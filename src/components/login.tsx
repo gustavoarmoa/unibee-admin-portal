@@ -1,8 +1,9 @@
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import type { RadioChangeEvent } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Checkbox, Form, Input, Tabs, Radio } from "antd";
 import OtpInput from "react-otp-input";
+import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 
 const APP_PATH = import.meta.env.BASE_URL;
@@ -18,10 +19,21 @@ const Index = () => {
   const [loginType, setLoginType] = useState("password"); // [password, OTP]
   // const { state } = useLocation();
 
+  const location = useLocation();
+
+  console.log("location: ", location);
+
   const onLoginTypeChange = (e: RadioChangeEvent) => {
     console.log("radio checked", e.target.value);
     setLoginType(e.target.value);
   };
+
+  useEffect(() => {
+    if (location.state && location.state.msg) {
+      toast(location.state.msg);
+    }
+  }, []);
+
   return (
     <div
       style={{
@@ -105,8 +117,8 @@ const Login1 = ({
           throw new Error(res.data.message);
         }
         localStorage.setItem("token", res.data.data.Token);
-        navigate(`${APP_PATH}dashboard`);
-        // if (res.data.code) navigate("/Dashboard");
+        navigate(`${APP_PATH}profile`);
+        // if (res.data.code) navigate("/profile");
       })
       .catch((err) => {
         console.log("login err: ", err.message);
@@ -204,6 +216,10 @@ const Login2 = ({
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
 
+  const onOTPchange = (value: string) => {
+    setOtp(value.toUpperCase());
+  };
+
   const resend = () => {
     setOtp("");
     axios
@@ -257,8 +273,8 @@ const Login2 = ({
             throw new Error(res.data.message);
           }
           localStorage.setItem("token", res.data.data.Token);
-          navigate(`${APP_PATH}dashboard`);
-          // if (res.data.code) navigate("/Dashboard");
+          navigate(`${APP_PATH}profile`);
+          // if (res.data.code) navigate("/profile");
         })
         .catch((err) => {
           console.log("login err: ", err.message);
@@ -324,7 +340,7 @@ const Login2 = ({
           </div>
           <OtpInput
             value={otp}
-            onChange={setOtp}
+            onChange={onOTPchange}
             numInputs={6}
             shouldAutoFocus={true}
             skipDefaultStyles={true}

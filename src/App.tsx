@@ -21,6 +21,7 @@ import Dashboard from "./components/dashboard";
 import PricePlans from "./components/pricePlans";
 import Login from "./components/login";
 import Signup from "./components/signup";
+import Profile from "./components/profile";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -41,8 +42,9 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("Dashboard", "1", <PieChartOutlined />),
-  getItem("Price plans", "2", <DesktopOutlined />),
+  getItem("Profile", "1", <PieChartOutlined />),
+  getItem("Dashboard", "2", <PieChartOutlined />),
+  getItem("Price plans", "3", <DesktopOutlined />),
   /*
   getItem("User", "sub1", <UserOutlined />, [
     getItem("Tom", "3"),
@@ -87,10 +89,12 @@ const App: React.FC = () => {
     // keyPath: any;
     // domEvent: any;
   }) => {
-    if (key == "1") {
+    if (key == "2") {
       navigate(`${APP_PATH}dashboard`);
-    } else if (key == "2") {
+    } else if (key == "3") {
       navigate(`${APP_PATH}price-plan`);
+    } else if (key == "1") {
+      navigate(`${APP_PATH}profile`);
     }
   };
 
@@ -111,6 +115,7 @@ const App: React.FC = () => {
       ) : (
         <Layout style={{ minHeight: "100vh" }}>
           <Sider
+            // theme="light"
             collapsible
             collapsed={collapsed}
             onCollapse={(value) => setCollapsed(value)}
@@ -154,6 +159,7 @@ const App: React.FC = () => {
                 }}
               >
                 <Routes>
+                  <Route path={`${APP_PATH}profile`} Component={Profile} />
                   <Route path={`${APP_PATH}`} Component={Dashboard} />
                   <Route path={`${APP_PATH}dashboard`} Component={Dashboard} />
                   <Route

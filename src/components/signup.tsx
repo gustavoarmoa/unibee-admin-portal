@@ -4,8 +4,8 @@ import { Button, Checkbox, Form, Input } from "antd";
 // import { request } from "../api/axios2";
 // import { login } from "../api/auth";
 import OtpInput from "react-otp-input";
-
 import axios from "axios";
+
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -44,6 +44,9 @@ const Index = () => {
     setPassword2(evt.target.value);
   // const onCodeChange = (evt) => setVerificationCode(evt.target.value);
   const [otp, setOtp] = useState("");
+  const onOTPchange = (value: string) => {
+    setOtp(value.toUpperCase());
+  };
 
   const onSubmit = () => {
     if (
@@ -153,10 +156,10 @@ const Index = () => {
             <Form
               name="basic"
               labelCol={{
-                span: 8,
+                span: 10,
               }}
               wrapperCol={{
-                span: 16,
+                span: 18,
               }}
               style={{
                 maxWidth: 600,
@@ -232,7 +235,7 @@ const Index = () => {
                 <Input value={phone} onChange={onPhoneChange} />
               </Form.Item>
 
-              <Form.Item
+              {/* <Form.Item
                 label="Physical address"
                 name="address"
                 rules={[
@@ -243,7 +246,7 @@ const Index = () => {
                 ]}
               >
                 <Input value={address} onChange={onAdderssChange} />
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item
                 label="Password"
@@ -302,7 +305,7 @@ const Index = () => {
                 <span style={{ color: "red" }}>{errMsg}</span>
               </Form.Item>
 
-              <Form.Item
+              {/* <Form.Item
                 name="remember"
                 valuePropName="checked"
                 wrapperCol={{
@@ -311,7 +314,7 @@ const Index = () => {
                 }}
               >
                 <Checkbox>Remember me</Checkbox>
-              </Form.Item>
+              </Form.Item> */}
 
               <Form.Item
                 wrapperCol={{
@@ -345,7 +348,7 @@ const Index = () => {
           </div>
           <OtpInput
             value={otp}
-            onChange={setOtp}
+            onChange={onOTPchange}
             numInputs={6}
             shouldAutoFocus={true}
             skipDefaultStyles={true}
