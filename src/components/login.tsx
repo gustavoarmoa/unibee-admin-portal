@@ -6,7 +6,7 @@ import OtpInput from "react-otp-input";
 import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 
-const APP_PATH = import.meta.env.BASE_URL;
+const APP_PATH = import.meta.env.BASE_URL; // if not specified in build command, default is /
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Index = () => {
@@ -17,18 +17,16 @@ const Index = () => {
   const onPasswordChange = (evt: ChangeEvent<HTMLInputElement>) =>
     setPassword(evt.target.value);
   const [loginType, setLoginType] = useState("password"); // [password, OTP]
-  // const { state } = useLocation();
 
   const location = useLocation();
 
-  console.log("location: ", location);
-
   const onLoginTypeChange = (e: RadioChangeEvent) => {
-    console.log("radio checked", e.target.value);
+    // console.log("radio checked", e.target.value);
     setLoginType(e.target.value);
   };
 
   useEffect(() => {
+    console.log("location: ", location);
     if (location.state && location.state.msg) {
       toast(location.state.msg);
     }
@@ -100,10 +98,6 @@ const Login1 = ({
 }) => {
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
-  // const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
-  // const onEmailChange = (evt) => setEmail(evt.target.value);
-  // const onPasswordChange = (evt) => setPassword(evt.target.value);
   const onSubmit = () => {
     setErrMsg("");
     axios
