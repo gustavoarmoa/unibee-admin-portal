@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Space, Table, Tag } from "antd";
+import { Space, Table, Tag, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   PlusOutlined,
@@ -58,8 +58,7 @@ const columns: ColumnsType<DataType> = [
     title: "Price",
     dataIndex: "price",
     key: "price",
-    render: (_, p, idx) => {
-      console.log("abcidx: ", "/", p, "/", idx);
+    render: (_, p) => {
       return (
         <span>{`${CURRENCY_SYMBOL[p.currency]} ${p.amount}/${p.intervalCount}${
           p.intervalUnit
@@ -96,8 +95,8 @@ const Index = () => {
   const [plan, setPlan] = useState<DataType[]>([]);
 
   const normalize = (data: any): DataType[] => {
-    console.log("normalize: ", data);
-    let plans = data.map((d: any) => {
+    // console.log("normalize: ", data);
+    const plans = data.map((d: any) => {
       return {
         id: d.plan.id,
         amount: d.plan.amount,
@@ -109,7 +108,7 @@ const Index = () => {
         isPublished: true,
       };
     });
-    console.log("after norM: ", plans);
+    // console.log("after norM: ", plans);
     return plans;
   };
 
@@ -151,7 +150,16 @@ const Index = () => {
       });
   }, []);
 
-  return <Table columns={columns} dataSource={plan} rowKey={"id"} />;
+  return (
+    <>
+      <div
+        style={{ padding: "16px 0", display: "flex", justifyContent: "end" }}
+      >
+        <Button type="primary">New plan</Button>
+      </div>
+      <Table columns={columns} dataSource={plan} rowKey={"id"} />
+    </>
+  );
 };
 
 export default Index;
