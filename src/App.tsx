@@ -11,7 +11,7 @@ import {
   // BrowserRouter as Router,
   Routes,
   Route,
-  // Outlet,
+  Outlet,
   // Link,
   useNavigate,
 } from "react-router-dom";
@@ -19,6 +19,9 @@ import { Layout, Menu, theme } from "antd";
 
 import Dashboard from "./components/dashboard";
 import PricePlans from "./components/pricePlans";
+import PricePlanList from "./components/pricePlansList";
+import PlanNew from "./components/newSubplan";
+import PlanDetail from "./components/subscriptionDetail";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
@@ -92,7 +95,7 @@ const App: React.FC = () => {
     if (key == "2") {
       navigate(`${APP_PATH}dashboard`);
     } else if (key == "3") {
-      navigate(`${APP_PATH}price-plan`);
+      navigate(`${APP_PATH}price-plan/list`);
     } else if (key == "1") {
       navigate(`${APP_PATH}profile`);
     }
@@ -121,7 +124,20 @@ const App: React.FC = () => {
             onCollapse={(value) => setCollapsed(value)}
           >
             <div className="demo-logo-vertical" />
-            <div style={{ color: "#FFF" }}>Logo here</div>
+            <div
+              style={{
+                color: "#FFF",
+                display: "flex",
+                justifyContent: "center",
+                margin: "16px 0",
+              }}
+            >
+              <img
+                src={"/MultiloginLogo.png"}
+                // width={"100px"}
+                height={"80px"}
+              />
+            </div>
             <Menu
               theme="dark"
               defaultSelectedKeys={["1"]}
@@ -146,9 +162,9 @@ const App: React.FC = () => {
             </div>
           </Sider>
           <Layout>
-            <Header style={{ padding: 0, background: colorBgContainer }}>
-              this is app header
-            </Header>
+            <Header
+              style={{ padding: 0, background: colorBgContainer }}
+            ></Header>
             <Content style={{ margin: "0 16px" }}>
               <div
                 style={{
@@ -162,10 +178,11 @@ const App: React.FC = () => {
                   <Route path={`${APP_PATH}profile`} Component={Profile} />
                   <Route path={`${APP_PATH}`} Component={Dashboard} />
                   <Route path={`${APP_PATH}dashboard`} Component={Dashboard} />
-                  <Route
-                    path={`${APP_PATH}price-plan`}
-                    Component={PricePlans}
-                  />
+                  <Route path={`${APP_PATH}price-plan`} Component={PricePlans}>
+                    <Route path="list" element={<PricePlanList />} />
+                    <Route path="new" element={<PlanNew />} />
+                    <Route path=":planId" element={<PlanDetail />} />
+                  </Route>
                 </Routes>
               </div>
             </Content>

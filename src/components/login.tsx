@@ -1,15 +1,15 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import type { RadioChangeEvent } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Checkbox, Form, Input, Tabs, Radio } from "antd";
+import { Button, Checkbox, Form, Input, Tabs, Radio, message } from "antd";
 import OtpInput from "react-otp-input";
-import toast, { Toaster } from "react-hot-toast";
 import axios from "axios";
 
 const APP_PATH = import.meta.env.BASE_URL; // if not specified in build command, default is /
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Index = () => {
+  const [messageApi, contextHolder] = message.useMessage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const onEmailChange = (evt: ChangeEvent<HTMLInputElement>) =>
@@ -28,7 +28,10 @@ const Index = () => {
   useEffect(() => {
     console.log("location: ", location);
     if (location.state && location.state.msg) {
-      toast(location.state.msg);
+      messageApi.open({
+        type: "info",
+        content: location.state.msg,
+      });
     }
   }, []);
 
@@ -42,6 +45,7 @@ const Index = () => {
         marginTop: "200px",
       }}
     >
+      {contextHolder}
       <h2>Merchant</h2>
       <Radio.Group
         options={[
@@ -101,7 +105,7 @@ const Login1 = ({
   const onSubmit = () => {
     setErrMsg("");
     axios
-      .post(`${API_URL}/auth/v1/sso/login`, {
+      .post(`${API_URL}/merchant/auth/sso/login`, {
         email,
         password,
       })
@@ -217,7 +221,7 @@ const Login2 = ({
   const resend = () => {
     setOtp("");
     axios
-      .post(`${API_URL}/auth/v1/sso/loginOTP`, {
+      .post(`${API_URL}/merchant/auth/sso/loginOTP`, {
         email,
       })
       .then((res) => {
@@ -239,7 +243,7 @@ const Login2 = ({
     console.log("submitting..");
     if (currentStep == 0) {
       axios
-        .post(`${API_URL}/auth/v1/sso/loginOTP`, {
+        .post(`${API_URL}/merchant/auth/sso/loginOTP`, {
           email,
         })
         .then((res) => {
@@ -256,7 +260,7 @@ const Login2 = ({
         });
     } else {
       axios
-        .post(`${API_URL}/auth/v1/sso/loginOTPVerify`, {
+        .post(`${API_URL}/merchant/auth/sso/loginOTPVerify`, {
           email,
           verificationCode: otp,
         })

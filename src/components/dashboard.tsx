@@ -8,39 +8,33 @@ const API_URL = import.meta.env.VITE_API_URL;
 const Index = () => {
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
-  console.log("token: ", token);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    setErrMsg("");
     axios
-      .post(
-        `${API_URL}/subscription/v1/subscription_plan_list`,
-        {
-          merchantId: 15621,
-          type: 1,
-          status: 0,
-          currency: "usd",
+      .get(`${API_URL}/merchant/profile`, {
+        headers: {
+          Authorization: `${token}`, // Bearer: ******
         },
-        {
-          headers: {
-            Authorization: `${token}`, // Bearer: ******
-          },
-        }
-      )
+      })
       .then((res) => {
-        console.log("subscription list res: ", res);
+        console.log("merchant dashboard as profile res: ", res);
         const statuCode = res.data.code;
         if (statuCode != 0) {
           if (statuCode == 61) {
             console.log("invalid token");
-            navigate(`${APP_PATH}login`);
-            throw new Error(res.data.message);
+            navigate(`${APP_PATH}login`, {
+              state: { msg: "session expired, please re-login" },
+            });
+            return;
           }
-          setErrMsg(res.data.message);
+          throw new Error(res.data.message);
         }
       })
       .catch((err) => {
-        console.log("get subscription list err: ", err);
+        console.log("login merchant profile err: ", err.message);
+        // todo: show a toast
         setErrMsg(err.message);
       });
   }, []);
