@@ -58,7 +58,7 @@ const Index = () => {
         }, 1000);
       })
       .catch((err) => {
-        console.log("login merchant profile err: ", err.message);
+        console.log("create plan err: ", err.message);
         messageApi.open({
           type: "error",
           content: err.message,
@@ -80,7 +80,12 @@ const Index = () => {
         style={{ maxWidth: 600 }}
         initialValues={DEFAULT_FORM_VALUES}
       >
-        <Form.Item label="ID" name="id" hidden initialValue={15621}>
+        <Form.Item
+          label="merchantId"
+          name="merchantId"
+          hidden
+          initialValue={15621}
+        >
           <Input disabled />
         </Form.Item>
 
@@ -199,7 +204,7 @@ const Index = () => {
           <Button type="primary" htmlType="submit">
             Save
           </Button>
-          <Button>Publish</Button>
+          {/* <Button>Publish</Button> */}
         </div>
         {/* </Form.Item>  */}
       </Form>

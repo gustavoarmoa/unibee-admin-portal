@@ -23,18 +23,12 @@ import {
   Outlet,
   // Link,
 } from "react-router-dom";
+import { PLAN_STATUS } from "../constants";
 
 const CURRENCY_SYMBOL: { [key: string]: string } = {
   CNY: "¥",
   USD: "$",
   JPY: "¥",
-};
-
-const PLAN_STATUS: { [key: number]: string } = {
-  1: "editing",
-  2: "active",
-  3: "inactive",
-  4: "expired",
 };
 
 const APP_PATH = import.meta.env.BASE_URL;
