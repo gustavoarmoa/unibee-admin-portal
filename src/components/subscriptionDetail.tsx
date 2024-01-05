@@ -212,7 +212,9 @@ const Index = () => {
           throw new Error(res.data.message);
         }
         setPlan(res.data.data.Plan.plan);
-        setSelectedAddon(res.data.data.Plan.addons.map((a: any) => a.id));
+        if (res.data.data.Plan.addons != null) {
+          setSelectedAddon(res.data.data.Plan.addons.map((a: any) => a.id));
+        }
       })
       .catch((err) => {
         console.log("get subscription list err: ", err);
@@ -435,7 +437,9 @@ const Index = () => {
             >
               Save
             </Button>
-            <Button onClick={onActivate}>Publish</Button>
+            <Button onClick={onActivate} disabled={plan.status != 1}>
+              Publish
+            </Button>
           </div>
           {/* </Form.Item>  */}
         </Form>

@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Space, Table, Tag, Button } from "antd";
+import { Space, Table, Tag, Button, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
   PlusOutlined,
@@ -35,12 +35,9 @@ const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 
 interface DataType {
-  // key: string;
   id: number;
   planName: string; // plan name
   description: string;
-  // age: number;
-  // address: string;
   type: number; // 1: main plan, 2: add-on
   amount: number;
   currency: string;
@@ -48,8 +45,8 @@ interface DataType {
   intervalCount: number;
   status: number;
   price: string;
-  // tags: string[];
   isPublished: boolean;
+  // addons?: string;
 }
 
 const columns: ColumnsType<DataType> = [
@@ -57,7 +54,7 @@ const columns: ColumnsType<DataType> = [
     title: "Name",
     dataIndex: "planName",
     key: "planName",
-    render: (text) => <a>{text}</a>,
+    // render: (text) => <a>{text}</a>,
   },
   {
     title: "Description",
@@ -134,6 +131,7 @@ const Index = () => {
         intervalCount: d.plan.intervalCount,
         intervalUnit: d.plan.intervalUnit,
         isPublished: true,
+        // addons:
       };
     });
     // console.log("after norM: ", plans);
