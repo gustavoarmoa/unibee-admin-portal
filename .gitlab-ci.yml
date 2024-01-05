@@ -19,7 +19,7 @@ build:
   script:
     - yarn add typescript --dev
     - yarn
-    - yarn build --base=/merchantPortal
+    - yarn build --base=/merchantPortal/
     - rm -rf /data/artifacts/merchant_portal_dist
     - cp -r dist /data/artifacts/merchant_portal_dist
 
