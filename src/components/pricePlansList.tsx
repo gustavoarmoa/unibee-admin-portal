@@ -120,7 +120,7 @@ const Index = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("merchantToken");
     axios
       .post(
         `${API_URL}/merchant/plan/subscription_plan_list`,

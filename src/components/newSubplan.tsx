@@ -20,7 +20,7 @@ const Index = () => {
   const onSave = () => {
     const errFields = form.getFieldsError();
     console.log("errFields: ", errFields);
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("merchantToken");
     console.log("form: ", form.getFieldsValue());
     // form.submit();
   };

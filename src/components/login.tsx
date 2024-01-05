@@ -114,7 +114,7 @@ const Login1 = ({
         if (res.data.code != 0) {
           throw new Error(res.data.message);
         }
-        localStorage.setItem("token", res.data.data.Token);
+        localStorage.setItem("merchantToken", res.data.data.Token);
         navigate(`${APP_PATH}profile`);
         // if (res.data.code) navigate("/profile");
       })
@@ -270,7 +270,7 @@ const Login2 = ({
             setErrMsg(res.data.message);
             throw new Error(res.data.message);
           }
-          localStorage.setItem("token", res.data.data.Token);
+          localStorage.setItem("merchantToken", res.data.data.Token);
           navigate(`${APP_PATH}profile`);
           // if (res.data.code) navigate("/profile");
         })

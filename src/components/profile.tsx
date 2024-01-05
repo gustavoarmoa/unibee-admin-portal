@@ -75,7 +75,7 @@ const Index = () => {
   );
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("merchantToken");
     setErrMsg("");
     axios
       .get(`${API_URL}/merchant/profile`, {

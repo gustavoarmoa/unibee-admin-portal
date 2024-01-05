@@ -10,7 +10,7 @@ const Index = () => {
   const params = useParams();
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("merchantToken");
   console.log("token: ", token);
 
   useEffect(() => {
