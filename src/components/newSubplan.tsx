@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Space, Table, Tag, Button, Form, Input, Select, Flex } from "antd";
+import { Space, Table, Tag, Button, Form, Input, Select, message } from "antd";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -10,30 +10,69 @@ const DEFAULT_FORM_VALUES = {
   currency: "USD",
   intervalUnit: "month",
   type: 1, // 1: main, 2: add-on
+  imageUrl: "http://www.google.com",
+  homeUrl: "http://www.google.com",
 };
 
+// new plan: 之后就是old plan了, 需要edit了, default form value 也不能用了.
+
 const Index = () => {
+  const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
 
-  const onSave = () => {
-    const errFields = form.getFieldsError();
-    console.log("errFields: ", errFields);
-    const token = localStorage.getItem("merchantToken");
-    console.log("form: ", form.getFieldsValue());
-    // form.submit();
-  };
+  const submitForm = (values: any) => {
+    const f = JSON.parse(JSON.stringify(values));
+    f.amount = Number(f.amount);
+    f.intervalCount = Number(f.intervalCount);
+    console.log("saving form: ", f);
 
-  const saveForm = () => {
-    console.log("saving....");
+    const token = localStorage.getItem("merchantToken");
+    axios
+      .post(`${API_URL}/merchant/plan/subscription_plan_create`, f, {
+        headers: {
+          Authorization: `${token}`, // Bearer: ******
+        },
+      })
+      .then((res) => {
+        console.log("create plan res: ", res);
+        const statuCode = res.data.code;
+        if (statuCode != 0) {
+          if (statuCode == 61) {
+            console.log("invalid token");
+            navigate(`${APP_PATH}login`, {
+              state: { msg: "session expired, please re-login" },
+            });
+            return;
+          }
+          throw new Error(res.data.message);
+        }
+        messageApi.open({
+          type: "success",
+          content: "Plan created",
+        });
+        setTimeout(() => {
+          navigate(-1);
+        }, 1000);
+      })
+      .catch((err) => {
+        console.log("login merchant profile err: ", err.message);
+        messageApi.open({
+          type: "error",
+          content: err.message,
+        });
+        setErrMsg(err.message);
+      });
   };
 
   return (
     <div>
+      {contextHolder}
       <Form
         form={form}
-        // onFinish={saveForm}
+        onFinish={submitForm}
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 24 }}
         layout="horizontal"
@@ -147,17 +186,17 @@ const Index = () => {
         </Form.Item>
 
         <Form.Item label="imageUrl" name="imageUrl">
-          <Input />
+          <Input disabled />
         </Form.Item>
 
         <Form.Item label="homeUrl" name="homeUrl">
-          <Input />
+          <Input disabled />
         </Form.Item>
 
         {/* <Form.Item label=""> */}
         <div style={{ display: "flex", justifyContent: "center", gap: "18px" }}>
-          <Button onClick={() => navigate(-1)}>Cancel</Button>
-          <Button type="primary" onClick={onSave}>
+          <Button onClick={() => navigate(-1)}>Go back</Button>
+          <Button type="primary" htmlType="submit">
             Save
           </Button>
           <Button>Publish</Button>

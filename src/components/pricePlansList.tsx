@@ -27,6 +27,14 @@ import {
 const CURRENCY_SYMBOL: { [key: string]: string } = {
   CNY: "¥",
   USD: "$",
+  JPY: "¥",
+};
+
+const PLAN_STATUS: { [key: number]: string } = {
+  1: "editing",
+  2: "active",
+  3: "inactive",
+  4: "expired",
 };
 
 const APP_PATH = import.meta.env.BASE_URL;
@@ -39,11 +47,12 @@ interface DataType {
   description: string;
   // age: number;
   // address: string;
+  type: number; // 1: main plan, 2: add-on
   amount: number;
   currency: string;
   intervalUnit: string;
   intervalCount: number;
-
+  status: number;
   price: string;
   // tags: string[];
   isPublished: boolean;
@@ -74,6 +83,22 @@ const columns: ColumnsType<DataType> = [
     },
   },
   {
+    title: "Type",
+    dataIndex: "type",
+    key: "type",
+    render: (_, plan) => {
+      return plan.type == 1 ? <span>Main plan</span> : <span>Add-on</span>;
+    },
+  },
+  {
+    title: "Status",
+    dataIndex: "status",
+    key: "status",
+    render: (_, plan) => {
+      return <span>{PLAN_STATUS[plan.status]}</span>;
+    },
+  },
+  /* {
     title: "is published",
     dataIndex: "isPublished",
     key: "isPublished",
@@ -83,7 +108,7 @@ const columns: ColumnsType<DataType> = [
       ) : (
         <MinusOutlined style={{ color: "red" }} />
       ),
-  },
+  }, */
   {
     title: "Action",
     key: "action",
@@ -108,6 +133,8 @@ const Index = () => {
         id: d.plan.id,
         amount: d.plan.amount,
         planName: d.plan.planName,
+        type: d.plan.type,
+        status: d.plan.status,
         description: d.plan.description,
         currency: d.plan.currency,
         intervalCount: d.plan.intervalCount,
@@ -126,9 +153,11 @@ const Index = () => {
         `${API_URL}/merchant/plan/subscription_plan_list`,
         {
           merchantId: 15621,
-          type: 1,
-          status: 0,
-          currency: "usd",
+          // type: 1,
+          // status: 0,
+          // currency: "usd",
+          page: 0,
+          count: 100,
         },
         {
           headers: {
@@ -175,6 +204,7 @@ const Index = () => {
         columns={columns}
         dataSource={plan}
         rowKey={"id"}
+        pagination={false}
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
