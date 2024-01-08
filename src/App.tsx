@@ -140,7 +140,7 @@ const App: React.FC = () => {
             </div>
             <Menu
               theme="dark"
-              defaultSelectedKeys={["1"]}
+              defaultSelectedKeys={["3"]}
               mode="inline"
               items={items}
               onClick={onItemClick}
