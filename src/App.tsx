@@ -25,6 +25,7 @@ import PlanDetail from "./components/subscriptionDetail";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
+import NotFound from "./components/notFound";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -175,6 +176,7 @@ const App: React.FC = () => {
                 }}
               >
                 <Routes>
+                  <Route path="*" Component={NotFound} />
                   <Route path={`${APP_PATH}profile`} Component={Profile} />
                   <Route path={`${APP_PATH}`} Component={Dashboard} />
                   <Route path={`${APP_PATH}dashboard`} Component={Dashboard} />
