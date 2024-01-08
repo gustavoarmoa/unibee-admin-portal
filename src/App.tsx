@@ -45,9 +45,9 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("Profile", "1", <PieChartOutlined />),
-  getItem("Dashboard", "2", <PieChartOutlined />),
   getItem("Price plans", "3", <DesktopOutlined />),
+  getItem("Dashboard", "2", <PieChartOutlined />),
+  getItem("Profile", "1", <PieChartOutlined />),
   /*
   getItem("User", "sub1", <UserOutlined />, [
     getItem("Tom", "3"),

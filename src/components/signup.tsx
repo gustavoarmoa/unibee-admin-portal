@@ -105,7 +105,6 @@ const Index = () => {
         navigate(`${APP_PATH}login`, {
           state: { msg: "Thanks for your sign-up on Unibee" },
         });
-        //     navigate("/checkout", { state: { priceId: selectedPrice } });
       })
       .catch((err) => {
         setSubmitting(false);
