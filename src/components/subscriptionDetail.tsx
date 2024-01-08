@@ -49,9 +49,9 @@ const Index = () => {
     f.amount = Number(f.amount);
     f.intervalCount = Number(f.intervalCount);
     f.planId = values.id;
+    f.addonIds = selectedAddon;
     console.log("saving form: ", f);
 
-    /*
     const token = localStorage.getItem("merchantToken");
     axios
       .post(`${API_URL}/merchant/plan/subscription_plan_edit`, f, {
@@ -85,7 +85,6 @@ const Index = () => {
         });
         setErrMsg(err.message);
       });
-      */
   };
 
   const bindAddon = () => {
