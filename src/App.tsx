@@ -22,6 +22,7 @@ import PricePlans from "./components/pricePlans";
 import PricePlanList from "./components/pricePlansList";
 import PlanNew from "./components/newSubplan";
 import PlanDetail from "./components/subscriptionDetail";
+import Subscription from "./components/subscription";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
@@ -47,6 +48,7 @@ function getItem(
 
 const items: MenuItem[] = [
   getItem("Price plans", "3", <DesktopOutlined />),
+  getItem("Subscription", "4", <PieChartOutlined />),
   getItem("Dashboard", "2", <PieChartOutlined />),
   getItem("Profile", "1", <PieChartOutlined />),
   /*
@@ -92,6 +94,8 @@ const App: React.FC = () => {
       navigate(`${APP_PATH}price-plan/list`);
     } else if (key == "1") {
       navigate(`${APP_PATH}profile`);
+    } else if (key == "4") {
+      navigate(`${APP_PATH}subscription`);
     }
   };
 
@@ -169,6 +173,10 @@ const App: React.FC = () => {
                   <Route path={`${APP_PATH}profile`} Component={Profile} />
                   <Route path={`${APP_PATH}`} Component={Dashboard} />
                   <Route path={`${APP_PATH}dashboard`} Component={Dashboard} />
+                  <Route
+                    path={`${APP_PATH}subscription`}
+                    Component={Subscription}
+                  />
                   <Route path={`${APP_PATH}price-plan`} Component={PricePlans}>
                     <Route path="list" element={<PricePlanList />} />
                     <Route path="new" element={<PlanNew />} />

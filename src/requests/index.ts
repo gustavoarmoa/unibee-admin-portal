@@ -40,3 +40,37 @@ export const getPlanDetail = async (planId: number) => {
     }
   );
 };
+
+export const getSublist = async () => {
+  const token = localStorage.getItem("merchantToken");
+
+  const body = {
+    merchantId: 15621,
+    // userId: 0,
+    // status: 0,
+    // sortField: "string",
+    // sortType: "string",
+    page: 0,
+    count: 100,
+  };
+  return await axios.post(
+    `${API_URL}/merchant/subscription/subscription_list`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+  /**
+     * {
+  "merchantId": 0,
+  "userId": 0,
+  "status": 0,
+  "sortField": "string",
+  "sortType": "string",
+  "page": 0,
+  "count": 0
+}
+     */
+};
