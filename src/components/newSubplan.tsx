@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Space, Table, Tag, Button, Form, Input, Select, message } from "antd";
+import { PLAN_STATUS, CURRENCY } from "../constants";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -26,7 +27,9 @@ const Index = () => {
   const submitForm = (values: any) => {
     const f = JSON.parse(JSON.stringify(values));
     f.amount = Number(f.amount);
+    f.amount *= CURRENCY[f.currency].stripe_factor;
     f.intervalCount = Number(f.intervalCount);
+    f.addonIds = [];
     console.log("saving form: ", f);
 
     const token = localStorage.getItem("merchantToken");

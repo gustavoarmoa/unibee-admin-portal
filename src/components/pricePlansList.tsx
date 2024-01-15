@@ -24,11 +24,13 @@ import {
   // Link,
 } from "react-router-dom";
 import { PLAN_STATUS } from "../constants";
+import { showAmount } from "../helpers";
 
-const CURRENCY_SYMBOL: { [key: string]: string } = {
-  CNY: "¥",
-  USD: "$",
-  JPY: "¥",
+const CURRENCY: { [key: string]: { symbol: string; stripe_factor: number } } = {
+  // what about PayPal
+  CNY: { symbol: "¥", stripe_factor: 100 },
+  USD: { symbol: "$", stripe_factor: 100 },
+  JPY: { symbol: "¥", stripe_factor: 1 },
 };
 
 const APP_PATH = import.meta.env.BASE_URL;
@@ -67,9 +69,9 @@ const columns: ColumnsType<DataType> = [
     key: "price",
     render: (_, p) => {
       return (
-        <span>{`${CURRENCY_SYMBOL[p.currency]} ${p.amount}/${p.intervalCount}${
-          p.intervalUnit
-        } `}</span>
+        <span>{` ${showAmount(p.amount, p.currency)} /${
+          p.intervalCount == 1 ? "" : p.intervalCount
+        }${p.intervalUnit} `}</span>
       );
     },
   },

@@ -61,13 +61,6 @@ const items: MenuItem[] = [
     getItem("Team 2", "8"),
   ]),
   */
-  /*
-  getItem("Events", "3", <FileOutlined />),
-  getItem("Billable items", "4", <FileOutlined />),
-  getItem("Customers", "5", <FileOutlined />),
-  getItem("Billings", "6", <FileOutlined />),
-  getItem("Admin center", "7", <FileOutlined />),
-  */
 ];
 
 const APP_PATH = import.meta.env.BASE_URL; // import.meta.env.VITE_APP_PATH;
@@ -89,7 +82,7 @@ const App: React.FC = () => {
   // domEvent,
   {
     // item: any;
-    key: any;
+    key: string;
     // keyPath: any;
     // domEvent: any;
   }) => {
@@ -133,11 +126,7 @@ const App: React.FC = () => {
                 margin: "16px 0",
               }}
             >
-              <img
-                src={"/MultiloginLogo.png"}
-                // width={"100px"}
-                height={"80px"}
-              />
+              <img src={`${APP_PATH}multiLoginLogo.png`} height={"80px"} />
             </div>
             <Menu
               theme="dark"
