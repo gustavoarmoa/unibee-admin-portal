@@ -43,7 +43,6 @@ export const getPlanDetail = async (planId: number) => {
 
 export const getSublist = async () => {
   const token = localStorage.getItem("merchantToken");
-
   const body = {
     merchantId: 15621,
     // userId: 0,
@@ -73,4 +72,18 @@ export const getSublist = async () => {
   "count": 0
 }
      */
+};
+
+export const getSubDetail = async (subscriptionId: string) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = { subscriptionId };
+  return await axios.post(
+    `${API_URL}/merchant/subscription/subscription_detail`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
 };

@@ -5,35 +5,11 @@ import { Space, Table, Tag, Button, Form, Input, Select, message } from "antd";
 import { getSublist } from "../requests";
 import type { ColumnsType } from "antd/es/table";
 import { showAmount } from "../helpers";
+import { SUBSCRIPTION_STATUS } from "../constants";
+import { ISubscriptionType } from "../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
-
-interface IPlan {
-  id: number;
-  planName: string;
-  description: string;
-  currency: number;
-  intervalCount: number;
-  intervalUnit: string;
-  amount: number;
-}
-
-interface IAddon extends IPlan {
-  Quantity: number;
-}
-
-interface ISubscriptionType {
-  id: number;
-  subscriptionId: string;
-  planId: number;
-  userId: number;
-  plan: IPlan;
-  addons: [IAddon] | null;
-  status: number;
-  currentPeriodStart: number;
-  currentPeriodEnd: number;
-}
 
 const columns: ColumnsType<ISubscriptionType> = [
   {
@@ -59,13 +35,11 @@ const columns: ColumnsType<ISubscriptionType> = [
             (s.addons == null
               ? 0
               : s.addons!.reduce(
-                  // total subscription amount = plan amount + all addons(amount * quantity)
+                  // total subscription amount = plan amount + all addons(an array): amount * quantity
                   (
                     sum,
                     { Quantity, amount }: { Quantity: number; amount: number } // destructure the quantity and amount from addon obj
-                  ) => {
-                    return sum + Quantity * amount;
-                  },
+                  ) => sum + Quantity * amount,
                   0
                 )),
           s.plan.currency
@@ -80,7 +54,7 @@ const columns: ColumnsType<ISubscriptionType> = [
     dataIndex: "status",
     key: "status",
     render: (_, sub) => {
-      return <span>{sub.status}</span>;
+      return <span>{SUBSCRIPTION_STATUS[sub.status]}</span>;
     },
   },
   {
@@ -168,8 +142,10 @@ const Index = () => {
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
-              console.log("row click: ", record, "///", rowIndex);
-              // navigate(`${APP_PATH}price-plan/${record.id}`);
+              // console.log("row click: ", record, "///", rowIndex);
+              navigate(`${APP_PATH}subscription/${record.subscriptionId}`, {
+                state: { subscriptionId: record.subscriptionId },
+              });
             }, // click row
             // onDoubleClick: (event) => {}, // double click row
             // onContextMenu: (event) => {}, // right button click row

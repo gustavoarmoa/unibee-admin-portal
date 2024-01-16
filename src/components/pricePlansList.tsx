@@ -4,19 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Space, Table, Tag, Button, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
-  PlusOutlined,
-  CheckOutlined,
-  CheckCircleOutlined,
-  MinusOutlined,
-  UploadOutlined,
-  DownloadOutlined,
-  DeleteOutlined,
-  SettingFilled,
-  SmileOutlined,
-  SyncOutlined,
-  LoadingOutlined,
-} from "@ant-design/icons";
-import {
   // BrowserRouter as Router,
   Routes,
   Route,
@@ -25,13 +12,6 @@ import {
 } from "react-router-dom";
 import { PLAN_STATUS } from "../constants";
 import { showAmount } from "../helpers";
-
-const CURRENCY: { [key: string]: { symbol: string; stripe_factor: number } } = {
-  // what about PayPal
-  CNY: { symbol: "¥", stripe_factor: 100 },
-  USD: { symbol: "$", stripe_factor: 100 },
-  JPY: { symbol: "¥", stripe_factor: 1 },
-};
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;

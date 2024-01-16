@@ -21,8 +21,10 @@ import Dashboard from "./components/dashboard";
 import PricePlans from "./components/pricePlans";
 import PricePlanList from "./components/pricePlansList";
 import PlanNew from "./components/newSubplan";
-import PlanDetail from "./components/subscriptionDetail";
-import Subscription from "./components/subscription";
+import PlanDetail from "./components/planDetail";
+import SubscriptionList from "./components/subscriptionList";
+import SubscriptionDetail from "./components/subscriptionDetail";
+import Subscriptions from "./components/subscriptions";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
@@ -47,7 +49,7 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("Price plans", "3", <DesktopOutlined />),
+  getItem("Plans", "3", <DesktopOutlined />),
   getItem("Subscription", "4", <PieChartOutlined />),
   getItem("Dashboard", "2", <PieChartOutlined />),
   getItem("Profile", "1", <PieChartOutlined />),
@@ -95,7 +97,7 @@ const App: React.FC = () => {
     } else if (key == "1") {
       navigate(`${APP_PATH}profile`);
     } else if (key == "4") {
-      navigate(`${APP_PATH}subscription`);
+      navigate(`${APP_PATH}subscription/list`);
     }
   };
 
@@ -134,7 +136,7 @@ const App: React.FC = () => {
             </div>
             <Menu
               theme="dark"
-              defaultSelectedKeys={["3"]}
+              defaultSelectedKeys={["4"]}
               mode="inline"
               items={items}
               onClick={onItemClick}
@@ -175,8 +177,15 @@ const App: React.FC = () => {
                   <Route path={`${APP_PATH}dashboard`} Component={Dashboard} />
                   <Route
                     path={`${APP_PATH}subscription`}
-                    Component={Subscription}
-                  />
+                    Component={Subscriptions}
+                  >
+                    <Route path="list" element={<SubscriptionList />} />
+                    {/* <Route path="new" element={<SubscriptionNew />} /> */}
+                    <Route
+                      path=":subscriptionId"
+                      element={<SubscriptionDetail />}
+                    />
+                  </Route>
                   <Route path={`${APP_PATH}price-plan`} Component={PricePlans}>
                     <Route path="list" element={<PricePlanList />} />
                     <Route path="new" element={<PlanNew />} />
