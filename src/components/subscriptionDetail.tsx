@@ -12,13 +12,34 @@ import {
   message,
   Spin,
   Modal,
+  Row,
+  Col,
 } from "antd";
-import { getPlanList, getSubDetail } from "../requests";
+import {
+  getPlanList,
+  getSubDetail,
+  createPreviewReq,
+  updateSubscription,
+  terminateSub,
+} from "../requests";
 import { ISubscriptionType, IPlan } from "../shared.types";
 import update from "immutability-helper";
 import Plan from "./plan";
+import { showAmount } from "../helpers";
 
 const APP_PATH = import.meta.env.BASE_URL;
+
+interface IPreview {
+  totalAmount: number;
+  prorationDate: number;
+  currency: string;
+  invoices: {
+    amount: number;
+    currency: string;
+    description: string;
+    probation: boolean;
+  }[];
+}
 
 const Index = () => {
   const [errMsg, setErrMsg] = useState("");
@@ -26,7 +47,7 @@ const Index = () => {
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
   const [modalOpen, setModalOpen] = useState(false);
-  // const [preview, setPreview] = useState<IPreview | null>(null);
+  const [preview, setPreview] = useState<IPreview | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(true);
   const [terminateModal, setTerminateModal] = useState(false);
@@ -68,6 +89,151 @@ const Index = () => {
     setPlans(newPlans);
   };
 
+  const toggleModal = () => setModalOpen(!modalOpen);
+  const openModal = () => {
+    const plan = plans.find((p) => p.id == selectedPlan);
+    let valid = true;
+    if (plan?.addons != null && plan.addons.length > 0) {
+      for (let i = 0; i < plan.addons.length; i++) {
+        if (plan.addons[i].checked) {
+          const q = Number(plan.addons[i].quantity);
+          console.log("q: ", q);
+          if (!Number.isInteger(q) || q <= 0) {
+            valid = false;
+            break;
+          }
+        }
+      }
+    }
+    if (!valid) {
+      message.error("Addon quantity must be greater than 0.");
+      return;
+    }
+    toggleModal();
+    createPreview();
+  };
+
+  const createPreview = async () => {
+    setPreview(null); // clear the last preview, otherwise, users might see the old value before the new value return
+    const plan = plans.find((p) => p.id == selectedPlan);
+    const addons =
+      plan != null && plan.addons != null
+        ? plan.addons.filter((a) => a.checked)
+        : [];
+    console.log("active sub addon bfr preview: ", addons);
+    let previewRes;
+    try {
+      previewRes = await createPreviewReq(
+        activeSub!.subscriptionId,
+        selectedPlan as number,
+        addons.map((a) => ({
+          quantity: a.quantity as number,
+          addonPlanId: a.id,
+        }))
+      );
+      console.log("subscription update preview res: ", previewRes);
+      const code = previewRes.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(previewRes.data.message);
+      }
+    } catch (err) {
+      setModalOpen(false);
+      if (err instanceof Error) {
+        console.log("err creating preview: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
+
+    const p: IPreview = {
+      totalAmount: previewRes.data.data.totalAmount,
+      currency: previewRes.data.data.currency,
+      prorationDate: previewRes.data.data.prorationDate,
+      invoices: previewRes.data.data.invoice.lines,
+    };
+    setPreview(p);
+  };
+
+  const onConfirm = async () => {
+    const plan = plans.find((p) => p.id == selectedPlan);
+    const addons =
+      plan != null && plan.addons != null
+        ? plan.addons.filter((a) => a.checked)
+        : [];
+    let updateSubRes;
+    try {
+      updateSubRes = await updateSubscription(
+        activeSub?.subscriptionId as string,
+        selectedPlan as number,
+        addons.map((a) => ({
+          quantity: a.quantity as number,
+          addonPlanId: a.id,
+        })),
+        preview?.totalAmount as number,
+        preview?.currency as string,
+        preview?.prorationDate as number
+      );
+      console.log("update subscription submit res: ", updateSubRes);
+      const code = updateSubRes.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(updateSubRes.data.message);
+      }
+    } catch (err) {
+      setModalOpen(false);
+      if (err instanceof Error) {
+        console.log("err creating preview: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
+
+    if (updateSubRes.data.data.paid) {
+      /*
+      navigate(`${APP_PATH}profile/subscription`, {
+        state: { msg: "Subscription updated" },
+      });
+      */
+      navigate(-1);
+      return;
+    }
+    toggleModal();
+    // ??????????????????
+    // what if checkout form is opened, you can't ask admin to pay user's subscription fee.
+    window.open(updateSubRes.data.data.link, "_blank");
+  };
+
+  const onTerminateSub = async () => {
+    let terminateRes;
+    try {
+      terminateRes = await terminateSub(activeSub?.subscriptionId as string);
+      console.log("terminate sub res: ", terminateRes);
+      const code = terminateRes.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(terminateRes.data.message);
+      }
+    } catch (err) {
+      setTerminateModal(false);
+      if (err instanceof Error) {
+        console.log("err creating preview: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
+    navigate(`${APP_PATH}subscription/list`, {
+      // receiving route hasn't read this msg yet.
+      state: { msg: "Subscription ended on current billing cycle." },
+    });
+  };
+
   useEffect(() => {
     // const subId = location.state && location.state.subscriptionId;
     const pathName = window.location.pathname.split("/");
@@ -107,8 +273,8 @@ const Index = () => {
       const localActiveSub: ISubscriptionType = { ...s.subscription };
       localActiveSub.addons = s.addons.map((a: any) => ({
         ...a.AddonPlan,
-        Quantity: a.Quantity,
-        AddonPlanId: a.AddonPlan.id,
+        quantity: a.quantity,
+        addonPlanId: a.addonPlan.id,
       }));
       console.log("active sub: ", localActiveSub);
       setActiveSub(s.subscription);
@@ -150,12 +316,12 @@ const Index = () => {
       if (planIdx != -1 && plans[planIdx].addons != null) {
         for (let i = 0; i < plans[planIdx].addons!.length; i++) {
           const addonIdx = localActiveSub.addons.findIndex(
-            (subAddon) => subAddon.AddonPlanId == plans[planIdx].addons![i].id
+            (subAddon) => subAddon.addonPlanId == plans[planIdx].addons![i].id
           );
           if (addonIdx != -1) {
             plans[planIdx].addons![i].checked = true;
             plans[planIdx].addons![i].quantity =
-              localActiveSub.addons[addonIdx].Quantity;
+              localActiveSub.addons[addonIdx].quantity;
           }
         }
       }
@@ -169,15 +335,23 @@ const Index = () => {
     <>
       <Spin spinning={loading} fullscreen />
       {contextHolder}
-      {/* <Modal
-        title="Terminate Subscription"
-        open={terminateModal}
-        onOk={onTerminateSub}
-        onCancel={() => setTerminateModal(false)}
-      >
-        <div>subscription detail here</div>
-  </Modal> */}
-      {/* selectedPlan != null && (
+      {
+        <Modal
+          title="Terminate Subscription"
+          open={terminateModal}
+          onOk={onTerminateSub}
+          onCancel={() => setTerminateModal(false)}
+        >
+          <div>subscription detail here</div>
+          <div>
+            Are you sure you want to terminate the following subscrition
+          </div>
+          <div>user info</div>
+          <div>subscription info</div>
+          <div>start/end</div>
+        </Modal>
+      }
+      {selectedPlan != null && (
         <Modal
           title="Subscription Update Preview"
           open={modalOpen}
@@ -208,16 +382,24 @@ const Index = () => {
             </>
           )}
         </Modal>
-              ) */}
+      )}
       <div
         style={{
-          height: "64px",
+          height: "120px",
           border: "1px solid #EEE",
           borderRadius: "6px",
+          marginBottom: "48px",
           padding: "8px",
         }}
       >
-        User Info
+        <h3>User info</h3>
+        userId, userName, email,
+        <span>billing cycle: from/to: ... </span>
+        <Button type="primary" onClick={() => setTerminateModal(true)}>
+          Terminate this subscrition at the end of current cycle
+        </Button>
+        <hr />
+        update billing cycle start date
       </div>
       <div style={{ display: "flex", gap: "18px" }}>
         {plans.map((p) => (
@@ -243,17 +425,12 @@ const Index = () => {
           <>
             <Button
               type="primary"
-              onClick={() => {
-                console.log("open modal");
-              }}
+              onClick={openModal}
               disabled={selectedPlan == null}
             >
               Confirm
             </Button>
             &nbsp;&nbsp;&nbsp;&nbsp;
-            <Button type="primary" onClick={() => setTerminateModal(true)}>
-              Terminate Subscription
-            </Button>
           </>
         )}
       </div>

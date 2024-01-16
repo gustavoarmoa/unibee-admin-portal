@@ -9,7 +9,6 @@ import { SUBSCRIPTION_STATUS } from "../constants";
 import { ISubscriptionType } from "../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
-const API_URL = import.meta.env.VITE_API_URL;
 
 const columns: ColumnsType<ISubscriptionType> = [
   {
@@ -38,8 +37,8 @@ const columns: ColumnsType<ISubscriptionType> = [
                   // total subscription amount = plan amount + all addons(an array): amount * quantity
                   (
                     sum,
-                    { Quantity, amount }: { Quantity: number; amount: number } // destructure the quantity and amount from addon obj
-                  ) => sum + Quantity * amount,
+                    { quantity, amount }: { quantity: number; amount: number } // destructure the quantity and amount from addon obj
+                  ) => sum + quantity * amount,
                   0
                 )),
           s.plan.currency
@@ -62,7 +61,11 @@ const columns: ColumnsType<ISubscriptionType> = [
     dataIndex: "currentPeriodStart",
     key: "currentPeriodStart",
     render: (_, sub) => {
-      return <span>{sub.currentPeriodStart}</span>;
+      return (
+        <span>{`${new Date(
+          sub.currentPeriodStart * 1000
+        ).toLocaleString()}`}</span>
+      );
     },
   },
   {
@@ -70,7 +73,11 @@ const columns: ColumnsType<ISubscriptionType> = [
     dataIndex: "currentPeriodEnd",
     key: "currentPeriodEnd",
     render: (_, sub) => {
-      return <span>{sub.currentPeriodEnd}</span>;
+      return (
+        <span>{`${new Date(
+          sub.currentPeriodEnd * 1000
+        ).toLocaleString()}`}</span>
+      );
     },
   },
   {
@@ -111,17 +118,17 @@ const Index = () => {
         }
         return;
       }
-      const list: ISubscriptionType[] = subListRes.data.data.Subscriptions.map(
+      const list: ISubscriptionType[] = subListRes.data.data.subscriptions.map(
         (s: any) => {
           return {
-            ...s.Subscription,
-            plan: s.Plan,
+            ...s.subscription,
+            plan: s.plan,
             addons:
-              s.Addons == null
+              s.addons == null
                 ? []
-                : s.Addons.map((a: any) => ({
-                    ...a.AddonPlan,
-                    Quantity: a.Quantity,
+                : s.addons.map((a: any) => ({
+                    ...a.addonPlan,
+                    quantity: a.quantity,
                   })),
           };
         }

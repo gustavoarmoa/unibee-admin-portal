@@ -87,3 +87,80 @@ export const getSubDetail = async (subscriptionId: string) => {
     }
   );
 };
+
+export const createPreviewReq = async (
+  subscriptionId: string,
+  newPlanId: number,
+  addons: { quantity: number; addonPlanId: number }[]
+) => {
+  const token = localStorage.getItem("merchantToken");
+  // isNew: true: create new subscription, false: update existing sub
+  /*
+  const urlPath = isNew
+    ? "subscription_create_preview"
+    : "subscription_update_preview";
+  */
+  const body = {
+    subscriptionId,
+    newPlanId,
+    quantity: 1,
+    // channelId: 25,
+    addonParams: addons,
+  };
+  return await axios.post(
+    `${API_URL}/merchant/subscription/subscription_update_preview`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+export const updateSubscription = async (
+  subscriptionId: string,
+  newPlanId: number,
+  addons: { quantity: number; addonPlanId: number }[],
+  confirmTotalAmount: number,
+  confirmCurrency: string,
+  prorationDate: number
+) => {
+  const token = localStorage.getItem("merchantToken");
+  // "subscription_create_submit"
+  const body = {
+    subscriptionId,
+    newPlanId,
+    quantity: 1,
+    addonParams: addons,
+    confirmTotalAmount,
+    confirmCurrency,
+    prorationDate,
+  };
+  return await axios.post(
+    `${API_URL}/merchant/subscription/subscription_update_submit`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+// terminate the subscription at the end of this billing cycle
+export const terminateSub = async (SubscriptionId: string) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = {
+    SubscriptionId,
+  };
+  return await axios.post(
+    `${API_URL}/user/subscription/subscription_cancel_at_period_end`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};

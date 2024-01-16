@@ -40,8 +40,8 @@ interface IPlan {
 interface ISubAddon extends IPlan {
   // when update subscription plan, I need to know which addons users have selected,
   // then apply them on the plan
-  Quantity: number;
-  AddonPlanId: number;
+  quantity: number;
+  addonPlanId: number;
 }
 
 interface ISubscriptionType {
