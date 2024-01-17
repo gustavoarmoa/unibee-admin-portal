@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Space,
@@ -14,13 +14,16 @@ import {
   Modal,
   Row,
   Col,
+  Tabs,
 } from "antd";
+import type { TabsProps } from "antd";
 import {
   getPlanList,
   getSubDetail,
   createPreviewReq,
   updateSubscription,
   terminateSub,
+  getCountryList,
 } from "../requests";
 import { ISubscriptionType, IPlan } from "../shared.types";
 import update from "immutability-helper";
@@ -42,6 +45,45 @@ interface IPreview {
 }
 
 const Index = () => {
+  const tabItems: TabsProps["items"] = [
+    {
+      key: "Account",
+      label: "Account",
+      children: "content of account",
+    },
+    {
+      key: "Subscription",
+      label: "Subscription",
+      children: <SubscriptionTab />,
+    },
+    {
+      key: "Invoices",
+      label: "Invoices",
+      children: "Content of invoices",
+    },
+    {
+      key: "Payment",
+      label: "Payment",
+      children: "content of payment",
+    },
+    {
+      key: "Timeline",
+      label: "Timeline",
+      children: "content of timeline",
+    },
+    {
+      key: "Custom",
+      label: "Custom",
+      children: "content of custom",
+    },
+  ];
+  const onTabChange = (key: string) => {
+    console.log(key);
+  };
+  return <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />;
+};
+
+const SubscriptionTab = () => {
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
   const [plans, setPlans] = useState<IPlan[]>([]);
@@ -50,6 +92,7 @@ const Index = () => {
   const [preview, setPreview] = useState<IPreview | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(true);
+  const [countryList, setCountryList] = useState();
   const [terminateModal, setTerminateModal] = useState(false);
   const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null); // null: when page is loading, no data is ready yet.
 
@@ -239,6 +282,7 @@ const Index = () => {
     const pathName = window.location.pathname.split("/");
     const subId = pathName.pop();
     if (subId == null) {
+      // TODO: show page not exit, OR invalid subscription
       return;
     }
     const fetchData = async () => {
@@ -267,8 +311,6 @@ const Index = () => {
         return;
       }
 
-      //   Quantity: number;
-      //   AddonPlanId: number;
       const s: any = subDetailRes.data.data;
       const localActiveSub: ISubscriptionType = { ...s.subscription };
       localActiveSub.addons = s.addons.map((a: any) => ({
@@ -423,6 +465,8 @@ const Index = () => {
       >
         {plans.length != 0 && (
           <>
+            <Button onClick={() => navigate(-1)}>Go back</Button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
             <Button
               type="primary"
               onClick={openModal}
@@ -430,7 +474,6 @@ const Index = () => {
             >
               Confirm
             </Button>
-            &nbsp;&nbsp;&nbsp;&nbsp;
           </>
         )}
       </div>

@@ -84,6 +84,9 @@ const columns: ColumnsType<ISubscriptionType> = [
     title: "User",
     dataIndex: "userId",
     key: "userId",
+    render: (_, sub) => {
+      return <span>{`${sub.user != null ? sub.user.email : ""}`}</span>;
+    },
   },
 ];
 
@@ -130,6 +133,7 @@ const Index = () => {
                     ...a.addonPlan,
                     quantity: a.quantity,
                   })),
+            user: s.user,
           };
         }
       );

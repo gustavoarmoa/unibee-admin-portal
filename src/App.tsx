@@ -161,7 +161,13 @@ const App: React.FC = () => {
             <Header
               style={{ padding: 0, background: colorBgContainer }}
             ></Header>
-            <Content style={{ margin: "0 16px" }}>
+            <Content
+              style={{
+                padding: "16px",
+                height: "calc(100vh - 180px)",
+                overflowY: "auto",
+              }}
+            >
               <div
                 style={{
                   padding: 24,

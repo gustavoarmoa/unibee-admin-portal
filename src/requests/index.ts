@@ -164,3 +164,15 @@ export const terminateSub = async (SubscriptionId: string) => {
     }
   );
 };
+
+export const getCountryList = async (merchantId: number) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = {
+    merchantId,
+  };
+  return await axios.post(`${API_URL}/merchant/vat/vat_country_list`, body, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
+};

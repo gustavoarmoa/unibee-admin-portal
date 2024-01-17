@@ -56,6 +56,7 @@ interface ISubscriptionType {
   currentPeriodEnd: number;
   trailEnd: number;
   addons: ISubAddon[];
+  user: IProfile | null;
 }
 
 export type { IProfile, IPlan, ISubscriptionType };
