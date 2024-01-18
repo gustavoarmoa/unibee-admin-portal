@@ -25,13 +25,13 @@ const columns: ColumnsType<ISubscriptionType> = [
     title: "Plan name",
     dataIndex: "planName",
     key: "planName",
-    render: (_, sub) => <a>{sub.plan.planName}</a>,
+    render: (_, sub) => <a>{sub.plan?.planName}</a>,
   },
   {
     title: "Description",
     dataIndex: "description",
     key: "description",
-    render: (_, sub) => <a>{sub.plan.description}</a>,
+    render: (_, sub) => <a>{sub.plan?.description}</a>,
   },
   {
     title: "Amount",
@@ -40,7 +40,7 @@ const columns: ColumnsType<ISubscriptionType> = [
     render: (_, s) => {
       return (
         <span>{` ${showAmount(
-          s.plan.amount +
+          s.plan!.amount +
             (s.addons == null
               ? 0
               : s.addons!.reduce(
@@ -51,9 +51,9 @@ const columns: ColumnsType<ISubscriptionType> = [
                   ) => sum + quantity * amount,
                   0
                 )),
-          s.plan.currency
-        )} /${s.plan.intervalCount == 1 ? "" : s.plan.intervalCount}${
-          s.plan.intervalUnit
+          s.plan!.currency
+        )} /${s.plan!.intervalCount == 1 ? "" : s.plan!.intervalCount}${
+          s.plan!.intervalUnit
         } `}</span>
       );
     },
