@@ -317,6 +317,7 @@ const SubscriptionTab = ({
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [confirmming, setConfirming] = useState(false);
   const [changePlanModal, setChangePlanModal] = useState(false);
   const [preview, setPreview] = useState<IPreview | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -436,6 +437,7 @@ const SubscriptionTab = ({
         : [];
     let updateSubRes;
     try {
+      setConfirming(true);
       updateSubRes = await updateSubscription(
         activeSub?.subscriptionId as string,
         selectedPlan as number,
@@ -454,6 +456,7 @@ const SubscriptionTab = ({
         throw new Error(updateSubRes.data.message);
       }
     } catch (err) {
+      setConfirming(false);
       setPreviewModalOpen(false);
       if (err instanceof Error) {
         console.log("err creating preview: ", err.message);
@@ -473,10 +476,12 @@ const SubscriptionTab = ({
       // navigate(-1);
       togglePreviewModal();
       setChangePlanModal(false);
+      setConfirming(false);
       fetchData();
       message.success("Plan updated");
       return;
     }
+    setConfirming(false);
     togglePreviewModal();
     // ??????????????????
     // what if checkout form is opened, you can't ask admin to pay user's subscription fee.
@@ -647,11 +652,24 @@ const SubscriptionTab = ({
         <Modal
           title="Subscription Update Preview"
           open={previewModalOpen}
-          onOk={onConfirm}
-          onCancel={togglePreviewModal}
+          // onOk={onConfirm}
+          // onCancel={togglePreviewModal}
           width={"640px"}
+          footer={null}
         >
-          {preview && (
+          {preview == null ? (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Spin />
+            </div>
+          ) : (
             <>
               {preview.invoices.map((i, idx) => (
                 <Row key={idx} gutter={[16, 16]}>
@@ -666,11 +684,30 @@ const SubscriptionTab = ({
                 </Col>
                 <Col span={18}>
                   <span style={{ fontSize: "18px", fontWeight: "bold" }}>
-                    {" "}
                     {`${showAmount(preview.totalAmount, preview.currency)}`}
                   </span>
                 </Col>
               </Row>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "end",
+                  gap: "16px",
+                  margin: "16px 0",
+                }}
+              >
+                <Button disabled={confirmming} onClick={togglePreviewModal}>
+                  Cancel
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={onConfirm}
+                  loading={confirmming}
+                  disabled={confirmming}
+                >
+                  Confirm
+                </Button>
+              </div>
             </>
           )}
         </Modal>
