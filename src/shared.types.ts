@@ -1,6 +1,8 @@
 interface IProfile {
   adress: string;
-  country: string; // use ISO code to represent country
+  country: string;
+  countryCode: string;
+  countryName: string;
   companyName: string;
   email: string;
   facebook: string;
@@ -18,6 +20,11 @@ interface IProfile {
   otherSocialInfo: string;
   token: string;
 }
+
+type Country = {
+  code: string;
+  name: string;
+};
 
 interface IAddon extends IPlan {
   quantity: number | null;
@@ -59,4 +66,4 @@ interface ISubscriptionType {
   user: IProfile | null;
 }
 
-export type { IProfile, IPlan, ISubscriptionType };
+export type { IProfile, IPlan, ISubscriptionType, Country };

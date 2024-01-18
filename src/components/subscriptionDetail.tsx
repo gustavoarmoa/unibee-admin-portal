@@ -15,6 +15,7 @@ import {
   Row,
   Col,
   Tabs,
+  Radio,
 } from "antd";
 import type { TabsProps } from "antd";
 import {
@@ -24,8 +25,9 @@ import {
   updateSubscription,
   terminateSub,
   getCountryList,
+  saveProfile,
 } from "../requests";
-import { ISubscriptionType, IPlan } from "../shared.types";
+import { ISubscriptionType, IPlan, IProfile, Country } from "../shared.types";
 import update from "immutability-helper";
 import Plan from "./plan";
 import { showAmount } from "../helpers";
@@ -45,16 +47,19 @@ interface IPreview {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [userProfile, setUserProfile] = useState<IProfile | null>(null);
+
   const tabItems: TabsProps["items"] = [
-    {
-      key: "Account",
-      label: "Account",
-      children: "content of account",
-    },
     {
       key: "Subscription",
       label: "Subscription",
-      children: <SubscriptionTab />,
+      children: <SubscriptionTab setUserProfile={setUserProfile} />,
+    },
+    {
+      key: "Account",
+      label: "Account",
+      children: <UserTab user={userProfile} />,
     },
     {
       key: "Invoices",
@@ -80,10 +85,233 @@ const Index = () => {
   const onTabChange = (key: string) => {
     console.log(key);
   };
-  return <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />;
+  return (
+    <div>
+      <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: "64px",
+        }}
+      >
+        <Button onClick={() => navigate(-1)}>Go back</Button>
+      </div>
+    </div>
+  );
 };
 
-const SubscriptionTab = () => {
+const UserTab = ({ user }: { user: IProfile | null }) => {
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const [countryList, setCountryList] = useState<Country[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const relogin = () =>
+    navigate(`${APP_PATH}login`, {
+      state: { msg: "session expired, please re-login" },
+    });
+
+  const filterOption = (
+    input: string,
+    option?: { label: string; value: string }
+  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
+  /*
+  const onSave = async () => {
+    console.log("form: ", form.getFieldsValue());
+    setLoading(true);
+    let saveProfileRes;
+    try {
+      saveProfileRes = await saveProfile(form.getFieldsValue());
+      console.log("save profile res: ", saveProfileRes);
+      const code = saveProfileRes.data.code;
+      if (code != 0) {
+        code == 61 && relogin();
+        // TODO: save all statu code in a constant
+        throw new Error(saveProfileRes.data.message);
+      }
+      message.success("saved");
+      setUserProfile(saveProfileRes.data.data.User);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("profile update err: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
+  };
+  */
+
+  useEffect(() => {
+    // setFirstLoading(true);
+    setLoading(true);
+    const fetchData = async () => {
+      let profileRes, countryListRes;
+      try {
+        const res = ([countryListRes] = await Promise.all([
+          // getProfile(),
+          getCountryList(15621),
+        ]));
+        console.log("profile/country: ", profileRes, "//", countryListRes);
+        res.forEach((r) => {
+          const code = r.data.code;
+          code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
+          if (code != 0) {
+            // TODO: save all the code as ENUM in constant,
+            throw new Error(r.data.message);
+          }
+        });
+        setLoading(false);
+      } catch (err) {
+        setLoading(false);
+        if (err instanceof Error) {
+          console.log("profile update err: ", err.message);
+          // setErrMsg(err.message);
+          message.error(err.message);
+        } else {
+          message.error("Unknown error");
+        }
+        return;
+      }
+      // setUserProfile(profileRes.data.data.User);
+      setCountryList(
+        countryListRes.data.data.vatCountryList.map((c: any) => ({
+          code: c.countryCode,
+          name: c.countryName,
+        }))
+      );
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    user != null && (
+      <Form
+        form={form}
+        labelCol={{ span: 6 }}
+        wrapperCol={{ span: 24 }}
+        layout="horizontal"
+        // disabled={componentDisabled}
+        style={{ maxWidth: 600 }}
+        initialValues={user}
+      >
+        <Form.Item label="ID" name="id" hidden>
+          <Input disabled />
+        </Form.Item>
+
+        <Form.Item label="First name" name="firstName">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Last name" name="lastName">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Email" name="email">
+          <Input disabled />
+        </Form.Item>
+
+        <Form.Item label="Billing address" name="address">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Country" name="countryCode">
+          <Select
+            showSearch
+            placeholder="Type to search"
+            optionFilterProp="children"
+            // value={country}
+            // onChange={onCountryChange}
+            // onSearch={onSearch}
+            filterOption={filterOption}
+            options={countryList.map((c) => ({
+              label: c.name,
+              value: c.code,
+            }))}
+          />
+        </Form.Item>
+
+        <Form.Item label="Country Name" name="countryName" hidden>
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Company name" name="companyName">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="VAT number" name="vATNumber">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Phone number" name="mobile">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Telegram" name="telegram">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="WhatsApp" name="whatsAPP">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="WeChat" name="weChat">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="LinkedIn" name="linkedIn">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Facebook" name="facebook">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="TikTok" name="tikTok">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Other social info" name="otherSocialInfo">
+          <Input />
+        </Form.Item>
+
+        <Form.Item label="Payment methods" name="paymentMethod">
+          <Radio.Group>
+            <Radio value="creditCard">Credit Card</Radio>
+            <Radio value="crypto">Crypto</Radio>
+            <Radio value="paypal">Paypal</Radio>
+            <Radio value="wireTransfer">Wire Transfer</Radio>
+          </Radio.Group>
+        </Form.Item>
+
+        {/* <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            margin: "36px",
+          }}
+        >
+          <Button type="primary" onClick={onSave} disabled={loading}>
+            Save
+          </Button>
+        </div> */}
+      </Form>
+    )
+  );
+};
+
+const SubscriptionTab = ({
+  setUserProfile,
+}: {
+  setUserProfile: (user: IProfile) => void;
+}) => {
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
   const [plans, setPlans] = useState<IPlan[]>([]);
@@ -92,7 +320,6 @@ const SubscriptionTab = () => {
   const [preview, setPreview] = useState<IPreview | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(true);
-  const [countryList, setCountryList] = useState();
   const [terminateModal, setTerminateModal] = useState(false);
   const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null); // null: when page is loading, no data is ready yet.
 
@@ -318,9 +545,11 @@ const SubscriptionTab = () => {
         quantity: a.quantity,
         addonPlanId: a.addonPlan.id,
       }));
+      localActiveSub.user = s.user;
       console.log("active sub: ", localActiveSub);
       setActiveSub(s.subscription);
       setSelectedPlan(s.planId.id);
+      setUserProfile(s.user);
 
       let plans: IPlan[] = planListRes.data.data.Plans.map((p: any) => {
         const p2 = p.plan;
@@ -482,3 +711,6 @@ const SubscriptionTab = () => {
 };
 
 export default Index;
+function getProfile(): any {
+  throw new Error("Function not implemented.");
+}

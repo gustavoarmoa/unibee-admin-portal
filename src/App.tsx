@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DesktopOutlined,
   // FileOutlined,
@@ -11,9 +11,10 @@ import {
   // BrowserRouter as Router,
   Routes,
   Route,
-  Outlet,
+  // Outlet,
   // Link,
   useNavigate,
+  Navigate,
 } from "react-router-dom";
 import { Layout, Menu, theme } from "antd";
 
@@ -49,30 +50,23 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("Plans", "3", <DesktopOutlined />),
-  getItem("Subscription", "4", <PieChartOutlined />),
-  getItem("Dashboard", "2", <PieChartOutlined />),
-  getItem("Profile", "1", <PieChartOutlined />),
-  /*
-  getItem("User", "sub1", <UserOutlined />, [
-    getItem("Tom", "3"),
-    getItem("Bill", "4"),
-    getItem("Alex", "5"),
-  ]),
-  
-  getItem("Team", "sub2", <TeamOutlined />, [
-    getItem("Team 1", "6"),
-    getItem("Team 2", "8"),
-  ]),
-  */
+  getItem("Plan", "/plan/list", <DesktopOutlined />),
+  getItem("Subscription", "/subscription/list", <PieChartOutlined />),
+  // getItem("Subscription", "/subscription/list", <PieChartOutlined />),
+  getItem("Dashboard", "/dashboard", <PieChartOutlined />),
+  getItem("Profile", "/profile", <PieChartOutlined />),
 ];
 
 const APP_PATH = import.meta.env.BASE_URL; // import.meta.env.VITE_APP_PATH;
-console.log("base url: ", APP_PATH);
 const noSiderRoutes = [`${APP_PATH}login`, `${APP_PATH}signup`];
 
 const App: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [activeMenuItem, setActiveMenuItem] = useState<string[]>([
+    "/subscription/list",
+  ]);
+  // this is the default open keys after successful login.
+  // const [openKeys, setOpenKeys] = useState<string[]>(["/subscription"]);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -80,31 +74,37 @@ const App: React.FC = () => {
   const navigate = useNavigate();
 
   const onItemClick = ({
-    // item,
     key,
-  }: // keyPath,
-  // domEvent,
-  {
-    // item: any;
+    needNavigate = true,
+  }: {
     key: string;
-    // keyPath: any;
-    // domEvent: any;
+    needNavigate?: boolean;
   }) => {
-    if (key == "2") {
-      navigate(`${APP_PATH}dashboard`);
-    } else if (key == "3") {
-      navigate(`${APP_PATH}price-plan/list`);
-    } else if (key == "1") {
-      navigate(`${APP_PATH}profile`);
-    } else if (key == "4") {
-      navigate(`${APP_PATH}subscription/list`);
-    }
+    needNavigate && navigate(`${APP_PATH}${key.substring(1)}`); // remove the leading '/' character, coz APP_PATH already has it
+    setActiveMenuItem([key]);
+    // const pathItem = key.split("/").filter((k) => !!k); // remove the empty leading item
+    // if (pathItem.length == 2) {
+    // submenu item clicked
+    // setOpenKeys(["/" + pathItem[0]]);
+    // }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("merchantToken");
     navigate(`${APP_PATH}login`);
   };
+
+  useEffect(() => {
+    // when user refresh or enter URL then ENTER, call this fn to highlight the active menu
+    // since we are already in the current path, there is no need to navigate
+    let key = window.location.pathname;
+    const pathItem = key.split("/").filter((k) => !!k);
+    if (pathItem.length > 1) {
+      key = "/" + pathItem[0];
+    }
+    console.log("path key: ", key);
+    onItemClick({ key, needNavigate: false });
+  }, []);
 
   return (
     <>
@@ -136,7 +136,7 @@ const App: React.FC = () => {
             </div>
             <Menu
               theme="dark"
-              defaultSelectedKeys={["4"]}
+              selectedKeys={activeMenuItem}
               mode="inline"
               items={items}
               onClick={onItemClick}
@@ -178,8 +178,11 @@ const App: React.FC = () => {
               >
                 <Routes>
                   <Route path="*" Component={NotFound} />
+                  <Route
+                    path={APP_PATH}
+                    element={<Navigate to={`${APP_PATH}subscription/list`} />}
+                  />
                   <Route path={`${APP_PATH}profile`} Component={Profile} />
-                  <Route path={`${APP_PATH}`} Component={Dashboard} />
                   <Route path={`${APP_PATH}dashboard`} Component={Dashboard} />
                   <Route
                     path={`${APP_PATH}subscription`}
@@ -192,7 +195,7 @@ const App: React.FC = () => {
                       element={<SubscriptionDetail />}
                     />
                   </Route>
-                  <Route path={`${APP_PATH}price-plan`} Component={PricePlans}>
+                  <Route path={`${APP_PATH}plan`} Component={PricePlans}>
                     <Route path="list" element={<PricePlanList />} />
                     <Route path="new" element={<PlanNew />} />
                     <Route path=":planId" element={<PlanDetail />} />

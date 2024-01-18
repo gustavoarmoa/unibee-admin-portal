@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 // import { useProfileStore } from "../stores";
+import { IProfile } from "../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -171,6 +172,16 @@ export const getCountryList = async (merchantId: number) => {
     merchantId,
   };
   return await axios.post(`${API_URL}/merchant/vat/vat_country_list`, body, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
+};
+
+// billing admin can also update user profile
+export const saveProfile = async (newProfile: IProfile) => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(`${API_URL}/user/profile`, newProfile, {
     headers: {
       Authorization: `${token}`, // Bearer: ******
     },

@@ -168,7 +168,7 @@ const Index = () => {
         <Button
           type="primary"
           onClick={() => {
-            navigate(`${APP_PATH}price-plan/new`);
+            navigate(`${APP_PATH}plan/new`);
           }}
         >
           New plan
@@ -183,7 +183,7 @@ const Index = () => {
           return {
             onClick: (event) => {
               console.log("row click: ", record, "///", rowIndex);
-              navigate(`${APP_PATH}price-plan/${record.id}`);
+              navigate(`${APP_PATH}plan/${record.id}`);
             }, // click row
             // onDoubleClick: (event) => {}, // double click row
             // onContextMenu: (event) => {}, // right button click row
