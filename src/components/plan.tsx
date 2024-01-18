@@ -96,10 +96,12 @@ const Index = ({
           alignItems: "center",
           gap: "24px",
           background: selectedPlan == plan.id ? "#FFF" : "#FBFBFB",
+
           boxShadow:
             selectedPlan == plan.id
               ? "rgba(0, 0, 0, 0.35) 0px 5px 15px"
               : "unset",
+
           cursor: "pointer",
         }}
       >

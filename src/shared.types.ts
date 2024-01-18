@@ -56,12 +56,14 @@ interface ISubscriptionType {
   subscriptionId: string;
   planId: number;
   userId: number;
-  plan: IPlan;
   status: number;
-  firstPayTime: Date;
+  firstPayTime: string;
   currentPeriodStart: number;
   currentPeriodEnd: number;
   trailEnd: number;
+  amount: number;
+  currency: string;
+  plan: IPlan | undefined;
   addons: ISubAddon[];
   user: IProfile | null;
 }

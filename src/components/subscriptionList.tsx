@@ -1,7 +1,17 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Space, Table, Tag, Button, Form, Input, Select, message } from "antd";
+import {
+  Space,
+  Table,
+  Tag,
+  Button,
+  Form,
+  Input,
+  Select,
+  message,
+  Spin,
+} from "antd";
 import { getSublist } from "../requests";
 import type { ColumnsType } from "antd/es/table";
 import { showAmount } from "../helpers";
@@ -92,7 +102,7 @@ const columns: ColumnsType<ISubscriptionType> = [
 
 const Index = () => {
   const [subList, setSubList] = useState<ISubscriptionType[]>([]);
-  const [errMsg, setErrMsg] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const relogin = () =>
@@ -101,6 +111,7 @@ const Index = () => {
     });
 
   useEffect(() => {
+    setLoading(true);
     const fetchData = async () => {
       let subListRes;
       try {
@@ -113,6 +124,7 @@ const Index = () => {
           throw new Error(subListRes.data.message);
         }
       } catch (err) {
+        setLoading(false);
         if (err instanceof Error) {
           console.log("err getting sub list: ", err.message);
           message.error(err.message);
@@ -137,6 +149,7 @@ const Index = () => {
           };
         }
       );
+      setLoading(false);
       setSubList(list);
     };
 
@@ -145,6 +158,7 @@ const Index = () => {
 
   return (
     <div>
+      <Spin spinning={loading} fullscreen />
       <Table
         columns={columns}
         dataSource={subList}

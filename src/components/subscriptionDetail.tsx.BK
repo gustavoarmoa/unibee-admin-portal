@@ -151,6 +151,7 @@ const UserTab = ({ user }: { user: IProfile | null }) => {
   */
 
   useEffect(() => {
+    // setFirstLoading(true);
     setLoading(true);
     const fetchData = async () => {
       let profileRes, countryListRes;
@@ -313,10 +314,11 @@ const SubscriptionTab = ({
 }: {
   setUserProfile: (user: IProfile) => void;
 }) => {
+  const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [changePlanModal, setChangePlanModal] = useState(false);
   const [preview, setPreview] = useState<IPreview | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -360,8 +362,8 @@ const SubscriptionTab = ({
     setPlans(newPlans);
   };
 
-  const togglePreviewModal = () => setPreviewModalOpen(!previewModalOpen);
-  const openPreviewModal = () => {
+  const toggleModal = () => setModalOpen(!modalOpen);
+  const openModal = () => {
     const plan = plans.find((p) => p.id == selectedPlan);
     let valid = true;
     if (plan?.addons != null && plan.addons.length > 0) {
@@ -380,7 +382,7 @@ const SubscriptionTab = ({
       message.error("Addon quantity must be greater than 0.");
       return;
     }
-    togglePreviewModal();
+    toggleModal();
     createPreview();
   };
 
@@ -409,7 +411,7 @@ const SubscriptionTab = ({
         throw new Error(previewRes.data.message);
       }
     } catch (err) {
-      setPreviewModalOpen(false);
+      setModalOpen(false);
       if (err instanceof Error) {
         console.log("err creating preview: ", err.message);
         message.error(err.message);
@@ -454,7 +456,7 @@ const SubscriptionTab = ({
         throw new Error(updateSubRes.data.message);
       }
     } catch (err) {
-      setPreviewModalOpen(false);
+      setModalOpen(false);
       if (err instanceof Error) {
         console.log("err creating preview: ", err.message);
         message.error(err.message);
@@ -470,14 +472,10 @@ const SubscriptionTab = ({
         state: { msg: "Subscription updated" },
       });
       */
-      // navigate(-1);
-      togglePreviewModal();
-      setChangePlanModal(false);
-      fetchData();
-      message.success("Plan updated");
+      navigate(-1);
       return;
     }
-    togglePreviewModal();
+    toggleModal();
     // ??????????????????
     // what if checkout form is opened, you can't ask admin to pay user's subscription fee.
     window.open(updateSubRes.data.data.link, "_blank");
@@ -514,8 +512,7 @@ const SubscriptionTab = ({
     setSelectedPlan(value);
   };
 
-  const fetchData = async () => {
-    let subDetailRes, planListRes;
+  useEffect(() => {
     // const subId = location.state && location.state.subscriptionId;
     const pathName = window.location.pathname.split("/");
     const subId = pathName.pop();
@@ -523,102 +520,96 @@ const SubscriptionTab = ({
       // TODO: show page not exit, OR invalid subscription
       return;
     }
-
-    setLoading(true);
-    try {
-      const res = ([subDetailRes, planListRes] = await Promise.all([
-        getSubDetail(subId),
-        getPlanList(1),
-      ]));
-      console.log("subDetail/planList: ", subDetailRes, "//", planListRes);
-      res.forEach((r) => {
-        const code = r.data.code;
-        code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-        if (code != 0) {
-          // TODO: save all the code as ENUM in constant,
-          throw new Error(r.data.message);
+    const fetchData = async () => {
+      let subDetailRes, planListRes;
+      try {
+        const res = ([subDetailRes, planListRes] = await Promise.all([
+          getSubDetail(subId),
+          getPlanList(1),
+        ]));
+        console.log("subDetail/planList: ", subDetailRes, "//", planListRes);
+        res.forEach((r) => {
+          const code = r.data.code;
+          code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
+          if (code != 0) {
+            // TODO: save all the code as ENUM in constant,
+            throw new Error(r.data.message);
+          }
+        });
+      } catch (err) {
+        if (err instanceof Error) {
+          console.log("err: ", err.message);
+          message.error(err.message);
+        } else {
+          message.error("Unknown error");
         }
+        return;
+      }
+
+      const s: any = subDetailRes.data.data;
+      const localActiveSub: ISubscriptionType = { ...s.subscription };
+      localActiveSub.addons = s.addons.map((a: any) => ({
+        ...a.AddonPlan,
+        quantity: a.quantity,
+        addonPlanId: a.addonPlan.id,
+      }));
+      localActiveSub.user = s.user;
+      console.log("active sub: ", localActiveSub);
+
+      setSelectedPlan(s.planId.id);
+      setUserProfile(s.user);
+
+      let plans: IPlan[] = planListRes.data.data.Plans.map((p: any) => {
+        const p2 = p.plan;
+        if (p.plan.type == 2) {
+          // addon plan
+          return null;
+        }
+        if (
+          p.plan.id != 31 &&
+          p.plan.id != 37 &&
+          p.plan.id != 38 &&
+          p.plan.id != 32 &&
+          p.plan.id != 41
+        ) {
+          return null;
+        }
+        return {
+          id: p2.id,
+          planName: p2.planName,
+          description: p2.description,
+          type: p2.type,
+          amount: p2.amount,
+          currency: p2.currency,
+          intervalUnit: p2.intervalUnit,
+          intervalCount: p2.intervalCount,
+          status: p2.status,
+          addons: p.addons,
+        };
       });
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log("err: ", err.message);
-        message.error(err.message);
-      } else {
-        message.error("Unknown error");
-      }
-      return;
-    }
-
-    setLoading(false);
-    const s: any = subDetailRes.data.data;
-    const localActiveSub: ISubscriptionType = { ...s.subscription };
-    localActiveSub.addons = s.addons?.map((a: any) => ({
-      ...a.AddonPlan,
-      quantity: a.quantity,
-      addonPlanId: a.addonPlan.id,
-    }));
-    localActiveSub.user = s.user;
-    console.log("active sub: ", localActiveSub);
-
-    setSelectedPlan(s.planId.id);
-    setUserProfile(s.user);
-
-    let plans: IPlan[] = planListRes.data.data.Plans.map((p: any) => {
-      const p2 = p.plan;
-      if (p.plan.type == 2) {
-        // addon plan
-        return null;
-      }
-      if (
-        p.plan.id != 31 &&
-        p.plan.id != 37 &&
-        p.plan.id != 38 &&
-        p.plan.id != 32 &&
-        p.plan.id != 41
-      ) {
-        return null;
-      }
-      return {
-        id: p2.id,
-        planName: p2.planName,
-        description: p2.description,
-        type: p2.type,
-        amount: p2.amount,
-        currency: p2.currency,
-        intervalUnit: p2.intervalUnit,
-        intervalCount: p2.intervalCount,
-        status: p2.status,
-        addons: p.addons,
-      };
-    });
-    plans = plans.filter((p) => p != null);
-    const planIdx = plans.findIndex((p) => p.id == s.planId.id);
-    // let's say we have planA(which has addonA1, addonA2, addonA3), planB, planC, user has subscribed to planA, and selected addonA1, addonA3
-    // I need to find the index of addonA1,3 in planA.addons array,
-    // then set their {quantity, checked: true} props on planA.addons, these props value are from subscription.addons array.
-    if (planIdx != -1 && plans[planIdx].addons != null) {
-      for (let i = 0; i < plans[planIdx].addons!.length; i++) {
-        const addonIdx =
-          localActiveSub.addons == null
-            ? -1
-            : localActiveSub.addons.findIndex(
-                (subAddon) =>
-                  subAddon.addonPlanId == plans[planIdx].addons![i].id
-              );
-        if (addonIdx != -1) {
-          plans[planIdx].addons![i].checked = true;
-          plans[planIdx].addons![i].quantity =
-            localActiveSub.addons[addonIdx].quantity;
+      plans = plans.filter((p) => p != null);
+      const planIdx = plans.findIndex((p) => p.id == s.planId.id);
+      // let's say we have planA(which has addonA1, addonA2, addonA3), planB, planC, user has subscribed to planA, and selected addonA1, addonA3
+      // I need to find the index of addonA1,3 in planA.addons array,
+      // then set their {quantity, checked: true} props on planA.addons, these props value are from subscription.addons array.
+      if (planIdx != -1 && plans[planIdx].addons != null) {
+        for (let i = 0; i < plans[planIdx].addons!.length; i++) {
+          const addonIdx = localActiveSub.addons.findIndex(
+            (subAddon) => subAddon.addonPlanId == plans[planIdx].addons![i].id
+          );
+          if (addonIdx != -1) {
+            plans[planIdx].addons![i].checked = true;
+            plans[planIdx].addons![i].quantity =
+              localActiveSub.addons[addonIdx].quantity;
+          }
         }
       }
-    }
-    setPlans(plans);
-    localActiveSub.plan = plans.find((p) => p.id == localActiveSub.planId);
-    setActiveSub(localActiveSub);
-  };
+      setPlans(plans);
+      localActiveSub.plan = plans.find((p) => p.id == localActiveSub.planId);
+      setActiveSub(localActiveSub);
 
-  useEffect(() => {
+      setLoading(false);
+    };
     fetchData();
   }, []);
 
@@ -646,9 +637,9 @@ const SubscriptionTab = ({
       {selectedPlan != null && (
         <Modal
           title="Subscription Update Preview"
-          open={previewModalOpen}
+          open={modalOpen}
           onOk={onConfirm}
-          onCancel={togglePreviewModal}
+          onCancel={toggleModal}
           width={"640px"}
         >
           {preview && (
@@ -679,11 +670,7 @@ const SubscriptionTab = ({
         <Modal
           title="Change plan"
           open={changePlanModal}
-          width={"480px"}
-          onOk={() => {
-            // setChangePlanModal(false);
-            openPreviewModal();
-          }}
+          onOk={() => setChangePlanModal(false)}
           onCancel={() => setChangePlanModal(false)}
         >
           <Divider>Choose a new subscription plan</Divider>
@@ -697,8 +684,12 @@ const SubscriptionTab = ({
           >
             <Select
               style={{ width: 120 }}
+              // placeholder="Type to search"
+              // optionFilterProp="children"
               value={selectedPlan}
               onChange={onSelectPlanChange}
+              // onSearch={onSearch}
+              // filterOption={filterOption}
               options={plans.map((p) => ({
                 label: p.planName,
                 value: p.id,
@@ -727,9 +718,7 @@ const SubscriptionTab = ({
         </Modal>
       }
       <div>
-        <Divider orientation="left" style={{ margin: "16px 0" }}>
-          User info
-        </Divider>
+        <Divider orientation="left">User info</Divider>
         <Row>
           <Col span={3}>
             <span style={{ fontWeight: "bold" }}>First name</span>
@@ -778,9 +767,7 @@ const SubscriptionTab = ({
         update billing cycle start date
               */}
       </div>
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
-        Subscription info
-      </Divider>
+      <Divider orientation="left">Subscription info</Divider>
       <Row>
         <Col span={3}>
           <span style={{ fontWeight: "bold" }}>Plan</span>
@@ -847,13 +834,9 @@ const SubscriptionTab = ({
           />
         ))}
         </div> */}
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
-        Subscription History
-      </Divider>
+      <Divider orientation="left">Subscription History</Divider>
 
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
-        Addon History
-      </Divider>
+      <Divider orientation="left">Addon History</Divider>
 
       <div
         style={{
@@ -863,17 +846,19 @@ const SubscriptionTab = ({
           height: "68px",
         }}
       >
-        {/* plans.length != 0 && (
+        {plans.length != 0 && (
           <>
+            {/* <Button onClick={() => navigate(-1)}>Go back</Button>
+            &nbsp;&nbsp;&nbsp;&nbsp; */}
             <Button
               type="primary"
-              onClick={openPreviewModal}
+              onClick={openModal}
               disabled={selectedPlan == null}
             >
               Confirm
             </Button>
           </>
-        ) */}
+        )}
       </div>
     </>
   );
