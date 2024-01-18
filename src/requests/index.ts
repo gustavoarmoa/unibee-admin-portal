@@ -178,7 +178,24 @@ export const getCountryList = async (merchantId: number) => {
   });
 };
 
-// billing admin can also update user profile
+export const extendDueDate = async (
+  subscriptionId: string,
+  appendTrialEndHour: number
+) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = { subscriptionId, appendTrialEndHour };
+  return await axios.post(
+    `${API_URL}/merchant/subscription/subscription_add_new_trial_start`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+// billing admin can also update user profile, not implemented yet.
 export const saveProfile = async (newProfile: IProfile) => {
   const token = localStorage.getItem("merchantToken");
   return await axios.post(`${API_URL}/user/profile`, newProfile, {

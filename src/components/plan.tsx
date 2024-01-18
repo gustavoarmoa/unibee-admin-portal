@@ -88,20 +88,20 @@ const Index = ({
           width: "240px",
           height: "320px",
           padding: "8px",
-          border: `1px solid ${isActive ? "orange" : "#EEE"}`,
-          borderRadius: "4px",
+          border: `1px solid ${isActive ? "orange" : "#BDBDBD"}`,
+          borderRadius: "8px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           gap: "24px",
           background: selectedPlan == plan.id ? "#FFF" : "#FBFBFB",
-
+          /*
           boxShadow:
             selectedPlan == plan.id
               ? "rgba(0, 0, 0, 0.35) 0px 5px 15px"
               : "unset",
-
+          */
           cursor: "pointer",
         }}
       >

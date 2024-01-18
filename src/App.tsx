@@ -103,6 +103,9 @@ const App: React.FC = () => {
       key = "/" + pathItem[0];
     }
     console.log("path key: ", key);
+    if (key == "/subscription") {
+      key = "/subscription/list";
+    }
     onItemClick({ key, needNavigate: false });
   }, []);
 

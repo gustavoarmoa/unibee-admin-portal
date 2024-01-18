@@ -60,7 +60,7 @@ interface ISubscriptionType {
   firstPayTime: string;
   currentPeriodStart: number;
   currentPeriodEnd: number;
-  trailEnd: number;
+  trialEnd: number;
   amount: number;
   currency: string;
   plan: IPlan | undefined;

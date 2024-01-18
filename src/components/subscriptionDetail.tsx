@@ -17,6 +17,7 @@ import {
   Tabs,
   Radio,
   Divider,
+  DatePicker,
 } from "antd";
 import type { TabsProps } from "antd";
 import {
@@ -26,12 +27,14 @@ import {
   updateSubscription,
   terminateSub,
   getCountryList,
-  saveProfile,
+  extendDueDate,
+  // saveProfile,
 } from "../requests";
+import * as dayjs from "dayjs";
 import { ISubscriptionType, IPlan, IProfile, Country } from "../shared.types";
 import update from "immutability-helper";
 import Plan from "./plan";
-import { showAmount } from "../helpers";
+import { daysBetweenDate, showAmount } from "../helpers";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -50,6 +53,7 @@ interface IPreview {
 const Index = () => {
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<IProfile | null>(null);
+  const { TextArea } = Input;
 
   const tabItems: TabsProps["items"] = [
     {
@@ -88,17 +92,50 @@ const Index = () => {
     console.log(key);
   };
   return (
-    <div>
-      <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
+    <div style={{ display: "flex" }}>
+      <div style={{ width: "80%" }}>
+        <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "64px",
+          }}
+        >
+          <Button onClick={() => navigate(-1)}>Back</Button>
+        </div>
+      </div>
       <div
         style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginTop: "64px",
+          width: "20%",
+          border: "1px solid #EEE",
+          borderRadius: "4px",
+          marginLeft: "24px",
         }}
       >
-        <Button onClick={() => navigate(-1)}>Back</Button>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "gray",
+          }}
+        >
+          admin side note
+        </div>
+        <div style={{ height: "70%", marginBottom: "18px" }}>main content</div>
+        <TextArea rows={4} />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "48px",
+          }}
+        >
+          <Button>Submit</Button>
+        </div>
       </div>
     </div>
   );
@@ -318,6 +355,8 @@ const SubscriptionTab = ({
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [confirmming, setConfirming] = useState(false);
+  const [dueDateModal, setDueDateModal] = useState(false);
+  const [dueDate, setDueDate] = useState("");
   const [changePlanModal, setChangePlanModal] = useState(false);
   const [preview, setPreview] = useState<IPreview | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -623,6 +662,48 @@ const SubscriptionTab = ({
     setActiveSub(localActiveSub);
   };
 
+  const onDueDateChange = (date, dateStr) => {
+    console.log(date, "//", dateStr, "///", activeSub?.currentPeriodEnd);
+    const days = daysBetweenDate(
+      dateStr,
+      (activeSub?.currentPeriodEnd as number) * 1000
+    );
+    setDueDateModal(true);
+    setDueDate(dateStr);
+    // console.log("days between: ", days);
+  };
+
+  const onExtendDueDate = async () => {
+    setLoading(true);
+    let extendRes;
+    try {
+      const hours =
+        daysBetweenDate(activeSub!.currentPeriodEnd * 1000, dueDate) * 24;
+      extendRes = await extendDueDate(activeSub!.subscriptionId, hours);
+      console.log("extend res: ", extendRes);
+      const code = extendRes.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(extendRes.data.message);
+      }
+    } catch (err) {
+      setLoading(false);
+      setDueDateModal(false);
+      if (err instanceof Error) {
+        console.log("err: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
+    setLoading(false);
+    message.success("Due date extended");
+    setDueDateModal(false);
+    setDueDate("");
+    fetchData(); // better to call message.success in fetchData cb(add a cb parameter to fetchData)
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -646,6 +727,90 @@ const SubscriptionTab = ({
           <div>user info</div>
           <div>subscription info</div>
           <div>start/end</div>
+        </Modal>
+      }
+      {
+        <Modal
+          title="Extend due date"
+          open={dueDateModal}
+          width={"640px"}
+          footer={null}
+        >
+          <div style={{ margin: "16px 0" }}>
+            Are you sure you want to extend the due date?
+          </div>
+          <Row>
+            <Col span={6}>
+              <span style={{ fontWeight: "bold" }}>First name</span>
+            </Col>
+            <Col span={6}>{activeSub?.user?.firstName}</Col>
+            <Col span={5}>
+              <span style={{ fontWeight: "bold" }}> Lastname</span>
+            </Col>
+            <Col span={6}>{activeSub?.user?.lastName}</Col>
+          </Row>
+          <Row>
+            <Col span={6}>
+              <span style={{ fontWeight: "bold" }}>Plan</span>
+            </Col>
+            <Col span={6}>{activeSub?.plan?.planName}</Col>
+            <Col span={5}>
+              <span style={{ fontWeight: "bold" }}>Amount</span>
+            </Col>
+            <Col span={6}>
+              {activeSub?.plan?.amount &&
+                showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
+            </Col>
+          </Row>
+          <Row>
+            <Col span={6}>
+              <span style={{ fontWeight: "bold" }}>Current due date</span>
+            </Col>
+            <Col span={6}>
+              {new Date(
+                (activeSub?.currentPeriodEnd as number) * 1000
+              ).toDateString()}
+            </Col>
+            <Col span={5}>
+              <span style={{ fontWeight: "bold" }}>New due date</span>
+            </Col>
+            <Col span={7}>
+              {dueDate}{" "}
+              <span style={{ color: "red" }}>
+                {`(+ ${daysBetweenDate(
+                  dueDate,
+                  (activeSub?.currentPeriodEnd as number) * 1000
+                )} days)`}
+              </span>
+            </Col>
+          </Row>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              alignItems: "center",
+              gap: "18px",
+              marginTop: "24px",
+            }}
+          >
+            <Button
+              onClick={() => {
+                setDueDateModal(false);
+                setDueDate("");
+              }}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              onClick={onExtendDueDate}
+              loading={loading}
+              disabled={loading}
+            >
+              OK
+            </Button>
+          </div>
         </Modal>
       }
       {selectedPlan != null && (
@@ -768,44 +933,46 @@ const SubscriptionTab = ({
           User info
         </Divider>
         <Row>
-          <Col span={3}>
+          <Col span={4}>
             <span style={{ fontWeight: "bold" }}>First name</span>
           </Col>
-          <Col span={4}>{activeSub?.user?.firstName}</Col>
-          <Col span={3}>
+          <Col span={6}>{activeSub?.user?.firstName}</Col>
+          <Col span={4}>
             <span style={{ fontWeight: "bold" }}> Lastname</span>
           </Col>
-          <Col span={4}>{activeSub?.user?.lastName}</Col>
+          <Col span={6}>{activeSub?.user?.lastName}</Col>
         </Row>
         <Row>
-          <Col span={3}>
+          <Col span={4}>
             <span style={{ fontWeight: "bold" }}>Email</span>
           </Col>
-          <Col span={4}>{activeSub?.user?.email}</Col>
-          <Col span={3}>
+          <Col span={6}>
+            <a href={activeSub?.user?.email}>{activeSub?.user?.email} </a>
+          </Col>
+          <Col span={4}>
             <span style={{ fontWeight: "bold" }}>Phone</span>
           </Col>
-          <Col span={4}>{activeSub?.user?.phone}</Col>
+          <Col span={6}>{activeSub?.user?.phone}</Col>
         </Row>
         <Row>
-          <Col span={3}>
+          <Col span={4}>
             <span style={{ fontWeight: "bold" }}>Country</span>
           </Col>
-          <Col span={4}>{activeSub?.user?.countryName}</Col>
-          <Col span={3}>
+          <Col span={6}>{activeSub?.user?.countryName}</Col>
+          <Col span={4}>
             <span style={{ fontWeight: "bold" }}>Billing address</span>
           </Col>
-          <Col span={4}>{activeSub?.user?.adress}</Col>
+          <Col span={6}>{activeSub?.user?.adress}</Col>
         </Row>
         <Row>
-          <Col span={3}>
+          <Col span={4}>
             <span style={{ fontWeight: "bold" }}>Payment method</span>
           </Col>
-          <Col span={4}>{activeSub?.user?.paymentMethod}</Col>
-          <Col span={3}>
+          <Col span={6}>{activeSub?.user?.paymentMethod}</Col>
+          <Col span={4}>
             <span style={{ fontWeight: "bold" }}>VAT number</span>
           </Col>
-          <Col span={4}>{activeSub?.user?.vATNumber}</Col>
+          <Col span={6}>{activeSub?.user?.vATNumber}</Col>
         </Row>
 
         {/* <span>billing cycle: from/to: ... </span>
@@ -819,56 +986,80 @@ const SubscriptionTab = ({
         Subscription info
       </Divider>
       <Row>
-        <Col span={3}>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Plan</span>
         </Col>
-        <Col span={4}>{activeSub?.plan?.planName}</Col>
-        <Col span={3}>
+        <Col span={6}>{activeSub?.plan?.planName}</Col>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Plan description</span>
         </Col>
-        <Col span={4}>{activeSub?.plan?.description}</Col>
+        <Col span={6}>{activeSub?.plan?.description}</Col>
       </Row>
       <Row>
-        <Col span={3}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Status</span>
+        </Col>
+        <Col span={6}>{activeSub?.status}</Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Subscription Id</span>
+        </Col>
+        <Col span={6}>{activeSub?.subscriptionId}</Col>
+      </Row>
+      <Row>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Plan price</span>
         </Col>
-        <Col span={4}>
+        <Col span={6}>
           {activeSub?.plan?.amount &&
             showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
         </Col>
-        <Col span={3}>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Addons</span>
         </Col>
-        <Col span={4}>{"*******"}</Col>
+        <Col span={6}>{"*******"}</Col>
       </Row>
       <Row>
-        <Col span={3}>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Total amount</span>
         </Col>
-        <Col span={4}>
+        <Col span={6}>
           {activeSub?.amount &&
             showAmount(activeSub.amount, activeSub.currency)}
         </Col>
 
-        <Col span={3}>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Bill period</span>
         </Col>
-        <Col span={4}>{activeSub?.plan?.intervalUnit}</Col>
+        <Col span={6}>{`${activeSub?.plan && activeSub?.plan?.intervalCount} ${
+          activeSub?.plan && activeSub?.plan?.intervalUnit
+        }`}</Col>
       </Row>
       <Row>
-        <Col span={3}>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>First pay</span>
         </Col>
-        <Col span={4}>{activeSub?.firstPayTime}</Col>
-        <Col span={3}>
-          <span style={{ fontWeight: "bold" }}>Next due date</span>
-        </Col>
+        <Col span={6}>{activeSub?.firstPayTime}</Col>
         <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Next due date</span>
+          <DatePicker
+            onChange={onDueDateChange}
+            disabledDate={(d) =>
+              d.isBefore(
+                new Date(
+                  activeSub != null
+                    ? activeSub.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24
+                    : Date.now()
+                )
+              )
+            }
+          />
+        </Col>
+        <Col span={6}>
           {activeSub?.currentPeriodEnd &&
             new Date(activeSub?.currentPeriodEnd * 1000).toLocaleDateString()}
         </Col>
       </Row>
-      <div style={{ margin: "12px 0" }}>
+      <div style={{ margin: "24px 0" }}>
         <Button onClick={() => setChangePlanModal(true)}>Change plan</Button>
       </div>
 
