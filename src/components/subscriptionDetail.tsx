@@ -721,7 +721,7 @@ const SubscriptionTab = ({
     setActiveSub(localActiveSub);
   };
 
-  const onDueDateChange = (date, dateStr) => {
+  const onDueDateChange = (date: any, dateStr: string) => {
     console.log(date, "//", dateStr, "///", activeSub?.currentPeriodEnd);
     const days = daysBetweenDate(
       dateStr,
