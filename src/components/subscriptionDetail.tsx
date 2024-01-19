@@ -18,6 +18,7 @@ import {
   DatePicker,
   Radio,
   RadioChangeEvent,
+  Popover,
 } from "antd";
 import type { TabsProps } from "antd";
 import {
@@ -37,7 +38,7 @@ import { ISubscriptionType, IPlan, IProfile, Country } from "../shared.types";
 import update from "immutability-helper";
 import Plan from "./plan";
 import { daysBetweenDate, showAmount } from "../helpers";
-import { SyncOutlined } from "@ant-design/icons";
+import { InfoCircleOutlined, SyncOutlined } from "@ant-design/icons";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -657,7 +658,7 @@ const SubscriptionTab = ({
     const s: any = subDetailRes.data.data;
     const localActiveSub: ISubscriptionType = { ...s.subscription };
     localActiveSub.addons = s.addons?.map((a: any) => ({
-      ...a.AddonPlan,
+      ...a.addonPlan,
       quantity: a.quantity,
       addonPlanId: a.addonPlan.id,
     }));
@@ -1201,9 +1202,43 @@ const SubscriptionTab = ({
             showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
         </Col>
         <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Addons</span>
+          <span style={{ fontWeight: "bold" }}>Addons price</span>
         </Col>
-        <Col span={6}>{"*******"}</Col>
+        <Col span={6}>
+          {activeSub &&
+            activeSub.addons &&
+            showAmount(
+              activeSub!.addons!.reduce(
+                (
+                  sum,
+                  { quantity, amount }: { quantity: number; amount: number }
+                ) => sum + quantity * amount,
+                0
+              ),
+              activeSub!.currency
+            )}
+          <Popover
+            placement="top"
+            title="Addon breakdown"
+            content={
+              <div style={{ width: "280px" }}>
+                {activeSub?.addons.map((a) => (
+                  <Row key={a.id}>
+                    <Col span={8}>{a.planName}</Col>
+                    <Col span={810}>
+                      {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
+                      {showAmount(a.amount * a.quantity, a.currency)}
+                    </Col>
+                  </Row>
+                ))}
+              </div>
+            }
+          >
+            <span style={{ marginLeft: "4px", cursor: "pointer" }}>
+              <InfoCircleOutlined />
+            </span>
+          </Popover>
+        </Col>
       </Row>
       <Row>
         <Col span={4}>

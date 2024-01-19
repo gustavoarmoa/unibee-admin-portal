@@ -45,6 +45,8 @@ const columns: ColumnsType<ISubscriptionType> = [
               ? 0
               : s.addons!.reduce(
                   // total subscription amount = plan amount + all addons(an array): amount * quantity
+                  // this value might not be the value users are gonna pay on next billing cycle
+                  // because, users might downgrade their plan.
                   (
                     sum,
                     { quantity, amount }: { quantity: number; amount: number } // destructure the quantity and amount from addon obj
