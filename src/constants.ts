@@ -10,7 +10,7 @@ export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
   1: "Created", // when sub is created, but user hasn't paid yet, 2: active: user paid the sub fee
   2: "Active",
   // 3: "Suspended", // suspend: not used yet. For future implementation: users might want to suspend the sub for a period of time, during which, they don't need to pay
-  3: "PendingInActive", // when status is transitioning from 1 to 2, or 2 to 4, there is a pending status, it's not synchronous
+  3: "Pending", // when status is transitioning from 1 to 2, or 2 to 4, there is a pending status, it's not synchronous
   // so we have to wait, in status 3: no action can be taken on UI.
   4: "Cancelled", // users(or admin) cancelled the sub(immediately or automatically at the end of billing cycle). It's triggered by human.
   5: "Expired", // sub ended.

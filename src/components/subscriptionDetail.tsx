@@ -1226,8 +1226,8 @@ const SubscriptionTab = ({
                 <div style={{ width: "280px" }}>
                   {activeSub?.addons.map((a) => (
                     <Row key={a.id}>
-                      <Col span={8}>{a.planName}</Col>
-                      <Col span={810}>
+                      <Col span={10}>{a.planName}</Col>
+                      <Col span={10}>
                         {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
                         {showAmount(a.amount * a.quantity, a.currency)}
                       </Col>
