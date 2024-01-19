@@ -149,21 +149,45 @@ export const updateSubscription = async (
   );
 };
 
-// terminate the subscription at the end of this billing cycle
-export const terminateSub = async (SubscriptionId: string) => {
+// terminate the subscription, immediate: true -> now, immediate: false -> at the end of this billing cycle
+export const terminateSub = async (
+  SubscriptionId: string,
+  immediate: boolean
+) => {
   const token = localStorage.getItem("merchantToken");
-  const body = {
+  const body: {
+    SubscriptionId: string;
+    invoiceNow?: boolean;
+    prorate?: boolean;
+  } = {
     SubscriptionId,
   };
-  return await axios.post(
-    `${API_URL}/user/subscription/subscription_cancel_at_period_end`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    }
-  );
+  let url = `${API_URL}/merchant/subscription/subscription_cancel_at_period_end`;
+  if (immediate) {
+    body.invoiceNow = true;
+    body.prorate = true;
+    url = `${API_URL}/merchant/subscription/subscription_cancel`;
+  }
+  return await axios.post(url, body, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
+};
+
+// resume subscription, if it's been terminated on end of this billing cycle.
+// if it's ended immediately, no resume allowed
+export const resumeSub = async (subscriptionId: string) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = {
+    subscriptionId,
+  };
+  const url = `${API_URL}/user/subscription/subscription_cancel_last_cancel_at_period_end`;
+  return await axios.post(url, body, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
 };
 
 export const getCountryList = async (merchantId: number) => {

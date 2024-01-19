@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -15,9 +14,10 @@ import {
   Row,
   Col,
   Tabs,
-  Radio,
   Divider,
   DatePicker,
+  Radio,
+  RadioChangeEvent,
 } from "antd";
 import type { TabsProps } from "antd";
 import {
@@ -28,13 +28,16 @@ import {
   terminateSub,
   getCountryList,
   extendDueDate,
+  resumeSub,
   // saveProfile,
 } from "../requests";
 import * as dayjs from "dayjs";
+import { SUBSCRIPTION_STATUS } from "../constants";
 import { ISubscriptionType, IPlan, IProfile, Country } from "../shared.types";
 import update from "immutability-helper";
 import Plan from "./plan";
 import { daysBetweenDate, showAmount } from "../helpers";
+import { SyncOutlined } from "@ant-design/icons";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -112,6 +115,7 @@ const Index = () => {
           border: "1px solid #EEE",
           borderRadius: "4px",
           marginLeft: "24px",
+          padding: "8px",
         }}
       >
         <div
@@ -124,7 +128,21 @@ const Index = () => {
         >
           admin side note
         </div>
-        <div style={{ height: "70%", marginBottom: "18px" }}>main content</div>
+        <div
+          style={{
+            height: "70%",
+            marginBottom: "18px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "gray",
+          }}
+        >
+          <div>main content</div>
+          <div>side note1</div>
+          <div>side note2</div>
+        </div>
         <TextArea rows={4} />
         <div
           style={{
@@ -362,12 +380,20 @@ const SubscriptionTab = ({
   const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(true);
   const [terminateModal, setTerminateModal] = useState(false);
+  const [resumeModal, setResumeModal] = useState(false);
   const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null); // null: when page is loading, no data is ready yet.
+  const [endSubMode, setEndSubMode] = useState<1 | 2>(1); // 1: immediate, 2: end of this billing cycole
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
       state: { msg: "session expired, please re-login" },
     });
+
+  // select immediate or end of this billing cycle
+  const onEndSubModeChange = (e: RadioChangeEvent) => {
+    console.log("radio checked", e.target.value);
+    setEndSubMode(e.target.value);
+  };
 
   const onAddonChange = (
     addonId: number,
@@ -528,29 +554,62 @@ const SubscriptionTab = ({
   };
 
   const onTerminateSub = async () => {
-    let terminateRes;
     try {
-      terminateRes = await terminateSub(activeSub?.subscriptionId as string);
+      setLoading(true);
+      const terminateRes = await terminateSub(
+        activeSub?.subscriptionId as string,
+        endSubMode == 1
+      );
       console.log("terminate sub res: ", terminateRes);
       const code = terminateRes.data.code;
       code == 61 && relogin();
       if (code != 0) {
         throw new Error(terminateRes.data.message);
       }
+      setLoading(false);
+      setTerminateModal(false);
+      message.success(
+        endSubMode == 1
+          ? "Subscription ended"
+          : "Subscription will end on the end of this billing cycle"
+      );
+      fetchData();
     } catch (err) {
+      setLoading(false);
       setTerminateModal(false);
       if (err instanceof Error) {
-        console.log("err creating preview: ", err.message);
+        console.log("err terminating sub: ", err.message);
         message.error(err.message);
       } else {
         message.error("Unknown error");
       }
-      return;
     }
-    navigate(`${APP_PATH}subscription/list`, {
-      // receiving route hasn't read this msg yet.
-      state: { msg: "Subscription ended on current billing cycle." },
-    });
+  };
+
+  const onResumeSub = async () => {
+    try {
+      setLoading(true);
+      const resumeRes = await resumeSub(activeSub?.subscriptionId as string);
+      console.log("resume sub res: ", resumeRes);
+      const code = resumeRes.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(resumeRes.data.message);
+      }
+      setLoading(false);
+      setResumeModal(false);
+      message.success("Subscription resumed.");
+      fetchData();
+    } catch (err) {
+      setLoading(false);
+      setResumeModal(false);
+      if (err instanceof Error) {
+        console.log("err resuming sub: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
   };
 
   const onSelectPlanChange = (value: number) => {
@@ -713,106 +772,233 @@ const SubscriptionTab = ({
     <>
       <Spin spinning={loading} fullscreen />
       {contextHolder}
-      {
-        <Modal
-          title="Terminate Subscription"
-          open={terminateModal}
-          onOk={onTerminateSub}
-          onCancel={() => setTerminateModal(false)}
+
+      <Modal
+        title="Terminate Subscription"
+        width={"640px"}
+        open={terminateModal}
+        footer={null}
+      >
+        <div style={{ margin: "16px 0" }}>
+          Are you sure you want to end this subscription{" "}
+          <span style={{ color: "red" }}>
+            {endSubMode == 1 ? "immediately" : "at the end of billing cycle"}
+          </span>
+          ?
+        </div>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>First name</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.firstName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}> Lastname</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.lastName}</Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Plan</span>
+          </Col>
+          <Col span={6}>{activeSub?.plan?.planName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}>Amount</span>
+          </Col>
+          <Col span={6}>
+            {activeSub?.plan?.amount &&
+              showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
+          </Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Current due date</span>
+          </Col>
+          <Col span={6}>
+            {new Date(
+              (activeSub?.currentPeriodEnd as number) * 1000
+            ).toDateString()}
+          </Col>
+        </Row>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            gap: "18px",
+            marginTop: "24px",
+          }}
         >
-          <div>subscription detail here</div>
-          <div>
-            Are you sure you want to terminate the following subscrition
-          </div>
-          <div>user info</div>
-          <div>subscription info</div>
-          <div>start/end</div>
-        </Modal>
-      }
-      {
-        <Modal
-          title="Extend due date"
-          open={dueDateModal}
-          width={"640px"}
-          footer={null}
-        >
-          <div style={{ margin: "16px 0" }}>
-            Are you sure you want to extend the due date?
-          </div>
-          <Row>
-            <Col span={6}>
-              <span style={{ fontWeight: "bold" }}>First name</span>
-            </Col>
-            <Col span={6}>{activeSub?.user?.firstName}</Col>
-            <Col span={5}>
-              <span style={{ fontWeight: "bold" }}> Lastname</span>
-            </Col>
-            <Col span={6}>{activeSub?.user?.lastName}</Col>
-          </Row>
-          <Row>
-            <Col span={6}>
-              <span style={{ fontWeight: "bold" }}>Plan</span>
-            </Col>
-            <Col span={6}>{activeSub?.plan?.planName}</Col>
-            <Col span={5}>
-              <span style={{ fontWeight: "bold" }}>Amount</span>
-            </Col>
-            <Col span={6}>
-              {activeSub?.plan?.amount &&
-                showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
-            </Col>
-          </Row>
-          <Row>
-            <Col span={6}>
-              <span style={{ fontWeight: "bold" }}>Current due date</span>
-            </Col>
-            <Col span={6}>
-              {new Date(
-                (activeSub?.currentPeriodEnd as number) * 1000
-              ).toDateString()}
-            </Col>
-            <Col span={5}>
-              <span style={{ fontWeight: "bold" }}>New due date</span>
-            </Col>
-            <Col span={7}>
-              {dueDate}{" "}
-              <span style={{ color: "red" }}>
-                {`(+ ${daysBetweenDate(
-                  dueDate,
-                  (activeSub?.currentPeriodEnd as number) * 1000
-                )} days)`}
-              </span>
-            </Col>
-          </Row>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "end",
-              alignItems: "center",
-              gap: "18px",
-              marginTop: "24px",
+          <Button
+            onClick={() => {
+              setTerminateModal(false);
             }}
+            disabled={loading}
           >
-            <Button
-              onClick={() => {
-                setDueDateModal(false);
-                setDueDate("");
-              }}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              onClick={onExtendDueDate}
-              loading={loading}
-              disabled={loading}
-            >
-              OK
-            </Button>
-          </div>
-        </Modal>
-      }
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={onTerminateSub}
+            loading={loading}
+            disabled={loading}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        title="Resume Subscription"
+        width={"640px"}
+        open={resumeModal}
+        footer={null}
+      >
+        <div style={{ margin: "16px 0" }}>
+          Are you sure you want to resume this subscription?
+        </div>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>First name</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.firstName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}> Lastname</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.lastName}</Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Plan</span>
+          </Col>
+          <Col span={6}>{activeSub?.plan?.planName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}>Amount</span>
+          </Col>
+          <Col span={6}>
+            {activeSub?.plan?.amount &&
+              showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
+          </Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Current due date</span>
+          </Col>
+          <Col span={6}>
+            {new Date(
+              (activeSub?.currentPeriodEnd as number) * 1000
+            ).toDateString()}
+          </Col>
+        </Row>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            gap: "18px",
+            marginTop: "24px",
+          }}
+        >
+          <Button
+            onClick={() => {
+              setResumeModal(false);
+            }}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={onResumeSub}
+            loading={loading}
+            disabled={loading}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
+      <Modal
+        title="Extend due date"
+        open={dueDateModal}
+        width={"640px"}
+        footer={null}
+      >
+        <div style={{ margin: "16px 0" }}>
+          Are you sure you want to extend the due date?
+        </div>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>First name</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.firstName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}> Lastname</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.lastName}</Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Plan</span>
+          </Col>
+          <Col span={6}>{activeSub?.plan?.planName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}>Amount</span>
+          </Col>
+          <Col span={6}>
+            {activeSub?.plan?.amount &&
+              showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
+          </Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Current due date</span>
+          </Col>
+          <Col span={6}>
+            {new Date(
+              (activeSub?.currentPeriodEnd as number) * 1000
+            ).toDateString()}
+          </Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}>New due date</span>
+          </Col>
+          <Col span={7}>
+            {dueDate}{" "}
+            <span style={{ color: "red" }}>
+              {`(+ ${daysBetweenDate(
+                dueDate,
+                (activeSub?.currentPeriodEnd as number) * 1000
+              )} days)`}
+            </span>
+          </Col>
+        </Row>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            gap: "18px",
+            marginTop: "24px",
+          }}
+        >
+          <Button
+            onClick={() => {
+              setDueDateModal(false);
+              setDueDate("");
+            }}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={onExtendDueDate}
+            loading={loading}
+            disabled={loading}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
+
       {selectedPlan != null && (
         <Modal
           title="Subscription Update Preview"
@@ -974,13 +1160,6 @@ const SubscriptionTab = ({
           </Col>
           <Col span={6}>{activeSub?.user?.vATNumber}</Col>
         </Row>
-
-        {/* <span>billing cycle: from/to: ... </span>
-        <Button type="primary" onClick={() => setTerminateModal(true)}>
-          Terminate this subscrition at the end of current cycle
-        </Button>
-        update billing cycle start date
-              */}
       </div>
       <Divider orientation="left" style={{ margin: "32px 0" }}>
         Subscription info
@@ -999,7 +1178,15 @@ const SubscriptionTab = ({
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Status</span>
         </Col>
-        <Col span={6}>{activeSub?.status}</Col>
+        <Col span={6}>
+          {activeSub && SUBSCRIPTION_STATUS[activeSub.status]}{" "}
+          <span
+            style={{ cursor: "pointer", marginLeft: "8px" }}
+            onClick={fetchData}
+          >
+            <SyncOutlined />
+          </span>
+        </Col>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Subscription Id</span>
         </Col>
@@ -1059,9 +1246,40 @@ const SubscriptionTab = ({
             new Date(activeSub?.currentPeriodEnd * 1000).toLocaleDateString()}
         </Col>
       </Row>
-      <div style={{ margin: "24px 0" }}>
-        <Button onClick={() => setChangePlanModal(true)}>Change plan</Button>
-      </div>
+
+      {activeSub && activeSub.status == 2 && (
+        <div
+          style={{
+            margin: "24px 0",
+            display: "flex",
+            justifyContent: "start",
+            alignItems: "center",
+            gap: "36px",
+          }}
+        >
+          <Button onClick={() => setChangePlanModal(true)}>Change plan</Button>
+          {activeSub.cancelAtPeriodEnd == 0 ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Button onClick={() => setTerminateModal(true)}>
+                End subscription
+              </Button>
+              <Radio.Group onChange={onEndSubModeChange} value={endSubMode}>
+                <Radio value={1}>immediately</Radio>
+                <Radio value={2}>end of this cycle</Radio>
+              </Radio.Group>
+            </div>
+          ) : (
+            <div>
+              <span>Subscription will end on </span>
+              <span style={{ color: "red", marginRight: "8px" }}>
+                {activeSub &&
+                  new Date(activeSub!.trialEnd * 1000).toLocaleString()}
+              </span>
+              <Button onClick={() => setResumeModal(true)}>Resume</Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* <div style={{ display: "flex", gap: "18px" }}>
         {plans.map((p) => (

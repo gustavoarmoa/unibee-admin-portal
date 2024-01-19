@@ -60,7 +60,9 @@ interface ISubscriptionType {
   firstPayTime: string;
   currentPeriodStart: number;
   currentPeriodEnd: number;
-  trialEnd: number;
+  trialEnd: number; // if it's non-zero (seconds from Epoch): subscription'll end on that date(it should be >= currentPeriodEnd)
+  // it's used by admin to extend the next due date.
+  cancelAtPeriodEnd: number; // whether this sub will end at the end of billing cycle, 0: false, 1: true
   amount: number;
   currency: string;
   plan: IPlan | undefined;
