@@ -1217,27 +1217,30 @@ const SubscriptionTab = ({
               ),
               activeSub!.currency
             )}
-          <Popover
-            placement="top"
-            title="Addon breakdown"
-            content={
-              <div style={{ width: "280px" }}>
-                {activeSub?.addons.map((a) => (
-                  <Row key={a.id}>
-                    <Col span={8}>{a.planName}</Col>
-                    <Col span={810}>
-                      {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
-                      {showAmount(a.amount * a.quantity, a.currency)}
-                    </Col>
-                  </Row>
-                ))}
-              </div>
-            }
-          >
-            <span style={{ marginLeft: "4px", cursor: "pointer" }}>
-              <InfoCircleOutlined />
-            </span>
-          </Popover>
+
+          {activeSub && activeSub.addons && activeSub.addons.length > 0 && (
+            <Popover
+              placement="top"
+              title="Addon breakdown"
+              content={
+                <div style={{ width: "280px" }}>
+                  {activeSub?.addons.map((a) => (
+                    <Row key={a.id}>
+                      <Col span={8}>{a.planName}</Col>
+                      <Col span={810}>
+                        {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
+                        {showAmount(a.amount * a.quantity, a.currency)}
+                      </Col>
+                    </Row>
+                  ))}
+                </div>
+              }
+            >
+              <span style={{ marginLeft: "8px", cursor: "pointer" }}>
+                <InfoCircleOutlined />
+              </span>
+            </Popover>
+          )}
         </Col>
       </Row>
       <Row>
