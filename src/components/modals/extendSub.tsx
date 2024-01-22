@@ -6,20 +6,18 @@ interface Props {
   isOpen: boolean;
   loading: boolean;
   subInfo: ISubscriptionType | null;
-  dueDate: string;
+  newDueDate: string;
   onCancel: () => void;
   onConfirm: () => void;
-  setDueDate: (d: string) => void;
 }
 
 const ExtendSub = ({
   isOpen,
   loading,
   subInfo,
-  dueDate,
+  newDueDate,
   onCancel,
   onConfirm,
-  setDueDate,
 }: Props) => {
   return (
     <Modal title="Extend due date" open={isOpen} width={"640px"} footer={null}>
@@ -62,10 +60,10 @@ const ExtendSub = ({
           <span style={{ fontWeight: "bold" }}>New due date</span>
         </Col>
         <Col span={7}>
-          {dueDate}{" "}
+          {newDueDate}
           <span style={{ color: "red" }}>
             {`(+ ${daysBetweenDate(
-              dueDate,
+              newDueDate,
               (subInfo?.currentPeriodEnd as number) * 1000
             )} days)`}
           </span>
@@ -80,14 +78,7 @@ const ExtendSub = ({
           marginTop: "24px",
         }}
       >
-        <Button
-          onClick={() => {
-            // setDueDateModal(false);
-            onCancel();
-            setDueDate("");
-          }}
-          disabled={loading}
-        >
+        <Button onClick={onCancel} disabled={loading}>
           Cancel
         </Button>
         <Button

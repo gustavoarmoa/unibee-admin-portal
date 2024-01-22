@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, CSSProperties } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Space,
@@ -32,7 +32,7 @@ import {
   resumeSub,
   // saveProfile,
 } from "../requests";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import { SUBSCRIPTION_STATUS } from "../constants";
 import {
   ISubscriptionType,
@@ -364,6 +364,12 @@ const UserTab = ({ user }: { user: IProfile | null }) => {
   );
 };
 
+// --------------------------------------
+const rowStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  height: "32px",
+};
 const SubscriptionTab = ({
   setUserProfile,
 }: {
@@ -375,10 +381,10 @@ const SubscriptionTab = ({
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [confirmming, setConfirming] = useState(false);
   const [dueDateModal, setDueDateModal] = useState(false);
-  const [dueDate, setDueDate] = useState("");
+  const [newDueDate, setNewDueDate] = useState("");
   const [changePlanModal, setChangePlanModal] = useState(false);
   const [preview, setPreview] = useState<IPreview | null>(null);
-  const [messageApi, contextHolder] = message.useMessage();
+  // const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(true);
   const [terminateModal, setTerminateModal] = useState(false);
   const [resumeModal, setResumeModal] = useState(false);
@@ -618,10 +624,12 @@ const SubscriptionTab = ({
     }
   };
 
+  /*
   const onSelectPlanChange = (value: number) => {
     console.log("value change: ", value);
     setSelectedPlan(value);
   };
+  */
 
   const fetchData = async () => {
     let subDetailRes, planListRes;
@@ -660,7 +668,7 @@ const SubscriptionTab = ({
     }
 
     setLoading(false);
-    const s: any = subDetailRes.data.data;
+    const s = subDetailRes.data.data;
     const localActiveSub: ISubscriptionType = { ...s.subscription };
     localActiveSub.addons = s.addons?.map((a: any) => ({
       ...a.addonPlan,
@@ -737,14 +745,14 @@ const SubscriptionTab = ({
 
   const onDueDateChange = (date: any, dateStr: string) => {
     console.log(date, "//", dateStr, "///", activeSub?.currentPeriodEnd);
+    /*
     const days = daysBetweenDate(
       dateStr,
       (activeSub?.currentPeriodEnd as number) * 1000
     );
-    // setDueDateModal(true);
+    */
+    setNewDueDate(dateStr);
     toggleSetDueDateModal();
-    setDueDate(dateStr);
-    // console.log("days between: ", days);
   };
 
   const onExtendDueDate = async () => {
@@ -752,7 +760,7 @@ const SubscriptionTab = ({
     let extendRes;
     try {
       const hours =
-        daysBetweenDate(activeSub!.currentPeriodEnd * 1000, dueDate) * 24;
+        daysBetweenDate(activeSub!.currentPeriodEnd * 1000, newDueDate) * 24;
       extendRes = await extendDueDate(activeSub!.subscriptionId, hours);
       console.log("extend res: ", extendRes);
       const code = extendRes.data.code;
@@ -762,7 +770,6 @@ const SubscriptionTab = ({
       }
     } catch (err) {
       setLoading(false);
-      // setDueDateModal(false);
       toggleSetDueDateModal();
       if (err instanceof Error) {
         console.log("err: ", err.message);
@@ -774,9 +781,7 @@ const SubscriptionTab = ({
     }
     setLoading(false);
     message.success("Due date extended");
-    // setDueDateModal(false);
     toggleSetDueDateModal();
-    setDueDate("");
     fetchData(); // better to call message.success in fetchData cb(add a cb parameter to fetchData)
   };
 
@@ -788,7 +793,7 @@ const SubscriptionTab = ({
   return (
     <>
       <Spin spinning={loading} fullscreen />
-      {contextHolder}
+      {/* contextHolder */}
       <TerminateSubModal
         isOpen={terminateModal}
         loading={loading}
@@ -809,10 +814,10 @@ const SubscriptionTab = ({
         isOpen={dueDateModal}
         loading={loading}
         subInfo={activeSub}
-        dueDate={dueDate}
+        newDueDate={newDueDate}
         onCancel={toggleSetDueDateModal}
         onConfirm={onExtendDueDate}
-        setDueDate={setDueDate}
+        // setDueDate={setDueDate}
       />
 
       <ChangePlanModal
@@ -835,7 +840,8 @@ const SubscriptionTab = ({
       />
 
       <div>
-        <Divider orientation="left" style={{ margin: "16px 0" }}>
+        <UserInfoSection user={activeSub?.user || null} />
+        {/* <Divider orientation="left" style={{ margin: "16px 0" }}>
           User info
         </Divider>
         <Row>
@@ -879,12 +885,13 @@ const SubscriptionTab = ({
             <span style={{ fontWeight: "bold" }}>VAT number</span>
           </Col>
           <Col span={6}>{activeSub?.user?.vATNumber}</Col>
-        </Row>
+  </Row> */}
       </div>
+
       <Divider orientation="left" style={{ margin: "32px 0" }}>
         Subscription info
       </Divider>
-      <Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Plan</span>
         </Col>
@@ -894,7 +901,7 @@ const SubscriptionTab = ({
         </Col>
         <Col span={6}>{activeSub?.plan?.description}</Col>
       </Row>
-      <Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Status</span>
         </Col>
@@ -912,7 +919,7 @@ const SubscriptionTab = ({
         </Col>
         <Col span={6}>{activeSub?.subscriptionId}</Col>
       </Row>
-      <Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Plan price</span>
         </Col>
@@ -946,7 +953,7 @@ const SubscriptionTab = ({
                   {activeSub?.addons.map((a) => (
                     <Row key={a.id}>
                       <Col span={10}>{a.planName}</Col>
-                      <Col span={10}>
+                      <Col span={14}>
                         {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
                         {showAmount(a.amount * a.quantity, a.currency)}
                       </Col>
@@ -962,7 +969,7 @@ const SubscriptionTab = ({
           )}
         </Col>
       </Row>
-      <Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Total amount</span>
         </Col>
@@ -978,29 +985,32 @@ const SubscriptionTab = ({
           activeSub?.plan && activeSub?.plan?.intervalUnit
         }`}</Col>
       </Row>
-      <Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>First pay</span>
         </Col>
         <Col span={6}>{activeSub?.firstPayTime}</Col>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Next due date</span>
-          <DatePicker
-            onChange={onDueDateChange}
-            disabledDate={(d) =>
-              d.isBefore(
-                new Date(
-                  activeSub != null
-                    ? activeSub.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24
-                    : Date.now()
-                )
-              )
-            }
-          />
         </Col>
         <Col span={6}>
-          {activeSub?.currentPeriodEnd &&
-            new Date(activeSub?.currentPeriodEnd * 1000).toLocaleDateString()}
+          {activeSub && (
+            <DatePicker
+              format="YYYY-MM-DD"
+              onChange={onDueDateChange}
+              // defaultValue={dayjs()}
+              value={dayjs(new Date(activeSub.currentPeriodEnd * 1000))}
+              disabledDate={(d) =>
+                d.isBefore(
+                  new Date(
+                    activeSub?.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24
+                  )
+                )
+              }
+            />
+          )}
+          {/* activeSub?.currentPeriodEnd &&
+            new Date(activeSub?.currentPeriodEnd * 1000).toLocaleDateString() */}
         </Col>
       </Row>
 
@@ -1082,3 +1092,73 @@ const SubscriptionTab = ({
 };
 
 export default Index;
+
+const UserInfoSection = ({ user }: { user: IProfile | null }) => {
+  /*
+  const userInfo = [
+    // how to map it
+    { label: "First name", value: user.firstName },
+    { label: "Last name", value: user.lastName },
+    { label: "Email", value: user.firstName },
+    { label: "Phone", value: user.phone },
+    { label: "Country", value: user.countryName },
+    { label: "Billing address", value: user.adress },
+    { label: "Payment method", value: user.paymentMethod },
+    { label: "VAT number", value: user.vATNumber },
+  ];
+  */
+
+  if (user == null) {
+    return null;
+  }
+
+  return (
+    <div>
+      <Divider orientation="left" style={{ margin: "16px 0" }}>
+        User info
+      </Divider>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>First name</span>
+        </Col>
+        <Col span={6}>{user?.firstName}</Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}> Lastname</span>
+        </Col>
+        <Col span={6}>{user?.lastName}</Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Email</span>
+        </Col>
+        <Col span={6}>
+          <a href={user?.email}>{user?.email} </a>
+        </Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Phone</span>
+        </Col>
+        <Col span={6}>{user?.phone}</Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Country</span>
+        </Col>
+        <Col span={6}>{user?.countryName}</Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Billing address</span>
+        </Col>
+        <Col span={6}>{user?.adress}</Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Payment method</span>
+        </Col>
+        <Col span={6}>{user?.paymentMethod}</Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>VAT number</span>
+        </Col>
+        <Col span={6}>{user?.vATNumber}</Col>
+      </Row>
+    </div>
+  );
+};
