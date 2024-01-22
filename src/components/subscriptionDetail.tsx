@@ -42,7 +42,7 @@ import {
   IPreview,
 } from "../shared.types";
 import update from "immutability-helper";
-import Plan from "./plan";
+// import Plan from "./plan";
 import { daysBetweenDate, showAmount } from "../helpers";
 import { InfoCircleOutlined, SyncOutlined } from "@ant-design/icons";
 
@@ -383,18 +383,12 @@ const SubscriptionTab = ({
   const [terminateModal, setTerminateModal] = useState(false);
   const [resumeModal, setResumeModal] = useState(false);
   const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null); // null: when page is loading, no data is ready yet.
-  const [endSubMode, setEndSubMode] = useState<1 | 2>(1); // 1: immediate, 2: end of this billing cycole
+  const [endSubMode, setEndSubMode] = useState<1 | 2 | null>(null); // 1: immediate, 2: end of this billing cycole, null: not selected
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
       state: { msg: "session expired, please re-login" },
     });
-
-  // select immediate or end of this billing cycle
-  const onEndSubModeChange = (e: RadioChangeEvent) => {
-    console.log("radio checked", e.target.value);
-    setEndSubMode(e.target.value);
-  };
 
   const toggleTerminateModal = () => setTerminateModal(!terminateModal);
   const toggleResumeSubModal = () => setResumeModal(!resumeModal);
@@ -557,6 +551,10 @@ const SubscriptionTab = ({
   };
 
   const onTerminateSub = async () => {
+    if (endSubMode == null) {
+      message.error("Please choose when to end this subscription");
+      return;
+    }
     try {
       setLoading(true);
       const terminateRes = await terminateSub(
@@ -577,6 +575,7 @@ const SubscriptionTab = ({
           ? "Subscription ended"
           : "Subscription will end on the end of this billing cycle"
       );
+      setEndSubMode(null); // force users to choose a endMode before submitting.
       fetchData();
     } catch (err) {
       setLoading(false);
@@ -794,6 +793,7 @@ const SubscriptionTab = ({
         isOpen={terminateModal}
         loading={loading}
         terminateMode={endSubMode}
+        setTerminateMode={setEndSubMode}
         subInfo={activeSub}
         onCancel={toggleTerminateModal}
         onConfirm={onTerminateSub}
@@ -1018,17 +1018,18 @@ const SubscriptionTab = ({
           {activeSub.cancelAtPeriodEnd == 0 ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <Button onClick={toggleTerminateModal}>End subscription</Button>
-              <Radio.Group onChange={onEndSubModeChange} value={endSubMode}>
+              {/* <Radio.Group onChange={onEndSubModeChange} value={endSubMode}>
                 <Radio value={1}>immediately</Radio>
                 <Radio value={2}>end of this cycle</Radio>
-              </Radio.Group>
+          </Radio.Group> */}
             </div>
           ) : (
             <div>
               <span>Subscription will end on </span>
               <span style={{ color: "red", marginRight: "8px" }}>
                 {activeSub &&
-                  new Date(activeSub!.trialEnd * 1000).toLocaleString()}
+                  // new Date(activeSub!.trialEnd * 1000).toLocaleString()
+                  new Date(activeSub!.currentPeriodEnd * 1000).toLocaleString()}
               </span>
               <Button onClick={() => setResumeModal(true)}>Resume</Button>
             </div>

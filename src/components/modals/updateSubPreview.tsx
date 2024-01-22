@@ -40,8 +40,8 @@ const updateSubPreview = ({
         </div>
       ) : (
         <>
-          <Divider orientation="left" style={{ margin: "16px 0" }}>
-            Next billing period invoices:
+          <Divider plain style={{ margin: "16px 0" }}>
+            Next billing period invoices
           </Divider>
           {previewInfo.nextPeriodInvoice.lines.map((i, idx) => (
             <Row key={idx} gutter={[16, 16]}>
@@ -49,8 +49,8 @@ const updateSubPreview = ({
               <Col span={18}>{i.description}</Col>
             </Row>
           ))}
-          <Divider orientation="left" style={{ margin: "16px 0" }}>
-            Current billing period invoices:
+          <Divider plain style={{ margin: "16px 0" }}>
+            Current billing period invoices
           </Divider>
           {previewInfo.invoice.lines.map((i, idx) => (
             <Row key={idx} gutter={[16, 16]}>
