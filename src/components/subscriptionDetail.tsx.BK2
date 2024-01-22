@@ -34,25 +34,25 @@ import {
 } from "../requests";
 import * as dayjs from "dayjs";
 import { SUBSCRIPTION_STATUS } from "../constants";
-import {
-  ISubscriptionType,
-  IPlan,
-  IProfile,
-  Country,
-  IPreview,
-} from "../shared.types";
+import { ISubscriptionType, IPlan, IProfile, Country } from "../shared.types";
 import update from "immutability-helper";
 import Plan from "./plan";
 import { daysBetweenDate, showAmount } from "../helpers";
 import { InfoCircleOutlined, SyncOutlined } from "@ant-design/icons";
 
-import TerminateSubModal from "./modals/terminateSub";
-import ResumeSubModal from "./modals/resumeSub";
-import ExtendSubModal from "./modals/extendSub";
-import ChangePlanModal from "./modals/changePlan";
-import UpdateSubPreviewModal from "./modals/updateSubPreview";
-
 const APP_PATH = import.meta.env.BASE_URL;
+
+interface IPreview {
+  totalAmount: number;
+  prorationDate: number;
+  currency: string;
+  invoices: {
+    amount: number;
+    currency: string;
+    description: string;
+    probation: boolean;
+  }[];
+}
 
 const Index = () => {
   const navigate = useNavigate();
@@ -396,11 +396,6 @@ const SubscriptionTab = ({
     setEndSubMode(e.target.value);
   };
 
-  const toggleTerminateModal = () => setTerminateModal(!terminateModal);
-  const toggleResumeSubModal = () => setResumeModal(!resumeModal);
-  const toggleSetDueDateModal = () => setDueDateModal(!dueDateModal);
-  const toggleChangPlanModal = () => setChangePlanModal(!changePlanModal);
-
   const onAddonChange = (
     addonId: number,
     quantity: number | null, // null means: don't update this field, keep its original value
@@ -480,9 +475,8 @@ const SubscriptionTab = ({
       if (code != 0) {
         throw new Error(previewRes.data.message);
       }
-      // setPreviewModalOpen(false);
     } catch (err) {
-      // setPreviewModalOpen(false);
+      setPreviewModalOpen(false);
       if (err instanceof Error) {
         console.log("err creating preview: ", err.message);
         message.error(err.message);
@@ -492,7 +486,12 @@ const SubscriptionTab = ({
       return;
     }
 
-    const p: IPreview = previewRes.data.data;
+    const p: IPreview = {
+      totalAmount: previewRes.data.data.totalAmount,
+      currency: previewRes.data.data.currency,
+      prorationDate: previewRes.data.data.prorationDate,
+      invoices: previewRes.data.data.invoice.lines,
+    };
     setPreview(p);
   };
 
@@ -542,8 +541,7 @@ const SubscriptionTab = ({
       */
       // navigate(-1);
       togglePreviewModal();
-      // setChangePlanModal(false);
-      toggleChangPlanModal();
+      setChangePlanModal(false);
       setConfirming(false);
       fetchData();
       message.success("Plan updated");
@@ -570,8 +568,7 @@ const SubscriptionTab = ({
         throw new Error(terminateRes.data.message);
       }
       setLoading(false);
-      // setTerminateModal(false);
-      toggleTerminateModal();
+      setTerminateModal(false);
       message.success(
         endSubMode == 1
           ? "Subscription ended"
@@ -580,8 +577,7 @@ const SubscriptionTab = ({
       fetchData();
     } catch (err) {
       setLoading(false);
-      // setTerminateModal(false);
-      toggleTerminateModal();
+      setTerminateModal(false);
       if (err instanceof Error) {
         console.log("err terminating sub: ", err.message);
         message.error(err.message);
@@ -602,14 +598,12 @@ const SubscriptionTab = ({
         throw new Error(resumeRes.data.message);
       }
       setLoading(false);
-      // setResumeModal(false);
-      toggleResumeSubModal();
+      setResumeModal(false);
       message.success("Subscription resumed.");
       fetchData();
     } catch (err) {
       setLoading(false);
-      // setResumeModal(false);
-      toggleResumeSubModal();
+      setResumeModal(false);
       if (err instanceof Error) {
         console.log("err resuming sub: ", err.message);
         message.error(err.message);
@@ -677,15 +671,9 @@ const SubscriptionTab = ({
     let plans: IPlan[] = planListRes.data.data.Plans.map((p: any) => {
       const p2 = p.plan;
       if (p.plan.type == 2) {
-        // 1: main plan, 2: addon
         // addon plan
         return null;
       }
-      if (p.plan.status != 2) {
-        // 1: editing, 2: active, 3: inactive, 4: expired
-        return null;
-      }
-      /*
       if (
         p.plan.id != 31 &&
         p.plan.id != 37 &&
@@ -695,8 +683,6 @@ const SubscriptionTab = ({
       ) {
         return null;
       }
-      */
-
       return {
         id: p2.id,
         planName: p2.planName,
@@ -742,8 +728,7 @@ const SubscriptionTab = ({
       dateStr,
       (activeSub?.currentPeriodEnd as number) * 1000
     );
-    // setDueDateModal(true);
-    toggleSetDueDateModal();
+    setDueDateModal(true);
     setDueDate(dateStr);
     // console.log("days between: ", days);
   };
@@ -763,8 +748,7 @@ const SubscriptionTab = ({
       }
     } catch (err) {
       setLoading(false);
-      // setDueDateModal(false);
-      toggleSetDueDateModal();
+      setDueDateModal(false);
       if (err instanceof Error) {
         console.log("err: ", err.message);
         message.error(err.message);
@@ -775,8 +759,7 @@ const SubscriptionTab = ({
     }
     setLoading(false);
     message.success("Due date extended");
-    // setDueDateModal(false);
-    toggleSetDueDateModal();
+    setDueDateModal(false);
     setDueDate("");
     fetchData(); // better to call message.success in fetchData cb(add a cb parameter to fetchData)
   };
@@ -785,55 +768,353 @@ const SubscriptionTab = ({
     fetchData();
   }, []);
 
-  // const p = plans.find((p) => p.id == selectedPlan);
+  const p = plans.find((p) => p.id == selectedPlan);
   return (
     <>
       <Spin spinning={loading} fullscreen />
       {contextHolder}
-      <TerminateSubModal
-        isOpen={terminateModal}
-        loading={loading}
-        terminateMode={endSubMode}
-        subInfo={activeSub}
-        onCancel={toggleTerminateModal}
-        onConfirm={onTerminateSub}
-      />
-      <ResumeSubModal
-        isOpen={resumeModal}
-        loading={loading}
-        subInfo={activeSub}
-        onCancel={toggleResumeSubModal}
-        onConfirm={onResumeSub}
-      />
-      <ExtendSubModal
-        isOpen={dueDateModal}
-        loading={loading}
-        subInfo={activeSub}
-        dueDate={dueDate}
-        onCancel={toggleSetDueDateModal}
-        onConfirm={onExtendDueDate}
-        setDueDate={setDueDate}
-      />
 
-      <ChangePlanModal
-        isOpen={changePlanModal}
-        subInfo={activeSub}
-        selectedPlanId={selectedPlan}
-        plans={plans}
-        setSelectedPlan={setSelectedPlan}
-        onAddonChange={onAddonChange}
-        onCancel={toggleChangPlanModal}
-        onConfirm={openPreviewModal}
-      />
+      <Modal
+        title="Terminate Subscription"
+        width={"640px"}
+        open={terminateModal}
+        footer={null}
+      >
+        <div style={{ margin: "16px 0" }}>
+          Are you sure you want to end this subscription{" "}
+          <span style={{ color: "red" }}>
+            {endSubMode == 1 ? "immediately" : "at the end of billing cycle"}
+          </span>
+          ?
+        </div>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>First name</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.firstName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}> Lastname</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.lastName}</Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Plan</span>
+          </Col>
+          <Col span={6}>{activeSub?.plan?.planName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}>Amount</span>
+          </Col>
+          <Col span={6}>
+            {activeSub?.plan?.amount &&
+              showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
+          </Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Current due date</span>
+          </Col>
+          <Col span={6}>
+            {new Date(
+              (activeSub?.currentPeriodEnd as number) * 1000
+            ).toDateString()}
+          </Col>
+        </Row>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            gap: "18px",
+            marginTop: "24px",
+          }}
+        >
+          <Button
+            onClick={() => {
+              setTerminateModal(false);
+            }}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={onTerminateSub}
+            loading={loading}
+            disabled={loading}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
 
-      <UpdateSubPreviewModal
-        isOpen={previewModalOpen}
-        loading={confirmming}
-        previewInfo={preview}
-        onCancel={togglePreviewModal}
-        onConfirm={onConfirm}
-      />
+      <Modal
+        title="Resume Subscription"
+        width={"640px"}
+        open={resumeModal}
+        footer={null}
+      >
+        <div style={{ margin: "16px 0" }}>
+          Are you sure you want to resume this subscription?
+        </div>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>First name</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.firstName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}> Lastname</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.lastName}</Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Plan</span>
+          </Col>
+          <Col span={6}>{activeSub?.plan?.planName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}>Amount</span>
+          </Col>
+          <Col span={6}>
+            {activeSub?.plan?.amount &&
+              showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
+          </Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Current due date</span>
+          </Col>
+          <Col span={6}>
+            {new Date(
+              (activeSub?.currentPeriodEnd as number) * 1000
+            ).toDateString()}
+          </Col>
+        </Row>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            gap: "18px",
+            marginTop: "24px",
+          }}
+        >
+          <Button
+            onClick={() => {
+              setResumeModal(false);
+            }}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={onResumeSub}
+            loading={loading}
+            disabled={loading}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
+      <Modal
+        title="Extend due date"
+        open={dueDateModal}
+        width={"640px"}
+        footer={null}
+      >
+        <div style={{ margin: "16px 0" }}>
+          Are you sure you want to extend the due date?
+        </div>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>First name</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.firstName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}> Lastname</span>
+          </Col>
+          <Col span={6}>{activeSub?.user?.lastName}</Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Plan</span>
+          </Col>
+          <Col span={6}>{activeSub?.plan?.planName}</Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}>Amount</span>
+          </Col>
+          <Col span={6}>
+            {activeSub?.plan?.amount &&
+              showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
+          </Col>
+        </Row>
+        <Row>
+          <Col span={6}>
+            <span style={{ fontWeight: "bold" }}>Current due date</span>
+          </Col>
+          <Col span={6}>
+            {new Date(
+              (activeSub?.currentPeriodEnd as number) * 1000
+            ).toDateString()}
+          </Col>
+          <Col span={5}>
+            <span style={{ fontWeight: "bold" }}>New due date</span>
+          </Col>
+          <Col span={7}>
+            {dueDate}{" "}
+            <span style={{ color: "red" }}>
+              {`(+ ${daysBetweenDate(
+                dueDate,
+                (activeSub?.currentPeriodEnd as number) * 1000
+              )} days)`}
+            </span>
+          </Col>
+        </Row>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            gap: "18px",
+            marginTop: "24px",
+          }}
+        >
+          <Button
+            onClick={() => {
+              setDueDateModal(false);
+              setDueDate("");
+            }}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            onClick={onExtendDueDate}
+            loading={loading}
+            disabled={loading}
+          >
+            OK
+          </Button>
+        </div>
+      </Modal>
 
+      {selectedPlan != null && (
+        <Modal
+          title="Subscription Update Preview"
+          open={previewModalOpen}
+          // onOk={onConfirm}
+          // onCancel={togglePreviewModal}
+          width={"640px"}
+          footer={null}
+        >
+          {preview == null ? (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Spin />
+            </div>
+          ) : (
+            <>
+              {preview.invoices.map((i, idx) => (
+                <Row key={idx} gutter={[16, 16]}>
+                  <Col span={6}>{`${showAmount(i.amount, i.currency)}`}</Col>
+                  <Col span={18}>{i.description}</Col>
+                </Row>
+              ))}
+              <hr />
+              <Row gutter={[16, 16]}>
+                <Col span={6}>
+                  <span style={{ fontSize: "18px" }}>Total</span>
+                </Col>
+                <Col span={18}>
+                  <span style={{ fontSize: "18px", fontWeight: "bold" }}>
+                    {`${showAmount(preview.totalAmount, preview.currency)}`}
+                  </span>
+                </Col>
+              </Row>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "end",
+                  gap: "16px",
+                  margin: "16px 0",
+                }}
+              >
+                <Button disabled={confirmming} onClick={togglePreviewModal}>
+                  Cancel
+                </Button>
+                <Button
+                  type="primary"
+                  onClick={onConfirm}
+                  loading={confirmming}
+                  disabled={confirmming}
+                >
+                  Confirm
+                </Button>
+              </div>
+            </>
+          )}
+        </Modal>
+      )}
+      {
+        <Modal
+          title="Change plan"
+          open={changePlanModal}
+          width={"480px"}
+          onOk={() => {
+            // setChangePlanModal(false);
+            openPreviewModal();
+          }}
+          onCancel={() => setChangePlanModal(false)}
+        >
+          <Divider>Choose a new subscription plan</Divider>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              margin: "12px",
+            }}
+          >
+            <Select
+              style={{ width: 120 }}
+              value={selectedPlan}
+              onChange={onSelectPlanChange}
+              options={plans.map((p) => ({
+                label: p.planName,
+                value: p.id,
+              }))}
+            />
+          </div>
+
+          {p != undefined && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: "48px",
+              }}
+            >
+              <Plan
+                plan={p}
+                selectedPlan={selectedPlan}
+                setSelectedPlan={setSelectedPlan}
+                onAddonChange={onAddonChange}
+                isActive={p.id == activeSub?.planId}
+              />
+            </div>
+          )}
+        </Modal>
+      }
       <div>
         <Divider orientation="left" style={{ margin: "16px 0" }}>
           User info
@@ -1017,7 +1298,9 @@ const SubscriptionTab = ({
           <Button onClick={() => setChangePlanModal(true)}>Change plan</Button>
           {activeSub.cancelAtPeriodEnd == 0 ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Button onClick={toggleTerminateModal}>End subscription</Button>
+              <Button onClick={() => setTerminateModal(true)}>
+                End subscription
+              </Button>
               <Radio.Group onChange={onEndSubModeChange} value={endSubMode}>
                 <Radio value={1}>immediately</Radio>
                 <Radio value={2}>end of this cycle</Radio>

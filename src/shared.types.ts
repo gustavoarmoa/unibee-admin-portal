@@ -40,7 +40,7 @@ interface IPlan {
   intervalCount: number;
   intervalUnit: string;
   amount: number;
-  status: number;
+  status: number; // 1: editing，2: active, 3: inactive，4: expired
   addons?: IAddon[];
 }
 
@@ -70,4 +70,33 @@ interface ISubscriptionType {
   user: IProfile | null;
 }
 
-export type { IProfile, IPlan, ISubscriptionType, Country };
+type Invoice = {
+  currency: string;
+  subscriptionAmount: number;
+  subscriptionAmountExcludingTax: number;
+  taxAmount: number;
+  totalAmount: number;
+  totalAmountExcludingTax: number;
+  lines: {
+    amount: number;
+    amountExcludingTax: string;
+    currency: string;
+    description: string;
+    periodEnd: number;
+    periodStart: number;
+    proration: boolean;
+    quantity: number;
+    tax: number;
+    unitAmountExcludingTax: number;
+  }[];
+};
+
+interface IPreview {
+  totalAmount: number;
+  currency: string;
+  prorationDate: number;
+  invoice: Invoice;
+  nextPeriodInvoice: Invoice;
+}
+
+export type { IProfile, IPlan, ISubscriptionType, Country, IPreview };
