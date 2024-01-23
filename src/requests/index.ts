@@ -228,3 +228,69 @@ export const saveProfile = async (newProfile: IProfile) => {
     },
   });
 };
+
+export const getInvoiceList = async ({
+  userId,
+  page = 0,
+  count = 10,
+}: {
+  userId: number;
+  page: number;
+  count?: number;
+}) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = {
+    merchantId: 15621,
+    userId,
+    /*
+    "sendEmail": 0,
+    "sortField": "string",
+    "sortType": "string",
+    "deleteInclude": true,
+    */
+    page,
+    count,
+  };
+  return await axios.post(
+    `${API_URL}/merchant/invoice/subscription_invoice_list`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+export const createInvoice = async ({
+  userId,
+  currency,
+  invoiceItems,
+}: {
+  userId: number;
+  currency: string;
+  invoiceItems: {
+    unitAmountExcludingTax: number;
+    description: string;
+    quantity: number;
+  }[];
+}) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = {
+    merchantId: 15621,
+    userId,
+    taxPercentage: 0,
+    channelId: 25,
+    currency,
+    lines: invoiceItems,
+  };
+  return await axios.post(
+    `${API_URL}/merchant/invoice/new_invoice_create`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};

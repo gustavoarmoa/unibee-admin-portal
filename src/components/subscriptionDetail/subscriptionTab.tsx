@@ -38,11 +38,6 @@ import { InfoCircleOutlined, SyncOutlined } from "@ant-design/icons";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
-const rowStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  height: "32px",
-};
 const Index = ({
   setUserProfile,
 }: {
@@ -490,7 +485,7 @@ const Index = ({
         onConfirm={onConfirm}
       />
 
-      <UserInfoSection user={activeSub?.user || null} />
+      {/* <UserInfoSection user={activeSub?.user || null} /> */}
       <SubscriptionInfoSection
         subInfo={activeSub}
         onDueDateChange={onDueDateChange}
@@ -505,74 +500,10 @@ const Index = ({
 
 export default Index;
 
-const UserInfoSection = ({ user }: { user: IProfile | null }) => {
-  /*
-    const userInfo = [
-      // how to map it
-      { label: "First name", value: user.firstName },
-      { label: "Last name", value: user.lastName },
-      { label: "Email", value: user.firstName },
-      { label: "Phone", value: user.phone },
-      { label: "Country", value: user.countryName },
-      { label: "Billing address", value: user.adress },
-      { label: "Payment method", value: user.paymentMethod },
-      { label: "VAT number", value: user.vATNumber },
-    ];
-    */
-
-  if (user == null) {
-    return null;
-  }
-
-  return (
-    <div>
-      <Divider orientation="left" style={{ margin: "16px 0" }}>
-        User info
-      </Divider>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>First name</span>
-        </Col>
-        <Col span={6}>{user?.firstName}</Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Last name</span>
-        </Col>
-        <Col span={6}>{user?.lastName}</Col>
-      </Row>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Email</span>
-        </Col>
-        <Col span={6}>
-          <a href={user?.email}>{user?.email} </a>
-        </Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Phone</span>
-        </Col>
-        <Col span={6}>{user?.phone}</Col>
-      </Row>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Country</span>
-        </Col>
-        <Col span={6}>{user?.countryName}</Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Billing address</span>
-        </Col>
-        <Col span={6}>{user?.adress}</Col>
-      </Row>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Payment method</span>
-        </Col>
-        <Col span={6}>{user?.paymentMethod}</Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>VAT number</span>
-        </Col>
-        <Col span={6}>{user?.vATNumber}</Col>
-      </Row>
-    </div>
-  );
+const rowStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  height: "32px",
 };
 
 interface ISubSectionProps {
@@ -593,9 +524,6 @@ const SubscriptionInfoSection = ({
 }: ISubSectionProps) => {
   return (
     <>
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
-        Subscription info
-      </Divider>
       <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Plan</span>
