@@ -1,48 +1,28 @@
-import { Button, Col, Modal, Radio, RadioChangeEvent, Row } from "antd";
-import { ISubscriptionType } from "../../shared.types";
-import { showAmount } from "../../helpers";
+import { Button, Col, Modal, Row } from "antd";
+import { ISubscriptionType } from "../../../shared.types";
+import { daysBetweenDate, showAmount } from "../../../helpers";
 
 interface Props {
   isOpen: boolean;
   loading: boolean;
-  terminateMode: 1 | 2 | null; // 1: immediat, 2: end of this billing cycle, null: not selected
-  setTerminateMode: (mode: 1 | 2 | null) => void;
   subInfo: ISubscriptionType | null;
+  newDueDate: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-const TerminateSub = ({
+const ExtendSub = ({
   isOpen,
   loading,
-  terminateMode,
-  setTerminateMode,
   subInfo,
+  newDueDate,
   onCancel,
   onConfirm,
 }: Props) => {
-  // select immediate or end of this billing cycle
-  const onEndSubModeChange = (e: RadioChangeEvent) => {
-    console.log("radio checked", e.target.value);
-    setTerminateMode(e.target.value);
-  };
   return (
-    <Modal
-      title="Terminate Subscription"
-      width={"640px"}
-      open={isOpen}
-      footer={null}
-    >
+    <Modal title="Extend due date" open={isOpen} width={"640px"} footer={null}>
       <div style={{ margin: "16px 0" }}>
-        Are you sure you want to end this subscription{" "}
-        <span style={{ color: "red" }}>
-          {terminateMode == 1
-            ? "immediately"
-            : terminateMode == 2
-            ? "at the end of billing cycle"
-            : ""}
-        </span>
-        ?
+        Are you sure you want to extend the due date?
       </div>
       <Row>
         <Col span={6}>
@@ -76,15 +56,19 @@ const TerminateSub = ({
             (subInfo?.currentPeriodEnd as number) * 1000
           ).toDateString()}
         </Col>
+        <Col span={5}>
+          <span style={{ fontWeight: "bold" }}>New due date</span>
+        </Col>
+        <Col span={7}>
+          {newDueDate}
+          <span style={{ color: "red" }}>
+            {` (+ ${daysBetweenDate(
+              newDueDate,
+              (subInfo?.currentPeriodEnd as number) * 1000
+            )} days)`}
+          </span>
+        </Col>
       </Row>
-      <Radio.Group
-        onChange={onEndSubModeChange}
-        value={terminateMode}
-        style={{ margin: "18px 0" }}
-      >
-        <Radio value={1}>immediately</Radio>
-        <Radio value={2}>end of this cycle</Radio>
-      </Radio.Group>
       <div
         style={{
           display: "flex",
@@ -110,4 +94,4 @@ const TerminateSub = ({
   );
 };
 
-export default TerminateSub;
+export default ExtendSub;

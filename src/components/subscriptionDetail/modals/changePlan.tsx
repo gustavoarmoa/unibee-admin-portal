@@ -1,6 +1,6 @@
 import { Divider, Modal, Select } from "antd";
-import Plan from "../plan";
-import { IPlan, ISubscriptionType } from "../../shared.types";
+import Plan from "../../plan";
+import { IPlan, ISubscriptionType } from "../../../shared.types";
 
 interface Props {
   isOpen: boolean;

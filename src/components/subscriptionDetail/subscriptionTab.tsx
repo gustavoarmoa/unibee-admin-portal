@@ -1,376 +1,49 @@
-import React, { useEffect, useState, useRef, CSSProperties } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import {
-  Space,
-  Table,
-  Tag,
   Button,
-  Form,
-  Input,
-  Select,
-  message,
-  Spin,
-  Modal,
-  Row,
   Col,
-  Tabs,
-  Divider,
   DatePicker,
-  Radio,
-  RadioChangeEvent,
+  Divider,
   Popover,
+  Row,
+  Spin,
+  message,
 } from "antd";
-import type { TabsProps } from "antd";
+import dayjs from "dayjs";
+import { CSSProperties, useEffect, useState } from "react";
 import {
+  IPlan,
+  IPreview,
+  IProfile,
+  ISubscriptionType,
+} from "../../shared.types";
+import { useNavigate } from "react-router-dom";
+import update from "immutability-helper";
+import {
+  createPreviewReq,
+  extendDueDate,
   getPlanList,
   getSubDetail,
-  createPreviewReq,
-  updateSubscription,
-  terminateSub,
-  getCountryList,
-  extendDueDate,
   resumeSub,
-  // saveProfile,
-} from "../requests";
-import dayjs from "dayjs";
-import { SUBSCRIPTION_STATUS } from "../constants";
-import {
-  ISubscriptionType,
-  IPlan,
-  IProfile,
-  Country,
-  IPreview,
-} from "../shared.types";
-import update from "immutability-helper";
-// import Plan from "./plan";
-import { daysBetweenDate, showAmount } from "../helpers";
-import { InfoCircleOutlined, SyncOutlined } from "@ant-design/icons";
-
+  terminateSub,
+  updateSubscription,
+} from "../../requests";
+import { daysBetweenDate, showAmount } from "../../helpers";
 import TerminateSubModal from "./modals/terminateSub";
 import ResumeSubModal from "./modals/resumeSub";
 import ExtendSubModal from "./modals/extendSub";
 import ChangePlanModal from "./modals/changePlan";
 import UpdateSubPreviewModal from "./modals/updateSubPreview";
+import { SUBSCRIPTION_STATUS } from "../../constants";
+import { InfoCircleOutlined, SyncOutlined } from "@ant-design/icons";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
-const Index = () => {
-  const navigate = useNavigate();
-  const [userProfile, setUserProfile] = useState<IProfile | null>(null);
-  const { TextArea } = Input;
-
-  const tabItems: TabsProps["items"] = [
-    {
-      key: "Subscription",
-      label: "Subscription",
-      children: <SubscriptionTab setUserProfile={setUserProfile} />,
-    },
-    {
-      key: "Account",
-      label: "Account",
-      children: <UserTab user={userProfile} />,
-    },
-    {
-      key: "Invoices",
-      label: "Invoices",
-      children: "Content of invoices",
-    },
-    {
-      key: "Payment",
-      label: "Payment",
-      children: "content of payment",
-    },
-    /* {
-      key: "Timeline",
-      label: "Timeline",
-      children: "content of timeline",
-    },
-    {
-      key: "Custom",
-      label: "Custom",
-      children: "content of custom",
-    },
-    */
-  ];
-  const onTabChange = (key: string) => {
-    console.log(key);
-  };
-  return (
-    <div style={{ display: "flex" }}>
-      <div style={{ width: "80%" }}>
-        <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: "64px",
-          }}
-        >
-          <Button onClick={() => navigate(-1)}>Back</Button>
-        </div>
-      </div>
-      <div
-        style={{
-          width: "20%",
-          border: "1px solid #EEE",
-          borderRadius: "4px",
-          marginLeft: "24px",
-          padding: "8px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            color: "gray",
-          }}
-        >
-          admin side note
-        </div>
-        <div
-          style={{
-            height: "70%",
-            marginBottom: "18px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            color: "gray",
-          }}
-        >
-          <div>main content</div>
-          <div>side note1</div>
-          <div>side note2</div>
-        </div>
-        <TextArea rows={4} />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "48px",
-          }}
-        >
-          <Button>Submit</Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const UserTab = ({ user }: { user: IProfile | null }) => {
-  const [form] = Form.useForm();
-  const navigate = useNavigate();
-  const [countryList, setCountryList] = useState<Country[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: "session expired, please re-login" },
-    });
-
-  const filterOption = (
-    input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
-
-  /*
-  const onSave = async () => {
-    console.log("form: ", form.getFieldsValue());
-    setLoading(true);
-    let saveProfileRes;
-    try {
-      saveProfileRes = await saveProfile(form.getFieldsValue());
-      console.log("save profile res: ", saveProfileRes);
-      const code = saveProfileRes.data.code;
-      if (code != 0) {
-        code == 61 && relogin();
-        // TODO: save all statu code in a constant
-        throw new Error(saveProfileRes.data.message);
-      }
-      message.success("saved");
-      setUserProfile(saveProfileRes.data.data.User);
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log("profile update err: ", err.message);
-        message.error(err.message);
-      } else {
-        message.error("Unknown error");
-      }
-      return;
-    }
-  };
-  */
-
-  useEffect(() => {
-    setLoading(true);
-    const fetchData = async () => {
-      let profileRes, countryListRes;
-      try {
-        const res = ([countryListRes] = await Promise.all([
-          // getProfile(),
-          getCountryList(15621),
-        ]));
-        console.log("profile/country: ", profileRes, "//", countryListRes);
-        res.forEach((r) => {
-          const code = r.data.code;
-          code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-          if (code != 0) {
-            // TODO: save all the code as ENUM in constant,
-            throw new Error(r.data.message);
-          }
-        });
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        if (err instanceof Error) {
-          console.log("profile update err: ", err.message);
-          // setErrMsg(err.message);
-          message.error(err.message);
-        } else {
-          message.error("Unknown error");
-        }
-        return;
-      }
-      // setUserProfile(profileRes.data.data.User);
-      setCountryList(
-        countryListRes.data.data.vatCountryList.map((c: any) => ({
-          code: c.countryCode,
-          name: c.countryName,
-        }))
-      );
-    };
-
-    fetchData();
-  }, []);
-
-  return (
-    user != null && (
-      <Form
-        form={form}
-        labelCol={{ span: 6 }}
-        wrapperCol={{ span: 24 }}
-        layout="horizontal"
-        // disabled={componentDisabled}
-        style={{ maxWidth: 600 }}
-        initialValues={user}
-      >
-        <Form.Item label="ID" name="id" hidden>
-          <Input disabled />
-        </Form.Item>
-
-        <Form.Item label="First name" name="firstName">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Last name" name="lastName">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Email" name="email">
-          <Input disabled />
-        </Form.Item>
-
-        <Form.Item label="Billing address" name="address">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Country" name="countryCode">
-          <Select
-            showSearch
-            placeholder="Type to search"
-            optionFilterProp="children"
-            // value={country}
-            // onChange={onCountryChange}
-            // onSearch={onSearch}
-            filterOption={filterOption}
-            options={countryList.map((c) => ({
-              label: c.name,
-              value: c.code,
-            }))}
-          />
-        </Form.Item>
-
-        <Form.Item label="Country Name" name="countryName" hidden>
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Company name" name="companyName">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="VAT number" name="vATNumber">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Phone number" name="mobile">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Telegram" name="telegram">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="WhatsApp" name="whatsAPP">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="WeChat" name="weChat">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="LinkedIn" name="linkedIn">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Facebook" name="facebook">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="TikTok" name="tikTok">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Other social info" name="otherSocialInfo">
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Payment methods" name="paymentMethod">
-          <Radio.Group>
-            <Radio value="creditCard">Credit Card</Radio>
-            <Radio value="crypto">Crypto</Radio>
-            <Radio value="paypal">Paypal</Radio>
-            <Radio value="wireTransfer">Wire Transfer</Radio>
-          </Radio.Group>
-        </Form.Item>
-
-        {/* <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            margin: "36px",
-          }}
-        >
-          <Button type="primary" onClick={onSave} disabled={loading}>
-            Save
-          </Button>
-        </div> */}
-      </Form>
-    )
-  );
-};
-
-// --------------------------------------
 const rowStyle: CSSProperties = {
   display: "flex",
   alignItems: "center",
   height: "32px",
 };
-const SubscriptionTab = ({
+const Index = ({
   setUserProfile,
 }: {
   setUserProfile: (user: IProfile) => void;
@@ -403,7 +76,7 @@ const SubscriptionTab = ({
 
   const onAddonChange = (
     addonId: number,
-    quantity: number | null, // null means: don't update this field, keep its original value
+    quantity: number | null, // null means: don't update this field, keep its original value. I don't want to define 2 fn to do similar jobs.
     checked: boolean | null // ditto
   ) => {
     const planIdx = plans.findIndex((p) => p.id == selectedPlan);
@@ -481,8 +154,10 @@ const SubscriptionTab = ({
         throw new Error(previewRes.data.message);
       }
       // setPreviewModalOpen(false);
+      // togglePreviewModal();
     } catch (err) {
-      // setPreviewModalOpen(false);
+      // togglePreviewModal();
+      setPreviewModalOpen(false);
       if (err instanceof Error) {
         console.log("err creating preview: ", err.message);
         message.error(err.message);
@@ -496,6 +171,7 @@ const SubscriptionTab = ({
     setPreview(p);
   };
 
+  // confirm the changed plan
   const onConfirm = async () => {
     const plan = plans.find((p) => p.id == selectedPlan);
     const addons =
@@ -526,7 +202,7 @@ const SubscriptionTab = ({
       setConfirming(false);
       setPreviewModalOpen(false);
       if (err instanceof Error) {
-        console.log("err creating preview: ", err.message);
+        console.log("err submitting plan update: ", err.message);
         message.error(err.message);
       } else {
         message.error("Unknown error");
@@ -536,10 +212,10 @@ const SubscriptionTab = ({
 
     if (updateSubRes.data.data.paid) {
       /*
-      navigate(`${APP_PATH}profile/subscription`, {
-        state: { msg: "Subscription updated" },
-      });
-      */
+        navigate(`${APP_PATH}profile/subscription`, {
+          state: { msg: "Subscription updated" },
+        });
+        */
       // navigate(-1);
       togglePreviewModal();
       // setChangePlanModal(false);
@@ -624,24 +300,18 @@ const SubscriptionTab = ({
     }
   };
 
-  /*
-  const onSelectPlanChange = (value: number) => {
-    console.log("value change: ", value);
-    setSelectedPlan(value);
-  };
-  */
-
+  // fetch current subscription detail, and all active plans.
   const fetchData = async () => {
-    let subDetailRes, planListRes;
     // const subId = location.state && location.state.subscriptionId;
     const pathName = window.location.pathname.split("/");
     const subId = pathName.pop();
     if (subId == null) {
-      // TODO: show page not exit, OR invalid subscription
+      // TODO: show page not exist, OR invalid subscription
       return;
     }
 
     setLoading(true);
+    let subDetailRes, planListRes;
     try {
       const res = ([subDetailRes, planListRes] = await Promise.all([
         getSubDetail(subId),
@@ -692,17 +362,6 @@ const SubscriptionTab = ({
         // 1: editing, 2: active, 3: inactive, 4: expired
         return null;
       }
-      /*
-      if (
-        p.plan.id != 31 &&
-        p.plan.id != 37 &&
-        p.plan.id != 38 &&
-        p.plan.id != 32 &&
-        p.plan.id != 41
-      ) {
-        return null;
-      }
-      */
 
       return {
         id: p2.id,
@@ -745,12 +404,6 @@ const SubscriptionTab = ({
 
   const onDueDateChange = (date: any, dateStr: string) => {
     console.log(date, "//", dateStr, "///", activeSub?.currentPeriodEnd);
-    /*
-    const days = daysBetweenDate(
-      dateStr,
-      (activeSub?.currentPeriodEnd as number) * 1000
-    );
-    */
     setNewDueDate(dateStr);
     toggleSetDueDateModal();
   };
@@ -762,7 +415,7 @@ const SubscriptionTab = ({
       const hours =
         daysBetweenDate(activeSub!.currentPeriodEnd * 1000, newDueDate) * 24;
       extendRes = await extendDueDate(activeSub!.subscriptionId, hours);
-      console.log("extend res: ", extendRes);
+      console.log("extend due date res: ", extendRes);
       const code = extendRes.data.code;
       code == 61 && relogin();
       if (code != 0) {
@@ -789,11 +442,9 @@ const SubscriptionTab = ({
     fetchData();
   }, []);
 
-  // const p = plans.find((p) => p.id == selectedPlan);
   return (
     <>
       <Spin spinning={loading} fullscreen />
-      {/* contextHolder */}
       <TerminateSubModal
         isOpen={terminateModal}
         loading={loading}
@@ -839,254 +490,15 @@ const SubscriptionTab = ({
         onConfirm={onConfirm}
       />
 
-      <div>
-        <UserInfoSection user={activeSub?.user || null} />
-        {/* <Divider orientation="left" style={{ margin: "16px 0" }}>
-          User info
-        </Divider>
-        <Row>
-          <Col span={4}>
-            <span style={{ fontWeight: "bold" }}>First name</span>
-          </Col>
-          <Col span={6}>{activeSub?.user?.firstName}</Col>
-          <Col span={4}>
-            <span style={{ fontWeight: "bold" }}> Lastname</span>
-          </Col>
-          <Col span={6}>{activeSub?.user?.lastName}</Col>
-        </Row>
-        <Row>
-          <Col span={4}>
-            <span style={{ fontWeight: "bold" }}>Email</span>
-          </Col>
-          <Col span={6}>
-            <a href={activeSub?.user?.email}>{activeSub?.user?.email} </a>
-          </Col>
-          <Col span={4}>
-            <span style={{ fontWeight: "bold" }}>Phone</span>
-          </Col>
-          <Col span={6}>{activeSub?.user?.phone}</Col>
-        </Row>
-        <Row>
-          <Col span={4}>
-            <span style={{ fontWeight: "bold" }}>Country</span>
-          </Col>
-          <Col span={6}>{activeSub?.user?.countryName}</Col>
-          <Col span={4}>
-            <span style={{ fontWeight: "bold" }}>Billing address</span>
-          </Col>
-          <Col span={6}>{activeSub?.user?.adress}</Col>
-        </Row>
-        <Row>
-          <Col span={4}>
-            <span style={{ fontWeight: "bold" }}>Payment method</span>
-          </Col>
-          <Col span={6}>{activeSub?.user?.paymentMethod}</Col>
-          <Col span={4}>
-            <span style={{ fontWeight: "bold" }}>VAT number</span>
-          </Col>
-          <Col span={6}>{activeSub?.user?.vATNumber}</Col>
-  </Row> */}
-      </div>
-
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
-        Subscription info
-      </Divider>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Plan</span>
-        </Col>
-        <Col span={6}>{activeSub?.plan?.planName}</Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Plan description</span>
-        </Col>
-        <Col span={6}>{activeSub?.plan?.description}</Col>
-      </Row>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Status</span>
-        </Col>
-        <Col span={6}>
-          {activeSub && SUBSCRIPTION_STATUS[activeSub.status]}{" "}
-          <span
-            style={{ cursor: "pointer", marginLeft: "8px" }}
-            onClick={fetchData}
-          >
-            <SyncOutlined />
-          </span>
-        </Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Subscription Id</span>
-        </Col>
-        <Col span={6}>{activeSub?.subscriptionId}</Col>
-      </Row>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Plan price</span>
-        </Col>
-        <Col span={6}>
-          {activeSub?.plan?.amount &&
-            showAmount(activeSub?.plan?.amount, activeSub?.plan?.currency)}
-        </Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Addons price</span>
-        </Col>
-        <Col span={6}>
-          {activeSub &&
-            activeSub.addons &&
-            showAmount(
-              activeSub!.addons!.reduce(
-                (
-                  sum,
-                  { quantity, amount }: { quantity: number; amount: number }
-                ) => sum + quantity * amount,
-                0
-              ),
-              activeSub!.currency
-            )}
-
-          {activeSub && activeSub.addons && activeSub.addons.length > 0 && (
-            <Popover
-              placement="top"
-              title="Addon breakdown"
-              content={
-                <div style={{ width: "280px" }}>
-                  {activeSub?.addons.map((a) => (
-                    <Row key={a.id}>
-                      <Col span={10}>{a.planName}</Col>
-                      <Col span={14}>
-                        {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
-                        {showAmount(a.amount * a.quantity, a.currency)}
-                      </Col>
-                    </Row>
-                  ))}
-                </div>
-              }
-            >
-              <span style={{ marginLeft: "8px", cursor: "pointer" }}>
-                <InfoCircleOutlined />
-              </span>
-            </Popover>
-          )}
-        </Col>
-      </Row>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Total amount</span>
-        </Col>
-        <Col span={6}>
-          {activeSub?.amount &&
-            showAmount(activeSub.amount, activeSub.currency)}
-        </Col>
-
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Bill period</span>
-        </Col>
-        <Col span={6}>{`${activeSub?.plan && activeSub?.plan?.intervalCount} ${
-          activeSub?.plan && activeSub?.plan?.intervalUnit
-        }`}</Col>
-      </Row>
-      <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>First pay</span>
-        </Col>
-        <Col span={6}>{activeSub?.firstPayTime}</Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Next due date</span>
-        </Col>
-        <Col span={6}>
-          {activeSub && (
-            <DatePicker
-              format="YYYY-MM-DD"
-              onChange={onDueDateChange}
-              // defaultValue={dayjs()}
-              value={dayjs(new Date(activeSub.currentPeriodEnd * 1000))}
-              disabledDate={(d) =>
-                d.isBefore(
-                  new Date(
-                    activeSub?.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24
-                  )
-                )
-              }
-            />
-          )}
-          {/* activeSub?.currentPeriodEnd &&
-            new Date(activeSub?.currentPeriodEnd * 1000).toLocaleDateString() */}
-        </Col>
-      </Row>
-
-      {activeSub && activeSub.status == 2 && (
-        <div
-          style={{
-            margin: "24px 0",
-            display: "flex",
-            justifyContent: "start",
-            alignItems: "center",
-            gap: "36px",
-          }}
-        >
-          <Button onClick={() => setChangePlanModal(true)}>Change plan</Button>
-          {activeSub.cancelAtPeriodEnd == 0 ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Button onClick={toggleTerminateModal}>End subscription</Button>
-              {/* <Radio.Group onChange={onEndSubModeChange} value={endSubMode}>
-                <Radio value={1}>immediately</Radio>
-                <Radio value={2}>end of this cycle</Radio>
-          </Radio.Group> */}
-            </div>
-          ) : (
-            <div>
-              <span>Subscription will end on </span>
-              <span style={{ color: "red", marginRight: "8px" }}>
-                {activeSub &&
-                  // new Date(activeSub!.trialEnd * 1000).toLocaleString()
-                  new Date(activeSub!.currentPeriodEnd * 1000).toLocaleString()}
-              </span>
-              <Button onClick={() => setResumeModal(true)}>Resume</Button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* <div style={{ display: "flex", gap: "18px" }}>
-        {plans.map((p) => (
-          <Plan
-            key={p.id}
-            plan={p}
-            selectedPlan={selectedPlan}
-            setSelectedPlan={setSelectedPlan}
-            onAddonChange={onAddonChange}
-            isActive={p.id == activeSub?.planId}
-          />
-        ))}
-        </div> */}
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
-        Subscription History
-      </Divider>
-
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
-        Addon History
-      </Divider>
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "68px",
-        }}
-      >
-        {/* plans.length != 0 && (
-          <>
-            <Button
-              type="primary"
-              onClick={openPreviewModal}
-              disabled={selectedPlan == null}
-            >
-              Confirm
-            </Button>
-          </>
-        ) */}
-      </div>
+      <UserInfoSection user={activeSub?.user || null} />
+      <SubscriptionInfoSection
+        subInfo={activeSub}
+        onDueDateChange={onDueDateChange}
+        refresh={fetchData}
+        toggleTerminateModal={toggleTerminateModal}
+        toggleResumeSubModal={toggleResumeSubModal}
+        toggleChangPlanModal={toggleChangPlanModal}
+      />
     </>
   );
 };
@@ -1095,18 +507,18 @@ export default Index;
 
 const UserInfoSection = ({ user }: { user: IProfile | null }) => {
   /*
-  const userInfo = [
-    // how to map it
-    { label: "First name", value: user.firstName },
-    { label: "Last name", value: user.lastName },
-    { label: "Email", value: user.firstName },
-    { label: "Phone", value: user.phone },
-    { label: "Country", value: user.countryName },
-    { label: "Billing address", value: user.adress },
-    { label: "Payment method", value: user.paymentMethod },
-    { label: "VAT number", value: user.vATNumber },
-  ];
-  */
+    const userInfo = [
+      // how to map it
+      { label: "First name", value: user.firstName },
+      { label: "Last name", value: user.lastName },
+      { label: "Email", value: user.firstName },
+      { label: "Phone", value: user.phone },
+      { label: "Country", value: user.countryName },
+      { label: "Billing address", value: user.adress },
+      { label: "Payment method", value: user.paymentMethod },
+      { label: "VAT number", value: user.vATNumber },
+    ];
+    */
 
   if (user == null) {
     return null;
@@ -1123,7 +535,7 @@ const UserInfoSection = ({ user }: { user: IProfile | null }) => {
         </Col>
         <Col span={6}>{user?.firstName}</Col>
         <Col span={4}>
-          <span style={{ fontWeight: "bold" }}> Lastname</span>
+          <span style={{ fontWeight: "bold" }}>Last name</span>
         </Col>
         <Col span={6}>{user?.lastName}</Col>
       </Row>
@@ -1160,5 +572,190 @@ const UserInfoSection = ({ user }: { user: IProfile | null }) => {
         <Col span={6}>{user?.vATNumber}</Col>
       </Row>
     </div>
+  );
+};
+
+interface ISubSectionProps {
+  subInfo: ISubscriptionType | null;
+  onDueDateChange: (date: any, dateStr: string) => void;
+  refresh: () => void;
+  toggleTerminateModal: () => void;
+  toggleResumeSubModal: () => void;
+  toggleChangPlanModal: () => void;
+}
+const SubscriptionInfoSection = ({
+  subInfo,
+  onDueDateChange,
+  refresh,
+  toggleTerminateModal,
+  toggleResumeSubModal,
+  toggleChangPlanModal,
+}: ISubSectionProps) => {
+  return (
+    <>
+      <Divider orientation="left" style={{ margin: "32px 0" }}>
+        Subscription info
+      </Divider>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Plan</span>
+        </Col>
+        <Col span={6}>{subInfo?.plan?.planName}</Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Plan description</span>
+        </Col>
+        <Col span={6}>{subInfo?.plan?.description}</Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Status</span>
+        </Col>
+        <Col span={6}>
+          {subInfo && SUBSCRIPTION_STATUS[subInfo.status]}{" "}
+          <span
+            style={{ cursor: "pointer", marginLeft: "8px" }}
+            onClick={refresh}
+          >
+            <SyncOutlined />
+          </span>
+        </Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Subscription Id</span>
+        </Col>
+        <Col span={6}>{subInfo?.subscriptionId}</Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Plan price</span>
+        </Col>
+        <Col span={6}>
+          {subInfo?.plan?.amount &&
+            showAmount(subInfo?.plan?.amount, subInfo?.plan?.currency)}
+        </Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Addons price</span>
+        </Col>
+        <Col span={6}>
+          {subInfo &&
+            subInfo.addons &&
+            showAmount(
+              subInfo!.addons!.reduce(
+                (
+                  sum,
+                  { quantity, amount }: { quantity: number; amount: number }
+                ) => sum + quantity * amount,
+                0
+              ),
+              subInfo!.currency
+            )}
+
+          {subInfo && subInfo.addons && subInfo.addons.length > 0 && (
+            <Popover
+              placement="top"
+              title="Addon breakdown"
+              content={
+                <div style={{ width: "280px" }}>
+                  {subInfo?.addons.map((a) => (
+                    <Row key={a.id}>
+                      <Col span={10}>{a.planName}</Col>
+                      <Col span={14}>
+                        {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
+                        {showAmount(a.amount * a.quantity, a.currency)}
+                      </Col>
+                    </Row>
+                  ))}
+                </div>
+              }
+            >
+              <span style={{ marginLeft: "8px", cursor: "pointer" }}>
+                <InfoCircleOutlined />
+              </span>
+            </Popover>
+          )}
+        </Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Total amount</span>
+        </Col>
+        <Col span={6}>
+          {subInfo?.amount && showAmount(subInfo.amount, subInfo.currency)}
+        </Col>
+
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Bill period</span>
+        </Col>
+        <Col span={6}>
+          {subInfo != null && subInfo.plan != null
+            ? `${subInfo.plan.intervalCount} ${subInfo.plan.intervalUnit}`
+            : ""}
+        </Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>First pay</span>
+        </Col>
+        <Col span={6}>{subInfo?.firstPayTime}</Col>
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>Next due date</span>
+        </Col>
+        <Col span={6}>
+          {subInfo && (
+            <DatePicker
+              format="YYYY-MM-DD"
+              allowClear={false}
+              onChange={onDueDateChange}
+              // defaultValue={dayjs()}
+              value={dayjs(new Date(subInfo.currentPeriodEnd * 1000))}
+              disabledDate={(d) =>
+                d.isBefore(
+                  new Date(
+                    subInfo?.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24
+                  )
+                )
+              }
+            />
+          )}
+          {/* activeSub?.currentPeriodEnd &&
+              new Date(activeSub?.currentPeriodEnd * 1000).toLocaleDateString() */}
+        </Col>
+      </Row>
+
+      {subInfo && subInfo.status == 2 && (
+        <div
+          style={{
+            margin: "24px 0",
+            display: "flex",
+            justifyContent: "start",
+            alignItems: "center",
+            gap: "36px",
+          }}
+        >
+          <Button onClick={toggleChangPlanModal}>Change plan</Button>
+          {subInfo.cancelAtPeriodEnd == 0 ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Button onClick={toggleTerminateModal}>End subscription</Button>
+              {/* <Radio.Group onChange={onEndSubModeChange} value={endSubMode}>
+                  <Radio value={1}>immediately</Radio>
+                  <Radio value={2}>end of this cycle</Radio>
+            </Radio.Group> */}
+            </div>
+          ) : (
+            <div>
+              <span>Subscription will end on </span>
+              <span style={{ color: "red", marginRight: "8px" }}>
+                {subInfo &&
+                  // new Date(activeSub!.trialEnd * 1000).toLocaleString()
+                  new Date(subInfo!.currentPeriodEnd * 1000).toLocaleString()}
+              </span>
+              <Button onClick={toggleResumeSubModal}>Resume</Button>
+            </div>
+          )}
+        </div>
+      )}
+      <Divider orientation="left" style={{ margin: "32px 0" }}>
+        Subscription History
+      </Divider>
+    </>
   );
 };

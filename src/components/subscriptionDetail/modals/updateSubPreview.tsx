@@ -1,6 +1,6 @@
 import { Button, Col, Divider, Modal, Row, Spin } from "antd";
-import { showAmount } from "../../helpers";
-import { IPreview } from "../../shared.types";
+import { showAmount } from "../../../helpers";
+import { IPreview } from "../../../shared.types";
 
 interface Props {
   isOpen: boolean;
