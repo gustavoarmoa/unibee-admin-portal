@@ -104,19 +104,10 @@ const Index = () => {
         console.log("edit plan res: ", res);
         const statuCode = res.data.code;
         if (statuCode != 0) {
-          if (statuCode == 61) {
-            console.log("invalid token");
-            navigate(`${APP_PATH}login`, {
-              state: { msg: "session expired, please re-login" },
-            });
-            return;
-          }
+          statuCode == 61 && relogin();
           throw new Error(res.data.message);
         }
-        messageApi.open({
-          type: "success",
-          content: "Plan saved",
-        });
+        message.success("Plan saved");
       })
       .catch((err) => {
         console.log("edit plan err: ", err.message);
@@ -232,8 +223,8 @@ const Index = () => {
       try {
         const res = ([planListRes, planDetailRes] = await Promise.all([
           // any rejected promise will jump to the catch block, this is what we want.
-          getPlanList(2),
-          getPlanDetail(planId),
+          getPlanList({ type: 2, status: 2 }), // type: 2 (addon), status: 2 (active),
+          getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
         ]));
         console.log(
           "[planListRes, planDetailRes]",

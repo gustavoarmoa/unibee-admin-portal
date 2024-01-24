@@ -1,17 +1,11 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Space, Table, Tag, Button, Tooltip } from "antd";
+import { Space, Table, Tag, Button, Tooltip, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import {
-  // BrowserRouter as Router,
-  Routes,
-  Route,
-  Outlet,
-  // Link,
-} from "react-router-dom";
 import { PLAN_STATUS } from "../constants";
 import { showAmount } from "../helpers";
+import { getPlanList } from "../requests";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -97,7 +91,13 @@ const columns: ColumnsType<DataType> = [
 const Index = () => {
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<DataType[]>([]);
+
+  const relogin = () =>
+    navigate(`${APP_PATH}login`, {
+      state: { msg: "session expired, please re-login" },
+    });
 
   const normalize = (data: any): DataType[] => {
     // console.log("normalize: ", data);
@@ -121,43 +121,29 @@ const Index = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("merchantToken");
-    axios
-      .post(
-        `${API_URL}/merchant/plan/subscription_plan_list`,
-        {
-          merchantId: 15621,
-          // type: 1,
-          // status: 0,
-          // currency: "usd",
-          page: 0,
-          count: 100,
-        },
-        {
-          headers: {
-            Authorization: `${token}`, // Bearer: ******
-          },
+    const fetchPlan = async () => {
+      try {
+        const planListRes = await getPlanList({
+          type: undefined, // get main plan and addon
+          status: undefined, // active, inactive, expired, editing, all of them
+        });
+        console.log("plan list res: ", planListRes);
+        const statusCode = planListRes.data.code;
+        if (statusCode != 0) {
+          statusCode == 61 && relogin();
+          throw new Error(planListRes.data.message);
         }
-      )
-      .then((res) => {
-        console.log("subscription list res: ", res);
-        const statuCode = res.data.code;
-        if (statuCode != 0) {
-          if (statuCode == 61) {
-            console.log("invalid token");
-            navigate(`${APP_PATH}login`, {
-              state: { msg: "session expired, please re-login" },
-            });
-            return;
-          }
-          throw new Error(res.data.message);
+        setPlan(normalize(planListRes.data.data.Plans));
+      } catch (err) {
+        if (err instanceof Error) {
+          console.log("err getting planlist: ", err.message);
+          message.error(err.message);
+        } else {
+          message.error("Unknown error");
         }
-        setPlan(normalize(res.data.data.Plans));
-      })
-      .catch((err) => {
-        console.log("get subscription list err: ", err);
-        setErrMsg(err.message);
-      });
+      }
+    };
+    fetchPlan();
   }, []);
 
   return (

@@ -7,24 +7,37 @@ import { IProfile } from "../shared.types";
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const getPlanList = async (planType: number) => {
+export const getPlanList = async ({
+  type,
+  status,
+}: {
+  type?: number;
+  status?: number;
+}) => {
   const token = localStorage.getItem("merchantToken");
-  return axios.post(
-    `${API_URL}/merchant/plan/subscription_plan_list`,
-    {
-      merchantId: 15621,
-      type: planType, // 1: main plan, 2: addon
-      status: 2, // 1: editing, 2: active, 3: inactive, 4: expired
-      // currency: "usd",
-      page: 0,
-      count: 100,
+  const body: {
+    merchantId: number;
+    type?: number;
+    status?: number;
+    page: number;
+    count: number;
+  } = {
+    merchantId: 15621,
+    // currency: "usd",
+    page: 0,
+    count: 100,
+  };
+  if (type != null) {
+    body.type = type; // null: all types, 1: main plan, 2: addon
+  }
+  if (status != null) {
+    body.status = status; // 1: editing, 2: active, 3: inactive, 4: expired
+  }
+  return axios.post(`${API_URL}/merchant/plan/subscription_plan_list`, body, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
     },
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    }
-  );
+  });
 };
 
 export const getPlanDetail = async (planId: number) => {

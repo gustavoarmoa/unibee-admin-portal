@@ -314,7 +314,7 @@ const Index = ({
     try {
       const res = ([subDetailRes, planListRes] = await Promise.all([
         getSubDetail(subId),
-        getPlanList(1),
+        getPlanList({ type: 1, status: 2 }), // type:1 (main plan), status: 2 (active)
       ]));
       console.log("subDetail/planList: ", subDetailRes, "//", planListRes);
       res.forEach((r) => {
