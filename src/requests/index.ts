@@ -1,5 +1,3 @@
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 // import { useProfileStore } from "../stores";
 import { IProfile } from "../shared.types";
@@ -47,6 +45,46 @@ export const getPlanDetail = async (planId: number) => {
     {
       planId,
     },
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+export const createPlan = async (planDetail: any) => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(
+    `${API_URL}/merchant/plan/subscription_plan_create`,
+    planDetail,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+export const savePlan = async (planDetail: any) => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(
+    `${API_URL}/merchant/plan/subscription_plan_edit`,
+    planDetail,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+export const activatePlan = async (planId: number) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = { planId };
+  return await axios.post(
+    `${API_URL}/merchant/plan/subscription_plan_activate`,
+    body,
     {
       headers: {
         Authorization: `${token}`, // Bearer: ******

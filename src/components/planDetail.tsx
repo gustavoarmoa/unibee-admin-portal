@@ -1,10 +1,26 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Space, Table, Tag, Button, Form, Input, Select, message } from "antd";
+import {
+  Space,
+  Table,
+  Tag,
+  Button,
+  Form,
+  Input,
+  Select,
+  message,
+  Spin,
+} from "antd";
 import type { SelectProps } from "antd";
-import { getPlanDetail, getPlanList } from "../requests";
+import {
+  getPlanDetail,
+  getPlanList,
+  activatePlan,
+  savePlan,
+} from "../requests";
 import { CURRENCY, PLAN_STATUS } from "../constants";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const options: SelectProps["options"] = [];
 
@@ -39,13 +55,13 @@ const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
 
 const Index = () => {
-  const [messageApi, contextHolder] = message.useMessage();
   const params = useParams();
+  const [loading, setLoading] = useState(false);
+  const [activating, setActivating] = useState(false);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [addons, setAddons] = useState<Plan[]>([]);
   const [selectAddons, setSelectAddons] = useState<Plan[]>([]);
   const [selectedAddon, setSelectedAddon] = useState<number[]>([]);
-  const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
@@ -82,7 +98,7 @@ const Index = () => {
     // once changed, I'm gonna clear the selected addons,
   }, [itvCountUnit, itvCountValue, addonCurrency]);
 
-  const submitForm = (values: any) => {
+  const onSave = async (values: any) => {
     const f = JSON.parse(JSON.stringify(values));
     f.amount = Number(f.amount);
     f.amount *= CURRENCY[f.currency].stripe_factor;
@@ -90,35 +106,31 @@ const Index = () => {
     f.intervalCount = Number(f.intervalCount);
     f.planId = values.id;
     f.addonIds = selectedAddon;
-    console.log("saving form: ", f);
+    console.log("saving plan form: ", f);
 
-    const token = localStorage.getItem("merchantToken");
-
-    axios
-      .post(`${API_URL}/merchant/plan/subscription_plan_edit`, f, {
-        headers: {
-          Authorization: `${token}`, // Bearer: ******
-        },
-      })
-      .then((res) => {
-        console.log("edit plan res: ", res);
-        const statuCode = res.data.code;
-        if (statuCode != 0) {
-          statuCode == 61 && relogin();
-          throw new Error(res.data.message);
-        }
-        message.success("Plan saved");
-      })
-      .catch((err) => {
-        console.log("edit plan err: ", err.message);
-        messageApi.open({
-          type: "error",
-          content: err.message,
-        });
-        setErrMsg(err.message);
-      });
+    try {
+      setLoading(true);
+      const savePlanRes = await savePlan(f);
+      setLoading(false);
+      const statuCode = savePlanRes.data.code;
+      if (statuCode != 0) {
+        statuCode == 61 && relogin();
+        throw new Error(savePlanRes.data.message);
+      }
+      message.success("Plan saved");
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("plan saving err: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
   };
 
+  /*
   const bindAddon = () => {
     const token = localStorage.getItem("merchantToken");
     // const addonField = form.getFieldsValue(["addons"]);
@@ -150,82 +162,63 @@ const Index = () => {
           }
           throw new Error(res.data.message);
         }
-        messageApi.open({
-          type: "success",
-          content: `Addons bound`,
-        });
+        message.success("Addons bound");
       })
       .catch((err) => {
         console.log("edit plan err: ", err.message);
-        messageApi.open({
-          type: "error",
-          content: err.message,
-        });
-        setErrMsg(err.message);
+        message.error(err.message);
       });
   };
+  */
 
-  const onActivate = () => {
-    const token = localStorage.getItem("merchantToken");
-    axios
-      .post(
-        `${API_URL}/merchant/plan/subscription_plan_activate`,
-        {
-          planId: Number(params.planId),
-        },
-        {
-          headers: {
-            Authorization: `${token}`, // Bearer: ******
-          },
-        }
-      )
-      .then((res) => {
-        console.log("plan activate res: ", res);
-        const statuCode = res.data.code;
-        if (statuCode != 0) {
-          if (statuCode == 61) {
-            console.log("invalid token");
-            navigate(`${APP_PATH}login`, {
-              state: { msg: "session expired, please re-login" },
-            });
-            return;
-          }
-          throw new Error(res.data.message);
-        }
-        messageApi.open({
-          type: "success",
-          content: "plan published",
-        });
-        setTimeout(() => {
-          navigate(-1);
-        }, 1200);
-        // setPlan(res.data.data.Plan.plan);
-      })
-      .catch((err) => {
-        console.log("plan activate err: ", err);
-        messageApi.open({
-          type: "error",
-          content: err.message,
-        });
-        setErrMsg(err.message);
-      });
+  const onActivate = async () => {
+    const planId = Number(params.planId);
+    if (isNaN(planId)) {
+      message.error("Invalid planId");
+      return;
+    }
+    try {
+      setActivating(true);
+      const activateRes = await activatePlan(planId);
+      setActivating(false);
+      console.log("activate plan res: ", activateRes);
+      const statuCode = activateRes.data.code;
+      if (statuCode != 0) {
+        statuCode == 61 && relogin();
+        throw new Error(activateRes.data.message);
+      }
+      message.success("plan published");
+      setTimeout(() => {
+        navigate(-1);
+      }, 2000);
+    } catch (err) {
+      setActivating(false);
+      if (err instanceof Error) {
+        console.log("plan activate err: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
   };
 
   useEffect(() => {
-    console.log("params: ", params.planId, "//", typeof params.planId);
-
+    // console.log("params: ", params.planId, "//", typeof params.planId);
     const planId = Number(params.planId);
     const fetchData = async () => {
       if (isNaN(planId)) {
         return;
       }
-      let planListRes, planDetailRes: any;
+      let planListRes, planDetailRes;
       try {
+        setLoading(true);
         const res = ([planListRes, planDetailRes] = await Promise.all([
           // any rejected promise will jump to the catch block, this is what we want.
           getPlanList({ type: 2, status: 2 }), // type: 2 (addon), status: 2 (active),
           getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
         ]));
+        setLoading(false);
         console.log(
           "[planListRes, planDetailRes]",
           planListRes,
@@ -242,6 +235,7 @@ const Index = () => {
           }
         });
       } catch (err) {
+        setLoading(false);
         if (err instanceof Error) {
           console.log("err in detail page: ", err.message);
           message.error(err.message);
@@ -281,11 +275,17 @@ const Index = () => {
 
   return (
     <div>
-      {contextHolder}
+      <Spin
+        spinning={loading}
+        indicator={
+          <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
+        }
+        fullscreen
+      />
       {plan && (
         <Form
           form={form}
-          onFinish={submitForm}
+          onFinish={onSave}
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 24 }}
           layout="horizontal"
@@ -438,15 +438,25 @@ const Index = () => {
           <div
             style={{ display: "flex", justifyContent: "center", gap: "18px" }}
           >
-            <Button onClick={() => navigate(-1)}>Go back</Button>
+            <Button
+              onClick={() => navigate(-1)}
+              disabled={loading || activating}
+            >
+              Go back
+            </Button>
             <Button
               type="primary"
               htmlType="submit"
-              disabled={plan.status != 1}
+              loading={loading}
+              disabled={plan.status != 1 || loading || activating}
             >
               Save
             </Button>
-            <Button onClick={onActivate} disabled={plan.status != 1}>
+            <Button
+              onClick={onActivate}
+              loading={activating}
+              disabled={plan.status != 1 || activating || loading}
+            >
               Publish
             </Button>
           </div>

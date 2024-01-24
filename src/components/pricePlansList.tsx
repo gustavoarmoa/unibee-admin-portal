@@ -6,6 +6,7 @@ import type { ColumnsType } from "antd/es/table";
 import { PLAN_STATUS } from "../constants";
 import { showAmount } from "../helpers";
 import { getPlanList } from "../requests";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -89,7 +90,6 @@ const columns: ColumnsType<DataType> = [
 ];
 
 const Index = () => {
-  const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<DataType[]>([]);
@@ -122,11 +122,13 @@ const Index = () => {
 
   useEffect(() => {
     const fetchPlan = async () => {
+      setLoading(true);
       try {
         const planListRes = await getPlanList({
           type: undefined, // get main plan and addon
           status: undefined, // active, inactive, expired, editing, all of them
         });
+        setLoading(false);
         console.log("plan list res: ", planListRes);
         const statusCode = planListRes.data.code;
         if (statusCode != 0) {
@@ -135,6 +137,7 @@ const Index = () => {
         }
         setPlan(normalize(planListRes.data.data.Plans));
       } catch (err) {
+        setLoading(false);
         if (err instanceof Error) {
           console.log("err getting planlist: ", err.message);
           message.error(err.message);
@@ -165,6 +168,10 @@ const Index = () => {
         dataSource={plan}
         rowKey={"id"}
         pagination={false}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
+        }}
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {

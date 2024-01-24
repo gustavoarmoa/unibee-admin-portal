@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Space, Table, Tag, Button, Form, Input, Select, message } from "antd";
 import { PLAN_STATUS, CURRENCY } from "../constants";
+import { createPlan } from "../requests";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -18,13 +19,16 @@ const DEFAULT_FORM_VALUES = {
 // new plan: 之后就是old plan了, 需要edit了, default form value 也不能用了.
 
 const Index = () => {
-  const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
-  const [submitting, setSubmitting] = useState(false);
-  const [errMsg, setErrMsg] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const submitForm = (values: any) => {
+  const relogin = () =>
+    navigate(`${APP_PATH}login`, {
+      state: { msg: "session expired, please re-login" },
+    });
+
+  const onCreatePlan = async (values: any) => {
     const f = JSON.parse(JSON.stringify(values));
     f.amount = Number(f.amount);
     f.amount *= CURRENCY[f.currency].stripe_factor;
@@ -32,50 +36,36 @@ const Index = () => {
     f.addonIds = [];
     console.log("saving form: ", f);
 
-    const token = localStorage.getItem("merchantToken");
-    axios
-      .post(`${API_URL}/merchant/plan/subscription_plan_create`, f, {
-        headers: {
-          Authorization: `${token}`, // Bearer: ******
-        },
-      })
-      .then((res) => {
-        console.log("create plan res: ", res);
-        const statuCode = res.data.code;
-        if (statuCode != 0) {
-          if (statuCode == 61) {
-            console.log("invalid token");
-            navigate(`${APP_PATH}login`, {
-              state: { msg: "session expired, please re-login" },
-            });
-            return;
-          }
-          throw new Error(res.data.message);
-        }
-        messageApi.open({
-          type: "success",
-          content: "Plan created",
-        });
-        setTimeout(() => {
-          navigate(-1);
-        }, 1000);
-      })
-      .catch((err) => {
-        console.log("create plan err: ", err.message);
-        messageApi.open({
-          type: "error",
-          content: err.message,
-        });
-        setErrMsg(err.message);
-      });
+    try {
+      setLoading(true);
+      const createPlanRes = await createPlan(f);
+      setLoading(false);
+      console.log("create plan res: ", createPlanRes);
+      const statusCode = createPlanRes.data.code;
+      if (statusCode != 0) {
+        statusCode == 61 && relogin();
+        throw new Error(createPlanRes.data.message);
+      }
+      message.success("Plan created");
+      setTimeout(() => {
+        navigate(-1);
+      }, 1500);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("err in creatign plan: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
   };
 
   return (
     <div>
-      {contextHolder}
       <Form
         form={form}
-        onFinish={submitForm}
+        onFinish={onCreatePlan}
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 24 }}
         layout="horizontal"
@@ -203,9 +193,16 @@ const Index = () => {
 
         {/* <Form.Item label=""> */}
         <div style={{ display: "flex", justifyContent: "center", gap: "18px" }}>
-          <Button onClick={() => navigate(-1)}>Go back</Button>
-          <Button type="primary" htmlType="submit">
-            Save
+          <Button onClick={() => navigate(-1)} disabled={loading}>
+            Go back
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={loading}
+            loading={loading}
+          >
+            Create
           </Button>
           {/* <Button>Publish</Button> */}
         </div>
