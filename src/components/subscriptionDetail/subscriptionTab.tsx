@@ -34,7 +34,11 @@ import ExtendSubModal from "./modals/extendSub";
 import ChangePlanModal from "./modals/changePlan";
 import UpdateSubPreviewModal from "./modals/updateSubPreview";
 import { SUBSCRIPTION_STATUS } from "../../constants";
-import { InfoCircleOutlined, SyncOutlined } from "@ant-design/icons";
+import {
+  InfoCircleOutlined,
+  LoadingOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -439,7 +443,13 @@ const Index = ({
 
   return (
     <>
-      <Spin spinning={loading} fullscreen />
+      <Spin
+        spinning={loading}
+        indicator={
+          <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
+        }
+        fullscreen
+      />{" "}
       <TerminateSubModal
         isOpen={terminateModal}
         loading={loading}
@@ -465,7 +475,6 @@ const Index = ({
         onConfirm={onExtendDueDate}
         // setDueDate={setDueDate}
       />
-
       <ChangePlanModal
         isOpen={changePlanModal}
         subInfo={activeSub}
@@ -476,7 +485,6 @@ const Index = ({
         onCancel={toggleChangPlanModal}
         onConfirm={openPreviewModal}
       />
-
       <UpdateSubPreviewModal
         isOpen={previewModalOpen}
         loading={confirmming}
@@ -484,7 +492,6 @@ const Index = ({
         onCancel={togglePreviewModal}
         onConfirm={onConfirm}
       />
-
       {/* <UserInfoSection user={activeSub?.user || null} /> */}
       <SubscriptionInfoSection
         subInfo={activeSub}

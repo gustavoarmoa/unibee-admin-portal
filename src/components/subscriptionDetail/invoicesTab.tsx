@@ -19,9 +19,11 @@ import {
   CloseOutlined,
   EditOutlined,
   FilePdfOutlined,
+  LoadingOutlined,
   MailOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
+import { showAmount } from "../../helpers";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
@@ -33,6 +35,7 @@ interface InvoiceShort {
   invoiceName: string;
   totalAmount: number;
   subscriptionAmount: number;
+  currency: string;
   /*
   taxAmount: number;
   subscriptionAmount: number;
@@ -53,13 +56,13 @@ const columns: ColumnsType<InvoiceShort> = [
     title: "Total amount",
     dataIndex: "totalAmount",
     key: "totalAmount",
-    // render: (_, sub) => <a>{sub.plan?.planName}</a>,
+    render: (amt, invoice) => <a>{showAmount(amt, invoice.currency)}</a>,
   },
   {
     title: "Subscription Amt",
     dataIndex: "subscriptionAmount",
     key: "subscriptionAmount",
-    // render: (_, sub) => <a>{sub.plan?.description}</a>,
+    render: (amt, invoice) => <a>{showAmount(amt, invoice.currency)}</a>,
   },
   {
     title: "Action",
@@ -135,10 +138,6 @@ const Index = ({ user }: { user: IProfile | null }) => {
     setLoading(false);
   };
 
-  const onNewInvoiceOK = () => {
-    toggleNewInvoiceModal();
-  };
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -149,16 +148,19 @@ const Index = ({ user }: { user: IProfile | null }) => {
 
   return (
     <div>
-      <Spin spinning={loading} fullscreen />
-      {newInvoiceModal && (
-        <NewInvoiceModal
-          isOpen={newInvoiceModal}
-          // onCancel={toggleNewInvoiceModal}
-          // onConfirm={onNewInvoiceOK}
-          toggleModal={toggleNewInvoiceModal}
-          loading={false}
-        />
-      )}
+      <Spin
+        spinning={loading}
+        indicator={
+          <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
+        }
+        fullscreen
+      />{" "}
+      <NewInvoiceModal
+        isOpen={newInvoiceModal}
+        user={user}
+        toggleModal={toggleNewInvoiceModal}
+        refresh={fetchData}
+      />
       <Table
         columns={columns}
         dataSource={invoiceList}

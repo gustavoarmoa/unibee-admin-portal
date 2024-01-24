@@ -17,6 +17,7 @@ import type { ColumnsType } from "antd/es/table";
 import { showAmount } from "../helpers";
 import { SUBSCRIPTION_STATUS } from "../constants";
 import { ISubscriptionType } from "../shared.types";
+import { LoadingOutlined } from "@ant-design/icons";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -160,7 +161,13 @@ const Index = () => {
 
   return (
     <div>
-      <Spin spinning={loading} fullscreen />
+      <Spin
+        spinning={loading}
+        indicator={
+          <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
+        }
+        fullscreen
+      />
       <Table
         columns={columns}
         dataSource={subList}

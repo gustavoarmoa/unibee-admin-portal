@@ -1,22 +1,20 @@
 import { Button, Col, Input, Modal, Row, message, Select, Divider } from "antd";
-import { ISubscriptionType } from "../../../shared.types";
+import { IProfile, ISubscriptionType } from "../../../shared.types";
 import { daysBetweenDate, showAmount, ramdonString } from "../../../helpers";
 import { useEffect, useState } from "react";
 import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { createInvoice } from "../../../requests";
 import { CURRENCY } from "../../../constants";
 import update from "immutability-helper";
+import { useNavigate } from "react-router-dom";
+
+const APP_PATH = import.meta.env.BASE_URL;
 
 interface Props {
+  user: IProfile | null;
   isOpen: boolean;
   toggleModal: () => void;
-  loading: boolean;
-  /*
-  subInfo: ISubscriptionType | null;
-  newDueDate: string;
-  */
-  // onCancel: () => void;
-  // onConfirm: () => void;
+  refresh: () => void;
 }
 
 type InvoiceItem = {
@@ -35,11 +33,18 @@ const newPlaceholderItem = (): InvoiceItem => ({
   total: 0,
 });
 
-const Index = ({ isOpen, loading, toggleModal }: Props) => {
+const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
+  const [loading, setLoading] = useState(false);
   const [invoiceList, setInvoiceList] = useState<InvoiceItem[]>([
     newPlaceholderItem(),
   ]);
+  const navigate = useNavigate();
   const [currency, setCurrency] = useState("USD");
+
+  const relogin = () =>
+    navigate(`${APP_PATH}login`, {
+      state: { msg: "session expired, please re-login" },
+    });
 
   const addInvoiceItem = () => {
     setInvoiceList(
@@ -67,7 +72,7 @@ const Index = ({ isOpen, loading, toggleModal }: Props) => {
         message.error("Please input valid quantity");
         return false;
       }
-      q = Number(invoiceList[i].unitAmountExcludingTax); // JPY has no decimal point, take that into account.
+      q = Number(invoiceList[i].unitAmountExcludingTax); // TODO: JPY has no decimal point, take that into account.
       if (isNaN(q) || q <= 0) {
         message.error("Please input valid amount");
         return false;
@@ -76,47 +81,87 @@ const Index = ({ isOpen, loading, toggleModal }: Props) => {
     return true;
   };
 
-  const onConfirm = () => {
+  const onConfirm = async () => {
     if (!validateFields()) {
       return;
     }
+    setLoading(true);
+    const invoiceItems = invoiceList.map((v) => ({
+      description: v.description,
+      unitAmountExcludingTax:
+        Number(v.unitAmountExcludingTax) * CURRENCY[currency].stripe_factor,
+      quantity: Number(v.quantity),
+    }));
+    try {
+      const createInvoiceRes = await createInvoice({
+        userId: user!.id,
+        currency,
+        invoiceItems,
+      });
+      console.log("create invoice res: ", createInvoiceRes);
+      const code = createInvoiceRes.data.code;
+      code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
+      if (code != 0) {
+        // TODO: save all the code as ENUM in constant,
+        throw new Error(createInvoiceRes.data.message);
+      }
+      setInvoiceList([newPlaceholderItem()]); // reset to default state, otherwise, nexttime when Modal is open, current data is still there
+      toggleModal();
+      message.success("Invoice created.");
+      refresh();
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("err getting sub list: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
+  };
 
-    console.log("submitting...", invoiceList);
-    // toggleModal();
+  const onCancel = () => {
+    toggleModal();
+    setInvoiceList([newPlaceholderItem()]); // reset to default state
   };
 
   const onFieldChange =
     (invoiceId: string, fieldName: string) =>
     (evt: React.ChangeEvent<HTMLInputElement>) => {
-      let newList = invoiceList;
       const idx = invoiceList.findIndex((v) => v.id == invoiceId);
-      if (idx != -1) {
-        newList = update(invoiceList, {
-          [idx]: { [fieldName]: { $set: evt.target.value } },
-        });
-        newList = update(newList, {
-          [idx]: {
-            total: {
-              $set:
-                Number(newList[idx].quantity) *
-                Number(newList[idx].unitAmountExcludingTax),
-            },
-          },
-        });
+      if (idx == -1) {
+        return;
       }
+      let newList = update(invoiceList, {
+        [idx]: { [fieldName]: { $set: evt.target.value } },
+      });
+      newList = update(newList, {
+        [idx]: {
+          total: {
+            $set:
+              Number(newList[idx].quantity) *
+              Number(newList[idx].unitAmountExcludingTax),
+          },
+        },
+      });
       setInvoiceList(newList);
     };
 
   const onSelectChange = (v: string) => setCurrency(v);
 
-  const getTotal = (invoices: InvoiceItem[]) => {
-    let total = 0;
-    for (let i = 0; i < invoices.length; i++) {
-      if (isNaN(invoices[i].total)) {
-        return NaN;
-      }
-      total += Math.round((invoices[i].total + Number.EPSILON) * 100) / 100;
-    }
+  // to get a numerical value with 2 decimal points, but still not right
+  // https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
+  // TODO:
+  // line1: 33.93 * 35
+  // line2: 77.95 * 3
+  // we get: 1421.3999999999
+  const getTotal = (invoices: InvoiceItem[]): number => {
+    const total = invoices.reduce(
+      (accu, curr) =>
+        accu + Math.round((curr.total + Number.EPSILON) * 100) / 100,
+      0
+    );
     return total;
   };
 
@@ -165,7 +210,7 @@ const Index = ({ isOpen, loading, toggleModal }: Props) => {
             <Input
               value={v.description}
               onChange={onFieldChange(v.id, "description")}
-              style={{ width: "90%" }}
+              style={{ width: "95%" }}
             />
           </Col>
           <Col span={3}>
@@ -222,7 +267,7 @@ const Index = ({ isOpen, loading, toggleModal }: Props) => {
           marginTop: "24px",
         }}
       >
-        <Button onClick={toggleModal} disabled={loading}>
+        <Button onClick={onCancel} disabled={loading}>
           Cancel
         </Button>
         <Button
