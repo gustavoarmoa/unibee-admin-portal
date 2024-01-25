@@ -45,7 +45,10 @@ const updateSubPreview = ({
           </Divider>
           {previewInfo.nextPeriodInvoice.lines.map((i, idx) => (
             <Row key={idx} gutter={[16, 16]}>
-              <Col span={6}>{`${showAmount(i.amount, i.currency)}`}</Col>
+              <Col span={6}>{`${showAmount(
+                i.amount as number,
+                i.currency
+              )}`}</Col>
               <Col span={18}>{i.description}</Col>
             </Row>
           ))}
@@ -54,7 +57,10 @@ const updateSubPreview = ({
           </Divider>
           {previewInfo.invoice.lines.map((i, idx) => (
             <Row key={idx} gutter={[16, 16]}>
-              <Col span={6}>{`${showAmount(i.amount, i.currency)}`}</Col>
+              <Col span={6}>{`${showAmount(
+                i.amount as number,
+                i.currency
+              )}`}</Col>
               <Col span={18}>{i.description}</Col>
             </Row>
           ))}
