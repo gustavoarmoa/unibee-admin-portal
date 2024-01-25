@@ -256,9 +256,7 @@ const Index = () => {
           planDetailRes.data.data.Plan.addons.map((a: any) => a.id)
         );
       }
-
       const addons = planListRes.data.data.Plans.map((p: any) => p.plan);
-
       setAddons(addons);
       setSelectAddons(
         addons.filter(

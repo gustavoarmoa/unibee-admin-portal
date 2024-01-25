@@ -106,7 +106,7 @@ const UserInfoSection = ({ user }: { user: IProfile | null }) => {
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Billing address</span>
         </Col>
-        <Col span={6}>{user?.adress}</Col>
+        <Col span={6}>{user?.address}</Col>
       </Row>
       <Row style={rowStyle}>
         <Col span={4}>

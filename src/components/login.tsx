@@ -9,7 +9,7 @@ const APP_PATH = import.meta.env.BASE_URL; // if not specified in build command,
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Index = () => {
-  const [messageApi, contextHolder] = message.useMessage();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const onEmailChange = (evt: ChangeEvent<HTMLInputElement>) =>
@@ -18,20 +18,12 @@ const Index = () => {
     setPassword(evt.target.value);
   const [loginType, setLoginType] = useState("password"); // [password, OTP]
 
-  const location = useLocation();
-
-  const onLoginTypeChange = (e: RadioChangeEvent) => {
-    // console.log("radio checked", e.target.value);
+  const onLoginTypeChange = (e: RadioChangeEvent) =>
     setLoginType(e.target.value);
-  };
 
   useEffect(() => {
-    console.log("location: ", location);
     if (location.state && location.state.msg) {
-      messageApi.open({
-        type: "info",
-        content: location.state.msg,
-      });
+      message.info(location.state.msg);
     }
   }, []);
 
@@ -45,7 +37,6 @@ const Index = () => {
         marginTop: "200px",
       }}
     >
-      {contextHolder}
       <h2>Merchant</h2>
       <Radio.Group
         options={[

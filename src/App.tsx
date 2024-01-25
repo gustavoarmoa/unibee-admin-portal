@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   DesktopOutlined,
+  LogoutOutlined,
   // FileOutlined,
   PieChartOutlined,
   // TeamOutlined,
@@ -15,6 +16,7 @@ import {
   // Link,
   useNavigate,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { Layout, Menu, theme } from "antd";
 
@@ -26,6 +28,7 @@ import PlanDetail from "./components/planDetail";
 import SubscriptionList from "./components/subscriptionList";
 import SubscriptionDetail from "./components/subscriptionDetail";
 import Subscriptions from "./components/subscriptions";
+import Settings from "./components/settings";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
@@ -52,19 +55,21 @@ function getItem(
 const items: MenuItem[] = [
   getItem("Plan", "/plan/list", <DesktopOutlined />),
   getItem("Subscription", "/subscription/list", <PieChartOutlined />),
-  // getItem("Subscription", "/subscription/list", <PieChartOutlined />),
   getItem("Dashboard", "/dashboard", <PieChartOutlined />),
   getItem("Profile", "/profile", <PieChartOutlined />),
+  getItem("Settings", "/settings", <PieChartOutlined />),
 ];
 
 const APP_PATH = import.meta.env.BASE_URL; // import.meta.env.VITE_APP_PATH;
 const noSiderRoutes = [`${APP_PATH}login`, `${APP_PATH}signup`];
 
 const App: React.FC = () => {
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [activeMenuItem, setActiveMenuItem] = useState<string[]>([
-    "/subscription/list",
+    window.location.pathname,
   ]);
+  // const [openKeys, setOpenKeys] = useState<string[]>(["/subscription/list"]);
   // this is the default open keys after successful login.
   // const [openKeys, setOpenKeys] = useState<string[]>(["/subscription"]);
   const {
@@ -73,20 +78,10 @@ const App: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const onItemClick = ({
-    key,
-    needNavigate = true,
-  }: {
-    key: string;
-    needNavigate?: boolean;
-  }) => {
-    needNavigate && navigate(`${APP_PATH}${key.substring(1)}`); // remove the leading '/' character, coz APP_PATH already has it
+  const onItemClick = ({ key }: { key: string; needNavigate?: boolean }) => {
+    console.log("on item click, key: ", key);
+    navigate(`${APP_PATH}${key.substring(1)}`); // remove the leading '/' character, coz APP_PATH already has it
     setActiveMenuItem([key]);
-    // const pathItem = key.split("/").filter((k) => !!k); // remove the empty leading item
-    // if (pathItem.length == 2) {
-    // submenu item clicked
-    // setOpenKeys(["/" + pathItem[0]]);
-    // }
   };
 
   const logout = () => {
@@ -95,19 +90,16 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // when user refresh or enter URL then ENTER, call this fn to highlight the active menu
-    // since we are already in the current path, there is no need to navigate
-    let key = window.location.pathname;
-    const pathItem = key.split("/").filter((k) => !!k);
-    if (pathItem.length > 1) {
-      key = "/" + pathItem[0];
+    console.log("pathname: ", location.pathname);
+    const pathItems = location.pathname.split("/").filter((p) => p != "");
+    if (pathItems[0] == "subscription") {
+      setActiveMenuItem(["/subscription/list"]);
+    } else if (pathItems[0] == "plan") {
+      setActiveMenuItem(["/plan/list"]);
+    } else {
+      setActiveMenuItem(["/" + pathItems[0]]);
     }
-    console.log("path key: ", key);
-    if (key == "/subscription") {
-      key = "/subscription/list";
-    }
-    onItemClick({ key, needNavigate: false });
-  }, []);
+  }, [location, location.pathname]);
 
   return (
     <>
@@ -157,7 +149,8 @@ const App: React.FC = () => {
                 cursor: "pointer",
               }}
             >
-              logout
+              <LogoutOutlined />
+              &nbsp;&nbsp;Logout
             </div>
           </Sider>
           <Layout>
@@ -187,12 +180,12 @@ const App: React.FC = () => {
                   />
                   <Route path={`${APP_PATH}profile`} Component={Profile} />
                   <Route path={`${APP_PATH}dashboard`} Component={Dashboard} />
+                  <Route path={`${APP_PATH}settings`} Component={Settings} />
                   <Route
                     path={`${APP_PATH}subscription`}
                     Component={Subscriptions}
                   >
                     <Route path="list" element={<SubscriptionList />} />
-                    {/* <Route path="new" element={<SubscriptionNew />} /> */}
                     <Route
                       path=":subscriptionId"
                       element={<SubscriptionDetail />}

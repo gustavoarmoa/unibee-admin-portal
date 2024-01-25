@@ -316,10 +316,12 @@ export const getInvoiceList = async ({
 export const createInvoice = async ({
   userId,
   currency,
+  taxScale,
   invoiceItems,
 }: {
   userId: number;
   currency: string;
+  taxScale: number;
   invoiceItems: {
     unitAmountExcludingTax: number;
     description: string;
@@ -330,7 +332,7 @@ export const createInvoice = async ({
   const body = {
     merchantId: 15621,
     userId,
-    taxPercentage: 0,
+    taxScale,
     channelId: 25,
     currency,
     lines: invoiceItems,

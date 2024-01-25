@@ -24,6 +24,7 @@ import {
   UndoOutlined,
 } from "@ant-design/icons";
 import { showAmount } from "../../helpers";
+import { UserInvoice } from "../../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
@@ -45,64 +46,67 @@ interface InvoiceShort {
   */
 }
 
-const columns: ColumnsType<InvoiceShort> = [
-  {
-    title: "Plan",
-    dataIndex: "invoiceName",
-    key: "invoiceName",
-    // render: (_, sub) => <a>{sub.plan?.planName}</a>,
-  },
-  {
-    title: "Total amount",
-    dataIndex: "totalAmount",
-    key: "totalAmount",
-    render: (amt, invoice) => <a>{showAmount(amt, invoice.currency)}</a>,
-  },
-  {
-    title: "Subscription Amt",
-    dataIndex: "subscriptionAmount",
-    key: "subscriptionAmount",
-    render: (amt, invoice) => <a>{showAmount(amt, invoice.currency)}</a>,
-  },
-  {
-    title: "Action",
-    key: "action",
-    render: (
-      _,
-      record // use fn to generate these icons, only show available ones.
-    ) => (
-      <Space size="middle">
-        <span>
-          <EditOutlined />
-        </span>
-        <span>
-          <MailOutlined />
-        </span>
-        <span>
-          <UndoOutlined />
-        </span>
-        <span>
-          <CloseOutlined />
-        </span>
-        <span>
-          <FilePdfOutlined />
-        </span>
-      </Space>
-    ),
-  },
-];
-
 const Index = ({ user }: { user: IProfile | null }) => {
-  const [invoiceList, setInvoiceList] = useState<InvoiceShort[]>([]);
+  const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0); // pagination props
   const [newInvoiceModal, setNewInvoiceModal] = useState(false);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<null | string>(
+    null
+  );
+  const [invoiceIdx, setInvoiceIdx] = useState(-1); // -1: not selected
   const navigate = useNavigate();
-
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
       state: { msg: "session expired, please re-login" },
     });
+
+  const columns: ColumnsType<UserInvoice> = [
+    {
+      title: "Plan",
+      dataIndex: "invoiceName",
+      key: "invoiceName",
+      // render: (_, sub) => <a>{sub.plan?.planName}</a>,
+    },
+    {
+      title: "Total amount",
+      dataIndex: "totalAmount",
+      key: "totalAmount",
+      render: (amt, invoice) => <a>{showAmount(amt, invoice.currency)}</a>,
+    },
+    {
+      title: "Subscription Amt",
+      dataIndex: "subscriptionAmount",
+      key: "subscriptionAmount",
+      render: (amt, invoice) => <a>{showAmount(amt, invoice.currency)}</a>,
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (
+        _,
+        record // use fn to generate these icons, only show available ones.
+      ) => (
+        <Space size="middle">
+          <span onClick={toggleNewInvoiceModal} style={{ cursor: "pointer" }}>
+            <EditOutlined />
+          </span>
+          <span style={{ cursor: "pointer" }}>
+            <MailOutlined />
+          </span>
+          <span style={{ cursor: "pointer" }}>
+            <UndoOutlined />
+          </span>
+          <span style={{ cursor: "pointer" }}>
+            <CloseOutlined />
+          </span>
+          <span style={{ cursor: "pointer" }}>
+            <FilePdfOutlined />
+          </span>
+        </Space>
+      ),
+    },
+  ];
 
   const toggleNewInvoiceModal = () => setNewInvoiceModal(!newInvoiceModal);
 
@@ -112,6 +116,9 @@ const Index = ({ user }: { user: IProfile | null }) => {
   };
 
   const fetchData = async () => {
+    if (user == null) {
+      return;
+    }
     setLoading(true);
     let invoiceListRes;
     try {
@@ -155,12 +162,15 @@ const Index = ({ user }: { user: IProfile | null }) => {
         }
         fullscreen
       />{" "}
-      <NewInvoiceModal
-        isOpen={newInvoiceModal}
-        user={user}
-        toggleModal={toggleNewInvoiceModal}
-        refresh={fetchData}
-      />
+      {newInvoiceModal && (
+        <NewInvoiceModal
+          isOpen={true}
+          items={invoiceIdx == -1 ? null : invoiceList[invoiceIdx].lines}
+          user={user}
+          toggleModal={toggleNewInvoiceModal}
+          refresh={fetchData}
+        />
+      )}
       <Table
         columns={columns}
         dataSource={invoiceList}
@@ -170,6 +180,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           return {
             onClick: (event) => {
               console.log("row click: ", record, "///", rowIndex);
+              setInvoiceIdx(rowIndex as number);
               // navigate(`${APP_PATH}subscription/${record.subscriptionId}`, {
               // state: { subscriptionId: record.subscriptionId },
               // });
@@ -192,7 +203,14 @@ const Index = ({ user }: { user: IProfile | null }) => {
           size="small"
           onChange={onPageChange}
         />
-        <Button type="primary" onClick={toggleNewInvoiceModal}>
+        <Button
+          type="primary"
+          onClick={() => {
+            setInvoiceIdx(-1);
+            toggleNewInvoiceModal();
+          }}
+          disabled={user == null}
+        >
           New Invoice
         </Button>
       </div>

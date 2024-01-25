@@ -7,23 +7,26 @@ import { createInvoice } from "../../../requests";
 import { CURRENCY } from "../../../constants";
 import update from "immutability-helper";
 import { useNavigate } from "react-router-dom";
+import { InvoiceItem, UserInvoice } from "../../../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
 interface Props {
   user: IProfile | null;
   isOpen: boolean;
+  items: InvoiceItem[] | null;
   toggleModal: () => void;
   refresh: () => void;
 }
 
 type InvoiceItem = {
-  id: string;
+  id?: string; // for invoice creation, I need a unique id, for editing existing one, no id.
   description: string;
-  unitAmountExcludingTax: string;
-  quantity: string;
-  total: number;
-};
+  unitAmountExcludingTax: string | number;
+  quantity: string | number;
+  total?: number; // ditto
+}; // total 只是用来本地计算, 但后端不需要, 故: edit时, 需要手动计算total.
+// id, total are optional, but for editing, I need to fill these 2 fields with actual value.
 
 const newPlaceholderItem = (): InvoiceItem => ({
   id: ramdonString(8),
@@ -33,18 +36,29 @@ const newPlaceholderItem = (): InvoiceItem => ({
   total: 0,
 });
 
-const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
+const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
   const [loading, setLoading] = useState(false);
-  const [invoiceList, setInvoiceList] = useState<InvoiceItem[]>([
-    newPlaceholderItem(),
-  ]);
+
+  if (items != null) {
+    items.forEach((item) => {
+      item.id = ramdonString(8);
+      item.total = Number(item.quantity) * Number(item.unitAmountExcludingTax);
+    });
+  }
+
+  const [invoiceList, setInvoiceList] = useState<InvoiceItem[]>(
+    items == null ? [newPlaceholderItem()] : items
+  );
   const navigate = useNavigate();
   const [currency, setCurrency] = useState("USD");
+  const [taxScale, setTaxScale] = useState<string>("");
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
       state: { msg: "session expired, please re-login" },
     });
+
+  console.log("invoice item: ", items);
 
   const addInvoiceItem = () => {
     setInvoiceList(
@@ -62,6 +76,14 @@ const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
   };
 
   const validateFields = () => {
+    if (
+      taxScale.trim() == "" ||
+      isNaN(Number(taxScale)) ||
+      Number(taxScale) < 0
+    ) {
+      message.error("Please input valid tax rate(in percentage)");
+      return false;
+    }
     for (let i = 0; i < invoiceList.length; i++) {
       if (invoiceList[i].description == "") {
         message.error("Description is required");
@@ -95,6 +117,7 @@ const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
     try {
       const createInvoiceRes = await createInvoice({
         userId: user!.id,
+        taxScale: Number(taxScale) * 100,
         currency,
         invoiceItems,
       });
@@ -105,7 +128,7 @@ const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
         // TODO: save all the code as ENUM in constant,
         throw new Error(createInvoiceRes.data.message);
       }
-      setInvoiceList([newPlaceholderItem()]); // reset to default state, otherwise, nexttime when Modal is open, current data is still there
+      // setInvoiceList([newPlaceholderItem()]); // reset to default state, otherwise, nexttime when Modal is open, current data is still there
       toggleModal();
       message.success("Invoice created.");
       refresh();
@@ -123,7 +146,7 @@ const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
 
   const onCancel = () => {
     toggleModal();
-    setInvoiceList([newPlaceholderItem()]); // reset to default state
+    // setInvoiceList([newPlaceholderItem()]); // reset to default state
   };
 
   const onFieldChange =
@@ -149,6 +172,8 @@ const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
     };
 
   const onSelectChange = (v: string) => setCurrency(v);
+  const onTaxScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
+    setTaxScale(evt.target.value);
 
   // to get a numerical value with 2 decimal points, but still not right
   // https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
@@ -165,28 +190,41 @@ const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
     return total;
   };
 
+  useEffect(() => {}, []);
+
   return (
     <Modal title="New invoice" open={isOpen} width={"820px"} footer={null}>
-      <span style={{ marginRight: "12px" }}>Currency:</span>
-      <Select
-        style={{ width: 100, margin: "8px 0" }}
-        value={currency}
-        onChange={onSelectChange}
-        options={[
-          { value: "USD", label: "USD" },
-          { value: "JPY", label: "JPY" },
-        ]}
-      />
+      <Row style={{ marginTop: "16px" }}>
+        <Col span={4}>Currency</Col>
+        <Col span={4}>Tax Rate %</Col>
+      </Row>
       <Row style={{ display: "flex", alignItems: "center" }}>
-        <Col span={12}>
+        <Col span={4}>
+          <Select
+            style={{ width: 100, margin: "8px 0" }}
+            value={currency}
+            onChange={onSelectChange}
+            options={[
+              { value: "USD", label: "USD" },
+              { value: "JPY", label: "JPY" },
+            ]}
+          />
+        </Col>
+        <Col span={4}>
+          <Input value={taxScale} onChange={onTaxScaleChange} type="number" />
+        </Col>
+      </Row>
+
+      <Row style={{ display: "flex", alignItems: "center" }}>
+        <Col span={11}>
           <span style={{ fontWeight: "bold" }}>Description</span>
         </Col>
-        <Col span={3}>
+        <Col span={4}>
           <div style={{ fontWeight: "bold" }}>Amount</div>
           <div style={{ fontWeight: "bold" }}>(exclude Tax)</div>
         </Col>
         <Col span={1}></Col>
-        <Col span={3}>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Quantity</span>
         </Col>
         <Col span={3}>
@@ -206,15 +244,16 @@ const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
           key={v.id}
           style={{ margin: "8px 0", display: "flex", alignItems: "center" }}
         >
-          <Col span={12}>
+          <Col span={11}>
             <Input
               value={v.description}
               onChange={onFieldChange(v.id, "description")}
               style={{ width: "95%" }}
             />
           </Col>
-          <Col span={3}>
+          <Col span={4}>
             <Input
+              type="number"
               value={v.unitAmountExcludingTax}
               onChange={onFieldChange(v.id, "unitAmountExcludingTax")}
               style={{ width: "80%" }}
@@ -223,8 +262,9 @@ const Index = ({ user, isOpen, toggleModal, refresh }: Props) => {
           <Col span={1} style={{ fontSize: "18px" }}>
             ×
           </Col>
-          <Col span={3}>
+          <Col span={4}>
             <Input
+              type="number"
               value={v.quantity}
               onChange={onFieldChange(v.id, "quantity")}
               style={{ width: "60%" }}
