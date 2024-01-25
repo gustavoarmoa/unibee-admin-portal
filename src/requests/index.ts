@@ -5,6 +5,19 @@ import { IProfile } from "../shared.types";
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 
+export const logoutReq = async () => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(
+    `${API_URL}/merchant/auth/sso/logout`,
+    {},
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
 export const getPlanList = async ({
   type,
   status,
@@ -233,7 +246,7 @@ export const resumeSub = async (subscriptionId: string) => {
   const body = {
     subscriptionId,
   };
-  const url = `${API_URL}/user/subscription/subscription_cancel_last_cancel_at_period_end`;
+  const url = `${API_URL}/merchant/subscription/subscription_cancel_last_cancel_at_period_end`;
   return await axios.post(url, body, {
     headers: {
       Authorization: `${token}`, // Bearer: ******

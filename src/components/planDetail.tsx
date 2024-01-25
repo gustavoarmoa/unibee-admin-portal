@@ -210,7 +210,7 @@ const Index = () => {
       if (isNaN(planId)) {
         return;
       }
-      let planListRes, planDetailRes;
+      let planListRes: any, planDetailRes: any;
       try {
         setLoading(true);
         const res = ([planListRes, planDetailRes] = await Promise.all([

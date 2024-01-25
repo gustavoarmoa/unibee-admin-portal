@@ -7,7 +7,7 @@ import { createInvoice } from "../../../requests";
 import { CURRENCY } from "../../../constants";
 import update from "immutability-helper";
 import { useNavigate } from "react-router-dom";
-import { InvoiceItem, UserInvoice } from "../../../shared.types";
+// import { InvoiceItem, UserInvoice } from "../../../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -184,7 +184,7 @@ const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
   const getTotal = (invoices: InvoiceItem[]): number => {
     const total = invoices.reduce(
       (accu, curr) =>
-        accu + Math.round((curr.total + Number.EPSILON) * 100) / 100,
+        accu + Math.round((curr.total! + Number.EPSILON) * 100) / 100,
       0
     );
     return total;
@@ -247,7 +247,7 @@ const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
           <Col span={11}>
             <Input
               value={v.description}
-              onChange={onFieldChange(v.id, "description")}
+              onChange={onFieldChange(v.id!, "description")}
               style={{ width: "95%" }}
             />
           </Col>
@@ -255,7 +255,7 @@ const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
             <Input
               type="number"
               value={v.unitAmountExcludingTax}
-              onChange={onFieldChange(v.id, "unitAmountExcludingTax")}
+              onChange={onFieldChange(v.id!, "unitAmountExcludingTax")}
               style={{ width: "80%" }}
             />
           </Col>
@@ -266,18 +266,18 @@ const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
             <Input
               type="number"
               value={v.quantity}
-              onChange={onFieldChange(v.id, "quantity")}
+              onChange={onFieldChange(v.id!, "quantity")}
               style={{ width: "60%" }}
             />
           </Col>
           <Col span={3}>
-            {isNaN(v.total)
+            {isNaN(v.total!)
               ? ""
               : `${CURRENCY[currency].symbol} ${getTotal([invoiceList[i]])}`}
           </Col>
           <Col span={1}>
             <div
-              onClick={removeInvoiceItem(v.id)}
+              onClick={removeInvoiceItem(v.id!)}
               style={{ fontWeight: "bold", width: "64px", cursor: "pointer" }}
             >
               <MinusOutlined />

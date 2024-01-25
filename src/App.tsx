@@ -18,7 +18,7 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { Layout, Menu, theme } from "antd";
+import { Layout, Menu, message, theme } from "antd";
 
 import Dashboard from "./components/dashboard";
 import PricePlans from "./components/pricePlans";
@@ -33,6 +33,7 @@ import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
 import NotFound from "./components/notFound";
+import { logoutReq } from "./requests";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -84,9 +85,20 @@ const App: React.FC = () => {
     setActiveMenuItem([key]);
   };
 
-  const logout = () => {
-    localStorage.removeItem("merchantToken");
-    navigate(`${APP_PATH}login`);
+  const logout = async () => {
+    try {
+      const logoutRes = await logoutReq();
+      console.log("logout res: ", logoutRes);
+      localStorage.removeItem("merchantToken");
+      navigate(`${APP_PATH}login`);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log("err logging out: ", err.message);
+        // message.error(err.message);
+      } else {
+        // message.error("Unknown error");
+      }
+    }
   };
 
   useEffect(() => {

@@ -155,13 +155,13 @@ const Index = ({ user }: { user: IProfile | null }) => {
 
   return (
     <div>
-      <Spin
+      {/* <Spin
         spinning={loading}
         indicator={
           <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
         }
         fullscreen
-      />{" "}
+    /> */}
       {newInvoiceModal && (
         <NewInvoiceModal
           isOpen={true}
@@ -179,13 +179,13 @@ const Index = ({ user }: { user: IProfile | null }) => {
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
-              console.log("row click: ", record, "///", rowIndex);
               setInvoiceIdx(rowIndex as number);
-              // navigate(`${APP_PATH}subscription/${record.subscriptionId}`, {
-              // state: { subscriptionId: record.subscriptionId },
-              // });
             },
           };
+        }}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
         }}
       />
       <div
