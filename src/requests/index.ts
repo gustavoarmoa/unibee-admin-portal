@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 export const logoutReq = async () => {
   const token = localStorage.getItem("merchantToken");
   return await axios.post(
-    `${API_URL}/merchant/auth/sso/logout`,
+    `${API_URL}/merchant/user_logout`,
     {},
     {
       headers: {

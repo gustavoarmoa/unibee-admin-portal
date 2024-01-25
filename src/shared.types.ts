@@ -79,16 +79,18 @@ interface IPreview {
 }
 
 type InvoiceItem = {
-  amount: number;
-  amountExcludingTax: string;
+  id?: string; // when creating new invoice, list needs an id for each row, but backend response has no id.
+  amount: number | string; // when admin creating an invoice, inputbox value is string.
+  amountExcludingTax: number | string;
   currency: string;
   description: string;
-  periodEnd: number;
-  periodStart: number;
-  proration: boolean;
-  quantity: number;
-  tax: number;
-  unitAmountExcludingTax: number;
+  periodEnd?: number;
+  periodStart?: number;
+  proration?: boolean;
+  quantity: number | string;
+  tax: number | string; // tax amount
+  taxScale: number | string; // tax rate
+  unitAmountExcludingTax: number | string;
 };
 
 // when admin update user subscription, this Invoice is part of the response

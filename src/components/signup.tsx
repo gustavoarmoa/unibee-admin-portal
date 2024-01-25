@@ -48,6 +48,8 @@ const Index = () => {
     setOtp(value.toUpperCase());
   };
 
+  const goLogin = () => navigate(`${APP_PATH}login`);
+
   const onSubmit = () => {
     if (
       firstName == "" ||
@@ -103,7 +105,7 @@ const Index = () => {
           throw new Error(res.data.message);
         }
         navigate(`${APP_PATH}login`, {
-          state: { msg: "Thanks for your sign-up on Unibee" },
+          state: { msg: "Thanks for your sign-up on UniBee" },
         });
       })
       .catch((err) => {
@@ -135,6 +137,7 @@ const Index = () => {
               borderRadius: "8px",
               background: "#FFF",
               display: "flex",
+              flexDirection: "column",
               justifyContent: "center",
               paddingTop: "24px",
             }}
@@ -304,8 +307,8 @@ const Index = () => {
 
               <Form.Item
                 wrapperCol={{
-                  offset: 8,
-                  span: 16,
+                  offset: 11,
+                  span: 8,
                 }}
               >
                 <Button
@@ -318,6 +321,20 @@ const Index = () => {
                 </Button>
               </Form.Item>
             </Form>
+            <div
+              style={{
+                display: "flex",
+                color: "#757575",
+                justifyContent: "center",
+                alignItems: "center",
+                margin: "-12px 0 18px 0",
+              }}
+            >
+              Already have an account?
+              <Button type="link" onClick={goLogin}>
+                Login
+              </Button>
+            </div>
           </div>
         </>
       ) : (

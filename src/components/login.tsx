@@ -10,6 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const Index = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const onEmailChange = (evt: ChangeEvent<HTMLInputElement>) =>
@@ -20,6 +21,8 @@ const Index = () => {
 
   const onLoginTypeChange = (e: RadioChangeEvent) =>
     setLoginType(e.target.value);
+
+  const goSignup = () => navigate(`${APP_PATH}signup`);
 
   useEffect(() => {
     if (location.state && location.state.msg) {
@@ -72,6 +75,20 @@ const Index = () => {
         ) : (
           <Login2 email={email} onEmailChange={onEmailChange} />
         )}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          color: "#757575",
+          justifyContent: "center",
+          alignItems: "center",
+          // margin: "-48px 0 18px 0",
+        }}
+      >
+        Don't have an account?
+        <Button type="link" onClick={goSignup}>
+          Free signup
+        </Button>
       </div>
     </div>
   );

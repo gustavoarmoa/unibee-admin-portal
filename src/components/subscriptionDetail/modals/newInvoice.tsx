@@ -7,7 +7,7 @@ import { createInvoice } from "../../../requests";
 import { CURRENCY } from "../../../constants";
 import update from "immutability-helper";
 import { useNavigate } from "react-router-dom";
-// import { InvoiceItem, UserInvoice } from "../../../shared.types";
+import { InvoiceItem, UserInvoice } from "../../../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -19,6 +19,7 @@ interface Props {
   refresh: () => void;
 }
 
+/*
 type InvoiceItem = {
   id?: string; // for invoice creation, I need a unique id, for editing existing one, no id.
   description: string;
@@ -27,13 +28,18 @@ type InvoiceItem = {
   total?: number; // ditto
 }; // total 只是用来本地计算, 但后端不需要, 故: edit时, 需要手动计算total.
 // id, total are optional, but for editing, I need to fill these 2 fields with actual value.
+*/
 
 const newPlaceholderItem = (): InvoiceItem => ({
   id: ramdonString(8),
   description: "",
   unitAmountExcludingTax: "",
   quantity: "1",
-  total: 0,
+  amount: 0,
+  currency: "",
+  amountExcludingTax: 0,
+  tax: 0,
+  taxScale: 0,
 });
 
 const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
@@ -42,7 +48,7 @@ const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
   if (items != null) {
     items.forEach((item) => {
       item.id = ramdonString(8);
-      item.total = Number(item.quantity) * Number(item.unitAmountExcludingTax);
+      item.amount = Number(item.quantity) * Number(item.unitAmountExcludingTax);
     });
   }
 
@@ -161,7 +167,7 @@ const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
       });
       newList = update(newList, {
         [idx]: {
-          total: {
+          amount: {
             $set:
               Number(newList[idx].quantity) *
               Number(newList[idx].unitAmountExcludingTax),
@@ -184,7 +190,8 @@ const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
   const getTotal = (invoices: InvoiceItem[]): number => {
     const total = invoices.reduce(
       (accu, curr) =>
-        accu + Math.round((curr.total! + Number.EPSILON) * 100) / 100,
+        accu +
+        Math.round(((curr.amount as number) + Number.EPSILON) * 100) / 100,
       0
     );
     return total;
@@ -271,7 +278,7 @@ const Index = ({ user, isOpen, items, toggleModal, refresh }: Props) => {
             />
           </Col>
           <Col span={3}>
-            {isNaN(v.total!)
+            {isNaN(v.amount as number)
               ? ""
               : `${CURRENCY[currency].symbol} ${getTotal([invoiceList[i]])}`}
           </Col>

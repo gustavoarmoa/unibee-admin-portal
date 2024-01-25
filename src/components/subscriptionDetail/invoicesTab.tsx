@@ -130,7 +130,6 @@ const Index = ({ user }: { user: IProfile | null }) => {
         // TODO: save all the code as ENUM in constant,
         throw new Error(invoiceListRes.data.message);
       }
-      console.log("set state: ", invoiceListRes.data.data.Invoices);
       setInvoiceList(invoiceListRes.data.data.Invoices);
     } catch (err) {
       setLoading(false);
