@@ -19,17 +19,6 @@ interface Props {
   refresh: () => void;
 }
 
-/*
-type InvoiceItem = {
-  id?: string; // for invoice creation, I need a unique id, for editing existing one, no id.
-  description: string;
-  unitAmountExcludingTax: string | number;
-  quantity: string | number;
-  total?: number; // ditto
-}; // total 只是用来本地计算, 但后端不需要, 故: edit时, 需要手动计算total.
-// id, total are optional, but for editing, I need to fill these 2 fields with actual value.
-*/
-
 const newPlaceholderItem = (): InvoiceItem => ({
   id: ramdonString(8),
   description: "",
