@@ -106,6 +106,26 @@ export const activatePlan = async (planId: number) => {
   );
 };
 
+export const togglePublishReq = async ({
+  planId,
+  publishAction,
+}: {
+  planId: number;
+  publishAction: "PUBLISH" | "UNPUBLISH";
+}) => {
+  // 1: to publish, 0: to unpublish
+  const token = localStorage.getItem("merchantToken");
+  const body = { planId };
+  const url = `${API_URL}/merchant/plan/subscription_plan_${
+    publishAction === "PUBLISH" ? "publish" : "unpublished"
+  }`;
+  return await axios.post(url, body, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
+};
+
 export const getSublist = async () => {
   const token = localStorage.getItem("merchantToken");
   const body = {

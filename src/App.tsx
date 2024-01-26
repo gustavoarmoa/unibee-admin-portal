@@ -21,6 +21,7 @@ import {
 import { Layout, Menu, message, theme } from "antd";
 
 import Dashboard from "./components/dashboard";
+import Invoices from "./components/invoices";
 import PricePlans from "./components/pricePlans";
 import PricePlanList from "./components/pricePlansList";
 import PlanNew from "./components/newSubplan";
@@ -56,7 +57,8 @@ function getItem(
 const items: MenuItem[] = [
   getItem("Plan", "/plan/list", <DesktopOutlined />),
   getItem("Subscription", "/subscription/list", <PieChartOutlined />),
-  getItem("Dashboard", "/dashboard", <PieChartOutlined />),
+  getItem("Analytics", "/analytics", <PieChartOutlined />),
+  getItem("Invoices", "/invoices", <PieChartOutlined />),
   getItem("Profile", "/profile", <PieChartOutlined />),
   getItem("Settings", "/settings", <PieChartOutlined />),
 ];
@@ -191,7 +193,8 @@ const App: React.FC = () => {
                     element={<Navigate to={`${APP_PATH}subscription/list`} />}
                   />
                   <Route path={`${APP_PATH}profile`} Component={Profile} />
-                  <Route path={`${APP_PATH}dashboard`} Component={Dashboard} />
+                  <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
+                  <Route path={`${APP_PATH}invoices`} Component={Invoices} />
                   <Route path={`${APP_PATH}settings`} Component={Settings} />
                   <Route
                     path={`${APP_PATH}subscription`}
@@ -212,7 +215,7 @@ const App: React.FC = () => {
               </div>
             </Content>
             <Footer style={{ textAlign: "center" }}>
-              UniBee - your one-stop billing & invoicing solution ©2024
+              UniBee - Your one-stop solutioin for billing & invoicing ©2024
             </Footer>
           </Layout>
         </Layout>

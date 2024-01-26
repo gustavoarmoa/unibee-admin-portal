@@ -1,17 +1,6 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Space,
-  Table,
-  Tag,
-  Button,
-  Form,
-  Input,
-  Select,
-  message,
-  Spin,
-} from "antd";
+import { Button, Form, Input, Select, message, Spin } from "antd";
 import type { SelectProps } from "antd";
 import {
   getPlanDetail,
@@ -20,36 +9,18 @@ import {
   savePlan,
 } from "../requests";
 import { CURRENCY, PLAN_STATUS } from "../constants";
-import { LoadingOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  LoadingOutlined,
+  MinusOutlined,
+} from "@ant-design/icons";
+import { IPlan } from "../shared.types";
+import { togglePublishReq } from "../requests";
 
 const options: SelectProps["options"] = [];
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
-
-type Plan = {
-  id: number;
-  gmtCreate: string;
-  gmtModify: string;
-  companyId: number;
-  merchantId: number;
-  planName: string;
-  amount: number;
-  currency: string;
-  intervalUnit: string;
-  intervalCount: number;
-  description: string;
-  isDeleted: number;
-  imageUrl: string;
-  homeUrl: string;
-  channelProductName: string;
-  channelProductDescription: string;
-  taxPercentage: number;
-  taxInclusive: number;
-  type: number;
-  status: number;
-  bindingAddonIds: string;
-};
 
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
@@ -58,10 +29,10 @@ const Index = () => {
   const params = useParams();
   const [loading, setLoading] = useState(false);
   const [activating, setActivating] = useState(false);
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [addons, setAddons] = useState<Plan[]>([]);
-  const [selectAddons, setSelectAddons] = useState<Plan[]>([]);
-  const [selectedAddon, setSelectedAddon] = useState<number[]>([]);
+  const [plan, setPlan] = useState<IPlan | null>(null);
+  const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have
+  const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
+  const [selectedAddon, setSelectedAddon] = useState<number[]>([]); // from the above selectAddons, which are selected(addon Id array)
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
@@ -203,71 +174,92 @@ const Index = () => {
     }
   };
 
-  useEffect(() => {
-    // console.log("params: ", params.planId, "//", typeof params.planId);
+  const fetchData = async () => {
     const planId = Number(params.planId);
-    const fetchData = async () => {
-      if (isNaN(planId)) {
-        return;
-      }
-      let planListRes: any, planDetailRes: any;
-      try {
-        setLoading(true);
-        const res = ([planListRes, planDetailRes] = await Promise.all([
-          // any rejected promise will jump to the catch block, this is what we want.
-          getPlanList({ type: 2, status: 2 }), // type: 2 (addon), status: 2 (active),
-          getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
-        ]));
-        setLoading(false);
-        console.log(
-          "[planListRes, planDetailRes]",
-          planListRes,
-          "///",
-          planDetailRes
-        );
-
-        res.forEach((r) => {
-          const code = r.data.code;
-          code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-          if (code != 0) {
-            // TODO: save all the code as ENUM in constant,
-            throw new Error(r.data.message);
-          }
-        });
-      } catch (err) {
-        setLoading(false);
-        if (err instanceof Error) {
-          console.log("err in detail page: ", err.message);
-          message.error(err.message);
-        } else {
-          message.error("Unknown error");
-        }
-        return;
-      }
-
-      planDetailRes.data.data.Plan.plan.amount = getAmount(
-        planDetailRes.data.data.Plan.plan.amount,
-        planDetailRes.data.data.Plan.plan.currency
-      ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
-
-      setPlan(planDetailRes.data.data.Plan.plan);
-      if (planDetailRes.data.data.Plan.addons != null) {
-        setSelectedAddon(
-          planDetailRes.data.data.Plan.addons.map((a: any) => a.id)
-        );
-      }
-      const addons = planListRes.data.data.Plans.map((p: any) => p.plan);
-      setAddons(addons);
-      setSelectAddons(
-        addons.filter(
-          (a: any) =>
-            a.intervalCount ==
-              planDetailRes.data.data.Plan.plan.intervalCount &&
-            a.intervalUnit == planDetailRes.data.data.Plan.plan.intervalUnit &&
-            a.currency == planDetailRes.data.data.Plan.plan.currency
-        )
+    if (isNaN(planId)) {
+      return;
+    }
+    let planListRes: any, planDetailRes: any;
+    try {
+      setLoading(true);
+      const res = ([planListRes, planDetailRes] = await Promise.all([
+        // any rejected promise will jump to the catch block, this is what we want.
+        getPlanList({ type: 2, status: 2 }), // type: 2 (addon), status: 2 (active),
+        getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
+      ]));
+      setLoading(false);
+      console.log(
+        "[planListRes, planDetailRes]",
+        planListRes,
+        "///",
+        planDetailRes
       );
-    };
+
+      res.forEach((r) => {
+        const code = r.data.code;
+        code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
+        if (code != 0) {
+          throw new Error(r.data.message);
+        }
+      });
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("err in detail page: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
+
+    planDetailRes.data.data.Plan.plan.amount = getAmount(
+      planDetailRes.data.data.Plan.plan.amount,
+      planDetailRes.data.data.Plan.plan.currency
+    ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
+
+    setPlan(planDetailRes.data.data.Plan.plan);
+    if (planDetailRes.data.data.Plan.addons != null) {
+      setSelectedAddon(
+        planDetailRes.data.data.Plan.addons.map((a: any) => a.id)
+      );
+    }
+    const addons = planListRes.data.data.Plans.map((p: any) => p.plan);
+    setAddons(addons);
+    setSelectAddons(
+      addons.filter(
+        (a: any) =>
+          a.intervalCount == planDetailRes.data.data.Plan.plan.intervalCount &&
+          a.intervalUnit == planDetailRes.data.data.Plan.plan.intervalUnit &&
+          a.currency == planDetailRes.data.data.Plan.plan.currency
+      )
+    );
+  };
+
+  const togglePublish = async () => {
+    try {
+      const publishRes = await togglePublishReq({
+        planId: plan!.id,
+        publishAction: plan!.publishStatus == 1 ? "PUBLISH" : "UNPUBLISH",
+      });
+      console.log("toggle publish res: ", publishRes);
+      const statusCode = publishRes.data.code;
+      if (statusCode != 0) {
+        statusCode == 61 && relogin();
+        throw new Error(publishRes.data.message);
+      }
+      fetchData();
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log("err toggleing publish status: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -291,7 +283,7 @@ const Index = () => {
           style={{ maxWidth: 600 }}
           initialValues={plan}
         >
-          <Form.Item label="ID" name="id" hidden initialValue={15621}>
+          <Form.Item label="ID" name="id" hidden>
             <Input disabled />
           </Form.Item>
 
@@ -314,6 +306,26 @@ const Index = () => {
 
           <Form.Item label="Status" name="status">
             <span>{PLAN_STATUS[plan.status]}</span>
+          </Form.Item>
+
+          <Form.Item label="Is Published" name="publishStatus">
+            <span>
+              {plan.publishStatus == 2 ? (
+                <CheckCircleOutlined
+                  style={{ color: "green", fontSize: "18px" }}
+                />
+              ) : (
+                <MinusOutlined style={{ color: "red", fontSize: "18px" }} />
+              )}{" "}
+            </span>
+            <Button
+              style={{ marginLeft: "12px" }}
+              onClick={togglePublish}
+              disabled={plan.status != 2}
+            >
+              {/* 2: active, you can only publish/unpublish an active plan */}
+              {plan.publishStatus == 2 ? "Unpublish" : "Publish"}
+            </Button>
           </Form.Item>
 
           <Form.Item
@@ -455,7 +467,7 @@ const Index = () => {
               loading={activating}
               disabled={plan.status != 1 || activating || loading}
             >
-              Publish
+              Activate
             </Button>
           </div>
           {/* </Form.Item>  */}

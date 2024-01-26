@@ -51,9 +51,6 @@ const Index = ({ user }: { user: IProfile | null }) => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0); // pagination props
   const [newInvoiceModal, setNewInvoiceModal] = useState(false);
-  const [selectedInvoiceId, setSelectedInvoiceId] = useState<null | string>(
-    null
-  );
   const [invoiceIdx, setInvoiceIdx] = useState(-1); // -1: not selected
   const navigate = useNavigate();
   const relogin = () =>
@@ -111,9 +108,11 @@ const Index = ({ user }: { user: IProfile | null }) => {
   const toggleNewInvoiceModal = () => setNewInvoiceModal(!newInvoiceModal);
 
   const onPageChange = (page: number, pageSize: number) => {
-    console.log("page change: ", page, "//", pageSize);
+    // console.log("page change: ", page, "//", pageSize);
     setPage(page - 1);
   };
+
+  const permission = () => {};
 
   const fetchData = async () => {
     if (user == null) {

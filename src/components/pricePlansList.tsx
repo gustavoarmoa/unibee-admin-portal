@@ -6,27 +6,17 @@ import type { ColumnsType } from "antd/es/table";
 import { PLAN_STATUS } from "../constants";
 import { showAmount } from "../helpers";
 import { getPlanList } from "../requests";
-import { LoadingOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  LoadingOutlined,
+  MinusOutlined,
+} from "@ant-design/icons";
+import { IPlan } from "../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 
-interface DataType {
-  id: number;
-  planName: string; // plan name
-  description: string;
-  type: number; // 1: main plan, 2: add-on
-  amount: number;
-  currency: string;
-  intervalUnit: string;
-  intervalCount: number;
-  status: number;
-  price: string;
-  isPublished: boolean;
-  // addons?: string;
-}
-
-const columns: ColumnsType<DataType> = [
+const columns: ColumnsType<IPlan> = [
   {
     title: "Name",
     dataIndex: "planName",
@@ -66,17 +56,17 @@ const columns: ColumnsType<DataType> = [
       return <span>{PLAN_STATUS[plan.status]}</span>;
     },
   },
-  /* {
-    title: "is published",
-    dataIndex: "isPublished",
-    key: "isPublished",
-    render: (_, isPublished) =>
-      isPublished ? (
+  {
+    title: "Published",
+    dataIndex: "publishStatus",
+    key: "publishStatus",
+    render: (publishStatus, plan) =>
+      publishStatus == 2 ? (
         <CheckCircleOutlined style={{ color: "green" }} />
       ) : (
         <MinusOutlined style={{ color: "red" }} />
       ),
-  }, */
+  },
   {
     title: "Action",
     key: "action",
@@ -92,15 +82,15 @@ const columns: ColumnsType<DataType> = [
 const Index = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState<DataType[]>([]);
+  const [plan, setPlan] = useState<IPlan[]>([]);
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
       state: { msg: "session expired, please re-login" },
     });
 
-  const normalize = (data: any): DataType[] => {
-    // console.log("normalize: ", data);
+  /*
+  const normalize = (data: any): IPlan[] => {
     const plans = data.map((d: any) => {
       return {
         id: d.plan.id,
@@ -112,13 +102,11 @@ const Index = () => {
         currency: d.plan.currency,
         intervalCount: d.plan.intervalCount,
         intervalUnit: d.plan.intervalUnit,
-        isPublished: true,
-        // addons:
       };
     });
-    // console.log("after norM: ", plans);
     return plans;
   };
+  */
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -135,7 +123,7 @@ const Index = () => {
           statusCode == 61 && relogin();
           throw new Error(planListRes.data.message);
         }
-        setPlan(normalize(planListRes.data.data.Plans));
+        setPlan(planListRes.data.data.Plans.map((p: any) => ({ ...p.plan })));
       } catch (err) {
         setLoading(false);
         if (err instanceof Error) {
