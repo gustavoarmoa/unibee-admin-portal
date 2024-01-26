@@ -123,6 +123,9 @@ const Index = () => {
           statusCode == 61 && relogin();
           throw new Error(planListRes.data.message);
         }
+        if (planListRes.data.data.Plans == null) {
+          return;
+        }
         setPlan(planListRes.data.data.Plans.map((p: any) => ({ ...p.plan })));
       } catch (err) {
         setLoading(false);

@@ -6,6 +6,7 @@ import {
   Popover,
   Row,
   Spin,
+  Table,
   message,
 } from "antd";
 import dayjs from "dayjs";
@@ -23,6 +24,7 @@ import {
   extendDueDate,
   getPlanList,
   getSubDetail,
+  getSubTimeline,
   resumeSub,
   terminateSub,
   updateSubscription,
@@ -39,6 +41,7 @@ import {
   LoadingOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
+import { ColumnsType } from "antd/es/table";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -345,6 +348,8 @@ const Index = ({
       addonPlanId: a.addonPlan.id,
     }));
     localActiveSub.user = s.user;
+    localActiveSub.unfinishedSubscriptionPendingUpdate =
+      s.unfinishedSubscriptionPendingUpdate;
     console.log("active sub: ", localActiveSub);
 
     setSelectedPlan(s.planId.id);
@@ -495,6 +500,7 @@ const Index = ({
       {/* <UserInfoSection user={activeSub?.user || null} /> */}
       <SubscriptionInfoSection
         subInfo={activeSub}
+        plans={plans}
         onDueDateChange={onDueDateChange}
         refresh={fetchData}
         toggleTerminateModal={toggleTerminateModal}
@@ -515,6 +521,7 @@ const rowStyle: CSSProperties = {
 
 interface ISubSectionProps {
   subInfo: ISubscriptionType | null;
+  plans: IPlan[];
   onDueDateChange: (date: any, dateStr: string) => void;
   refresh: () => void;
   toggleTerminateModal: () => void;
@@ -523,6 +530,7 @@ interface ISubSectionProps {
 }
 const SubscriptionInfoSection = ({
   subInfo,
+  plans,
   onDueDateChange,
   refresh,
   toggleTerminateModal,
@@ -688,9 +696,145 @@ const SubscriptionInfoSection = ({
           )}
         </div>
       )}
+      {subInfo?.unfinishedSubscriptionPendingUpdate && (
+        <PendingUpdateSection subInfo={subInfo} />
+      )}
+      <SubTimeline userId={subInfo?.userId} plans={plans} />
+    </>
+  );
+};
+
+const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
+  return (
+    <>
+      <Divider orientation="left" style={{ margin: "32px 0" }}>
+        Pending update
+      </Divider>
+      <Row>
+        <Col span={8}>Effective Time</Col>
+        <Col span={4}>Paid</Col>
+      </Row>
+      <Row>
+        <Col span={8}>
+          {new Date(
+            subInfo.unfinishedSubscriptionPendingUpdate!.effectTime * 1000
+          ).toLocaleDateString()}
+        </Col>
+        <Col span={4}> {subInfo.unfinishedSubscriptionPendingUpdate?.paid}</Col>
+      </Row>
+    </>
+  );
+};
+
+// -------------
+type SubTimeline = {
+  currency: string;
+  id: number;
+  planId: number;
+  planName: string;
+  periodStart: number;
+  periodEnd: number;
+  subscriptionId: string;
+  invoiceId: string;
+};
+
+const SubTimeline = ({
+  userId,
+  plans,
+}: {
+  userId: number | undefined;
+  plans: IPlan[];
+}) => {
+  // parent updated, how can I knwo that, and update myself
+  const [timeline, setTimeline] = useState<SubTimeline[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const columns: ColumnsType<SubTimeline> = [
+    {
+      title: "Plan",
+      dataIndex: "planId",
+      key: "planId",
+      render: (planId) => plans.find((p) => p.id == planId)?.planName,
+    },
+    {
+      title: "Start",
+      dataIndex: "periodStart",
+      key: "periodStart",
+      render: (d) => new Date(d * 1000).toLocaleDateString(),
+    },
+    {
+      title: "End",
+      dataIndex: "periodEnd",
+      key: "periodEnd",
+      render: (d) => new Date(d * 1000).toLocaleDateString(),
+    },
+    {
+      title: "Subscription Id",
+      dataIndex: "subscriptionId",
+      key: "subscriptionId",
+    },
+    {
+      title: "Invoice Id",
+      dataIndex: "invoiceId",
+      key: "invoiceId",
+    },
+  ];
+
+  useEffect(() => {
+    const fetchTimeline = async () => {
+      if (userId == null) {
+        return;
+      }
+      try {
+        setLoading(true);
+        const timelineRes = await getSubTimeline({ userId });
+        setLoading(false);
+        console.log("timeline res: ", timelineRes);
+        const code = timelineRes.data.code;
+        // code == 61 && relogin();
+        if (code != 0) {
+          throw new Error(timelineRes.data.message);
+        }
+        setTimeline(timelineRes.data.data.subscriptionTimeLines);
+      } catch (err) {
+        setLoading(false);
+        if (err instanceof Error) {
+          console.log("err getting sub timeline: ", err.message);
+          message.error(err.message);
+        } else {
+          message.error("Unknown error");
+        }
+      }
+    };
+    fetchTimeline();
+  }, [userId]);
+  return (
+    <>
       <Divider orientation="left" style={{ margin: "32px 0" }}>
         Subscription History
       </Divider>
+      <Table
+        columns={columns}
+        dataSource={timeline}
+        rowKey={"id"}
+        pagination={false}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
+        }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {
+              // console.log("row click: ", record, "///", rowIndex);
+              // navigate(`${APP_PATH}plan/${record.id}`);
+            }, // click row
+            // onDoubleClick: (event) => {}, // double click row
+            // onContextMenu: (event) => {}, // right button click row
+            // onMouseEnter: (event) => {}, // mouse enter row
+            // onMouseLeave: (event) => {}, // mouse leave row
+          };
+        }}
+      />
     </>
   );
 };

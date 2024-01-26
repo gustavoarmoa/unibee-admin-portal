@@ -274,6 +274,27 @@ export const resumeSub = async (subscriptionId: string) => {
   });
 };
 
+export const getSubTimeline = async ({ userId }: { userId: number }) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = {
+    merchantId: 15621,
+    userId,
+    // "sortField": "string",
+    // "sortType": "string",
+    page: 0,
+    count: 100,
+  };
+  return await axios.post(
+    `${API_URL}/merchant/subscription/subscription_timeline_list`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
 export const getCountryList = async (merchantId: number) => {
   const token = localStorage.getItem("merchantToken");
   const body = {
