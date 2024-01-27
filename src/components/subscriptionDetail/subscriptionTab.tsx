@@ -37,8 +37,10 @@ import ChangePlanModal from "./modals/changePlan";
 import UpdateSubPreviewModal from "./modals/updateSubPreview";
 import { SUBSCRIPTION_STATUS } from "../../constants";
 import {
+  CheckCircleOutlined,
   InfoCircleOutlined,
   LoadingOutlined,
+  MinusOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
@@ -350,6 +352,29 @@ const Index = ({
     localActiveSub.user = s.user;
     localActiveSub.unfinishedSubscriptionPendingUpdate =
       s.unfinishedSubscriptionPendingUpdate;
+    if (localActiveSub.unfinishedSubscriptionPendingUpdate != null) {
+      if (
+        localActiveSub.unfinishedSubscriptionPendingUpdate.updateAddons != null
+      ) {
+        localActiveSub.unfinishedSubscriptionPendingUpdate.updateAddons =
+          localActiveSub.unfinishedSubscriptionPendingUpdate.updateAddons.map(
+            (a: any) => ({
+              ...a.addonPlan,
+              addonPlanId: a.addonPlan.id,
+            })
+          );
+      }
+    }
+
+    /*
+interface ISubAddon extends IPlan {
+  // when update subscription plan, I need to know which addons users have selected,
+  // then apply them on the plan
+  quantity: number;
+  addonPlanId: number;
+}
+    */
+
     console.log("active sub: ", localActiveSub);
 
     setSelectedPlan(s.planId.id);
@@ -518,6 +543,7 @@ const rowStyle: CSSProperties = {
   alignItems: "center",
   height: "32px",
 };
+const colStyle: CSSProperties = { fontWeight: "bold" };
 
 interface ISubSectionProps {
   subInfo: ISubscriptionType | null;
@@ -540,18 +566,18 @@ const SubscriptionInfoSection = ({
   return (
     <>
       <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Plan</span>
+        <Col span={4} style={colStyle}>
+          Plan
         </Col>
         <Col span={6}>{subInfo?.plan?.planName}</Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Plan description</span>
+        <Col span={4} style={colStyle}>
+          Plan description
         </Col>
         <Col span={6}>{subInfo?.plan?.description}</Col>
       </Row>
       <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Status</span>
+        <Col span={4} style={colStyle}>
+          Status
         </Col>
         <Col span={6}>
           {subInfo && SUBSCRIPTION_STATUS[subInfo.status]}{" "}
@@ -562,21 +588,21 @@ const SubscriptionInfoSection = ({
             <SyncOutlined />
           </span>
         </Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Subscription Id</span>
+        <Col span={4} style={colStyle}>
+          Subscription Id
         </Col>
         <Col span={6}>{subInfo?.subscriptionId}</Col>
       </Row>
       <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Plan price</span>
+        <Col span={4} style={colStyle}>
+          Plan price
         </Col>
         <Col span={6}>
           {subInfo?.plan?.amount &&
             showAmount(subInfo?.plan?.amount, subInfo?.plan?.currency)}
         </Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Addons price</span>
+        <Col span={4} style={colStyle}>
+          Addons price
         </Col>
         <Col span={6}>
           {subInfo &&
@@ -618,15 +644,23 @@ const SubscriptionInfoSection = ({
         </Col>
       </Row>
       <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Total amount</span>
+        <Col span={4} style={colStyle}>
+          Total amount
         </Col>
         <Col span={6}>
-          {subInfo?.amount && showAmount(subInfo.amount, subInfo.currency)}
+          {subInfo?.amount && showAmount(subInfo.amount, subInfo.currency)}{" "}
+          {subInfo && subInfo.taxScale && (
+            <span style={{ color: "#757575", fontSize: "11px" }}>
+              {" "}
+              {`(${
+                subInfo && subInfo.taxScale && subInfo.taxScale / 100
+              }% tax incl)`}{" "}
+            </span>
+          )}
         </Col>
 
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Bill period</span>
+        <Col span={4} style={colStyle}>
+          Bill period
         </Col>
         <Col span={6}>
           {subInfo != null && subInfo.plan != null
@@ -635,12 +669,12 @@ const SubscriptionInfoSection = ({
         </Col>
       </Row>
       <Row style={rowStyle}>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>First pay</span>
+        <Col span={4} style={colStyle}>
+          First pay
         </Col>
         <Col span={6}>{subInfo?.firstPayTime}</Col>
-        <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Next due date</span>
+        <Col span={4} style={colStyle}>
+          Next due date
         </Col>
         <Col span={6}>
           {subInfo && (
@@ -678,10 +712,6 @@ const SubscriptionInfoSection = ({
           {subInfo.cancelAtPeriodEnd == 0 ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <Button onClick={toggleTerminateModal}>End subscription</Button>
-              {/* <Radio.Group onChange={onEndSubModeChange} value={endSubMode}>
-                  <Radio value={1}>immediately</Radio>
-                  <Radio value={2}>end of this cycle</Radio>
-            </Radio.Group> */}
             </div>
           ) : (
             <div>
@@ -705,22 +735,69 @@ const SubscriptionInfoSection = ({
 };
 
 const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
+  const i = subInfo.unfinishedSubscriptionPendingUpdate;
   return (
     <>
       <Divider orientation="left" style={{ margin: "32px 0" }}>
         Pending update
       </Divider>
-      <Row>
-        <Col span={8}>Effective Time</Col>
-        <Col span={4}>Paid</Col>
-      </Row>
-      <Row>
-        <Col span={8}>
-          {new Date(
-            subInfo.unfinishedSubscriptionPendingUpdate!.effectTime * 1000
-          ).toLocaleDateString()}
+      <Row style={rowStyle}>
+        <Col span={4} style={colStyle}>
+          Plan
         </Col>
-        <Col span={4}> {subInfo.unfinishedSubscriptionPendingUpdate?.paid}</Col>
+        <Col span={6}>{i!.updatePlan.planName}</Col>
+        <Col span={4} style={colStyle}>
+          Plan description
+        </Col>
+        <Col span={6}>{i!.updatePlan.description}</Col>
+      </Row>
+
+      <Row style={rowStyle}>
+        <Col span={4} style={colStyle}>
+          Plan Price
+        </Col>
+        <Col span={6}>
+          {showAmount(i!.updatePlan.amount, i!.updatePlan.currency)}
+        </Col>
+        <Col span={4} style={colStyle}>
+          Addon Price
+        </Col>
+        <Col span={6}>addon prices</Col>
+      </Row>
+
+      <Row style={rowStyle}>
+        <Col span={4} style={colStyle}>
+          Total amount
+        </Col>
+        <Col span={6}>
+          {" "}
+          {showAmount(i!.updateAmount, i!.updatePlan.currency)}
+        </Col>
+        <Col span={4} style={colStyle}>
+          Bill period
+        </Col>
+        <Col span={6}>
+          {`${i!.updatePlan.intervalCount} ${i!.updatePlan.intervalUnit}`}
+        </Col>
+      </Row>
+
+      <Row style={rowStyle}>
+        <Col span={4} style={colStyle}>
+          Effective Time
+        </Col>
+        <Col span={6}>
+          {new Date(i!.effectTime * 1000).toLocaleDateString()}
+        </Col>
+        <Col span={4} style={colStyle}>
+          <span>Paid</span>
+        </Col>
+        <Col span={6}>
+          {i!.paid == 1 ? (
+            <CheckCircleOutlined style={{ color: "green" }} />
+          ) : (
+            <MinusOutlined style={{ color: "red" }} />
+          )}
+        </Col>
       </Row>
     </>
   );

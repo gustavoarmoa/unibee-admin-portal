@@ -89,25 +89,6 @@ const Index = () => {
       state: { msg: "session expired, please re-login" },
     });
 
-  /*
-  const normalize = (data: any): IPlan[] => {
-    const plans = data.map((d: any) => {
-      return {
-        id: d.plan.id,
-        amount: d.plan.amount,
-        planName: d.plan.planName,
-        type: d.plan.type,
-        status: d.plan.status,
-        description: d.plan.description,
-        currency: d.plan.currency,
-        intervalCount: d.plan.intervalCount,
-        intervalUnit: d.plan.intervalUnit,
-      };
-    });
-    return plans;
-  };
-  */
-
   useEffect(() => {
     const fetchPlan = async () => {
       setLoading(true);

@@ -2,29 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Checkbox, Input } from "antd";
 import type { CheckboxChangeEvent } from "antd/es/checkbox";
 import { showAmount } from "../helpers";
-// import { ISubscriptionType, IPlan } from "../shared.types";
 import { IPlan } from "../shared.types";
-
-/*
-interface IAddon extends IPlan {
-  quantity: number | null;
-  checked: boolean;
-}
-
-interface IPlan {
-  id: number;
-  planName: string;
-  description: string;
-  type: number; // 1: main plan, 2: add-on
-  amount: number;
-  currency: string;
-  intervalUnit: string;
-  intervalCount: number;
-  status: number;
-  addons?: IAddon[];
-}
-
-*/
 
 interface IPLanProps {
   plan: IPlan;

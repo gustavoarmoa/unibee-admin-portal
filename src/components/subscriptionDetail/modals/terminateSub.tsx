@@ -48,7 +48,7 @@ const TerminateSub = ({
         <Col span={6}>
           <span style={{ fontWeight: "bold" }}>First name</span>
         </Col>
-        <Col span={6}>{subInfo?.user?.firstName}</Col>
+        <Col span={7}>{subInfo?.user?.firstName}</Col>
         <Col span={5}>
           <span style={{ fontWeight: "bold" }}> Lastname</span>
         </Col>
@@ -58,7 +58,7 @@ const TerminateSub = ({
         <Col span={6}>
           <span style={{ fontWeight: "bold" }}>Plan</span>
         </Col>
-        <Col span={6}>{subInfo?.plan?.planName}</Col>
+        <Col span={7}>{subInfo?.plan?.planName}</Col>
         <Col span={5}>
           <span style={{ fontWeight: "bold" }}>Amount</span>
         </Col>
@@ -71,7 +71,7 @@ const TerminateSub = ({
         <Col span={6}>
           <span style={{ fontWeight: "bold" }}>Current due date</span>
         </Col>
-        <Col span={6}>
+        <Col span={7}>
           {new Date(
             (subInfo?.currentPeriodEnd as number) * 1000
           ).toDateString()}

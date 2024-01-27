@@ -220,61 +220,148 @@ const PermissionTab = () => (
         >
           <Col span={2}>{r}</Col>
           <Col span={2}>
-            <Checkbox defaultChecked={role[r].appConfig.read}>Read</Checkbox>
-            <Checkbox defaultChecked={role[r].appConfig.write}>Write</Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox defaultChecked={role[r].emailTemplate.read}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].appConfig.read}
+            >
               Read
             </Checkbox>
-            <Checkbox defaultChecked={role[r].emailTemplate.write}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].appConfig.write}
+            >
               Write
             </Checkbox>
           </Col>
           <Col span={2}>
-            <Checkbox defaultChecked={role[r].invoiceTemplate.read}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].emailTemplate.read}
+            >
               Read
             </Checkbox>
-            <Checkbox defaultChecked={role[r].invoiceTemplate.write}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].emailTemplate.write}
+            >
               Write
             </Checkbox>
           </Col>
           <Col span={2}>
-            <Checkbox defaultChecked={role[r].plan.read}>Read</Checkbox>
-            <Checkbox defaultChecked={role[r].plan.write}>Write</Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox defaultChecked={role[r].subscription.read}>Read</Checkbox>
-            <Checkbox defaultChecked={role[r].subscription.write}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].invoiceTemplate.read}
+            >
+              Read
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].invoiceTemplate.write}
+            >
               Write
             </Checkbox>
           </Col>
           <Col span={2}>
-            <Checkbox defaultChecked={role[r].invoice.read}>Read</Checkbox>
-            <Checkbox defaultChecked={role[r].invoice.write}>Write</Checkbox>
-            <Checkbox defaultChecked={role[r].invoice.generate}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].plan.read}
+            >
+              Read
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].plan.write}
+            >
+              Write
+            </Checkbox>
+          </Col>
+          <Col span={2}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].subscription.read}
+            >
+              Read
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].subscription.write}
+            >
+              Write
+            </Checkbox>
+          </Col>
+          <Col span={2}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].invoice.read}
+            >
+              Read
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].invoice.write}
+            >
+              Write
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].invoice.generate}
+            >
               Generate
             </Checkbox>
           </Col>
           <Col span={2}>
-            <Checkbox defaultChecked={role[r].accountData.write}>Read</Checkbox>
-            <Checkbox defaultChecked={role[r].accountData.read}>Write</Checkbox>
-            <Checkbox defaultChecked={role[r].accountData.invite}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].accountData.write}
+            >
+              Read
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].accountData.read}
+            >
+              Write
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].accountData.invite}
+            >
               Invite
             </Checkbox>
-            <Checkbox defaultChecked={role[r].accountData.permissionSetting}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].accountData.permissionSetting}
+            >
               set Permission
             </Checkbox>
           </Col>
           <Col span={2}>
-            <Checkbox defaultChecked={role[r].customerData.read}>Read</Checkbox>
-            <Checkbox defaultChecked={role[r].customerData.write}>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].customerData.read}
+            >
+              Read
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].customerData.write}
+            >
               Write
             </Checkbox>
           </Col>
           <Col span={2}>
-            <Checkbox defaultChecked={role[r].analytic.read}>Read</Checkbox>
-            <Checkbox defaultChecked={role[r].analytic.export}>Export</Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].analytic.read}
+            >
+              Read
+            </Checkbox>
+            <Checkbox
+              disabled={r == "App Owner"}
+              defaultChecked={role[r].analytic.export}
+            >
+              Export
+            </Checkbox>
           </Col>
         </Row>
         <Divider />
