@@ -184,6 +184,7 @@ const App: React.FC = () => {
                   minHeight: 360,
                   background: colorBgContainer,
                   borderRadius: borderRadiusLG,
+                  // height: "100%",
                 }}
               >
                 <Routes>
