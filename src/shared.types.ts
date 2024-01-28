@@ -70,6 +70,7 @@ interface ISubscriptionType {
   cancelAtPeriodEnd: number; // whether this sub will end at the end of billing cycle, 0: false, 1: true
   amount: number;
   currency: string;
+  taxScale: number; // 20000 means 20%
   plan: IPlan | undefined; // ?????????? why it can be undefined.
   addons: ISubAddon[];
   user: IProfile | null;
