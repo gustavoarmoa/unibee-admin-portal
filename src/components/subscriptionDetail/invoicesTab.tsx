@@ -12,13 +12,13 @@ import {
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 // import { ISubscriptionType } from "../../shared.types";
-import { getInvoiceList } from "../../requests";
+import { getInvoiceList, downloadInvoice } from "../../requests";
 import { IProfile } from "../../shared.types";
 import NewInvoiceModal from "./modals/newInvoice";
 import {
   CloseOutlined,
+  DownloadOutlined,
   EditOutlined,
-  FilePdfOutlined,
   LoadingOutlined,
   MailOutlined,
   UndoOutlined,
@@ -89,16 +89,25 @@ const Index = ({ user }: { user: IProfile | null }) => {
             <EditOutlined />
           </span>
           <span style={{ cursor: "pointer" }}>
+            <CloseOutlined />
+          </span>
+          <span style={{ cursor: "pointer" }}>
             <MailOutlined />
           </span>
           <span style={{ cursor: "pointer" }}>
             <UndoOutlined />
           </span>
-          <span style={{ cursor: "pointer" }}>
-            <CloseOutlined />
-          </span>
-          <span style={{ cursor: "pointer" }}>
-            <FilePdfOutlined />
+          <span
+            onClick={() => downloadInvoice(record.sendPdf)}
+            style={{
+              cursor: `${
+                record.sendPdf != null && record.sendPdf != ""
+                  ? "pointer"
+                  : "not-allowed"
+              }`,
+            }}
+          >
+            <DownloadOutlined />
           </span>
         </Space>
       ),

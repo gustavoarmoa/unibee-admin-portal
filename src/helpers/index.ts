@@ -2,10 +2,11 @@ import { CURRENCY } from "../constants";
 
 export const showAmount = (
   amount: number,
-  currency: keyof typeof CURRENCY
+  currency: keyof typeof CURRENCY,
+  ignoreFactor?: boolean
 ): string => {
   const c = CURRENCY[currency];
-  return `${c.symbol}${amount / c.stripe_factor}`;
+  return `${c.symbol}${amount / (ignoreFactor ? 1 : c.stripe_factor)}`;
 };
 
 export const daysBetweenDate = (

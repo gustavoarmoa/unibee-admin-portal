@@ -41,7 +41,6 @@ const Index = ({
   refresh,
 }: Props) => {
   const [loading, setLoading] = useState(false);
-  console.log("readonly: ", readonly);
 
   if (items != null) {
     // we're creating new invoice
@@ -197,7 +196,10 @@ const Index = ({
     if (isNaN(total)) {
       return "";
     }
-    return showAmount(total, currency);
+    // 3rd argument is 'whether ignoreFactor',
+    // readonly is used for reading invoices(no edit/create allowed), the amounts need to take factor into account, 10000 need to show $100
+    // readonly: false, is used when admin need to create a new invoice, $100 need to be shown as $100, no factor considered
+    return showAmount(total, currency, !readonly);
   };
 
   useEffect(() => {}, []);
@@ -281,12 +283,15 @@ const Index = ({
                 {showAmount(v.unitAmountExcludingTax as number, v.currency)}
               </span>
             ) : (
-              <Input
-                type="number"
-                value={v.unitAmountExcludingTax}
-                onChange={onFieldChange(v.id!, "unitAmountExcludingTax")}
-                style={{ width: "80%" }}
-              />
+              <>
+                {CURRENCY[currency].symbol}&nbsp;&nbsp;
+                <Input
+                  type="number"
+                  value={v.unitAmountExcludingTax}
+                  onChange={onFieldChange(v.id!, "unitAmountExcludingTax")}
+                  style={{ width: "80%" }}
+                />
+              </>
             )}
           </Col>
           <Col span={1} style={{ fontSize: "18px" }}>
