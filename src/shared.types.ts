@@ -133,8 +133,10 @@ interface UserInvoice {
   channelInvoiceId: string;
   uniqueId: string;
   gmtCreate: string;
+  gmtModify: string;
   totalAmount: number;
   taxAmount: number;
+  taxScale: number;
   subscriptionAmount: number;
   currency: string;
   lines: InvoiceItem[];
@@ -144,7 +146,6 @@ interface UserInvoice {
   sendEmail: string;
   sendPdf: string;
   data: string;
-  gmtModify: string;
   isDeleted: number;
   link: string;
   channelStatus: string;
@@ -162,6 +163,16 @@ interface UserInvoice {
   refundId: string;
 }
 
+type TInvoicePerm = {
+  editable: boolean; // in list view, can I click the record, and open a Modal to edit it
+  savable: boolean; // in Modal, can I click save
+  creatable: boolean; // in Modal, can I click create
+  deletable: boolean; // in list view, can I click the delete icon
+  refundable: boolean; // in list view, can I cilck the refund icon
+  downloadable: boolean; // download invoice, ditto
+  sendable: boolean; // send invoice via email, ditto
+};
+
 export type {
   IProfile,
   IPlan,
@@ -170,4 +181,5 @@ export type {
   IPreview,
   UserInvoice,
   InvoiceItem,
+  TInvoicePerm,
 };

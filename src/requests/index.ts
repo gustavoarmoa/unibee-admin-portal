@@ -367,20 +367,25 @@ export const getInvoiceList = async ({
   );
 };
 
+type TInvoiceItems = {
+  unitAmountExcludingTax: number;
+  description: string;
+  quantity: number;
+};
+// admin manually create an invoice, still editable until the following publishInvoice() is called.
+// before that, users won't see(or receive) this invoice.
 export const createInvoice = async ({
+  name,
   userId,
   currency,
   taxScale,
   invoiceItems,
 }: {
+  name: string;
   userId: number;
   currency: string;
   taxScale: number;
-  invoiceItems: {
-    unitAmountExcludingTax: number;
-    description: string;
-    quantity: number;
-  }[];
+  invoiceItems: TInvoiceItems[];
 }) => {
   const token = localStorage.getItem("merchantToken");
   const body = {
@@ -389,6 +394,7 @@ export const createInvoice = async ({
     taxScale,
     channelId: 25,
     currency,
+    name,
     lines: invoiceItems,
   };
   return await axios.post(
@@ -401,6 +407,76 @@ export const createInvoice = async ({
     }
   );
 };
+
+// before publish, admin can still edit.
+export const saveInvoice = async ({
+  invoiceId,
+  taxScale,
+  currency,
+  name,
+  invoiceItems,
+}: {
+  invoiceId: string;
+  taxScale: number;
+  currency: string;
+  name: string;
+  invoiceItems: TInvoiceItems[];
+}) => {
+  const body = {
+    invoiceId,
+    taxScale,
+    channelId: 25,
+    currency,
+    name,
+    lines: invoiceItems,
+  };
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(
+    `${API_URL}/merchant/invoice/new_invoice_edit`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+// admin can delete the invoice, before the following publishInvoice() is called
+export const deleteInvoice = async () => {};
+
+// after publish, user will receive an email informing him/her to make the payment.
+// admin cannot edit it anymore, but can cancel it by calling the following cancelInvoice() before user make the payment
+export const publishInvoice = async ({
+  invoiceId,
+  payMethod,
+  daysUtilDue,
+}: {
+  invoiceId: string;
+  payMethod: number;
+  daysUtilDue: number;
+}) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = {
+    invoiceId,
+    payMethod,
+    daysUtilDue,
+  };
+  return await axios.post(
+    `${API_URL}/merchant/invoice/finish_new_invoice`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+// admin can cancel the invoice(make it invalid) before user make the payment.
+export const cancelInvoice = async () => {};
+
+export const refund = async () => {};
 
 export const downloadInvoice = (url: string) => {
   if (url == null || url == "") {

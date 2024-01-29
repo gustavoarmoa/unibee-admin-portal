@@ -16,6 +16,7 @@ const passwordRegx =
 
 const Index = () => {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -58,10 +59,13 @@ const Index = () => {
       lastName == "" ||
       email == "" ||
       password == "" ||
-      password2 == ""
+      password2 == "" ||
+      password != password2 ||
+      !passwordRegx.test(password)
     ) {
       return;
     }
+
     setErrMsg("");
     setSubmitting(true);
     const user_name = "ewo" + Math.random();
@@ -154,6 +158,8 @@ const Index = () => {
             >
               <Form
                 name="basic"
+                form={form}
+                onFinish={onSubmit}
                 labelCol={{
                   span: 10,
                 }}
@@ -257,7 +263,7 @@ const Index = () => {
                     },
                     ({ getFieldValue }) => ({
                       validator(rule, value) {
-                        if (passwordRegx.test(password)) {
+                        if (passwordRegx.test(password) && value == password2) {
                           return Promise.resolve();
                         }
                         return Promise.reject(
@@ -275,7 +281,7 @@ const Index = () => {
 
                 <Form.Item
                   label="Password confirm"
-                  name="passwordConfirm"
+                  name="password2"
                   rules={[
                     {
                       required: true,

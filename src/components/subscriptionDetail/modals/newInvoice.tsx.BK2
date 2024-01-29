@@ -1,13 +1,9 @@
 import { Button, Col, Input, Modal, Row, message, Select, Divider } from "antd";
-import {
-  IProfile,
-  ISubscriptionType,
-  TInvoicePerm,
-} from "../../../shared.types";
+import { IProfile, ISubscriptionType } from "../../../shared.types";
 import { daysBetweenDate, showAmount, ramdonString } from "../../../helpers";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { EditFilled, MinusOutlined, PlusOutlined } from "@ant-design/icons";
-import { createInvoice, saveInvoice, publishInvoice } from "../../../requests";
+import { createInvoice } from "../../../requests";
 import { CURRENCY } from "../../../constants";
 import update from "immutability-helper";
 import { useNavigate } from "react-router-dom";
@@ -19,8 +15,8 @@ interface Props {
   user: IProfile | null;
   isOpen: boolean;
   readonly: boolean;
-  detail: UserInvoice | null; // null means new user, no data available
-  permission: TInvoicePerm;
+  deleteMode: boolean;
+  detail: UserInvoice;
   // items: InvoiceItem[] | null;
   toggleModal: () => void;
   refresh: () => void;
@@ -29,11 +25,11 @@ interface Props {
 const newPlaceholderItem = (): InvoiceItem => ({
   id: ramdonString(8),
   description: "",
-  amount: 0,
   unitAmountExcludingTax: "",
-  amountExcludingTax: 0,
   quantity: "1",
+  amount: 0,
   currency: "",
+  amountExcludingTax: 0,
   tax: 0,
   taxScale: 0,
 });
@@ -44,29 +40,29 @@ const Index = ({
   readonly,
   // items,
   detail,
-  permission,
+  deleteMode,
   toggleModal,
   refresh,
 }: Props) => {
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  if (detail != null) {
-    detail.lines.forEach((item) => {
+
+  if (items != null) {
+    items.forEach((item) => {
       item.id = ramdonString(8);
+      item.amount = Number(item.quantity) * Number(item.unitAmountExcludingTax);
     });
   }
 
+  console.log("readonly/delete: ", readonly, "//", deleteMode);
+
   const [invoiceList, setInvoiceList] = useState<InvoiceItem[]>(
-    detail == null ? [newPlaceholderItem()] : detail.lines
+    items == null ? [newPlaceholderItem()] : items
   );
+  const navigate = useNavigate();
   const defaultCurrency =
-    detail == null || detail.lines.length == 0
-      ? "USD"
-      : detail.lines[0].currency; // assume all invoice items have the same currencies.
+    items == null || items.length == 0 ? "USD" : items[0].currency; // assume all invoice items have the same currencies.
   const [currency, setCurrency] = useState(defaultCurrency);
-  const taxScaleTmp = detail == null ? "" : detail.taxScale / 100;
-  const [taxScale, setTaxScale] = useState<string>(taxScaleTmp + "");
-  console.log("invoice detail/perm: ", detail, "//", permission);
+  const [taxScale, setTaxScale] = useState<string>("");
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
@@ -116,9 +112,7 @@ const Index = ({
     return true;
   };
 
-  // const onNew = async () => {  }
-
-  const onSave = async () => {
+  const onCreate = async () => {
     if (!validateFields()) {
       return;
     }
@@ -130,49 +124,34 @@ const Index = ({
     }));
     try {
       setLoading(true);
-      let saveInvoiceRes;
-      if (detail == null) {
-        // creating a new invoice
-        saveInvoiceRes = await createInvoice({
-          userId: user!.id,
-          taxScale: Number(taxScale) * 100,
-          currency,
-          invoiceItems,
-          name: "a new invoice at " + new Date().toLocaleDateString(),
-        });
-      } else {
-        // saving an invoice
-        saveInvoiceRes = await saveInvoice({
-          invoiceId: detail.invoiceId,
-          taxScale: Number(taxScale) / 100,
-          currency: detail.currency,
-          name: "a invoice",
-          invoiceItems,
-        });
-      }
-
-      console.log("save invoice res: ", saveInvoiceRes);
-      const code = saveInvoiceRes.data.code;
+      const createInvoiceRes = await createInvoice({
+        userId: user!.id,
+        taxScale: Number(taxScale) * 100,
+        currency,
+        invoiceItems,
+      });
+      console.log("create invoice res: ", createInvoiceRes);
+      const code = createInvoiceRes.data.code;
       code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
       if (code != 0) {
-        throw new Error(saveInvoiceRes.data.message);
+        // TODO: save all the code as ENUM in constant,
+        throw new Error(createInvoiceRes.data.message);
       }
+      // setInvoiceList([newPlaceholderItem()]); // reset to default state, otherwise, nexttime when Modal is open, current data is still there
       toggleModal();
-      message.success("Invoice saved.");
+      message.success("Invoice created.");
       refresh();
       setLoading(false);
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
-        console.log("err saving invoice: ", err.message);
+        console.log("err creating invoice: ", err.message);
         message.error(err.message);
       } else {
         message.error("Unknown error");
       }
     }
   };
-
-  const onPublish = async () => {};
 
   const onCancel = () => toggleModal();
 
@@ -225,7 +204,7 @@ const Index = ({
     // 3rd argument is 'whether ignoreFactor',
     // readonly is used for reading invoices(no edit/create allowed), the amounts need to take factor into account, 10000 need to show $100
     // readonly: false, is used when admin need to create a new invoice, $100 need to be shown as $100, no factor considered
-    return showAmount(total, currency, true);
+    return showAmount(total, currency, !readonly);
   };
 
   useEffect(() => {}, []);
@@ -235,7 +214,6 @@ const Index = ({
       <Row style={{ marginTop: "16px" }}>
         <Col span={4}>Currency</Col>
         <Col span={4}>Tax Rate %</Col>
-        <Col span={6}>Invoice title</Col>
       </Row>
       <Row style={{ display: "flex", alignItems: "center" }}>
         <Col span={4}>
@@ -257,37 +235,22 @@ const Index = ({
           {readonly ? (
             <span>{taxScale} </span>
           ) : (
-            <Input
-              value={taxScale}
-              onChange={onTaxScaleChange}
-              type="number"
-              style={{ width: "80px" }}
-            />
-          )}
-        </Col>
-        <Col span={6}>
-          {readonly ? (
-            <span>{detail?.invoiceName}</span>
-          ) : (
-            <Input value={detail?.invoiceName} />
+            <Input value={taxScale} onChange={onTaxScaleChange} type="number" />
           )}
         </Col>
       </Row>
 
       <Row style={{ display: "flex", alignItems: "center" }}>
-        <Col span={10}>
-          <span style={{ fontWeight: "bold" }}>Item description</span>
+        <Col span={11}>
+          <span style={{ fontWeight: "bold" }}>Description</span>
         </Col>
         <Col span={4}>
           <div style={{ fontWeight: "bold" }}>Amount</div>
           <div style={{ fontWeight: "bold" }}>(exclude Tax)</div>
         </Col>
         <Col span={1}></Col>
-        <Col span={3}>
+        <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Quantity</span>
-        </Col>
-        <Col span={2}>
-          <span style={{ fontWeight: "bold" }}>Tax</span>
         </Col>
         <Col span={3}>
           <span style={{ fontWeight: "bold" }}>Total</span>
@@ -308,7 +271,7 @@ const Index = ({
           key={v.id}
           style={{ margin: "8px 0", display: "flex", alignItems: "center" }}
         >
-          <Col span={10}>
+          <Col span={11}>
             {readonly ? (
               <span>{v.description}</span>
             ) : (
@@ -322,11 +285,7 @@ const Index = ({
           <Col span={4}>
             {readonly ? (
               <span>
-                {showAmount(
-                  v.unitAmountExcludingTax as number,
-                  v.currency,
-                  true
-                )}
+                {showAmount(v.unitAmountExcludingTax as number, v.currency)}
               </span>
             ) : (
               <>
@@ -343,7 +302,7 @@ const Index = ({
           <Col span={1} style={{ fontSize: "18px" }}>
             ×
           </Col>
-          <Col span={3}>
+          <Col span={4}>
             {readonly ? (
               <span>{v.quantity}</span>
             ) : (
@@ -355,7 +314,6 @@ const Index = ({
               />
             )}
           </Col>
-          <Col span={2}>{`${CURRENCY[currency].symbol} ${v.tax}`}</Col>
           <Col span={3}>{getTotal([invoiceList[i]])}</Col>
           {!readonly && (
             <Col span={1}>
@@ -381,13 +339,26 @@ const Index = ({
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "end",
           alignItems: "center",
           gap: "18px",
           marginTop: "24px",
         }}
       >
-        {permission.deletable && (
+        <Button onClick={onCancel} disabled={loading}>
+          {`${readonly ? "Close" : "Cancel"}`}
+        </Button>
+        {!readonly && (
+          <Button
+            type="primary"
+            onClick={onCreate}
+            loading={loading}
+            disabled={loading || invoiceList.length == 0}
+          >
+            {deleteMode ? "Delete" : "OK"}
+          </Button>
+        )}
+        {deleteMode && (
           <Button
             type="primary"
             danger
@@ -398,26 +369,6 @@ const Index = ({
             Delete
           </Button>
         )}
-        <div style={{ display: "flex", gap: "16px" }}>
-          <Button onClick={onCancel} disabled={loading}>
-            {`${readonly ? "Close" : "Cancel"}`}
-          </Button>
-          {permission.savable && (
-            <Button
-              type="primary"
-              onClick={onSave}
-              loading={loading}
-              disabled={loading || invoiceList.length == 0}
-            >
-              Save
-            </Button>
-          )}
-          {permission.creatable && (
-            <Button onClick={onPublish} loading={loading} disabled={loading}>
-              Create
-            </Button>
-          )}
-        </div>
       </div>
     </Modal>
   );

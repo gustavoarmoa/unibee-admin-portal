@@ -695,6 +695,10 @@ const SubscriptionInfoSection = ({
           )}
           {/* activeSub?.currentPeriodEnd &&
               new Date(activeSub?.currentPeriodEnd * 1000).toLocaleDateString() */}
+          TrialEnd:{" "}
+          {subInfo == null
+            ? ""
+            : new Date(subInfo?.trialEnd * 1000).toLocaleDateString()}
         </Col>
       </Row>
 

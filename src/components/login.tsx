@@ -129,16 +129,19 @@ const Login1 = ({
   password: string;
   onPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
+  const [submitting, setSubmitting] = useState(false);
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
   const onSubmit = () => {
     setErrMsg("");
+    setSubmitting(true);
     axios
       .post(`${API_URL}/merchant/auth/sso/login`, {
         email,
         password,
       })
       .then((res) => {
+        setSubmitting(false);
         console.log("login res: ", res);
         if (res.data.code != 0) {
           throw new Error(res.data.message);
@@ -147,6 +150,7 @@ const Login1 = ({
         navigate(`${APP_PATH}subscription/list`);
       })
       .catch((err) => {
+        setSubmitting(false);
         console.log("login err: ", err.message);
         setErrMsg(err.message);
       });
@@ -221,7 +225,13 @@ const Login1 = ({
           span: 16,
         }}
       >
-        <Button type="primary" htmlType="submit" onClick={onSubmit}>
+        <Button
+          type="primary"
+          htmlType="submit"
+          onClick={onSubmit}
+          loading={submitting}
+          disabled={submitting}
+        >
           Submit
         </Button>
       </Form.Item>
