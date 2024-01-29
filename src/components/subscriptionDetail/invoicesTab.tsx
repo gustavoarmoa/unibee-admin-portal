@@ -105,7 +105,12 @@ const Index = ({ user }: { user: IProfile | null }) => {
     },
   ];
 
-  const toggleNewInvoiceModal = () => setNewInvoiceModal(!newInvoiceModal);
+  const toggleNewInvoiceModal = () => {
+    if (newInvoiceModal) {
+      setInvoiceIdx(-1);
+    }
+    setNewInvoiceModal(!newInvoiceModal);
+  };
 
   const onPageChange = (page: number, pageSize: number) => {
     // console.log("page change: ", page, "//", pageSize);
@@ -153,16 +158,10 @@ const Index = ({ user }: { user: IProfile | null }) => {
 
   return (
     <div>
-      {/* <Spin
-        spinning={loading}
-        indicator={
-          <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
-        }
-        fullscreen
-    /> */}
       {newInvoiceModal && (
         <NewInvoiceModal
           isOpen={true}
+          readonly={invoiceIdx != -1}
           items={invoiceIdx == -1 ? null : invoiceList[invoiceIdx].lines}
           user={user}
           toggleModal={toggleNewInvoiceModal}

@@ -237,7 +237,8 @@ const Login2 = ({
   email: string;
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
-  const [currentStep, setCurrentStep] = useState(0); // 0: email, 1: code
+  const [currentStep, setCurrentStep] = useState(0); // 0: input email, 1: input verification code
+  const [submitting, setSubmitting] = useState(false);
   const [otp, setOtp] = useState("");
   const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
@@ -247,12 +248,14 @@ const Login2 = ({
   };
 
   const resend = () => {
+    setSubmitting(true);
     setOtp("");
     axios
       .post(`${API_URL}/merchant/auth/sso/loginOTP`, {
         email,
       })
       .then((res) => {
+        setSubmitting(false);
         console.log("login res: ", res);
         if (res.data.code != 0) {
           setErrMsg(res.data.message);
@@ -261,6 +264,7 @@ const Login2 = ({
         setCurrentStep(1);
       })
       .catch((err) => {
+        setSubmitting(false);
         console.log("login err: ", err.message);
         setErrMsg(err.message);
       });
@@ -268,6 +272,7 @@ const Login2 = ({
 
   const submit = () => {
     setErrMsg("");
+    setSubmitting(true);
     console.log("submitting..");
     if (currentStep == 0) {
       axios
@@ -275,6 +280,7 @@ const Login2 = ({
           email,
         })
         .then((res) => {
+          setSubmitting(false);
           console.log("login res: ", res);
           if (res.data.code != 0) {
             setErrMsg(res.data.message);
@@ -283,6 +289,7 @@ const Login2 = ({
           setCurrentStep(1);
         })
         .catch((err) => {
+          setSubmitting(false);
           console.log("login err: ", err.message);
           setErrMsg(err.message);
         });
@@ -294,6 +301,7 @@ const Login2 = ({
         })
         .then((res) => {
           console.log("otp loginVerify res: ", res);
+          setSubmitting(false);
           if (res.data.code != 0) {
             setErrMsg(res.data.message);
             throw new Error(res.data.message);
@@ -302,6 +310,7 @@ const Login2 = ({
           navigate(`${APP_PATH}subscription/list`);
         })
         .catch((err) => {
+          setSubmitting(false);
           console.log("login err: ", err.message);
           setErrMsg(err.message);
         });
@@ -346,7 +355,13 @@ const Login2 = ({
               span: 16,
             }}
           >
-            <Button type="primary" htmlType="submit" onClick={submit}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              onClick={submit}
+              loading={submitting}
+              disabled={submitting}
+            >
               Submit
             </Button>
           </Form.Item>
@@ -390,7 +405,13 @@ const Login2 = ({
             }}
           >
             <span style={{ marginBottom: "18px", color: "red" }}>{errMsg}</span>
-            <Button type="primary" block onClick={submit}>
+            <Button
+              type="primary"
+              block
+              onClick={submit}
+              disabled={submitting}
+              loading={submitting}
+            >
               OK
             </Button>
             <Button type="link" block onClick={resend}>

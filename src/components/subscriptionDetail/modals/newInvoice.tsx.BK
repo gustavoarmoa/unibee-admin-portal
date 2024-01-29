@@ -210,26 +210,18 @@ const Index = ({
       </Row>
       <Row style={{ display: "flex", alignItems: "center" }}>
         <Col span={4}>
-          {readonly ? (
-            <span>{currency}</span>
-          ) : (
-            <Select
-              style={{ width: 100, margin: "8px 0" }}
-              value={currency}
-              onChange={onSelectChange}
-              options={[
-                { value: "USD", label: "USD" },
-                { value: "JPY", label: "JPY" },
-              ]}
-            />
-          )}
+          <Select
+            style={{ width: 100, margin: "8px 0" }}
+            value={currency}
+            onChange={onSelectChange}
+            options={[
+              { value: "USD", label: "USD" },
+              { value: "JPY", label: "JPY" },
+            ]}
+          />
         </Col>
         <Col span={4}>
-          {readonly ? (
-            <span>{taxScale} </span>
-          ) : (
-            <Input value={taxScale} onChange={onTaxScaleChange} type="number" />
-          )}
+          <Input value={taxScale} onChange={onTaxScaleChange} type="number" />
         </Col>
       </Row>
 
@@ -248,16 +240,14 @@ const Index = ({
         <Col span={3}>
           <span style={{ fontWeight: "bold" }}>Total</span>
         </Col>
-        {!readonly && (
-          <Col span={1}>
-            <div
-              onClick={addInvoiceItem}
-              style={{ fontWeight: "bold", width: "64px", cursor: "pointer" }}
-            >
-              <PlusOutlined />
-            </div>
-          </Col>
-        )}
+        <Col span={1}>
+          <div
+            onClick={addInvoiceItem}
+            style={{ fontWeight: "bold", width: "64px", cursor: "pointer" }}
+          >
+            <PlusOutlined />
+          </div>
+        </Col>
       </Row>
       {invoiceList.map((v, i) => (
         <Row
@@ -304,25 +294,31 @@ const Index = ({
               />
             )}
           </Col>
-          <Col span={3}>{getTotal([invoiceList[i]])}</Col>
-          {!readonly && (
-            <Col span={1}>
-              <div
-                onClick={removeInvoiceItem(v.id!)}
-                style={{ fontWeight: "bold", width: "64px", cursor: "pointer" }}
-              >
-                <MinusOutlined />
-              </div>
-            </Col>
-          )}
+          <Col span={3}>
+            {isNaN(v.amount as number)
+              ? ""
+              : `${CURRENCY[currency].symbol} ${getTotal([invoiceList[i]])}`}
+          </Col>
+          <Col span={1}>
+            <div
+              onClick={removeInvoiceItem(v.id!)}
+              style={{ fontWeight: "bold", width: "64px", cursor: "pointer" }}
+            >
+              <MinusOutlined />
+            </div>
+          </Col>
         </Row>
       ))}
       <Divider />
 
       <Row>
-        <Col span={20}></Col>
-        <Col span={3} style={{ fontWeight: "bold" }}>
-          {getTotal(invoiceList)}
+        <Col span={19}></Col>
+        <Col span={5} style={{ fontWeight: "bold" }}>
+          {isNaN(getTotal(invoiceList)) ? (
+            <span>&nbsp;</span>
+          ) : (
+            `${CURRENCY[currency].symbol} ${getTotal(invoiceList)}`
+          )}
         </Col>
       </Row>
 
