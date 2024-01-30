@@ -215,9 +215,7 @@ const App: React.FC = () => {
                 </Routes>
               </div>
             </Content>
-            <Footer style={{ textAlign: "center" }}>
-              UniBee - Your one-stop solutioin for billing & invoicing ©2024
-            </Footer>
+            <Footer style={{ textAlign: "center" }}>MultiLogin ©2024</Footer>
           </Layout>
         </Layout>
       )}

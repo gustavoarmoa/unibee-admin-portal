@@ -136,22 +136,23 @@ const Index = () => {
         }
         return;
       }
-      const list: ISubscriptionType[] = subListRes.data.data.subscriptions.map(
-        (s: any) => {
-          return {
-            ...s.subscription,
-            plan: s.plan,
-            addons:
-              s.addons == null
-                ? []
-                : s.addons.map((a: any) => ({
-                    ...a.addonPlan,
-                    quantity: a.quantity,
-                  })),
-            user: s.user,
-          };
-        }
-      );
+      const list: ISubscriptionType[] =
+        subListRes.data.data.subscriptions == null
+          ? []
+          : subListRes.data.data.subscriptions.map((s: any) => {
+              return {
+                ...s.subscription,
+                plan: s.plan,
+                addons:
+                  s.addons == null
+                    ? []
+                    : s.addons.map((a: any) => ({
+                        ...a.addonPlan,
+                        quantity: a.quantity,
+                      })),
+                user: s.user,
+              };
+            });
       setLoading(false);
       setSubList(list);
     };

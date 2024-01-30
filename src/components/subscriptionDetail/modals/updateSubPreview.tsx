@@ -1,6 +1,7 @@
 import { Button, Col, Divider, Modal, Row, Spin } from "antd";
 import { showAmount } from "../../../helpers";
 import { IPreview } from "../../../shared.types";
+import { LoadingOutlined } from "@ant-design/icons";
 
 interface Props {
   isOpen: boolean;
@@ -36,7 +37,10 @@ const updateSubPreview = ({
             alignItems: "center",
           }}
         >
-          <Spin />
+          <Spin
+            spinning={true}
+            indicator={<LoadingOutlined style={{ fontSize: "32px" }} spin />}
+          />
         </div>
       ) : (
         <>
@@ -102,66 +106,3 @@ const updateSubPreview = ({
 };
 
 export default updateSubPreview;
-
-/* <Modal
-          title="Subscription Update Preview"
-          open={previewModalOpen}
-          // onOk={onConfirm}
-          // onCancel={togglePreviewModal}
-          width={"640px"}
-          footer={null}
-        >
-          {preview == null ? (
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Spin />
-            </div>
-          ) : (
-            <>
-              {preview.invoices.map((i, idx) => (
-                <Row key={idx} gutter={[16, 16]}>
-                  <Col span={6}>{`${showAmount(i.amount, i.currency)}`}</Col>
-                  <Col span={18}>{i.description}</Col>
-                </Row>
-              ))}
-              <hr />
-              <Row gutter={[16, 16]}>
-                <Col span={6}>
-                  <span style={{ fontSize: "18px" }}>Total</span>
-                </Col>
-                <Col span={18}>
-                  <span style={{ fontSize: "18px", fontWeight: "bold" }}>
-                    {`${showAmount(preview.totalAmount, preview.currency)}`}
-                  </span>
-                </Col>
-              </Row>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "end",
-                  gap: "16px",
-                  margin: "16px 0",
-                }}
-              >
-                <Button disabled={confirmming} onClick={togglePreviewModal}>
-                  Cancel
-                </Button>
-                <Button
-                  type="primary"
-                  onClick={onConfirm}
-                  loading={confirmming}
-                  disabled={confirmming}
-                >
-                  Confirm
-                </Button>
-              </div>
-            </>
-          )}
-        </Modal> */
