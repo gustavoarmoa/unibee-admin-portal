@@ -220,7 +220,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
             invoiceIdx == -1 ? null : invoiceList[invoiceIdx]
           )}
           user={user}
-          toggleModal={toggleNewInvoiceModal}
+          closeModal={toggleNewInvoiceModal}
           refresh={fetchData}
         />
       )}

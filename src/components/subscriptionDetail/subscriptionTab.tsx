@@ -820,7 +820,11 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
             <MinusOutlined style={{ color: "red" }} />
           )}
           {i!.link != "" && (
-            <a href={i!.link} style={{ marginLeft: "8px", fontSize: "11px" }}>
+            <a
+              href={i!.link}
+              target="_blank"
+              style={{ marginLeft: "8px", fontSize: "11px" }}
+            >
               Payment link
             </a>
           )}

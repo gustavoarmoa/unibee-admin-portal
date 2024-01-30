@@ -123,7 +123,7 @@ const Index = () => {
         autoComplete="off"
       >
         <Form.Item
-          label="Company name"
+          label="Company Name"
           name="companyName"
           rules={[
             {
@@ -135,7 +135,7 @@ const Index = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item label="Company logo" name="logo">
+        <Form.Item label="Company Logo" name="logo">
           <Upload
             name="avatar"
             listType="picture-card"
@@ -154,7 +154,7 @@ const Index = () => {
         </Form.Item>
 
         <Form.Item
-          label="First name"
+          label="First Name"
           name="firstName"
           rules={[
             {
@@ -167,7 +167,7 @@ const Index = () => {
         </Form.Item>
 
         <Form.Item
-          label="Last name"
+          label="Last Name"
           name="lastName"
           rules={[
             {
@@ -220,12 +220,12 @@ const Index = () => {
         </Form.Item>
 
         <Form.Item
-          label="Email language"
-          name="emailLang"
+          label="Emergency Contact Phone"
+          name="emergencyPhone"
           rules={[
             {
               required: true,
-              message: "Please input your Email!",
+              message: "Please input your emergency phone!",
             },
           ]}
         >
@@ -233,7 +233,7 @@ const Index = () => {
         </Form.Item>
 
         <Form.Item
-          label="Physical address"
+          label="Physical Address"
           name="address"
           rules={[
             {

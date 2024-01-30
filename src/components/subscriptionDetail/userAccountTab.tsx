@@ -1,8 +1,8 @@
-import { Form, Input, Radio, Select, message } from "antd";
+import { Button, Form, Input, Radio, Select, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Country, IProfile } from "../../shared.types";
 import { useEffect, useState } from "react";
-import { getCountryList } from "../../requests";
+import { getCountryList, saveUserProfile } from "../../requests";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -22,35 +22,34 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
     option?: { label: string; value: string }
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
-  /*
-    const onSave = async () => {
-      console.log("form: ", form.getFieldsValue());
-      setLoading(true);
-      let saveProfileRes;
-      try {
-        saveProfileRes = await saveProfile(form.getFieldsValue());
-        console.log("save profile res: ", saveProfileRes);
-        const code = saveProfileRes.data.code;
-        if (code != 0) {
-          code == 61 && relogin();
-          // TODO: save all statu code in a constant
-          throw new Error(saveProfileRes.data.message);
-        }
-        message.success("saved");
-        setUserProfile(saveProfileRes.data.data.User);
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        if (err instanceof Error) {
-          console.log("profile update err: ", err.message);
-          message.error(err.message);
-        } else {
-          message.error("Unknown error");
-        }
-        return;
+  const onSave = async () => {
+    console.log("form: ", form.getFieldsValue());
+    setLoading(true);
+    let saveProfileRes;
+    return;
+    try {
+      saveProfileRes = await saveUserProfile(form.getFieldsValue());
+      console.log("save profile res: ", saveProfileRes);
+      const code = saveProfileRes.data.code;
+      if (code != 0) {
+        code == 61 && relogin();
+        // TODO: save all statu code in a constant
+        throw new Error(saveProfileRes.data.message);
       }
-    };
-    */
+      message.success("saved");
+      // setUserProfile(saveProfileRes.data.data.User);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("profile update err: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+      return;
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -194,17 +193,17 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
           </Radio.Group>
         </Form.Item>
 
-        {/* <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              margin: "36px",
-            }}
-          >
-            <Button type="primary" onClick={onSave} disabled={loading}>
-              Save
-            </Button>
-          </div> */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            margin: "36px",
+          }}
+        >
+          <Button type="primary" onClick={onSave} disabled={loading}>
+            Save
+          </Button>
+        </div>
       </Form>
     )
   );

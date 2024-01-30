@@ -288,7 +288,7 @@ const Index = () => {
           </Form.Item>
 
           <Form.Item
-            label="Plan name"
+            label="Plan Name"
             name="planName"
             rules={[
               {
@@ -309,23 +309,25 @@ const Index = () => {
           </Form.Item>
 
           <Form.Item label="Is Published" name="publishStatus">
-            <span>
-              {plan.publishStatus == 2 ? (
-                <CheckCircleOutlined
-                  style={{ color: "green", fontSize: "18px" }}
-                />
-              ) : (
-                <MinusOutlined style={{ color: "red", fontSize: "18px" }} />
-              )}{" "}
-            </span>
-            <Button
-              style={{ marginLeft: "12px" }}
-              onClick={togglePublish}
-              disabled={plan.status != 2}
-            >
-              {/* 2: active, you can only publish/unpublish an active plan */}
-              {plan.publishStatus == 2 ? "Unpublish" : "Publish"}
-            </Button>
+            <div>
+              <span>
+                {plan.publishStatus == 2 ? (
+                  <CheckCircleOutlined
+                    style={{ color: "green", fontSize: "18px" }}
+                  />
+                ) : (
+                  <MinusOutlined style={{ color: "red", fontSize: "18px" }} />
+                )}{" "}
+              </span>
+              <Button
+                style={{ marginLeft: "12px" }}
+                onClick={togglePublish}
+                disabled={plan.status != 2}
+              >
+                {/* 2: active, you can only publish/unpublish an active plan */}
+                {plan.publishStatus == 2 ? "Unpublish" : "Publish"}
+              </Button>
+            </div>
           </Form.Item>
 
           <Form.Item
@@ -394,7 +396,7 @@ const Index = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item label="Plan type" name="type">
+          <Form.Item label="Plan Type" name="type">
             <Select
               style={{ width: 120 }}
               disabled
@@ -407,24 +409,19 @@ const Index = () => {
 
           {plan.type == 1 && (
             <Form.Item label="Add-ons" name="addons">
-              <>
-                <Select
-                  mode="multiple"
-                  allowClear
-                  style={{ width: "100%" }}
-                  value={selectedAddon}
-                  onChange={(value) => {
-                    console.log("on sleecgt change: ", setSelectedAddon(value));
-                  }}
-                  options={selectAddons.map((a) => ({
-                    label: a.planName,
-                    value: a.id,
-                  }))}
-                />
-                {/* <Button type="link" onClick={bindAddon}>
-                  bind
-                </Button> */}
-              </>
+              <Select
+                mode="multiple"
+                allowClear
+                style={{ width: "100%" }}
+                value={selectedAddon}
+                onChange={(value) => {
+                  console.log("on sleecgt change: ", setSelectedAddon(value));
+                }}
+                options={selectAddons.map((a) => ({
+                  label: a.planName,
+                  value: a.id,
+                }))}
+              />
             </Form.Item>
           )}
 
@@ -444,7 +441,6 @@ const Index = () => {
             <Input disabled />
           </Form.Item>
 
-          {/* <Form.Item label=""> */}
           <div
             style={{ display: "flex", justifyContent: "center", gap: "18px" }}
           >
@@ -452,7 +448,7 @@ const Index = () => {
               onClick={() => navigate(-1)}
               disabled={loading || activating}
             >
-              Go back
+              Go Back
             </Button>
             <Button
               type="primary"
@@ -470,7 +466,6 @@ const Index = () => {
               Activate
             </Button>
           </div>
-          {/* </Form.Item>  */}
         </Form>
       )}
     </div>

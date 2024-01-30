@@ -7,7 +7,14 @@ import {
 import { daysBetweenDate, showAmount, ramdonString } from "../../../helpers";
 import { useEffect, useRef, useState } from "react";
 import { EditFilled, MinusOutlined, PlusOutlined } from "@ant-design/icons";
-import { createInvoice, saveInvoice, publishInvoice } from "../../../requests";
+import {
+  createInvoice,
+  saveInvoice,
+  publishInvoice,
+  revokeInvoice,
+  deleteInvoice,
+  refund,
+} from "../../../requests";
 import { CURRENCY } from "../../../constants";
 import update from "immutability-helper";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +29,7 @@ interface Props {
   detail: UserInvoice | null; // null means new user, no data available
   permission: TInvoicePerm;
   // items: InvoiceItem[] | null;
-  toggleModal: () => void;
+  closeModal: () => void;
   refresh: () => void;
 }
 
@@ -45,7 +52,7 @@ const Index = ({
   // items,
   detail,
   permission,
-  toggleModal,
+  closeModal,
   refresh,
 }: Props) => {
   const [loading, setLoading] = useState(false);
@@ -116,8 +123,6 @@ const Index = ({
     return true;
   };
 
-  // const onNew = async () => {  }
-
   const onSave = async () => {
     if (!validateFields()) {
       return;
@@ -157,7 +162,7 @@ const Index = ({
       if (code != 0) {
         throw new Error(saveInvoiceRes.data.message);
       }
-      toggleModal();
+      closeModal();
       message.success("Invoice saved.");
       refresh();
       setLoading(false);
@@ -172,13 +177,92 @@ const Index = ({
     }
   };
 
-  const onPublish = async () => {};
+  const onPublish = async () => {
+    if (detail == null) {
+      return;
+    }
+    // Do validation check first.
+    try {
+      setLoading(true);
+      const res = await publishInvoice({
+        invoiceId: detail.invoiceId,
+        payMethod: 1,
+        daysUtilDue: 1,
+      });
+      setLoading(false);
+      console.log("publishing invoice res: ", res);
+      const code = res.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(res.data.message);
+      }
+      closeModal();
+      message.success("Invoice generated and sent.");
+      refresh();
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("err saving invoice: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
+  };
 
-  const onCancel = () => toggleModal();
+  // revoke: just the opposite of publish
+  // delete. They have the same structure, so I'm being lazy to duplicate.
+  const onDeleteOrRevoke = async (action: "delete" | "revoke") => {
+    if (detail == null) {
+      return;
+    }
+    const callMethod = action == "delete" ? deleteInvoice : revokeInvoice;
+    try {
+      setLoading(true);
+      const res = await callMethod(detail.invoiceId);
+      setLoading(false);
+      console.log(`${action} invoice res: `, res);
+      const code = res.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(res.data.message);
+      }
+      closeModal();
+      message.success(`Invoice ${action}d.`);
+      refresh();
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log(`err ${action}ing invoice: `, err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
+  };
 
-  const onDelete = () => {
-    console.log("deleting....");
-    toggleModal();
+  const onDelete = () => onDeleteOrRevoke("delete");
+
+  const onRefund = async () => {
+    if (detail == null) {
+      return;
+    }
+    try {
+      const res = await refund({
+        invoiceId: detail?.invoiceId,
+        refundAmount: 100,
+        reason: "no reason",
+      });
+      console.log("refund res: ", res);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log(`err refunding: `, err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
   };
 
   const onFieldChange =
@@ -198,14 +282,33 @@ const Index = ({
               Number(newList[idx].quantity) *
               Number(newList[idx].unitAmountExcludingTax),
           },
+          tax: {
+            $set:
+              Math.round(
+                Number(newList[idx].quantity) *
+                  Number(newList[idx].unitAmountExcludingTax) *
+                  (Number(taxScale) / 100) *
+                  100
+              ) / 100,
+          },
         },
       });
       setInvoiceList(newList);
+      console.log("after filed change, new invoiceList: ", newList);
     };
 
   const onSelectChange = (v: string) => setCurrency(v);
-  const onTaxScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setTaxScale(evt.target.value);
+  const onTaxScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const t = evt.target.value;
+    setTaxScale(t);
+    const newList = invoiceList.map((iv) => ({
+      ...iv,
+      tax:
+        (Number(iv.quantity) * Number(iv.unitAmountExcludingTax) * Number(t)) /
+        100,
+    }));
+    setInvoiceList(newList);
+  };
 
   // to get a numerical value with 2 decimal points, but still not right
   // https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
@@ -216,7 +319,11 @@ const Index = ({
   const getTotal = (invoices: InvoiceItem[]): string => {
     const total = invoices.reduce(
       (accu, curr) =>
-        accu + Math.round((Number(curr.amount) + Number.EPSILON) * 100) / 100,
+        accu +
+        Math.round(
+          (Number(curr.amount) + Number(curr.tax) + Number.EPSILON) * 100
+        ) /
+          100,
       0
     );
     if (isNaN(total)) {
@@ -387,19 +494,18 @@ const Index = ({
           marginTop: "24px",
         }}
       >
-        {permission.deletable && (
-          <Button
-            type="primary"
-            danger
-            onClick={onDelete}
-            loading={loading}
-            disabled={loading}
-          >
-            Delete
-          </Button>
-        )}
+        <Button
+          type="primary"
+          danger
+          onClick={onDelete}
+          loading={loading}
+          disabled={!permission.deletable || loading}
+        >
+          Delete
+        </Button>
+
         <div style={{ display: "flex", gap: "16px" }}>
-          <Button onClick={onCancel} disabled={loading}>
+          <Button onClick={closeModal} disabled={loading}>
             {`${readonly ? "Close" : "Cancel"}`}
           </Button>
           {permission.savable && (

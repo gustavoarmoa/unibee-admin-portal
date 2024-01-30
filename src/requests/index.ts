@@ -325,13 +325,17 @@ export const extendDueDate = async (
 };
 
 // billing admin can also update user profile, not implemented yet.
-export const saveProfile = async (newProfile: IProfile) => {
+export const saveUserProfile = async (newProfile: IProfile) => {
   const token = localStorage.getItem("merchantToken");
-  return await axios.post(`${API_URL}/user/profile`, newProfile, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
-  });
+  return await axios.post(
+    `${API_URL}/merchant/merchant_user/update_user_profile`,
+    newProfile,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
 };
 
 export const getInvoiceList = async ({
@@ -443,7 +447,19 @@ export const saveInvoice = async ({
 };
 
 // admin can delete the invoice, before the following publishInvoice() is called
-export const deleteInvoice = async () => {};
+export const deleteInvoice = async (invoiceId: string) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = { invoiceId };
+  return await axios.post(
+    `${API_URL}/merchant/invoice/new_invoice_delete`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
 
 // after publish, user will receive an email informing him/her to make the payment.
 // admin cannot edit it anymore, but can cancel it by calling the following cancelInvoice() before user make the payment
@@ -474,9 +490,36 @@ export const publishInvoice = async ({
 };
 
 // admin can cancel the invoice(make it invalid) before user make the payment.
-export const cancelInvoice = async () => {};
+export const revokeInvoice = async (invoiceId: string) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = { invoiceId };
+  return await axios.post(
+    `${API_URL}/merchant/invoice/cancel_processing_invoice`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
 
-export const refund = async () => {};
+export const refund = async (body: {
+  invoiceId: string;
+  refundAmount: number;
+  reason: string;
+}) => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(
+    `${API_URL}/merchant/invoice/new_invoice_refund`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
 
 export const downloadInvoice = (url: string) => {
   if (url == null || url == "") {

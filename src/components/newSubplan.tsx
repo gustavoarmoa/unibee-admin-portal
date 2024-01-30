@@ -83,7 +83,7 @@ const Index = () => {
         </Form.Item>
 
         <Form.Item
-          label="Plan name"
+          label="Plan Name"
           name="planName"
           rules={[
             {
@@ -165,7 +165,7 @@ const Index = () => {
           <Input />
         </Form.Item>
 
-        <Form.Item label="Plan type" name="type">
+        <Form.Item label="Plan Type" name="type">
           <Select
             style={{ width: 120 }}
             options={[
@@ -194,7 +194,7 @@ const Index = () => {
         {/* <Form.Item label=""> */}
         <div style={{ display: "flex", justifyContent: "center", gap: "18px" }}>
           <Button onClick={() => navigate(-1)} disabled={loading}>
-            Go back
+            Go Back
           </Button>
           <Button
             type="primary"

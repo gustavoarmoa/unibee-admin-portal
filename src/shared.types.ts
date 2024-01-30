@@ -1,3 +1,4 @@
+// this is user profile, not merchant's
 interface IProfile {
   address: string;
   // country: string;
