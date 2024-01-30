@@ -27,6 +27,7 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
     setLoading(true);
     let saveProfileRes;
     return;
+    /*
     try {
       saveProfileRes = await saveUserProfile(form.getFieldsValue());
       console.log("save profile res: ", saveProfileRes);
@@ -49,6 +50,7 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
       }
       return;
     }
+    */
   };
 
   useEffect(() => {
