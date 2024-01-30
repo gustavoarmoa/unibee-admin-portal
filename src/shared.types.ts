@@ -78,7 +78,9 @@ interface ISubscriptionType {
     // downgrading will be effective on the next cycle, this props show this pending stat
     effectImmediate: number;
     effectTime: number;
+    prorationAmount: number; // for plan upgrading, you need to pay the difference amt.
     paid: number; // 1: paid,
+    link: string; // stripe payment link
     plan: IPlan; // original plan
     updatePlan: IPlan; // plan after change(upgrade/downgrade, or quantity change)
     // these are pending subscription's actual data

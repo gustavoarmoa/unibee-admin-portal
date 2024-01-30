@@ -360,6 +360,7 @@ const Index = ({
           localActiveSub.unfinishedSubscriptionPendingUpdate.updateAddons.map(
             (a: any) => ({
               ...a.addonPlan,
+              quantity: a.quantity,
               addonPlanId: a.addonPlan.id,
             })
           );
@@ -764,9 +765,66 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
           {showAmount(i!.updatePlan.amount, i!.updatePlan.currency)}
         </Col>
         <Col span={4} style={colStyle}>
-          Addon Price
+          Addons Price
         </Col>
-        <Col span={6}>addon prices</Col>
+        <Col span={6}>
+          {i?.updateAddons &&
+            showAmount(
+              i.updateAddons!.reduce(
+                (
+                  sum,
+                  { quantity, amount }: { quantity: number; amount: number }
+                ) => sum + quantity * amount,
+                0
+              ),
+              i.updateCurrency
+            )}
+
+          {i?.updateAddons && i.updateAddons.length > 0 && (
+            <Popover
+              placement="top"
+              title="Addon breakdown"
+              content={
+                <div style={{ width: "280px" }}>
+                  {i?.updateAddons.map((a) => (
+                    <Row key={a.id}>
+                      <Col span={10}>{a.planName}</Col>
+                      <Col span={14}>
+                        {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
+                        {showAmount(a.amount * a.quantity, a.currency)}
+                      </Col>
+                    </Row>
+                  ))}
+                </div>
+              }
+            >
+              <span style={{ marginLeft: "8px", cursor: "pointer" }}>
+                <InfoCircleOutlined />
+              </span>
+            </Popover>
+          )}
+        </Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col span={4} style={colStyle}>
+          Proration amount
+        </Col>
+        <Col span={6}>{showAmount(i!.prorationAmount, i!.updateCurrency)}</Col>
+        <Col span={4} style={colStyle}>
+          <span>Paid</span>
+        </Col>
+        <Col span={6}>
+          {i!.paid == 1 ? (
+            <CheckCircleOutlined style={{ color: "green" }} />
+          ) : (
+            <MinusOutlined style={{ color: "red" }} />
+          )}
+          {i!.link != "" && (
+            <a href={i!.link} style={{ marginLeft: "8px", fontSize: "11px" }}>
+              Payment link
+            </a>
+          )}
+        </Col>
       </Row>
 
       <Row style={rowStyle}>
@@ -787,20 +845,10 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
 
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
-          Effective Time
+          Effective time
         </Col>
         <Col span={6}>
           {new Date(i!.effectTime * 1000).toLocaleDateString()}
-        </Col>
-        <Col span={4} style={colStyle}>
-          <span>Paid</span>
-        </Col>
-        <Col span={6}>
-          {i!.paid == 1 ? (
-            <CheckCircleOutlined style={{ color: "green" }} />
-          ) : (
-            <MinusOutlined style={{ color: "red" }} />
-          )}
         </Col>
       </Row>
     </>

@@ -214,7 +214,6 @@ const Index = ({ user }: { user: IProfile | null }) => {
           isOpen={true}
           // readonly={invoiceIdx != -1}
           readonly={false}
-          deleteMode={deleteMode}
           detail={invoiceIdx == -1 ? null : invoiceList[invoiceIdx]}
           // items={invoiceIdx == -1 ? null : invoiceList[invoiceIdx].lines}
           permission={getPermission(
