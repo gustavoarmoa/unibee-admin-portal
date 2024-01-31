@@ -572,7 +572,7 @@ const SubscriptionInfoSection = ({
         </Col>
         <Col span={6}>{subInfo?.plan?.planName}</Col>
         <Col span={4} style={colStyle}>
-          Plan description
+          Plan Description
         </Col>
         <Col span={6}>{subInfo?.plan?.description}</Col>
       </Row>
@@ -596,14 +596,14 @@ const SubscriptionInfoSection = ({
       </Row>
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
-          Plan price
+          Plan Price
         </Col>
         <Col span={6}>
           {subInfo?.plan?.amount &&
             showAmount(subInfo?.plan?.amount, subInfo?.plan?.currency)}
         </Col>
         <Col span={4} style={colStyle}>
-          Addons price
+          Addons Price
         </Col>
         <Col span={6}>
           {subInfo &&
@@ -646,7 +646,7 @@ const SubscriptionInfoSection = ({
       </Row>
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
-          Total amount
+          Total Amount
         </Col>
         <Col span={6}>
           {subInfo?.amount && showAmount(subInfo.amount, subInfo.currency)}{" "}
@@ -661,7 +661,7 @@ const SubscriptionInfoSection = ({
         </Col>
 
         <Col span={4} style={colStyle}>
-          Bill period
+          Bill Period
         </Col>
         <Col span={6}>
           {subInfo != null && subInfo.plan != null
@@ -713,10 +713,10 @@ const SubscriptionInfoSection = ({
             gap: "36px",
           }}
         >
-          <Button onClick={toggleChangPlanModal}>Change plan</Button>
+          <Button onClick={toggleChangPlanModal}>Change Plan</Button>
           {subInfo.cancelAtPeriodEnd == 0 ? (
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Button onClick={toggleTerminateModal}>End subscription</Button>
+              <Button onClick={toggleTerminateModal}>End Subscription</Button>
             </div>
           ) : (
             <div>
@@ -744,7 +744,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
   return (
     <>
       <Divider orientation="left" style={{ margin: "32px 0" }}>
-        Pending update
+        Pending Update
       </Divider>
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
@@ -752,7 +752,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
         </Col>
         <Col span={6}>{i!.updatePlan.planName}</Col>
         <Col span={4} style={colStyle}>
-          Plan description
+          Plan Description
         </Col>
         <Col span={6}>{i!.updatePlan.description}</Col>
       </Row>
@@ -807,7 +807,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
       </Row>
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
-          Proration amount
+          Proration Amount
         </Col>
         <Col span={6}>{showAmount(i!.prorationAmount, i!.updateCurrency)}</Col>
         <Col span={4} style={colStyle}>
@@ -825,7 +825,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
               target="_blank"
               style={{ marginLeft: "8px", fontSize: "11px" }}
             >
-              Payment link
+              Payment Link
             </a>
           )}
         </Col>
@@ -833,14 +833,14 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
 
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
-          Total amount
+          Total Amount
         </Col>
         <Col span={6}>
           {" "}
           {showAmount(i!.updateAmount, i!.updatePlan.currency)}
         </Col>
         <Col span={4} style={colStyle}>
-          Bill period
+          Bill Period
         </Col>
         <Col span={6}>
           {`${i!.updatePlan.intervalCount} ${i!.updatePlan.intervalUnit}`}
@@ -849,7 +849,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
 
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
-          Effective time
+          Effective Date
         </Col>
         <Col span={6}>
           {new Date(i!.effectTime * 1000).toLocaleDateString()}

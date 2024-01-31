@@ -9,6 +9,7 @@ import {
   Spin,
   Pagination,
   Space,
+  Tooltip,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 // import { ISubscriptionType } from "../../shared.types";
@@ -21,6 +22,7 @@ import {
   EditOutlined,
   LoadingOutlined,
   MailOutlined,
+  SearchOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import { showAmount } from "../../helpers";
@@ -46,14 +48,17 @@ const Index = ({ user }: { user: IProfile | null }) => {
   const getPermission = (iv: UserInvoice | null): TInvoicePerm => {
     const p = {
       editable: false,
-      savable: false,
-      creatable: false,
-      deletable: false,
+      creatable: false, // create a new invoice
+      savable: false, // save it after creation
+      deletable: false, // delete before publish as nothing happened
+      publishable: false, // publish it, so user could receive it
       refundable: false,
       downloadable: false,
       sendable: false,
     };
     if (iv == null) {
+      // creating a new invoice
+      p.creatable = true;
       return p;
     }
     if (iv.subscriptionId == null || iv.subscriptionId == "") {
@@ -62,25 +67,29 @@ const Index = ({ user }: { user: IProfile | null }) => {
         // no record in the backend, first-time creation
         p.savable = true; // ???
       } else if (iv.link == "") {
-        // invoice record exist in backend, but not created(user won't see it)
+        // invoice record exist in backend, but not published(user won't see it)
         p.savable = true; // ???
+        p.publishable = true;
         p.creatable = true;
         p.editable = true;
         p.deletable = true;
-      } // else {}
+      } else {
+        // invoice payment link created, admin cannot change/save/publish
+        // but can delete only if user hasn't made the payment.
+      }
     }
     return p;
   };
 
   const columns: ColumnsType<UserInvoice> = [
     {
-      title: "Plan",
+      title: "Title",
       dataIndex: "invoiceName",
       key: "invoiceName",
       // render: (_, sub) => <a>{sub.plan?.planName}</a>,
     },
     {
-      title: "Total amount",
+      title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
       render: (amt, invoice) => (
@@ -88,7 +97,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       ),
     },
     {
-      title: "Subscription Amt",
+      title: "Subscription Amount",
       dataIndex: "subscriptionAmount",
       key: "subscriptionAmount",
       render: (amt, invoice) => (
@@ -103,25 +112,39 @@ const Index = ({ user }: { user: IProfile | null }) => {
         record // use fn to generate these icons, only show available ones.
       ) => (
         <Space size="middle">
-          <span onClick={toggleNewInvoiceModal} style={{ cursor: `pointer` }}>
-            <EditOutlined onClick={() => console.log("hehe, editing...")} />
-          </span>
-          <span
-            onClick={() => {
-              toggleNewInvoiceModal();
-              setDeleteMode(true);
-            }}
-            style={{ cursor: "pointer" }}
-          >
-            <CloseOutlined />
-          </span>
-          <span style={{ cursor: "pointer" }}>
-            <MailOutlined />
-          </span>
-          <span style={{ cursor: "pointer" }}>
-            <UndoOutlined />
-          </span>
-          <span
+          <Tooltip title="Edit">
+            <Button
+              onClick={toggleNewInvoiceModal}
+              icon={<EditOutlined />}
+              style={{ border: "unset" }}
+              disabled={!getPermission(record).editable}
+            />
+          </Tooltip>
+          <Tooltip title="Delete">
+            <Button
+              onClick={toggleNewInvoiceModal}
+              icon={<CloseOutlined />}
+              style={{ border: "unset" }}
+              disabled={!getPermission(record).deletable}
+            />
+          </Tooltip>
+          <Tooltip title="Send Mail">
+            <Button
+              onClick={toggleNewInvoiceModal}
+              icon={<MailOutlined />}
+              style={{ border: "unset" }}
+              disabled={!getPermission(record).sendable}
+            />
+          </Tooltip>
+          <Tooltip title="Refund">
+            <Button
+              onClick={toggleNewInvoiceModal}
+              icon={<UndoOutlined />}
+              style={{ border: "unset" }}
+              disabled={!getPermission(record).refundable}
+            />
+          </Tooltip>
+          {/* <span
             onClick={() => downloadInvoice(record.sendPdf)}
             style={{
               cursor: `${
@@ -132,7 +155,15 @@ const Index = ({ user }: { user: IProfile | null }) => {
             }}
           >
             <DownloadOutlined />
-          </span>
+          </span> */}
+          <Tooltip title="Download Invoice">
+            <Button
+              onClick={toggleNewInvoiceModal}
+              icon={<DownloadOutlined />}
+              style={{ border: "unset" }}
+              disabled={!getPermission(record).downloadable}
+            />
+          </Tooltip>
         </Space>
       ),
     },
@@ -233,6 +264,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           return {
             onClick: (event) => {
               setInvoiceIdx(rowIndex as number);
+              toggleNewInvoiceModal();
             },
           };
         }}

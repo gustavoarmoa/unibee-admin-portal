@@ -20,8 +20,10 @@ const Index = () => (
     }}
   >
     <div>
-      {/* <img src={`${APP_PATH}UniBeeLogo.png`} height={"32px"} /> */}
-      <img src={`${APP_PATH}multiLoginLogo.png`} height={"48px"} />
+      <img
+        src={`${APP_PATH}Multilogin-logo-white-horizontal.svg`}
+        height={"36px"}
+      />{" "}
       <span style={{ marginLeft: "8px", fontSize: "12px" }}>
         One-stop Billing for SaaS
       </span>

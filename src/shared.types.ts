@@ -168,11 +168,12 @@ interface UserInvoice {
 
 type TInvoicePerm = {
   editable: boolean; // in list view, can I click the record, and open a Modal to edit it
-  savable: boolean; // in Modal, can I click save
-  creatable: boolean; // in Modal, can I click create
-  deletable: boolean; // in list view, can I click the delete icon
+  savable: boolean; // in Modal, can I click save (save a newly created invoice, not yet publish)
+  creatable: boolean; // in Modal, can I click create, to create an invoice.
+  publishable: boolean; // in Modal, can I click 'publish', after publish, user can see it and receive a mail
+  deletable: boolean; // in list view, can I click the delete icon, only manually created invoice, and before publish
   refundable: boolean; // in list view, can I cilck the refund icon
-  downloadable: boolean; // download invoice, ditto
+  downloadable: boolean; // download invoice, true: for all system-generated invoice, and amdin manually generated(only after publish)
   sendable: boolean; // send invoice via email, ditto
 };
 

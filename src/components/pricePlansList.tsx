@@ -73,7 +73,6 @@ const columns: ColumnsType<IPlan> = [
     render: (_, record) => (
       <Space size="middle">
         <a>Edit</a>
-        {/* <a>Delete</a> */}
       </Space>
     ),
   },

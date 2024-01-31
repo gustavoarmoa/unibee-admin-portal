@@ -73,12 +73,30 @@ const Index = ({
   const [currency, setCurrency] = useState(defaultCurrency);
   const taxScaleTmp = detail == null ? "" : detail.taxScale / 100;
   const [taxScale, setTaxScale] = useState<string>(taxScaleTmp + "");
+  const [invoiceName, setInvoiceName] = useState(
+    detail == null ? "" : detail.invoiceName
+  );
   console.log("invoice detail/perm: ", detail, "//", permission);
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
       state: { msg: "session expired, please re-login" },
     });
+
+  const onCurrencyChange = (v: string) => setCurrency(v);
+  const onTaxScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const t = evt.target.value;
+    setTaxScale(t);
+    const newList = invoiceList.map((iv) => ({
+      ...iv,
+      tax:
+        (Number(iv.quantity) * Number(iv.unitAmountExcludingTax) * Number(t)) /
+        100,
+    }));
+    setInvoiceList(newList);
+  };
+  const onInvoiceNameChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
+    setInvoiceName(evt.target.value);
 
   const addInvoiceItem = () => {
     setInvoiceList(
@@ -142,8 +160,8 @@ const Index = ({
           userId: user!.id,
           taxScale: Number(taxScale) * 100,
           currency,
+          name: invoiceName,
           invoiceItems,
-          name: "a new invoice at " + new Date().toLocaleDateString(),
         });
       } else {
         // saving an invoice
@@ -151,7 +169,7 @@ const Index = ({
           invoiceId: detail.invoiceId,
           taxScale: Number(taxScale) / 100,
           currency: detail.currency,
-          name: "a invoice",
+          name: invoiceName,
           invoiceItems,
         });
       }
@@ -177,6 +195,8 @@ const Index = ({
     }
   };
 
+  // ----------------
+  // what if user made some changes, then click 'create' to publish, backend still uses the old data before the local change.
   const onPublish = async () => {
     if (detail == null) {
       return;
@@ -210,8 +230,8 @@ const Index = ({
     }
   };
 
-  // revoke: just the opposite of publish
-  // delete. They have the same structure, so I'm being lazy to duplicate.
+  // revoke: just the opposite of publish (back to unpublish state)
+  // delete. They have the same structure, and I'm too lazy to duplicate it.
   const onDeleteOrRevoke = async (action: "delete" | "revoke") => {
     if (detail == null) {
       return;
@@ -297,19 +317,6 @@ const Index = ({
       console.log("after filed change, new invoiceList: ", newList);
     };
 
-  const onSelectChange = (v: string) => setCurrency(v);
-  const onTaxScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    const t = evt.target.value;
-    setTaxScale(t);
-    const newList = invoiceList.map((iv) => ({
-      ...iv,
-      tax:
-        (Number(iv.quantity) * Number(iv.unitAmountExcludingTax) * Number(t)) /
-        100,
-    }));
-    setInvoiceList(newList);
-  };
-
   // to get a numerical value with 2 decimal points, but still not right
   // https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
   // TODO:
@@ -321,7 +328,10 @@ const Index = ({
       (accu, curr) =>
         accu +
         Math.round(
-          (Number(curr.amount) + Number(curr.tax) + Number.EPSILON) * 100
+          (Number(curr.amountExcludingTax) +
+            Number(curr.tax) +
+            Number.EPSILON) *
+            100
         ) /
           100,
       0
@@ -346,13 +356,13 @@ const Index = ({
       </Row>
       <Row style={{ display: "flex", alignItems: "center" }}>
         <Col span={4}>
-          {readonly ? (
+          {!permission.editable ? (
             <span>{currency}</span>
           ) : (
             <Select
               style={{ width: 100, margin: "8px 0" }}
               value={currency}
-              onChange={onSelectChange}
+              onChange={onCurrencyChange}
               options={[
                 { value: "USD", label: "USD" },
                 { value: "JPY", label: "JPY" },
@@ -361,7 +371,7 @@ const Index = ({
           )}
         </Col>
         <Col span={4}>
-          {readonly ? (
+          {!permission.editable ? (
             <span>{taxScale} </span>
           ) : (
             <Input
@@ -373,10 +383,10 @@ const Index = ({
           )}
         </Col>
         <Col span={6}>
-          {readonly ? (
+          {!permission.editable ? (
             <span>{detail?.invoiceName}</span>
           ) : (
-            <Input value={detail?.invoiceName} />
+            <Input value={invoiceName} onChange={onInvoiceNameChange} />
           )}
         </Col>
       </Row>
@@ -399,7 +409,7 @@ const Index = ({
         <Col span={3}>
           <span style={{ fontWeight: "bold" }}>Total</span>
         </Col>
-        {!readonly && (
+        {permission.editable && (
           <Col span={1}>
             <div
               onClick={addInvoiceItem}
@@ -416,7 +426,7 @@ const Index = ({
           style={{ margin: "8px 0", display: "flex", alignItems: "center" }}
         >
           <Col span={10}>
-            {readonly ? (
+            {!permission.editable ? (
               <span>{v.description}</span>
             ) : (
               <Input
@@ -427,7 +437,7 @@ const Index = ({
             )}
           </Col>
           <Col span={4}>
-            {readonly ? (
+            {!permission.editable ? (
               <span>
                 {showAmount(
                   v.unitAmountExcludingTax as number,
@@ -451,7 +461,7 @@ const Index = ({
             ×
           </Col>
           <Col span={3}>
-            {readonly ? (
+            {!permission.editable ? (
               <span>{v.quantity}</span>
             ) : (
               <Input
@@ -464,7 +474,7 @@ const Index = ({
           </Col>
           <Col span={2}>{`${CURRENCY[currency].symbol} ${v.tax}`}</Col>
           <Col span={3}>{getTotal([invoiceList[i]])}</Col>
-          {!readonly && (
+          {permission.editable && (
             <Col span={1}>
               <div
                 onClick={removeInvoiceItem(v.id!)}
@@ -506,9 +516,9 @@ const Index = ({
 
         <div style={{ display: "flex", gap: "16px" }}>
           <Button onClick={closeModal} disabled={loading}>
-            {`${readonly ? "Close" : "Cancel"}`}
+            {`${!permission.editable ? "Close" : "Cancel"}`}
           </Button>
-          {permission.savable && (
+          {(permission.savable || permission.creatable) && (
             <Button
               type="primary"
               onClick={onSave}
@@ -518,7 +528,7 @@ const Index = ({
               Save
             </Button>
           )}
-          {permission.creatable && (
+          {permission.publishable && (
             <Button onClick={onPublish} loading={loading} disabled={loading}>
               Create
             </Button>
