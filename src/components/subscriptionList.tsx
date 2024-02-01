@@ -23,7 +23,7 @@ const APP_PATH = import.meta.env.BASE_URL;
 
 const columns: ColumnsType<ISubscriptionType> = [
   {
-    title: "Plan name",
+    title: "Plan Name",
     dataIndex: "planName",
     key: "planName",
     render: (_, sub) => <a>{sub.plan?.planName}</a>,

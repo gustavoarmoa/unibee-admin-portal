@@ -233,7 +233,7 @@ const Index = ({
     togglePreviewModal();
     // ??????????????????
     // what if checkout form is opened, you can't ask admin to pay user's subscription fee.
-    window.open(updateSubRes.data.data.link, "_blank");
+    // window.open(updateSubRes.data.data.link, "_blank");
   };
 
   const onTerminateSub = async () => {
@@ -649,15 +649,14 @@ const SubscriptionInfoSection = ({
           Total Amount
         </Col>
         <Col span={6}>
-          {subInfo?.amount && showAmount(subInfo.amount, subInfo.currency)}{" "}
-          {subInfo && subInfo.taxScale && (
-            <span style={{ color: "#757575", fontSize: "11px" }}>
-              {" "}
-              {`(${
-                subInfo && subInfo.taxScale && subInfo.taxScale / 100
-              }% tax incl)`}{" "}
+          {subInfo?.amount && showAmount(subInfo.amount, subInfo.currency)}
+          {subInfo && subInfo.taxScale && subInfo.taxScale != 0 ? (
+            <span
+              style={{ color: "#757575", fontSize: "11px", background: "red" }}
+            >
+              {`(${subInfo.taxScale + 200}% tax incl)`}
             </span>
-          )}
+          ) : null}
         </Col>
 
         <Col span={4} style={colStyle}>
@@ -854,6 +853,10 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
         <Col span={6}>
           {new Date(i!.effectTime * 1000).toLocaleDateString()}
         </Col>
+        <Col span={4} style={colStyle}>
+          Note
+        </Col>
+        <Col span={6}>{i?.note}</Col>
       </Row>
     </>
   );

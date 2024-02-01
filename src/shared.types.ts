@@ -88,6 +88,7 @@ interface ISubscriptionType {
     updateAmount: number;
     updateCurrency: string;
     updateAddons: ISubAddon[];
+    note: string;
   };
 }
 
@@ -144,7 +145,7 @@ interface UserInvoice {
   currency: string;
   lines: InvoiceItem[];
   channelId: number;
-  status: number;
+  status: number; // go check INVOICE_STATUS in constants.ts
   sendStatus: number;
   sendEmail: string;
   sendPdf: string;

@@ -68,7 +68,7 @@ const Index = () => {
 
     setErrMsg("");
     setSubmitting(true);
-    const user_name = "ewo" + Math.random();
+    const user_name = "ewo" + Math.random(); // TO BE Deleted
     axios
       .post(`${API_URL}/merchant/auth/sso/register`, {
         email,

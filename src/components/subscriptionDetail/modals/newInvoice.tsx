@@ -37,10 +37,10 @@ const newPlaceholderItem = (): InvoiceItem => ({
   id: ramdonString(8),
   description: "",
   amount: 0,
-  unitAmountExcludingTax: "",
-  amountExcludingTax: 0,
+  unitAmountExcludingTax: "", // item price with single unit
+  amountExcludingTax: 0, // item price with quantity multiplied
   quantity: "1",
-  currency: "",
+  currency: "USD",
   tax: 0,
   taxScale: 0,
 });
@@ -76,7 +76,7 @@ const Index = ({
   const [invoiceName, setInvoiceName] = useState(
     detail == null ? "" : detail.invoiceName
   );
-  console.log("invoice detail/perm: ", detail, "//", permission);
+  // console.log("invoice detail/perm: ", detail, "//", permission);
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
@@ -314,7 +314,7 @@ const Index = ({
         },
       });
       setInvoiceList(newList);
-      console.log("after filed change, new invoiceList: ", newList);
+      console.log("after field change, new invoiceList: ", newList);
     };
 
   // to get a numerical value with 2 decimal points, but still not right
@@ -328,7 +328,7 @@ const Index = ({
       (accu, curr) =>
         accu +
         Math.round(
-          (Number(curr.amountExcludingTax) +
+          (Number(curr.unitAmountExcludingTax) +
             Number(curr.tax) +
             Number.EPSILON) *
             100
@@ -350,11 +350,19 @@ const Index = ({
   return (
     <Modal title="Invoice detail" open={isOpen} width={"820px"} footer={null}>
       <Row style={{ marginTop: "16px" }}>
-        <Col span={4}>Currency</Col>
-        <Col span={4}>Tax Rate %</Col>
-        <Col span={6}>Invoice title</Col>
+        <Col span={4} style={{ fontWeight: "bold" }}>
+          Currency
+        </Col>
+        <Col span={4} style={{ fontWeight: "bold" }}>
+          Tax Rate %
+        </Col>
+        <Col span={6} style={{ fontWeight: "bold" }}>
+          Invoice title
+        </Col>
       </Row>
-      <Row style={{ display: "flex", alignItems: "center" }}>
+      <Row
+        style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+      >
         <Col span={4}>
           {!permission.editable ? (
             <span>{currency}</span>
@@ -490,8 +498,17 @@ const Index = ({
 
       <Row>
         <Col span={20}></Col>
-        <Col span={3} style={{ fontWeight: "bold" }}>
-          {getTotal(invoiceList)}
+        <Col span={4}>
+          <span style={{ fontWeight: "bold" }}>{getTotal(invoiceList)}</span>
+          {detail != null && detail.link != "" && detail.link != null && (
+            <a
+              href={detail.link}
+              target="_blank"
+              style={{ fontSize: "11px", marginLeft: "4px", color: "#757575" }}
+            >
+              Payment Link
+            </a>
+          )}
         </Col>
       </Row>
 

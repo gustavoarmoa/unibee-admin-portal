@@ -23,11 +23,12 @@ import {
   LoadingOutlined,
   MailOutlined,
   SearchOutlined,
+  SyncOutlined,
   UndoOutlined,
 } from "@ant-design/icons";
 import { showAmount } from "../../helpers";
 import { UserInvoice, TInvoicePerm } from "../../shared.types";
-import { CURRENCY } from "../../constants";
+import { CURRENCY, INVOICE_STATUS } from "../../constants";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
@@ -45,6 +46,15 @@ const Index = ({ user }: { user: IProfile | null }) => {
       state: { msg: "session expired, please re-login" },
     });
 
+  /*
+  0: "Initiating", // this status only exist for a very short period, users/admin won't even know it exist
+  1: "Pending", // admin manually create an invoice, ready for edit, but not published yet, users won't see it, won't receive email
+  // in pending, admin can also delete the invoice
+  2: "Pocessing", // admin publish the invoice, user will receive a mail with payment link
+  3: "Paid", // user paid the invoice
+  4: "Failed", // user not pay the invoice before it get expired
+  5: "Cancelled", // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
+    */
   const getPermission = (iv: UserInvoice | null): TInvoicePerm => {
     const p = {
       editable: false,
@@ -58,29 +68,39 @@ const Index = ({ user }: { user: IProfile | null }) => {
     };
     if (iv == null) {
       // creating a new invoice
+      console.log("create a new invoice...");
       p.creatable = true;
+      p.editable = true;
+      p.savable = true;
+      p.publishable = true;
       return p;
     }
     if (iv.subscriptionId == null || iv.subscriptionId == "") {
       // manually created invoice
-      if (iv.invoiceId == "") {
-        // no record in the backend, first-time creation
-        p.savable = true; // ???
-      } else if (iv.link == "") {
-        // invoice record exist in backend, but not published(user won't see it)
-        p.savable = true; // ???
-        p.publishable = true;
-        p.creatable = true;
-        p.editable = true;
-        p.deletable = true;
-      } else {
-        // invoice payment link created, admin cannot change/save/publish
-        // but can delete only if user hasn't made the payment.
+      switch (iv.status) {
+        case 1: // edit mode
+          p.editable = true;
+          p.creatable = true;
+          p.deletable = true;
+          p.publishable = true;
+          break;
+        case 2:
+          p.deletable = true;
+          break;
+        case 3:
+          p.downloadable = true;
+          p.sendable = true;
+          p.refundable = true;
+          break;
       }
-    } else {
-      // system generated invoice
+      return p;
+    }
+
+    if (iv.subscriptionId != "") {
+      // system generated invoice, not admin manually generated
       p.sendable = true;
       p.downloadable = true;
+      p.refundable = true;
     }
     return p;
   };
@@ -98,6 +118,12 @@ const Index = ({ user }: { user: IProfile | null }) => {
       dataIndex: "totalAmount",
       key: "totalAmount",
       render: (amt, invoice) => showAmount(amt, invoice.currency, true),
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS],
     },
     {
       title: "Created by",
@@ -265,24 +291,38 @@ const Index = ({ user }: { user: IProfile | null }) => {
           refresh={fetchData}
         />
       )}
-      <Table
-        columns={columns}
-        dataSource={invoiceList}
-        rowKey={"id"}
-        pagination={false}
-        onRow={(record, rowIndex) => {
-          return {
-            onClick: (event) => {
-              setInvoiceIdx(rowIndex as number);
-              toggleNewInvoiceModal();
-            },
-          };
-        }}
-        loading={{
-          spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
-        }}
-      />
+      <div style={{ display: "flex" }}>
+        <Table
+          columns={columns}
+          dataSource={invoiceList}
+          rowKey={"id"}
+          pagination={false}
+          onRow={(record, rowIndex) => {
+            return {
+              onClick: (event) => {
+                setInvoiceIdx(rowIndex as number);
+                toggleNewInvoiceModal();
+              },
+              // onDoubleClick: (event) => {}, // double click row
+              onContextMenu: (event) => {
+                console.log("r click evt: ", event);
+              }, // right button click row
+              // onMouseEnter: (event) => {}, // mouse enter row
+              // onMouseLeave: (event) => {}, // mouse leave row
+            };
+          }}
+          loading={{
+            spinning: loading,
+            indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
+          }}
+        />
+        <span
+          style={{ cursor: "pointer", marginLeft: "8px" }}
+          onClick={fetchData}
+        >
+          <SyncOutlined />
+        </span>
+      </div>
       <div
         style={{
           display: "flex",
