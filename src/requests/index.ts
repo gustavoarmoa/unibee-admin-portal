@@ -1,6 +1,7 @@
 import axios from "axios";
 // import { useProfileStore } from "../stores";
 import { IProfile } from "../shared.types";
+import { CURRENCY } from "../constants";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -504,11 +505,16 @@ export const revokeInvoice = async (invoiceId: string) => {
   );
 };
 
-export const refund = async (body: {
-  invoiceId: string;
-  refundAmount: number;
-  reason: string;
-}) => {
+export const refund = async (
+  body: {
+    invoiceId: string;
+    refundAmount: number;
+    reason: string;
+  },
+  currency: string
+) => {
+  body.refundAmount *= CURRENCY[currency].stripe_factor;
+  body.refundAmount = Math.round(body.refundAmount);
   const token = localStorage.getItem("merchantToken");
   return await axios.post(
     `${API_URL}/merchant/invoice/new_invoice_refund`,

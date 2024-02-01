@@ -22,6 +22,7 @@ import {
   EditOutlined,
   LoadingOutlined,
   MailOutlined,
+  MoneyCollectOutlined,
   SearchOutlined,
   SyncOutlined,
   UndoOutlined,
@@ -40,6 +41,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
   const [newInvoiceModal, setNewInvoiceModal] = useState(false);
   const [invoiceIdx, setInvoiceIdx] = useState(-1); // -1: not selected, any action button: (delete, edit,refund) will set this value to the selected invoiceIdx
   const [deleteMode, setDeleteMode] = useState(false);
+  const [refundMode, setRefundMode] = useState(false);
   const navigate = useNavigate();
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
@@ -154,14 +156,14 @@ const Index = ({ user }: { user: IProfile | null }) => {
               disabled={!getPermission(record).editable}
             />
           </Tooltip>
-          <Tooltip title="Delete">
+          {/* <Tooltip title="Delete">
             <Button
               onClick={toggleNewInvoiceModal}
               icon={<CloseOutlined />}
               style={{ border: "unset" }}
               disabled={!getPermission(record).deletable}
             />
-          </Tooltip>
+      </Tooltip> */}
           <Tooltip title="Send Mail">
             <Button
               onClick={toggleNewInvoiceModal}
@@ -172,12 +174,13 @@ const Index = ({ user }: { user: IProfile | null }) => {
           </Tooltip>
           <Tooltip title="Refund">
             <Button
-              onClick={toggleNewInvoiceModal}
-              icon={<UndoOutlined />}
+              onClick={refund}
+              icon={<MoneyCollectOutlined />}
               style={{ border: "unset" }}
               disabled={!getPermission(record).refundable}
             />
           </Tooltip>
+
           {/* <span
             onClick={() => downloadInvoice(record.sendPdf)}
             style={{
@@ -203,10 +206,16 @@ const Index = ({ user }: { user: IProfile | null }) => {
     },
   ];
 
+  const refund = () => {
+    setRefundMode(true);
+    toggleNewInvoiceModal();
+  };
+
   const toggleNewInvoiceModal = () => {
     if (newInvoiceModal) {
       setInvoiceIdx(-1);
       setDeleteMode(false);
+      setRefundMode(false);
     }
     setNewInvoiceModal(!newInvoiceModal);
   };
@@ -279,10 +288,8 @@ const Index = ({ user }: { user: IProfile | null }) => {
       {newInvoiceModal && (
         <NewInvoiceModal
           isOpen={true}
-          // readonly={invoiceIdx != -1}
-          readonly={false}
+          refundMode={refundMode}
           detail={invoiceIdx == -1 ? null : invoiceList[invoiceIdx]}
-          // items={invoiceIdx == -1 ? null : invoiceList[invoiceIdx].lines}
           permission={getPermission(
             invoiceIdx == -1 ? null : invoiceList[invoiceIdx]
           )}

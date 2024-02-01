@@ -22,17 +22,6 @@ import { InvoiceItem, UserInvoice } from "../../../shared.types";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
-interface Props {
-  user: IProfile | null;
-  isOpen: boolean;
-  readonly: boolean;
-  detail: UserInvoice | null; // null means new user, no data available
-  permission: TInvoicePerm;
-  // items: InvoiceItem[] | null;
-  closeModal: () => void;
-  refresh: () => void;
-}
-
 const newPlaceholderItem = (): InvoiceItem => ({
   id: ramdonString(8),
   description: "",
@@ -45,13 +34,23 @@ const newPlaceholderItem = (): InvoiceItem => ({
   taxScale: 0,
 });
 
+interface Props {
+  user: IProfile | null;
+  isOpen: boolean;
+  detail: UserInvoice | null; // null means new user, no data available
+  permission: TInvoicePerm;
+  refundMode: boolean;
+  // items: InvoiceItem[] | null;
+  closeModal: () => void;
+  refresh: () => void;
+}
+
 const Index = ({
   user,
   isOpen,
-  readonly,
-  // items,
   detail,
   permission,
+  refundMode,
   closeModal,
   refresh,
 }: Props) => {
@@ -76,7 +75,11 @@ const Index = ({
   const [invoiceName, setInvoiceName] = useState(
     detail == null ? "" : detail.invoiceName
   );
+  const [refundAmt, setRefundAmt] = useState("");
+  const [refundReason, setRefundReason] = useState("");
   // console.log("invoice detail/perm: ", detail, "//", permission);
+
+  console.log("refund mode: ", refundMode);
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
@@ -97,6 +100,12 @@ const Index = ({
   };
   const onInvoiceNameChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
     setInvoiceName(evt.target.value);
+
+  const onRefundAmtChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
+    setRefundAmt(evt.target.value);
+
+  const onRefundReasonChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
+    setRefundReason(evt.target.value);
 
   const addInvoiceItem = () => {
     setInvoiceList(
@@ -267,13 +276,70 @@ const Index = ({
     if (detail == null) {
       return;
     }
-    try {
-      const res = await refund({
-        invoiceId: detail?.invoiceId,
-        refundAmount: 100,
-        reason: "no reason",
+    if (refundReason == "") {
+      message.error("Please input refund reason with less than 64 characters");
+      return;
+    }
+
+    const amt = Number(refundAmt);
+    const total = getTotal(invoiceList, true);
+    if (isNaN(amt) || amt > (total as number)) {
+      message.error(
+        "Refund amount must be less than or equal to invoice amount"
+      );
+      return;
+    }
+
+    console.log("refuding...");
+    /**
+     * 
+     * setLoading(true);
+      const res = await publishInvoice({
+        invoiceId: detail.invoiceId,
+        payMethod: 1,
+        daysUtilDue: 1,
       });
+      setLoading(false);
+      console.log("publishing invoice res: ", res);
+      const code = res.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(res.data.message);
+      }
+      closeModal();
+      message.success("Invoice generated and sent.");
+      refresh();
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("err saving invoice: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
+     */
+    //
+    try {
+      setLoading(true);
+      const res = await refund(
+        {
+          invoiceId: detail?.invoiceId,
+          refundAmount: Number(refundAmt),
+          reason: refundReason,
+        },
+        currency
+      );
+      setLoading(false);
       console.log("refund res: ", res);
+      const code = res.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(res.data.message);
+      }
+      message.success("Refunded."); // does user get refund immeidately? or there is a pending process
+      closeModal();
+      refresh();
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
@@ -323,7 +389,13 @@ const Index = ({
   // line1: 33.93 * 35
   // line2: 77.95 * 3
   // we get: 1421.3999999999
-  const getTotal = (invoices: InvoiceItem[]): string => {
+  const getTotal = (
+    invoices: InvoiceItem[],
+    asNumber?: boolean
+  ): string | number => {
+    // if (asNumber == null) {
+    // asNumber = false;
+    // }
     const total = invoices.reduce(
       (accu, curr) =>
         accu +
@@ -337,15 +409,16 @@ const Index = ({
       0
     );
     if (isNaN(total)) {
-      return "";
+      if (asNumber) {
+        return 0;
+      } else return "";
+      // return "";
     }
-    // 3rd argument is 'whether ignoreFactor',
-    // readonly is used for reading invoices(no edit/create allowed), the amounts need to take factor into account, 10000 need to show $100
-    // readonly: false, is used when admin need to create a new invoice, $100 need to be shown as $100, no factor considered
-    return showAmount(total, currency, true);
-  };
 
-  useEffect(() => {}, []);
+    // 3rd argument is 'whether ignoreFactor',
+    // readonly: false, is used when admin need to create a new invoice, $100 need to be shown as $100, no factor considered
+    return asNumber ? total : showAmount(total, currency, true);
+  };
 
   return (
     <Modal title="Invoice detail" open={isOpen} width={"820px"} footer={null}>
@@ -496,8 +569,42 @@ const Index = ({
       ))}
       <Divider />
 
-      <Row>
-        <Col span={20}></Col>
+      <Row style={{ display: "flex", alignItems: "center" }}>
+        <Col span={20}>
+          {refundMode && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginRight: "16px",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ marginRight: "6px" }}>Refund Reason:</div>
+                <Input
+                  style={{ width: "256px" }}
+                  maxLength={64}
+                  placeholder="Max characters: 64"
+                  value={refundReason}
+                  onChange={onRefundReasonChange}
+                />
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div style={{ marginRight: "6px" }}>
+                  Refund Amt: {CURRENCY[currency].symbol}
+                </div>
+                <Input
+                  style={{ width: "96px" }}
+                  placeholder={`≤ ${getTotal(invoiceList)}`}
+                  value={refundAmt}
+                  onChange={onRefundAmtChange}
+                />
+              </div>
+            </div>
+          )}
+        </Col>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>{getTotal(invoiceList)}</span>
           {detail != null && detail.link != "" && detail.link != null && (
@@ -548,6 +655,16 @@ const Index = ({
           {permission.publishable && (
             <Button onClick={onPublish} loading={loading} disabled={loading}>
               Create
+            </Button>
+          )}
+          {refundMode && (
+            <Button
+              type="primary"
+              onClick={onRefund}
+              loading={loading}
+              disabled={loading}
+            >
+              Refund
             </Button>
           )}
         </div>
