@@ -545,3 +545,16 @@ export const downloadInvoice = (url: string) => {
     URL.revokeObjectURL(href);
   });
 };
+
+export const searchUserReq = async () => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(
+    `${API_URL}/merchant/merchant_user/user_search`,
+    { merchantId: 15621 },
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};

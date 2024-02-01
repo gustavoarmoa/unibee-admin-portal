@@ -30,6 +30,7 @@ import SubscriptionList from "./components/subscriptionList";
 import SubscriptionDetail from "./components/subscriptionDetail";
 import Subscriptions from "./components/subscriptions";
 import Settings from "./components/settings";
+import Users from "./components/users";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
@@ -57,8 +58,9 @@ function getItem(
 const items: MenuItem[] = [
   getItem("Plan", "/plan/list", <DesktopOutlined />),
   getItem("Subscription", "/subscription/list", <PieChartOutlined />),
-  getItem("Analytics", "/analytics", <PieChartOutlined />),
   getItem("Invoices", "/invoices", <PieChartOutlined />),
+  getItem("Users", "/users", <PieChartOutlined />),
+  getItem("Analytics", "/analytics", <PieChartOutlined />),
   getItem("Profile", "/profile", <PieChartOutlined />),
   getItem("Settings", "/settings", <PieChartOutlined />),
 ];
@@ -141,7 +143,7 @@ const App: React.FC = () => {
                 margin: "16px 0",
               }}
             >
-              <img src={`${APP_PATH}multiLoginLogo.png`} height={"80px"} />
+              <img src={`${APP_PATH}multiloginLogo.png`} height={"80px"} />
             </div>
             <Menu
               theme="dark"
@@ -197,6 +199,7 @@ const App: React.FC = () => {
                   <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
                   <Route path={`${APP_PATH}invoices`} Component={Invoices} />
                   <Route path={`${APP_PATH}settings`} Component={Settings} />
+                  <Route path={`${APP_PATH}users`} Component={Users} />
                   <Route
                     path={`${APP_PATH}subscription`}
                     Component={Subscriptions}
@@ -215,7 +218,7 @@ const App: React.FC = () => {
                 </Routes>
               </div>
             </Content>
-            <Footer style={{ textAlign: "center" }}>MultiLogin ©2024</Footer>
+            <Footer style={{ textAlign: "center" }}>Multilogin ©2024</Footer>
           </Layout>
         </Layout>
       )}

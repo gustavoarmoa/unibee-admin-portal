@@ -24,7 +24,7 @@ const updateSubPreview = ({
       open={isOpen}
       // onOk={onConfirm}
       // onCancel={togglePreviewModal}
-      width={"640px"}
+      width={"820px"}
       footer={null}
     >
       {previewInfo == null ? (
@@ -44,41 +44,74 @@ const updateSubPreview = ({
         </div>
       ) : (
         <>
-          <Divider plain style={{ margin: "16px 0" }}>
-            Next billing period invoices
+          <Row style={{ display: "flex", alignItems: "center" }}>
+            <Col span={10}>
+              <span style={{ fontWeight: "bold" }}>Item description</span>
+            </Col>
+            <Col span={4}>
+              <div style={{ fontWeight: "bold" }}>Amount</div>
+              <div style={{ fontWeight: "bold" }}>(exclude Tax)</div>
+            </Col>
+            <Col span={1}></Col>
+            <Col span={3}>
+              <span style={{ fontWeight: "bold" }}>Quantity</span>
+            </Col>
+            <Col span={2}>
+              <span style={{ fontWeight: "bold" }}>Tax</span>
+            </Col>
+            <Col span={3}>
+              <span style={{ fontWeight: "bold" }}>Total</span>
+            </Col>
+          </Row>
+          <Divider plain style={{ margin: "8px 0", color: "#757575" }}>
+            ↓ Next billing period invoices ↓
           </Divider>
           {previewInfo.nextPeriodInvoice.lines.map((i, idx) => (
-            <Row key={idx} gutter={[16, 16]}>
-              <Col span={6}>{`${showAmount(
-                i.amount as number,
-                i.currency
-              )}`}</Col>
-              <Col span={18}>{i.description}</Col>
+            <Row key={idx}>
+              <Col span={10}>{i.description} </Col>
+              <Col span={4}>
+                {showAmount(i.unitAmountExcludingTax as number, i.currency)}
+              </Col>
+              <Col span={1}></Col>
+              <Col span={3}>{i.quantity}</Col>
+              <Col span={2}>{showAmount(i.tax as number, i.currency)}</Col>
+              <Col span={3}>{showAmount(i.amount as number, i.currency)}</Col>
             </Row>
           ))}
-          <Divider plain style={{ margin: "16px 0" }}>
-            Current billing period invoices
+          <Row>
+            <Col span={20}></Col>
+            <Col span={2} style={{ fontWeight: "bold" }}>
+              {showAmount(
+                previewInfo.nextPeriodInvoice.totalAmount,
+                previewInfo.nextPeriodInvoice.currency
+              )}
+            </Col>
+          </Row>
+
+          <Divider plain style={{ margin: "8px 0", color: "#757575" }}>
+            ↓ Current billing period invoices ↓
           </Divider>
           {previewInfo.invoice.lines.map((i, idx) => (
-            <Row key={idx} gutter={[16, 16]}>
-              <Col span={6}>{`${showAmount(
-                i.amount as number,
-                i.currency
-              )}`}</Col>
-              <Col span={18}>{i.description}</Col>
+            <Row key={idx}>
+              <Col span={10}>{i.description} </Col>
+              <Col span={4}>
+                {showAmount(i.unitAmountExcludingTax as number, i.currency)}
+              </Col>
+              <Col span={1}></Col>
+              <Col span={3}>{i.quantity}</Col>
+              <Col span={2}>{showAmount(i.tax as number, i.currency)}</Col>
+              <Col span={3}>{showAmount(i.amount as number, i.currency)}</Col>
             </Row>
           ))}
-
-          {/* <Row gutter={[16, 16]}>
-            <Col span={6}>
-              <span style={{ fontSize: "18px" }}>Total</span>
+          <Row>
+            <Col span={20}></Col>
+            <Col span={2} style={{ fontWeight: "bold" }}>
+              {showAmount(
+                previewInfo.invoice.totalAmount,
+                previewInfo.invoice.currency
+              )}
             </Col>
-            <Col span={18}>
-              <span style={{ fontSize: "18px", fontWeight: "bold" }}>
-                {`${showAmount(previewInfo.totalAmount, previewInfo.currency)}`}
-              </span>
-            </Col>
-          </Row> */}
+          </Row>
           <div
             style={{
               display: "flex",

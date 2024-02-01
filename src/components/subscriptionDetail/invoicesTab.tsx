@@ -77,6 +77,10 @@ const Index = ({ user }: { user: IProfile | null }) => {
         // invoice payment link created, admin cannot change/save/publish
         // but can delete only if user hasn't made the payment.
       }
+    } else {
+      // system generated invoice
+      p.sendable = true;
+      p.downloadable = true;
     }
     return p;
   };
@@ -86,23 +90,27 @@ const Index = ({ user }: { user: IProfile | null }) => {
       title: "Title",
       dataIndex: "invoiceName",
       key: "invoiceName",
+      render: (title, invoice) => <a>{title}</a>,
       // render: (_, sub) => <a>{sub.plan?.planName}</a>,
     },
     {
       title: "Total Amount",
       dataIndex: "totalAmount",
       key: "totalAmount",
-      render: (amt, invoice) => (
-        <a>{showAmount(amt, invoice.currency, true)}</a>
-      ),
+      render: (amt, invoice) => showAmount(amt, invoice.currency, true),
     },
     {
-      title: "Subscription Amount",
-      dataIndex: "subscriptionAmount",
-      key: "subscriptionAmount",
-      render: (amt, invoice) => (
-        <a>{showAmount(amt, invoice.currency, true)}</a>
-      ),
+      title: "Created by",
+      dataIndex: "subscriptionId",
+      key: "subscriptionId",
+      render: (subscriptionId, invoice) =>
+        subscriptionId == "" ? "Admin" : "System",
+    },
+    {
+      title: "Created at",
+      dataIndex: "gmtCreate",
+      key: "gmtCreate",
+      render: (d, invoice) => <span>{new Date(d).toLocaleDateString()}</span>,
     },
     {
       title: "Action",

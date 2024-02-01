@@ -405,7 +405,7 @@ const Index = () => {
                 onClick={onSubmit2}
                 loading={submitting}
               >
-                submit
+                Submit
               </Button>
               <Button type="link" block onClick={onSubmit} loading={submitting}>
                 Resend
