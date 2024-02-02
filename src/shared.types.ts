@@ -171,7 +171,8 @@ type TInvoicePerm = {
   editable: boolean; // in list view, can I click the record, and open a Modal to edit it
   savable: boolean; // in Modal, can I click save (save a newly created invoice, not yet publish)
   creatable: boolean; // in Modal, can I click create, to create an invoice.
-  publishable: boolean; // in Modal, can I click 'publish', after publish, user can see it and receive a mail
+  publishable: boolean; // in Modal, can I click 'publish', after publish, user can see it and receive a mail with payment link
+  revokable: boolean; // the opposite of publish, if user hasn't paid the invoice within *** days, admin can revoke it. But if user has paid, admin cannot revoke it.
   deletable: boolean; // in list view, can I click the delete icon, only manually created invoice, and before publish
   refundable: boolean; // in list view, can I cilck the refund icon
   downloadable: boolean; // download invoice, true: for all system-generated invoice, and amdin manually generated(only after publish)

@@ -55,7 +55,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
   0: "Initiating", // this status only exist for a very short period, users/admin won't even know it exist
   1: "Pending", // admin manually create an invoice, ready for edit, but not published yet, users won't see it, won't receive email
   // in pending, admin can also delete the invoice
-  2: "Pocessing", // admin publish the invoice, user will receive a mail with payment link
+  2: "Pocessing", // admin has published the invoice, user will receive a mail with payment link
   3: "Paid", // user paid the invoice
   4: "Failed", // user not pay the invoice before it get expired
   5: "Cancelled", // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
@@ -67,6 +67,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       savable: false, // save it after creation
       deletable: false, // delete before publish as nothing happened
       publishable: false, // publish it, so user could receive it
+      revokable: false,
       refundable: false,
       downloadable: false,
       sendable: false,
@@ -83,16 +84,16 @@ const Index = ({ user }: { user: IProfile | null }) => {
     if (iv.subscriptionId == null || iv.subscriptionId == "") {
       // manually created invoice
       switch (iv.status) {
-        case 1: // edit mode
+        case 1: // pending, aka edit mode
           p.editable = true;
           p.creatable = true;
           p.deletable = true;
           p.publishable = true;
           break;
-        case 2:
-          p.deletable = true;
+        case 2: // processing mode, user has received the invoice mail with payment link, but hasn't paid yet.
+          p.revokable = true;
           break;
-        case 3:
+        case 3: // user has paid
           p.downloadable = true;
           p.sendable = true;
           p.refundable = true;

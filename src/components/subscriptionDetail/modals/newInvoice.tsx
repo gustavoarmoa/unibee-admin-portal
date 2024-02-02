@@ -246,6 +246,8 @@ const Index = ({
     if (detail == null) {
       return;
     }
+    console.log("delete: ", action);
+
     const callMethod = action == "delete" ? deleteInvoice : revokeInvoice;
     try {
       setLoading(true);
@@ -272,6 +274,7 @@ const Index = ({
   };
 
   const onDelete = () => onDeleteOrRevoke("delete");
+  const onRevoke = () => onDeleteOrRevoke("revoke");
 
   const onRefund = async () => {
     if (detail == null) {
@@ -629,15 +632,29 @@ const Index = ({
           marginTop: "24px",
         }}
       >
-        <Button
-          type="primary"
-          danger
-          onClick={onDelete}
-          loading={loading}
-          disabled={!permission.deletable || loading}
-        >
-          Delete
-        </Button>
+        {permission.deletable && (
+          <Button
+            type="primary"
+            danger
+            onClick={onDelete}
+            loading={loading}
+            disabled={!permission.deletable || loading}
+          >
+            Delete
+          </Button>
+        )}
+
+        {permission.revokable && (
+          <Button
+            type="primary"
+            danger
+            onClick={onRevoke}
+            loading={loading}
+            disabled={!permission.revokable || loading}
+          >
+            Delete
+          </Button>
+        )}
 
         <div style={{ display: "flex", gap: "16px" }}>
           <Button onClick={closeModal} disabled={loading}>
