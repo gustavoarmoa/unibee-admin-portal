@@ -44,6 +44,7 @@ const ChangePlan = ({
       width={"480px"}
       onOk={onConfirm}
       onCancel={onCancel}
+      closeIcon={null}
     >
       <Divider>Choose a new subscription plan</Divider>
       <div

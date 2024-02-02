@@ -425,7 +425,13 @@ const Index = ({
   };
 
   return (
-    <Modal title="Invoice Detail" open={isOpen} width={"820px"} footer={null}>
+    <Modal
+      title="Invoice Detail"
+      open={isOpen}
+      width={"820px"}
+      footer={null}
+      closeIcon={null}
+    >
       <Row style={{ marginTop: "16px" }}>
         <Col span={4} style={{ fontWeight: "bold" }}>
           Currency
@@ -652,13 +658,13 @@ const Index = ({
             loading={loading}
             disabled={!permission.revokable || loading}
           >
-            Delete
+            Cancel
           </Button>
         )}
 
         <div style={{ display: "flex", gap: "16px" }}>
           <Button onClick={closeModal} disabled={loading}>
-            {`${!permission.editable ? "Close" : "Cancel"}`}
+            {`${!permission.editable ? "Close" : "Close"}`}
           </Button>
           {(permission.savable || permission.creatable) && (
             <Button

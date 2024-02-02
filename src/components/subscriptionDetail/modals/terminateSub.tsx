@@ -32,6 +32,7 @@ const TerminateSub = ({
       width={"640px"}
       open={isOpen}
       footer={null}
+      closeIcon={null}
     >
       <div style={{ margin: "16px 0" }}>
         Are you sure you want to end this subscription{" "}

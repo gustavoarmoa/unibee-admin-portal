@@ -26,6 +26,7 @@ const updateSubPreview = ({
       // onCancel={togglePreviewModal}
       width={"820px"}
       footer={null}
+      closeIcon={null}
     >
       {previewInfo == null ? (
         <div

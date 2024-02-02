@@ -20,7 +20,13 @@ const ExtendSub = ({
   onConfirm,
 }: Props) => {
   return (
-    <Modal title="Extend due date" open={isOpen} width={"640px"} footer={null}>
+    <Modal
+      title="Extend due date"
+      open={isOpen}
+      width={"640px"}
+      footer={null}
+      closeIcon={null}
+    >
       <div style={{ margin: "16px 0" }}>
         Are you sure you want to extend the due date?
       </div>
