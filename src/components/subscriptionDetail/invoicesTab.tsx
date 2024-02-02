@@ -10,6 +10,9 @@ import {
   Pagination,
   Space,
   Tooltip,
+  Checkbox,
+  Col,
+  Row,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 // import { ISubscriptionType } from "../../shared.types";
@@ -300,7 +303,8 @@ const Index = ({ user }: { user: IProfile | null }) => {
           refresh={fetchData}
         />
       )}
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <Searchbar />
         <Table
           columns={columns}
           dataSource={invoiceList}
@@ -328,9 +332,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
         <span
           style={{ cursor: "pointer", marginLeft: "8px" }}
           onClick={fetchData}
-        >
-          <SyncOutlined />
-        </span>
+        ></span>
       </div>
       <div
         style={{
@@ -363,3 +365,60 @@ const Index = ({ user }: { user: IProfile | null }) => {
 };
 
 export default Index;
+
+const Searchbar = () => {
+  // Object.keys(INVOICE_STATUS).map(s => ({value: s, label: INVOICE_STATUS[Number(s)] }))
+  return (
+    <div>
+      <Row style={{ display: "flex", justifyContent: "space-between" }}>
+        <Col span={6}>Title</Col>
+        <Col span={3}>Amt</Col>
+        <Col span={4}>Status</Col>
+        <Col span={2}>Refunded</Col>
+        <Col span={4}>Action</Col>
+      </Row>
+      <Row
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "12px",
+        }}
+      >
+        <Col span={6}>
+          <Input />
+        </Col>
+        <Col span={3} style={{ display: "flex", gap: "4px" }}>
+          <Input placeholder="from" /> <Input placeholder="to" />
+        </Col>
+        <Col span={4}>
+          {" "}
+          <Select
+            style={{ width: 120 }}
+            options={[
+              { label: INVOICE_STATUS[0], value: 0 },
+              { label: INVOICE_STATUS[1], value: 1 },
+              { label: INVOICE_STATUS[2], value: 2 },
+              { label: INVOICE_STATUS[3], value: 3 },
+              { label: INVOICE_STATUS[4], value: 4 },
+              { label: INVOICE_STATUS[5], value: 5 },
+            ]}
+          />
+        </Col>
+        <Col span={2}>
+          {" "}
+          <Checkbox></Checkbox>
+        </Col>
+        <Col span={4}>
+          <div style={{ display: "flex" }}>
+            <Button type="link" size="small">
+              Search
+            </Button>{" "}
+            <Button type="link" size="small">
+              Clear
+            </Button>
+          </div>
+        </Col>
+      </Row>
+    </div>
+  );
+};
