@@ -40,7 +40,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
   const [page, setPage] = useState(0); // pagination props
   const [newInvoiceModal, setNewInvoiceModal] = useState(false);
   const [invoiceIdx, setInvoiceIdx] = useState(-1); // -1: not selected, any action button: (delete, edit,refund) will set this value to the selected invoiceIdx
-  const [deleteMode, setDeleteMode] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false); // looks like I am not using it,
   const [refundMode, setRefundMode] = useState(false);
   const navigate = useNavigate();
   const relogin = () =>
@@ -158,12 +158,14 @@ const Index = ({ user }: { user: IProfile | null }) => {
           </Tooltip>
           {/* <Tooltip title="Delete">
             <Button
-              onClick={toggleNewInvoiceModal}
+              onClick={() => {
+                toggleNewInvoiceModal;
+              }}
               icon={<CloseOutlined />}
               style={{ border: "unset" }}
               disabled={!getPermission(record).deletable}
             />
-      </Tooltip> */}
+            </Tooltip>*/}
           <Tooltip title="Send Mail">
             <Button
               onClick={toggleNewInvoiceModal}

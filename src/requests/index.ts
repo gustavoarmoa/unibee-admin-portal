@@ -385,12 +385,14 @@ export const createInvoice = async ({
   currency,
   taxScale,
   invoiceItems,
+  finish,
 }: {
   name: string;
   userId: number;
   currency: string;
   taxScale: number;
   invoiceItems: TInvoiceItems[];
+  finish: boolean;
 }) => {
   const token = localStorage.getItem("merchantToken");
   const body = {
@@ -401,6 +403,7 @@ export const createInvoice = async ({
     currency,
     name,
     lines: invoiceItems,
+    finish,
   };
   return await axios.post(
     `${API_URL}/merchant/invoice/new_invoice_create`,

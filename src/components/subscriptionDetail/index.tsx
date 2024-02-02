@@ -74,7 +74,7 @@ const UserInfoSection = ({ user }: { user: IProfile | null }) => {
   return (
     <div style={{ marginBottom: "24px" }}>
       <Divider orientation="left" style={{ margin: "16px 0" }}>
-        User info
+        User Info
       </Divider>
       <Row style={rowStyle}>
         <Col span={4}>

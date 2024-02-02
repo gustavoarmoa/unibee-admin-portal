@@ -79,8 +79,6 @@ const Index = ({
   const [refundReason, setRefundReason] = useState("");
   // console.log("invoice detail/perm: ", detail, "//", permission);
 
-  console.log("refund mode: ", refundMode);
-
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
       state: { msg: "session expired, please re-login" },
@@ -150,7 +148,7 @@ const Index = ({
     return true;
   };
 
-  const onSave = async () => {
+  const onSave = (isFinished: boolean) => async () => {
     if (!validateFields()) {
       return;
     }
@@ -171,6 +169,7 @@ const Index = ({
           currency,
           name: invoiceName,
           invoiceItems,
+          finish: isFinished,
         });
       } else {
         // saving an invoice
@@ -208,6 +207,8 @@ const Index = ({
   // what if user made some changes, then click 'create' to publish, backend still uses the old data before the local change.
   const onPublish = async () => {
     if (detail == null) {
+      console.log("publis new invoice, detail is null? ", detail);
+      onSave(true)();
       return;
     }
     // Do validation check first.
@@ -421,7 +422,7 @@ const Index = ({
   };
 
   return (
-    <Modal title="Invoice detail" open={isOpen} width={"820px"} footer={null}>
+    <Modal title="Invoice Detail" open={isOpen} width={"820px"} footer={null}>
       <Row style={{ marginTop: "16px" }}>
         <Col span={4} style={{ fontWeight: "bold" }}>
           Currency
@@ -645,7 +646,7 @@ const Index = ({
           {(permission.savable || permission.creatable) && (
             <Button
               type="primary"
-              onClick={onSave}
+              onClick={onSave(false)}
               loading={loading}
               disabled={loading || invoiceList.length == 0}
             >
