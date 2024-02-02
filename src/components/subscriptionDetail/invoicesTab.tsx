@@ -18,7 +18,7 @@ import type { ColumnsType } from "antd/es/table";
 // import { ISubscriptionType } from "../../shared.types";
 import { getInvoiceList, downloadInvoice } from "../../requests";
 import { IProfile } from "../../shared.types";
-import NewInvoiceModal from "./modals/newInvoice";
+import InvoiceModal from "./modals/newInvoice";
 import {
   CloseOutlined,
   DownloadOutlined,
@@ -33,6 +33,7 @@ import {
 import { showAmount } from "../../helpers";
 import { UserInvoice, TInvoicePerm } from "../../shared.types";
 import { CURRENCY, INVOICE_STATUS } from "../../constants";
+import "../../shared.css";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
@@ -292,7 +293,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
   return (
     <div>
       {newInvoiceModal && (
-        <NewInvoiceModal
+        <InvoiceModal
           isOpen={true}
           refundMode={refundMode}
           detail={invoiceIdx == -1 ? null : invoiceList[invoiceIdx]}
@@ -305,11 +306,12 @@ const Index = ({ user }: { user: IProfile | null }) => {
         />
       )}
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <Searchbar />
+        <Searchbar refresh={fetchData} />
         <Table
           columns={columns}
           dataSource={invoiceList}
           rowKey={"id"}
+          rowClassName="clickable-tbl-row"
           pagination={false}
           onRow={(record, rowIndex) => {
             return {
@@ -367,7 +369,10 @@ const Index = ({ user }: { user: IProfile | null }) => {
 
 export default Index;
 
-const Searchbar = () => {
+interface ISearchBarProp {
+  refresh: () => void;
+}
+const Searchbar = ({ refresh }: ISearchBarProp) => {
   // Object.keys(INVOICE_STATUS).map(s => ({value: s, label: INVOICE_STATUS[Number(s)] }))
   return (
     <div>
@@ -414,7 +419,7 @@ const Searchbar = () => {
             <Button type="link" size="small">
               Search
             </Button>{" "}
-            <Button type="link" size="small">
+            <Button onClick={refresh} type="link" size="small">
               Clear
             </Button>
           </div>

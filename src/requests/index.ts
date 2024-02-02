@@ -325,12 +325,27 @@ export const extendDueDate = async (
   );
 };
 
-// billing admin can also update user profile, not implemented yet.
+// billing admin can also get user profile.
+export const getUserProfile = async (userId: number) => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.get(
+    `${API_URL}/merchant/merchant_user/get_user_profile?userId=${userId}`,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
+// billing admin can also update user profile.
 export const saveUserProfile = async (newProfile: IProfile) => {
+  const u = JSON.parse(JSON.stringify(newProfile));
+  u.userId = newProfile.id;
   const token = localStorage.getItem("merchantToken");
   return await axios.post(
     `${API_URL}/merchant/merchant_user/update_user_profile`,
-    newProfile,
+    u,
     {
       headers: {
         Authorization: `${token}`, // Bearer: ******

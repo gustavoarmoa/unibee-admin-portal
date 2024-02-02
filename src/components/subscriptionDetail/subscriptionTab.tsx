@@ -44,14 +44,11 @@ import {
   SyncOutlined,
 } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
+import "../../shared.css";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
-const Index = ({
-  setUserProfile,
-}: {
-  setUserProfile: (user: IProfile) => void;
-}) => {
+const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const navigate = useNavigate();
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
@@ -379,7 +376,7 @@ interface ISubAddon extends IPlan {
     console.log("active sub: ", localActiveSub);
 
     setSelectedPlan(s.planId.id);
-    setUserProfile(s.user);
+    setUserId(s.user.id);
 
     let plans: IPlan[] = planListRes.data.data.Plans.map((p: any) => {
       const p2 = p.plan;
@@ -953,6 +950,7 @@ const SubTimeline = ({
         columns={columns}
         dataSource={timeline}
         rowKey={"id"}
+        rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{
           spinning: loading,

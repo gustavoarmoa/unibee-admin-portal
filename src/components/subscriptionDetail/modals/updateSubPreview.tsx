@@ -22,8 +22,6 @@ const updateSubPreview = ({
     <Modal
       title="Subscription Update Preview"
       open={isOpen}
-      // onOk={onConfirm}
-      // onCancel={togglePreviewModal}
       width={"820px"}
       footer={null}
       closeIcon={null}

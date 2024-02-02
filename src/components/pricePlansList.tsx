@@ -12,10 +12,9 @@ import {
   MinusOutlined,
 } from "@ant-design/icons";
 import { IPlan } from "../shared.types";
+import "../shared.css";
 
 const APP_PATH = import.meta.env.BASE_URL;
-const API_URL = import.meta.env.VITE_API_URL;
-
 const columns: ColumnsType<IPlan> = [
   {
     title: "Name",
@@ -138,6 +137,7 @@ const Index = () => {
         columns={columns}
         dataSource={plan}
         rowKey={"id"}
+        rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{
           spinning: loading,

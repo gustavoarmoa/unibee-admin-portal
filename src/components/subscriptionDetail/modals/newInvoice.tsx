@@ -638,7 +638,7 @@ const Index = ({
           marginTop: "24px",
         }}
       >
-        {permission.deletable && (
+        {permission.deletable ? (
           <Button
             type="primary"
             danger
@@ -648,9 +648,11 @@ const Index = ({
           >
             Delete
           </Button>
+        ) : (
+          <span>&nbsp;</span>
         )}
 
-        {permission.revokable && (
+        {permission.revokable ? (
           <Button
             type="primary"
             danger
@@ -660,6 +662,8 @@ const Index = ({
           >
             Cancel
           </Button>
+        ) : (
+          <span>&nbsp;</span>
         )}
 
         <div style={{ display: "flex", gap: "16px" }}>

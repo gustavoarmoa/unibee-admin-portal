@@ -10,6 +10,7 @@ import { SUBSCRIPTION_STATUS } from "../constants";
 import { LoadingOutlined } from "@ant-design/icons";
 import { searchUserReq } from "../requests";
 import { ramdonString } from "../helpers";
+import "../shared.css";
 
 const columns: ColumnsType<IProfile> = [
   {
@@ -87,6 +88,7 @@ const Index = () => {
         columns={columns}
         dataSource={users}
         rowKey={"id"}
+        rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{
           spinning: loading,

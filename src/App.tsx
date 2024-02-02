@@ -96,6 +96,7 @@ const App: React.FC = () => {
       localStorage.removeItem("merchantToken");
       navigate(`${APP_PATH}login`);
     } catch (err) {
+      navigate(`${APP_PATH}login`);
       if (err instanceof Error) {
         console.log("err logging out: ", err.message);
         // message.error(err.message);
@@ -170,9 +171,9 @@ const App: React.FC = () => {
             </div>
           </Sider>
           <Layout>
-            <Header
-              style={{ padding: 0, background: colorBgContainer }}
-            ></Header>
+            <Header style={{ padding: 0, background: colorBgContainer }}>
+              <div>search</div>
+            </Header>
             <Content
               style={{
                 padding: "16px",

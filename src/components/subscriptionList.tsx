@@ -18,6 +18,7 @@ import { showAmount } from "../helpers";
 import { SUBSCRIPTION_STATUS } from "../constants";
 import { ISubscriptionType } from "../shared.types";
 import { LoadingOutlined } from "@ant-design/icons";
+import "../shared.css";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -26,13 +27,13 @@ const columns: ColumnsType<ISubscriptionType> = [
     title: "Plan Name",
     dataIndex: "planName",
     key: "planName",
-    render: (_, sub) => <a>{sub.plan?.planName}</a>,
+    render: (_, sub) => <span>{sub.plan?.planName}</span>,
   },
   {
     title: "Description",
     dataIndex: "description",
     key: "description",
-    render: (_, sub) => <a>{sub.plan?.description}</a>,
+    render: (_, sub) => <span>{sub.plan?.description}</span>,
   },
   {
     title: "Amount",
@@ -173,6 +174,7 @@ const Index = () => {
         columns={columns}
         dataSource={subList}
         rowKey={"id"}
+        rowClassName="clickable-tbl-row"
         pagination={false}
         onRow={(record, rowIndex) => {
           return {

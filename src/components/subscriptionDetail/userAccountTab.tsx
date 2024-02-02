@@ -2,11 +2,21 @@ import { Button, Form, Input, Radio, Select, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Country, IProfile } from "../../shared.types";
 import { useEffect, useState } from "react";
-import { getCountryList, saveUserProfile } from "../../requests";
+import {
+  getCountryList,
+  getUserProfile,
+  saveUserProfile,
+} from "../../requests";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
-const UserAccountTab = ({ user }: { user: IProfile | null }) => {
+const UserAccountTab = ({
+  user,
+  setUserProfile,
+}: {
+  user: IProfile | null;
+  setUserProfile: (u: IProfile) => void;
+}) => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const [countryList, setCountryList] = useState<Country[]>([]);
@@ -23,22 +33,26 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
   ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const onSave = async () => {
-    console.log("form: ", form.getFieldsValue());
+    const userProfile = form.getFieldsValue();
+
+    const isInvalid = form.getFieldsError().some((f) => f.errors.length > 0);
+    console.log("is invalid: ", isInvalid);
+    if (isInvalid) {
+      return;
+    }
+    console.log("form values: ", userProfile);
     setLoading(true);
-    let saveProfileRes;
-    return;
-    /*
+
     try {
-      saveProfileRes = await saveUserProfile(form.getFieldsValue());
+      const saveProfileRes = await saveUserProfile(form.getFieldsValue());
       console.log("save profile res: ", saveProfileRes);
       const code = saveProfileRes.data.code;
       if (code != 0) {
         code == 61 && relogin();
-        // TODO: save all statu code in a constant
         throw new Error(saveProfileRes.data.message);
       }
-      message.success("saved");
-      // setUserProfile(saveProfileRes.data.data.User);
+      message.success("User Info Saved");
+      setUserProfile(userProfile);
       setLoading(false);
     } catch (err) {
       setLoading(false);
@@ -50,19 +64,17 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
       }
       return;
     }
-    */
   };
 
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
-      let profileRes, countryListRes;
+      let countryListRes;
       try {
         const res = ([countryListRes] = await Promise.all([
-          // getProfile(),
           getCountryList(15621),
         ]));
-        console.log("profile/country: ", profileRes, "//", countryListRes);
+        console.log("country: ", countryListRes);
         res.forEach((r) => {
           const code = r.data.code;
           code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
@@ -76,14 +88,12 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
         setLoading(false);
         if (err instanceof Error) {
           console.log("profile update err: ", err.message);
-          // setErrMsg(err.message);
           message.error(err.message);
         } else {
           message.error("Unknown error");
         }
         return;
       }
-      // setUserProfile(profileRes.data.data.User);
       setCountryList(
         countryListRes.data.data.vatCountryList.map((c: any) => ({
           code: c.countryCode,
@@ -95,6 +105,16 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
     fetchData();
   }, []);
 
+  const countryCode = Form.useWatch("countryCode", form);
+  useEffect(() => {
+    countryCode &&
+      countryList.length > 0 &&
+      form.setFieldValue(
+        "countryName",
+        countryList.find((c) => c.code == countryCode)!.name
+      );
+  }, [countryCode]);
+
   return (
     user != null && (
       <Form
@@ -102,19 +122,41 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 24 }}
         layout="horizontal"
+        onFinish={onSave}
         // disabled={componentDisabled}
         style={{ maxWidth: 600 }}
         initialValues={user}
       >
-        <Form.Item label="ID" name="id" hidden>
+        <Form.Item label="id" name="id" hidden>
+          <Input disabled />
+        </Form.Item>
+        <Form.Item label="countryName" name="countryName" hidden>
           <Input disabled />
         </Form.Item>
 
-        <Form.Item label="First name" name="firstName">
+        <Form.Item
+          label="First name"
+          name="firstName"
+          rules={[
+            {
+              required: true,
+              message: "Please input your first name!",
+            },
+          ]}
+        >
           <Input />
         </Form.Item>
 
-        <Form.Item label="Last name" name="lastName">
+        <Form.Item
+          label="Last name"
+          name="lastName"
+          rules={[
+            {
+              required: true,
+              message: "Please input your last name!",
+            },
+          ]}
+        >
           <Input />
         </Form.Item>
 
@@ -122,11 +164,29 @@ const UserAccountTab = ({ user }: { user: IProfile | null }) => {
           <Input disabled />
         </Form.Item>
 
-        <Form.Item label="Billing address" name="address">
+        <Form.Item
+          label="Billing address"
+          name="address"
+          rules={[
+            {
+              required: true,
+              message: "Please input your billing address!",
+            },
+          ]}
+        >
           <Input />
         </Form.Item>
 
-        <Form.Item label="Country" name="countryCode">
+        <Form.Item
+          label="Country"
+          name="countryCode"
+          rules={[
+            {
+              required: true,
+              message: "Please select your first country!",
+            },
+          ]}
+        >
           <Select
             showSearch
             placeholder="Type to search"
