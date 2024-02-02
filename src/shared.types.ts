@@ -11,6 +11,7 @@ interface IProfile {
   lastName: string;
   id: number;
   phone: string;
+  mobile: string;
   paymentMethod: string;
   linkedIn: string;
   telegram: string;

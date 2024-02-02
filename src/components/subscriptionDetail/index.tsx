@@ -141,7 +141,7 @@ const UserInfoSection = ({ user }: { user: IProfile | null }) => {
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Phone</span>
         </Col>
-        <Col span={6}>{user?.phone}</Col>
+        <Col span={6}>{user?.mobile}</Col>
       </Row>
       <Row style={rowStyle}>
         <Col span={4}>
