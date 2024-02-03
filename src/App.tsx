@@ -35,6 +35,7 @@ import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
 import NotFound from "./components/notFound";
+import AppSearch from "./components/appSearch";
 import { logoutReq } from "./requests";
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -171,8 +172,8 @@ const App: React.FC = () => {
             </div>
           </Sider>
           <Layout>
-            <Header style={{ padding: 0, background: colorBgContainer }}>
-              <div>search</div>
+            <Header style={{ background: colorBgContainer }}>
+              <AppSearch />
             </Header>
             <Content
               style={{

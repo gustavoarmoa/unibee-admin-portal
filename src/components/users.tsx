@@ -83,7 +83,6 @@ const Index = () => {
   console.log("users: ", users);
   return (
     <div>
-      <div>search</div>
       <Table
         columns={columns}
         dataSource={users}

@@ -354,6 +354,19 @@ export const saveUserProfile = async (newProfile: IProfile) => {
   );
 };
 
+export const appSearchReq = async (searchKey: string) => {
+  const body = {
+    merchantId: 15621,
+    searchKey,
+  };
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(`${API_URL}/merchant/search/key_search`, body, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
+};
+
 export const getInvoiceList = async ({
   userId,
   page = 0,

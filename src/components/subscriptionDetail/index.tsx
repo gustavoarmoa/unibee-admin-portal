@@ -123,11 +123,11 @@ const UserInfoSection = ({ user }: { user: IProfile | null }) => {
       </Divider>
       <Row style={rowStyle}>
         <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>First name</span>
+          <span style={{ fontWeight: "bold" }}>First Name</span>
         </Col>
         <Col span={6}>{user?.firstName}</Col>
         <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Last name</span>
+          <span style={{ fontWeight: "bold" }}>Last Name</span>
         </Col>
         <Col span={6}>{user?.lastName}</Col>
       </Row>
@@ -149,17 +149,17 @@ const UserInfoSection = ({ user }: { user: IProfile | null }) => {
         </Col>
         <Col span={6}>{user?.countryName}</Col>
         <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Billing address</span>
+          <span style={{ fontWeight: "bold" }}>Billing Address</span>
         </Col>
         <Col span={6}>{user?.address}</Col>
       </Row>
       <Row style={rowStyle}>
         <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>Payment method</span>
+          <span style={{ fontWeight: "bold" }}>Payment Method</span>
         </Col>
         <Col span={6}>{user?.paymentMethod}</Col>
         <Col span={4}>
-          <span style={{ fontWeight: "bold" }}>VAT number</span>
+          <span style={{ fontWeight: "bold" }}>VAT Number</span>
         </Col>
         <Col span={6}>{user?.vATNumber}</Col>
       </Row>

@@ -72,7 +72,6 @@ const UserAccountTab = ({
       } else {
         message.error("Unknown error");
       }
-      return;
     }
   };
 
