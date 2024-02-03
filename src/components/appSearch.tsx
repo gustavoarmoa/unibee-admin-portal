@@ -5,12 +5,17 @@ import { appSearchReq } from "../requests";
 import { useNavigate } from "react-router-dom";
 import { useOnClickOutside } from "usehooks-ts";
 import { UserInvoice, IProfile } from "../shared.types";
-import { INVOICE_STATUS } from "../constants";
+import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from "../constants";
 import { showAmount } from "../helpers";
+import "./appSearch.css";
 
 const { Search } = Input;
-
 const APP_PATH = import.meta.env.BASE_URL;
+
+interface IAccountInfo extends IProfile {
+  subscriptionId: string;
+  subscriptionStatus: number;
+}
 
 const Index = () => {
   const navigate = useNavigate();
@@ -19,8 +24,8 @@ const Index = () => {
   const [showResult, setShowResult] = useState(false);
   const resultWrapperRef = useRef(null);
 
-  const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([]);
-  const [accountList, setAccountList] = useState<IProfile[]>([]);
+  const [invoiceList, setInvoiceList] = useState<UserInvoice[] | null>(null);
+  const [accountList, setAccountList] = useState<IAccountInfo[] | null>(null);
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
@@ -62,13 +67,9 @@ const Index = () => {
       return;
     }
     const d = res.data.data;
-    if (d.matchInvoice != null) {
-      setInvoiceList(res.data.data.matchInvoice);
-    } else if (d.matchUserAccounts != null) {
-      setAccountList(d.matchUserAccounts);
-    } else if (d.precisionMatchObject != null) {
-      console.log("matched");
-    }
+    setInvoiceList(d.matchInvoice);
+    setAccountList(d.matchUserAccounts);
+    // d.precisionMatchObject != null &&
   };
 
   const onTermChange = (evt: ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +103,7 @@ const Index = () => {
           position: "absolute",
           top: "52px",
           width: "480px",
-          height: "320px",
+          height: "640px",
           visibility: `${showResult ? "visible" : "hidden"}`,
           background: "#FAFAFA",
           zIndex: "800",
@@ -128,7 +129,7 @@ const Index = () => {
             />
           </div>
         ) : (
-          <div style={{ position: "relative", padding: "12px" }}>
+          <div style={{ position: "relative" }}>
             <div>precision match</div>
             <Divider
               orientation="left"
@@ -144,7 +145,6 @@ const Index = () => {
               Customers
             </Divider>
             <AccountMatch list={accountList} />
-            <div>match custoemr</div>
           </div>
         )}
       </div>
@@ -154,62 +154,281 @@ const Index = () => {
 
 export default Index;
 
-const rowStyle: CSSProperties = {
-  display: "flex",
-  width: "100%",
-  justifyContent: "space-between",
-  alignItems: "center",
+// const headerRowStyle = rowStyle;
+// headerRowStyle.marginBottom = "36px";
+const colStyle: CSSProperties = {
+  fontWeight: "bold",
   height: "32px",
+  display: "flex",
+  alignItems: "center",
 };
-const colStyle: CSSProperties = { fontWeight: "bold" };
 
-const InvoiceMatch = ({ list }: { list: UserInvoice[] }) => {
-  console.log("inv list: ", list);
+const InvoiceMatch = ({ list }: { list: UserInvoice[] | null }) => {
+  // console.log("inv list: ", list);
   return (
-    <div style={{ height: "160px", overflowY: "scroll" }}>
-      <Row style={rowStyle}>
-        <Col span={2} style={colStyle}>
+    <>
+      <Row
+        align={"middle"}
+        justify={"space-between"}
+        style={{
+          display: "flex",
+          width: "100%",
+          height: "32px",
+          padding: "0 6px",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Col span={7} style={colStyle}>
           Name
         </Col>
-        <Col span={1} style={colStyle}>
+        <Col span={3} style={colStyle}>
           Status
         </Col>
-        <Col span={1} style={colStyle}>
+        <Col span={4} style={colStyle}>
           Amt
         </Col>
-        <Col span={2} style={colStyle}>
+        <Col span={5} style={colStyle}>
           Start
         </Col>
-        <Col span={2} style={colStyle}>
+        <Col span={5} style={colStyle}>
           End
         </Col>
       </Row>
-      {list.map((iv) => (
-        <Row style={rowStyle}>
-          <Col span={2}>{iv.invoiceName}</Col>
-          <Col span={1}>
-            {INVOICE_STATUS[iv.status as keyof typeof INVOICE_STATUS]}
-          </Col>
-          <Col span={1}>{showAmount(iv.totalAmount, iv.currency)}</Col>
-          <Col span={2}>
-            {new Date(iv.periodStart * 1000).toLocaleDateString()}
-          </Col>
-          <Col span={2}>
-            {new Date(iv.periodEnd * 1000).toLocaleDateString()}
-          </Col>
-        </Row>
-      ))}
-    </div>
+      {list == null ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          No Match Found
+        </div>
+      ) : (
+        <div
+          style={{ maxHeight: "160px", minHeight: "48px", overflowY: "auto" }}
+        >
+          {list.map((iv) => (
+            <Row
+              style={{
+                display: "flex",
+                width: "100%",
+                height: "32px",
+                padding: "0 6px",
+                justifyContent: "space-between",
+                alignItems: "center",
+                color: "#757575",
+              }}
+              align={"middle"}
+              // style={{ height: "32px", margin: "6px 0" }}
+              className="clickable-item"
+              key={iv.id}
+              onClick={() => console.log("iv clicked: ", iv)}
+            >
+              <Col
+                span={7}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span>{iv.invoiceName}</span>
+              </Col>
+              <Col
+                span={3}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span>
+                  {INVOICE_STATUS[iv.status as keyof typeof INVOICE_STATUS]}
+                </span>
+              </Col>
+              <Col
+                span={4}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span>{showAmount(iv.totalAmount, iv.currency)}</span>
+              </Col>
+              <Col
+                span={5}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span>
+                  {new Date(iv.periodStart * 1000).toLocaleDateString()}
+                </span>
+              </Col>
+              <Col
+                span={5}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span>
+                  {new Date(iv.periodEnd * 1000).toLocaleDateString()}
+                </span>
+              </Col>
+            </Row>
+          ))}
+        </div>
+      )}
+    </>
   );
 };
 
-const AccountMatch = ({ list }: { list: IProfile[] }) => {
+const AccountMatch = ({ list }: { list: IAccountInfo[] | null }) => {
+  // console.log("acc matched: ", list);
   return (
-    <div>
-      {list.map((acc) => (
-        <span>{acc.firstName}</span>
-      ))}
-    </div>
+    <>
+      <Row
+        align={"middle"}
+        justify={"space-between"}
+        style={{
+          display: "flex",
+          width: "100%",
+          height: "32px",
+          padding: "0 6px",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Col span={5} style={colStyle}>
+          Name
+        </Col>
+        <Col span={5} style={colStyle}>
+          Email
+        </Col>
+        <Col span={4} style={colStyle}>
+          Country
+        </Col>
+        <Col span={5} style={colStyle}>
+          Subscription
+        </Col>
+        <Col span={5} style={colStyle}>
+          Status
+        </Col>
+      </Row>
+      {list == null ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          No Match Found
+        </div>
+      ) : (
+        <div
+          style={{ maxHeight: "160px", minHeight: "48px", overflowY: "auto" }}
+        >
+          {list.map((u) => (
+            <Row
+              style={{
+                display: "flex",
+                width: "100%",
+                height: "32px",
+                padding: "0 6px",
+                justifyContent: "space-between",
+                alignItems: "center",
+                color: "#757575",
+              }}
+              align={"middle"}
+              // style={{ height: "32px", margin: "6px 0" }}
+              className="clickable-item"
+              key={u.id}
+              onClick={() => console.log("iv clicked: ", u)}
+            >
+              <Col
+                span={5}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span>{u.firstName}</span>
+              </Col>
+              <Col
+                span={5}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  style={{
+                    width: "64px",
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {u.email}
+                </div>
+              </Col>
+              <Col
+                span={4}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  style={{
+                    width: "68px",
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {u.countryName}
+                </div>
+              </Col>
+              <Col
+                span={5}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span>{u.subscriptionId}</span>
+              </Col>
+              <Col
+                span={5}
+                style={{
+                  height: "32px",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span> {SUBSCRIPTION_STATUS[u.subscriptionStatus]}</span>
+              </Col>
+            </Row>
+          ))}
+        </div>
+      )}
+    </>
   );
 };
 

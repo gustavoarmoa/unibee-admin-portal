@@ -1,0 +1,4 @@
+.clickable-item:hover {
+  background: #eee;
+  cursor: pointer;
+}
