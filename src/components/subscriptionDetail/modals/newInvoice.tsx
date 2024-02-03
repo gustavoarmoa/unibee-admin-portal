@@ -437,7 +437,7 @@ const Index = ({
           Currency
         </Col>
         <Col span={4} style={{ fontWeight: "bold" }}>
-          Tax Rate %
+          Tax Rate
         </Col>
         <Col span={6} style={{ fontWeight: "bold" }}>
           Invoice title
@@ -467,9 +467,10 @@ const Index = ({
           ) : (
             <Input
               value={taxScale}
+              suffix="%"
               onChange={onTaxScaleChange}
               type="number"
-              style={{ width: "80px" }}
+              style={{ width: "110px" }}
             />
           )}
         </Col>
@@ -538,9 +539,10 @@ const Index = ({
               </span>
             ) : (
               <>
-                {CURRENCY[currency].symbol}&nbsp;&nbsp;
+                {/* CURRENCY[currency].symbol */}
                 <Input
                   type="number"
+                  prefix={CURRENCY[currency].symbol}
                   value={v.unitAmountExcludingTax}
                   onChange={onFieldChange(v.id!, "unitAmountExcludingTax")}
                   style={{ width: "80%" }}
