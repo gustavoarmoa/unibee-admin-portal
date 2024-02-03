@@ -23,7 +23,6 @@ const Index = () => {
   const [searching, setSearching] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const resultWrapperRef = useRef(null);
-
   const [invoiceList, setInvoiceList] = useState<UserInvoice[] | null>(null);
   const [accountList, setAccountList] = useState<IAccountInfo[] | null>(null);
 
@@ -35,6 +34,11 @@ const Index = () => {
   const hide = () => setShowResult(false);
   const show = () => setShowResult(true);
   useOnClickOutside(resultWrapperRef, hide);
+
+  const goToDetail = (pageId: string) => {
+    hide();
+    navigate(`${APP_PATH}${pageId}`);
+  };
 
   const onEnter = async () => {
     if (term.trim() == "") {
@@ -88,8 +92,6 @@ const Index = () => {
       <Search
         value={term}
         onChange={onTermChange}
-        // onKeyDown={onKeyDown}
-        // loading={searching}
         onClick={show}
         onPressEnter={onEnter}
         allowClear={true}
@@ -137,14 +139,14 @@ const Index = () => {
             >
               Invoices
             </Divider>
-            <InvoiceMatch list={invoiceList} />
+            <InvoiceMatch list={invoiceList} goToDetail={goToDetail} />
             <Divider
               orientation="left"
               style={{ margin: "2px 0", color: "#757575" }}
             >
               Customers
             </Divider>
-            <AccountMatch list={accountList} />
+            <AccountMatch list={accountList} goToDetail={goToDetail} />
           </div>
         )}
       </div>
@@ -154,8 +156,6 @@ const Index = () => {
 
 export default Index;
 
-// const headerRowStyle = rowStyle;
-// headerRowStyle.marginBottom = "36px";
 const colStyle: CSSProperties = {
   fontWeight: "bold",
   height: "32px",
@@ -163,7 +163,13 @@ const colStyle: CSSProperties = {
   alignItems: "center",
 };
 
-const InvoiceMatch = ({ list }: { list: UserInvoice[] | null }) => {
+const InvoiceMatch = ({
+  list,
+  goToDetail,
+}: {
+  list: UserInvoice[] | null;
+  goToDetail: (url: string) => void;
+}) => {
   // console.log("inv list: ", list);
   return (
     <>
@@ -180,7 +186,7 @@ const InvoiceMatch = ({ list }: { list: UserInvoice[] | null }) => {
         }}
       >
         <Col span={7} style={colStyle}>
-          Name
+          Title
         </Col>
         <Col span={3} style={colStyle}>
           Status
@@ -244,9 +250,16 @@ const InvoiceMatch = ({ list }: { list: UserInvoice[] | null }) => {
                   alignItems: "center",
                 }}
               >
-                <span>
+                <div
+                  style={{
+                    width: "68px",
+                    textOverflow: "ellipsis",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {INVOICE_STATUS[iv.status as keyof typeof INVOICE_STATUS]}
-                </span>
+                </div>
               </Col>
               <Col
                 span={4}
@@ -290,7 +303,13 @@ const InvoiceMatch = ({ list }: { list: UserInvoice[] | null }) => {
   );
 };
 
-const AccountMatch = ({ list }: { list: IAccountInfo[] | null }) => {
+const AccountMatch = ({
+  list,
+  goToDetail,
+}: {
+  list: IAccountInfo[] | null;
+  goToDetail: (url: string) => void;
+}) => {
   // console.log("acc matched: ", list);
   return (
     <>
@@ -351,7 +370,7 @@ const AccountMatch = ({ list }: { list: IAccountInfo[] | null }) => {
               // style={{ height: "32px", margin: "6px 0" }}
               className="clickable-item"
               key={u.id}
-              onClick={() => console.log("iv clicked: ", u)}
+              onClick={() => goToDetail(`customer/${u.id}`)}
             >
               <Col
                 span={5}

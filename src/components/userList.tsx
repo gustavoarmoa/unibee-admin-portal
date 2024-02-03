@@ -1,16 +1,13 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Col, Divider, Row, Table, Tabs, message } from "antd";
-import type { TabsProps } from "antd";
-import { Checkbox } from "antd";
-import type { CheckboxProps } from "antd";
+import { Table, message } from "antd";
 import { IProfile } from "../shared.types";
 import { ColumnsType } from "antd/es/table";
 import { SUBSCRIPTION_STATUS } from "../constants";
 import { LoadingOutlined } from "@ant-design/icons";
 import { searchUserReq } from "../requests";
-import { ramdonString } from "../helpers";
 import "../shared.css";
+const APP_PATH = import.meta.env.BASE_URL;
 
 const columns: ColumnsType<IProfile> = [
   {
@@ -58,14 +55,23 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<IProfile[]>([]);
 
+  const relogin = () =>
+    navigate(`${APP_PATH}login`, {
+      state: { msg: "session expired, please re-login" },
+    });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const res = await searchUserReq();
-        res.data.data.userAccounts.forEach(
-          (a: any) => (a.id = ramdonString(8))
-        );
+        setLoading(false);
         console.log("res getting user: ", res);
+        const code = res.data.code;
+        if (code != 0) {
+          code == 61 && relogin();
+          throw new Error(res.data.message);
+        }
         setUsers(res.data.data.userAccounts);
       } catch (err) {
         setLoading(false);
@@ -93,11 +99,11 @@ const Index = () => {
           spinning: loading,
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
         }}
-        onRow={(record, rowIndex) => {
+        onRow={(user, rowIndex) => {
           return {
             onClick: (event) => {
-              console.log("row click: ", record, "///", rowIndex);
-              // navigate(`${APP_PATH}plan/${record.id}`);
+              console.log("row click: ", user, "///", rowIndex);
+              navigate(`${APP_PATH}customer/${user.id}`);
             },
           };
         }}
@@ -107,25 +113,3 @@ const Index = () => {
 };
 
 export default Index;
-
-/**
- * 
- * <Table
-        columns={columns}
-        dataSource={users}
-        rowKey={"id"}
-        pagination={false}
-        loading={{
-          spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
-        }}
-        onRow={(record, rowIndex) => {
-          return {
-            onClick: (event) => {
-              console.log("row click: ", record, "///", rowIndex);
-              // navigate(`${APP_PATH}plan/${record.id}`);
-            },
-          };
-        }}
-      />
- */

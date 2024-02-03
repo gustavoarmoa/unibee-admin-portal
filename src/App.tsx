@@ -29,8 +29,13 @@ import PlanDetail from "./components/planDetail";
 import SubscriptionList from "./components/subscriptionList";
 import SubscriptionDetail from "./components/subscriptionDetail";
 import Subscriptions from "./components/subscriptions";
+
+import CustomerEntry from "./components/userEntryPage";
+import CustomerDetail from "./components/userDetail";
+import CustomerList from "./components/userList";
+
 import Settings from "./components/settings";
-import Users from "./components/users";
+// import Users from "./components/userList";
 import Login from "./components/login";
 import Signup from "./components/signup";
 import Profile from "./components/profile";
@@ -60,7 +65,7 @@ const items: MenuItem[] = [
   getItem("Plan", "/plan/list", <DesktopOutlined />),
   getItem("Subscription", "/subscription/list", <PieChartOutlined />),
   getItem("Invoices", "/invoices", <PieChartOutlined />),
-  getItem("Users", "/users", <PieChartOutlined />),
+  getItem("Customer", "/customer/list", <PieChartOutlined />),
   getItem("Analytics", "/analytics", <PieChartOutlined />),
   getItem("Profile", "/profile", <PieChartOutlined />),
   getItem("Settings", "/settings", <PieChartOutlined />),
@@ -114,6 +119,8 @@ const App: React.FC = () => {
       setActiveMenuItem(["/subscription/list"]);
     } else if (pathItems[0] == "plan") {
       setActiveMenuItem(["/plan/list"]);
+    } else if (pathItems[0] == "customer") {
+      setActiveMenuItem(["/customer/list"]);
     } else {
       setActiveMenuItem(["/" + pathItems[0]]);
     }
@@ -201,7 +208,7 @@ const App: React.FC = () => {
                   <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
                   <Route path={`${APP_PATH}invoices`} Component={Invoices} />
                   <Route path={`${APP_PATH}settings`} Component={Settings} />
-                  <Route path={`${APP_PATH}users`} Component={Users} />
+                  {/* <Route path={`${APP_PATH}users`} Component={Users} /> */}
                   <Route
                     path={`${APP_PATH}subscription`}
                     Component={Subscriptions}
@@ -216,6 +223,12 @@ const App: React.FC = () => {
                     <Route path="list" element={<PricePlanList />} />
                     <Route path="new" element={<PlanNew />} />
                     <Route path=":planId" element={<PlanDetail />} />
+                  </Route>
+
+                  <Route path={`${APP_PATH}customer`} Component={CustomerEntry}>
+                    <Route path="list" element={<CustomerList />} />
+                    {/* <Route path="new" element={<PlanNew />} /> */}
+                    <Route path=":userId" element={<CustomerDetail />} />
                   </Route>
                 </Routes>
               </div>
