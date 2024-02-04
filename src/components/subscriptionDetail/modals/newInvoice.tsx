@@ -455,6 +455,7 @@ const Index = ({
               value={currency}
               onChange={onCurrencyChange}
               options={[
+                { value: "EUR", label: "EUR" },
                 { value: "USD", label: "USD" },
                 { value: "JPY", label: "JPY" },
               ]}
@@ -463,7 +464,7 @@ const Index = ({
         </Col>
         <Col span={4}>
           {!permission.editable ? (
-            <span>{taxScale} </span>
+            <span>{taxScale} %</span>
           ) : (
             <Input
               value={taxScale}
@@ -604,11 +605,10 @@ const Index = ({
               </div>
 
               <div style={{ display: "flex", alignItems: "center" }}>
-                <div style={{ marginRight: "6px" }}>
-                  Refund Amt: {CURRENCY[currency].symbol}
-                </div>
+                <div style={{ marginRight: "6px" }}>Refund Amt:</div>
                 <Input
-                  style={{ width: "96px" }}
+                  style={{ width: "100px" }}
+                  prefix={CURRENCY[currency].symbol}
                   placeholder={`≤ ${getTotal(invoiceList)}`}
                   value={refundAmt}
                   onChange={onRefundAmtChange}

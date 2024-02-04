@@ -125,6 +125,7 @@ const Index = () => {
           <Select
             style={{ width: 120 }}
             options={[
+              { value: "EUR", label: "EUR" },
               { value: "USD", label: "USD" },
               { value: "JPY", label: "JPY" },
             ]}

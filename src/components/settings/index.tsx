@@ -28,7 +28,7 @@ type TPermission = {
 };
 
 const roles = [
-  "App Owner",
+  "Owner",
   "Admin",
   "Power User",
   "Finance",
@@ -37,7 +37,7 @@ const roles = [
 type TRoles = (typeof roles)[number]; // APP Owner | Admin | *** |
 
 const role: Record<TRoles, TPermission> = {
-  "App Owner": {
+  Owner: {
     appConfig: { read: true, write: true },
     emailTemplate: { read: true, write: true },
     invoiceTemplate: { read: true, write: true },
@@ -172,6 +172,18 @@ export default Index;
 const AppConfig = () => {
   return (
     <div style={{ margin: "32px 0" }}>
+      <Row gutter={[16, 32]} style={{ marginBottom: "16px" }}>
+        <Col span={4}>Stripe App Key</Col>
+        <Col span={12}>
+          <Input.Password
+            defaultValue={"1234567890-abcdefghijklmnopq"}
+            style={{ width: "80%" }}
+          />
+        </Col>
+        <Col span={4}>
+          <Button>Save</Button>
+        </Col>
+      </Row>
       <Row gutter={[16, 32]} style={{ marginBottom: "16px" }}>
         <Col span={4}>SendGrid Email Key</Col>
         <Col span={12}>
@@ -479,10 +491,10 @@ const EmailTemplate = () => {
           }}
         >
           <Button onClick={toggleModal}>Close</Button>
+          <Button onClick={toggleModal}>Make it Default</Button>
           <Button type="primary" onClick={toggleModal}>
             Save
           </Button>
-          <Button onClick={toggleModal}>Inactivate</Button>
         </div>
       </Modal>
       <Table
@@ -567,13 +579,13 @@ const PermissionTab = () => (
             <Col span={2}>{r}</Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].appConfig.read}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].appConfig.write}
               >
                 Write
@@ -581,13 +593,13 @@ const PermissionTab = () => (
             </Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].emailTemplate.read}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].emailTemplate.write}
               >
                 Write
@@ -595,13 +607,13 @@ const PermissionTab = () => (
             </Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].invoiceTemplate.read}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].invoiceTemplate.write}
               >
                 Write
@@ -609,13 +621,13 @@ const PermissionTab = () => (
             </Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].plan.read}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].plan.write}
               >
                 Write
@@ -623,13 +635,13 @@ const PermissionTab = () => (
             </Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].subscription.read}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].subscription.write}
               >
                 Write
@@ -637,19 +649,19 @@ const PermissionTab = () => (
             </Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].invoice.read}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].invoice.write}
               >
                 Write
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].invoice.generate}
               >
                 Generate
@@ -657,25 +669,25 @@ const PermissionTab = () => (
             </Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].accountData.write}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].accountData.read}
               >
                 Write
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].accountData.invite}
               >
                 Invite
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].accountData.permissionSetting}
               >
                 set Permission
@@ -683,13 +695,13 @@ const PermissionTab = () => (
             </Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].customerData.read}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].customerData.write}
               >
                 Write
@@ -697,13 +709,13 @@ const PermissionTab = () => (
             </Col>
             <Col span={2}>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].analytic.read}
               >
                 Read
               </Checkbox>
               <Checkbox
-                disabled={r == "App Owner"}
+                disabled={r == "Owner"}
                 defaultChecked={role[r].analytic.export}
               >
                 Export

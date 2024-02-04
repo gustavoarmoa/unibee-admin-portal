@@ -73,9 +73,9 @@ const Index = () => {
       key: "userId",
 
       render: (userId, iv) => (
-        <span className="unibee-user-id-wrapper" onClick={goToUser}>
+        <div className="unibee-user-id-wrapper" id={userId} onClick={goToUser}>
           <a>{userId}</a>
-        </span>
+        </div>
       ),
     },
   ];

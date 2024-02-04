@@ -1,6 +1,6 @@
 import axios from "axios";
 // import { useProfileStore } from "../stores";
-import { IProfile } from "../shared.types";
+import { IProfile, TMerchantInfo } from "../shared.types";
 import { CURRENCY } from "../constants";
 
 const APP_PATH = import.meta.env.BASE_URL;
@@ -17,6 +17,51 @@ export const logoutReq = async () => {
       },
     }
   );
+};
+
+/*
+export const getProfileReq = async () => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.get(`${API_URL}/merchant/profile`, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
+};
+*/
+
+/*
+export const updateProfileReq = async () => {
+
+}
+*/
+
+export const getMerchantInfoReq = async () => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.get(`${API_URL}/merchant/merchant_info/info`, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
+};
+
+export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(`${API_URL}/merchant/merchant_info/update`, body, {
+    headers: {
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
+};
+
+export const uploadLogoReq = async (f: FormData) => {
+  const token = localStorage.getItem("merchantToken");
+  return await axios.post(`${API_URL}/merchant/oss/file `, f, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Authorization: `${token}`, // Bearer: ******
+    },
+  });
 };
 
 export const getPlanList = async ({

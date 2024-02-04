@@ -1,287 +1,274 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import type { RadioChangeEvent } from "antd";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Checkbox, Form, Input, Tabs, Radio } from "antd";
-import { message, Upload } from "antd";
-import type { UploadChangeParam } from "antd/es/upload";
-import type { RcFile, UploadFile, UploadProps } from "antd/es/upload/interface";
+import { Button, Form, Input, Spin, Skeleton } from "antd";
+import { message } from "antd";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import OtpInput from "react-otp-input";
-import axios from "axios";
-
-const getBase64 = (img: RcFile, callback: (url: string) => void) => {
-  const reader = new FileReader();
-  reader.addEventListener("load", () => callback(reader.result as string));
-  reader.readAsDataURL(img);
-};
-
-const beforeUpload = (file: RcFile) => {
-  const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
-  if (!isJpgOrPng) {
-    message.error("You can only upload JPG/PNG file!");
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    message.error("Image must smaller than 2MB!");
-  }
-  return isJpgOrPng && isLt2M;
-};
+import {
+  getMerchantInfoReq,
+  updateMerchantInfoReq,
+  uploadLogoReq,
+} from "../requests";
+import { TMerchantInfo } from "../shared.types";
+import { emailValidate } from "../helpers";
 
 const APP_PATH = import.meta.env.BASE_URL;
-const API_URL = import.meta.env.VITE_API_URL;
 
 const Index = () => {
-  const [errMsg, setErrMsg] = useState("");
   const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false); // page loading/submitting
+  const [uploading, setUploading] = useState(false); // logo upload
+  const [logoUrl, setLogoUrl] = useState("");
+  const [merchantInfo, setMerchantInfo] = useState<TMerchantInfo | null>(null);
 
-  const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>();
+  const relogin = () =>
+    navigate(`${APP_PATH}login`, {
+      state: { msg: "session expired, please re-login" },
+    });
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const onEmailChange = (evt: ChangeEvent<HTMLInputElement>) =>
-    setEmail(evt.target.value);
-  const onPasswordChange = (evt: ChangeEvent<HTMLInputElement>) =>
-    setPassword(evt.target.value);
-  const [loginType, setLoginType] = useState("password"); // [password, OTP]
-  // const { state } = useLocation();
-
-  const onLoginTypeChange = (e: RadioChangeEvent) => {
-    console.log("radio checked", e.target.value);
-    setLoginType(e.target.value);
+  const getInfo = async () => {
+    setLoading(true);
+    try {
+      const res = await getMerchantInfoReq();
+      setLoading(false);
+      const statusCode = res.data.code;
+      if (statusCode != 0) {
+        statusCode == 61 && relogin();
+        throw new Error(res.data.message);
+      }
+      setMerchantInfo(res.data.data.MerchantInfo);
+      setLogoUrl(res.data.data.MerchantInfo.companyLogo);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log("err getting profile: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
   };
 
-  const handleChange: UploadProps["onChange"] = (
-    info: UploadChangeParam<UploadFile>
-  ) => {
-    if (info.file.status === "uploading") {
-      setLoading(true);
+  const onFileUplaod = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    let file;
+    if (event.target.files && event.target.files.length > 0) {
+      file = event.target.files[0];
+    }
+    if (file == null) {
       return;
     }
-    if (info.file.status === "done") {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj as RcFile, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
+
+    if (file.size > 4 * 1024 * 1024) {
+      message.error("Max logo file size: 4M.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    setUploading(true);
+    try {
+      const res = await uploadLogoReq(formData);
+      setUploading(false);
+      console.log("upload res: ", res);
+      const statusCode = res.data.code;
+      if (statusCode != 0) {
+        statusCode == 61 && relogin();
+        throw new Error(res.data.message);
+      }
+      const logoUrl = res.data.data.url;
+      form.setFieldValue("companyLogo", logoUrl);
+      setLogoUrl(logoUrl);
+    } catch (err) {
+      setUploading(false);
+      if (err instanceof Error) {
+        console.log("err uploading logo: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
     }
   };
 
-  const uploadButton = (
-    <button style={{ border: 0, background: "none" }} type="button">
-      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </button>
-  );
+  const onSubmit = async () => {
+    const info = form.getFieldsValue();
+    const isInvalid = form.getFieldsError().some((f) => f.errors.length > 0);
+    if (isInvalid) {
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const res = await updateMerchantInfoReq(info);
+      console.log("update info res: ", res);
+      setUploading(false);
+      const statusCode = res.data.code;
+      if (statusCode != 0) {
+        statusCode == 61 && relogin();
+        throw new Error(res.data.message);
+      }
+      message.success("Info Updated");
+    } catch (err) {
+      setUploading(false);
+      if (err instanceof Error) {
+        console.log("err getting profile: ", err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
+  };
 
   useEffect(() => {
-    const token = localStorage.getItem("merchantToken");
-    setErrMsg("");
-    axios
-      .get(`${API_URL}/merchant/profile`, {
-        headers: {
-          Authorization: `${token}`, // Bearer: ******
-        },
-      })
-      .then((res) => {
-        console.log("merchant profile res: ", res);
-        const statuCode = res.data.code;
-        if (statuCode != 0) {
-          if (statuCode == 61) {
-            console.log("invalid token");
-            navigate(`${APP_PATH}login`, {
-              state: { msg: "session expired, please re-login" },
-            });
-            return;
-          }
-          throw new Error(res.data.message);
-        }
-      })
-      .catch((err) => {
-        console.log("login merchant profile err: ", err.message);
-        // TODO: show a toast
-        setErrMsg(err.message);
-      });
+    getInfo();
   }, []);
 
   return (
     <div>
-      <Form
-        name="basic"
-        labelCol={{
-          span: 10,
-        }}
-        wrapperCol={{
-          span: 16,
-        }}
-        style={{
-          maxWidth: 600,
-        }}
-        initialValues={{
-          remember: true,
-        }}
-        autoComplete="off"
-      >
-        <Form.Item
-          label="Company Name"
-          name="companyName"
-          rules={[
-            {
-              required: true,
-              message: "Please input your company name!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item label="Company Logo" name="logo">
-          <Upload
-            name="avatar"
-            listType="picture-card"
-            className="avatar-uploader"
-            showUploadList={false}
-            action="https://run.mocky.io/v3/435e224c-44fb-4773-9faf-380c5e6a2188"
-            beforeUpload={beforeUpload}
-            onChange={handleChange}
+      {loading ? (
+        <Spin
+          spinning={loading}
+          indicator={
+            <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
+          }
+          fullscreen
+        />
+      ) : (
+        merchantInfo && (
+          <Form
+            form={form}
+            onFinish={onSubmit}
+            name="basic"
+            labelCol={{
+              span: 10,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            style={{
+              maxWidth: 600,
+            }}
+            initialValues={merchantInfo}
+            autoComplete="off"
           >
-            {imageUrl ? (
-              <img src={imageUrl} alt="avatar" style={{ width: "100%" }} />
-            ) : (
-              uploadButton
-            )}
-          </Upload>
-        </Form.Item>
+            <Form.Item
+              label="Company Name"
+              name="companyName"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your company name!",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-        <Form.Item
-          label="First Name"
-          name="firstName"
-          rules={[
-            {
-              required: true,
-              message: "Please input yourn first name!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
+            <Form.Item
+              label="Company Logo (< 4M)"
+              name="companyLogo"
+              rules={[
+                {
+                  required: true,
+                  message: "Please upload your company logo! (Max size: 4M)",
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (value != "") {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject();
+                  },
+                }),
+              ]}
+            >
+              <label htmlFor="comapnyLogoURL" style={{ cursor: "pointer" }}>
+                {logoUrl == "" ? (
+                  <div style={{ width: "48px", height: "48px" }}>
+                    <Skeleton.Image
+                      active={uploading}
+                      style={{ width: "48px", height: "48px" }}
+                    />
+                  </div>
+                ) : (
+                  <img src={logoUrl} style={{ maxWidth: "64px" }} />
+                )}
+              </label>
+            </Form.Item>
+            <input
+              type="file"
+              accept="image/png, image/gif, image/jpeg"
+              onChange={onFileUplaod}
+              id="comapnyLogoURL"
+              name="comapnyLogoURL"
+              style={{ display: "none" }}
+            />
 
-        <Form.Item
-          label="Last Name"
-          name="lastName"
-          rules={[
-            {
-              required: true,
-              message: "Please input yourn last name!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
+            <Form.Item
+              label="Physical Address"
+              name="address"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your company address!",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Email!",
-            },
-            ({ getFieldValue }) => ({
-              validator(rule, value) {
-                if (
-                  value
-                    .toLowerCase()
-                    .match(
-                      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                    )
-                ) {
-                  return Promise.resolve();
-                }
-                return Promise.reject("invalid email address");
-              },
-            }),
-          ]}
-        >
-          <Input />
-        </Form.Item>
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your Email!",
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (emailValidate(value)) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject("Invalid email address");
+                  },
+                }),
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-        <Form.Item
-          label="Phone"
-          name="phone"
-          rules={[
-            {
-              required: true,
-              message: "Please input your Email!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
+            <Form.Item
+              label="Phone"
+              name="phone"
+              rules={[
+                {
+                  required: true,
+                  message: "Please input company phone!",
+                },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-        <Form.Item
-          label="Emergency Contact Phone"
-          name="emergencyPhone"
-          rules={[
-            {
-              required: true,
-              message: "Please input your emergency phone!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          label="Physical Address"
-          name="address"
-          rules={[
-            {
-              required: true,
-              message: "Please input your address!",
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        {/* <Form.Item
-                name="errMsg"
-                wrapperCol={{
-                  offset: 8,
-                  span: 16,
-                }}
+            <Form.Item
+              wrapperCol={{
+                offset: 8,
+                span: 16,
+              }}
+            >
+              <Button
+                type="primary"
+                htmlType="submit"
+                onClick={onSubmit}
+                loading={loading}
+                disabled={loading || uploading}
               >
-                <span style={{ color: "red" }}>{errMsg}</span>
-              </Form.Item> */}
-
-        {/* <Form.Item
-                name="remember"
-                valuePropName="checked"
-                wrapperCol={{
-                  offset: 8,
-                  span: 16,
-                }}
-              >
-                <Checkbox>Remember me</Checkbox>
-              </Form.Item> */}
-
-        <Form.Item
-          wrapperCol={{
-            offset: 8,
-            span: 16,
-          }}
-        >
-          <Button
-            type="primary"
-            htmlType="submit"
-            // onClick={onSubmit}
-            // loading={submitting}
-          >
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
+                Submit
+              </Button>
+            </Form.Item>
+          </Form>
+        )
+      )}
     </div>
   );
 };

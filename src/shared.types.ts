@@ -23,6 +23,17 @@ interface IProfile {
   token: string;
 }
 
+type TMerchantInfo = {
+  id: number;
+  address: string;
+  companyId: string;
+  companyLogo: string;
+  companyName: string;
+  email: string;
+  location: string;
+  phone: string;
+};
+
 type Country = {
   code: string;
   name: string;
@@ -182,6 +193,7 @@ type TInvoicePerm = {
 
 export type {
   IProfile,
+  TMerchantInfo,
   IPlan,
   ISubscriptionType,
   Country,

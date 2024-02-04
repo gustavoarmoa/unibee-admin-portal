@@ -7,6 +7,7 @@ import OtpInput from "react-otp-input";
 import axios from "axios";
 import AppHeader from "./appHeader";
 import AppFooter from "./appFooter";
+import { emailValidate } from "../helpers";
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -210,16 +211,10 @@ const Index = () => {
                     },
                     ({ getFieldValue }) => ({
                       validator(rule, value) {
-                        if (
-                          value
-                            .toLowerCase()
-                            .match(
-                              /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                            )
-                        ) {
+                        if (emailValidate(value)) {
                           return Promise.resolve();
                         }
-                        return Promise.reject("invalid email address");
+                        return Promise.reject("Invalid email address");
                       },
                     }),
                   ]}
