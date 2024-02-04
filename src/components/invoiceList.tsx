@@ -15,6 +15,18 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([]);
 
+  const goToDetail = (invoiceId: string) => (evt: any) => {
+    console.log("go to detail: ", evt.target);
+    if (evt.target.closest(".unibee-user-id-wrapper")) {
+      return;
+    }
+    navigate(`${APP_PATH}invoice/${invoiceId}`);
+  };
+
+  const goToUser = () => {
+    console.log("got to user");
+  };
+
   const columns: ColumnsType<UserInvoice> = [
     {
       title: "Invoice Name",
@@ -47,25 +59,24 @@ const Index = () => {
       title: "Start",
       dataIndex: "periodStart",
       key: "periodStart",
-      render: (d, plan) => new Date(d).toLocaleDateString(),
+      render: (d, plan) => new Date(d * 1000).toLocaleDateString(),
     },
     {
       title: "End",
       dataIndex: "periodEnd",
       key: "periodEnd",
-      render: (d, plan) => new Date(d).toLocaleDateString(),
+      render: (d, plan) => new Date(d * 1000).toLocaleDateString(),
     },
     {
       title: "User Id",
       dataIndex: "userId",
       key: "userId",
-      /*
+
       render: (userId, iv) => (
-        <span onClick={() => navigate(`${APP_PATH}customer/${userId}`)}>
+        <span className="unibee-user-id-wrapper" onClick={goToUser}>
           <a>{userId}</a>
         </span>
       ),
-      */
     },
   ];
 
@@ -114,10 +125,7 @@ const Index = () => {
         }}
         onRow={(iv, rowIndex) => {
           return {
-            onClick: (event) => {
-              console.log("row click: ", iv, "///", rowIndex);
-              navigate(`${APP_PATH}invoice/${iv.invoiceId}`);
-            },
+            onClick: goToDetail(iv.invoiceId),
           };
         }}
       />
