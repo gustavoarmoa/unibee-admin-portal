@@ -230,7 +230,8 @@ const InvoiceMatch = ({
               // style={{ height: "32px", margin: "6px 0" }}
               className="clickable-item"
               key={iv.id}
-              onClick={() => console.log("iv clicked: ", iv)}
+              // onClick={() => console.log("iv clicked: ", iv)}
+              onClick={() => goToDetail(`invoice/${iv.invoiceId}`)}
             >
               <Col
                 span={7}
