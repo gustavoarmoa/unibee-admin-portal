@@ -1,17 +1,6 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Space,
-  Table,
-  Tag,
-  Button,
-  Form,
-  Input,
-  Select,
-  message,
-  Spin,
-} from "antd";
+import { Table, message, Spin } from "antd";
 import { getSublist } from "../requests";
 import type { ColumnsType } from "antd/es/table";
 import { showAmount } from "../helpers";

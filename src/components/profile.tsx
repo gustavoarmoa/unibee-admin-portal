@@ -8,12 +8,14 @@ import {
   updateMerchantInfoReq,
   uploadLogoReq,
 } from "../requests";
+import { useMerchantInfoStore } from "../stores";
 import { TMerchantInfo } from "../shared.types";
 import { emailValidate } from "../helpers";
 
 const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = () => {
+  const merchantInfoStore = useMerchantInfoStore();
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false); // page loading/submitting
@@ -107,6 +109,7 @@ const Index = () => {
         throw new Error(res.data.message);
       }
       message.success("Info Updated");
+      merchantInfoStore.setMerchantInfo(res.data.data.MerchantInfo);
     } catch (err) {
       setUploading(false);
       if (err instanceof Error) {

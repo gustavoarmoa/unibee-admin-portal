@@ -6,6 +6,26 @@ import { CURRENCY } from "../constants";
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 
+export const passwordloginReq = async (email: string, password: string) => {
+  return await axios.post(`${API_URL}/merchant/auth/sso/login`, {
+    email,
+    password,
+  });
+};
+
+export const otpLoginReq = async (email: string) =>
+  await axios.post(`${API_URL}/merchant/auth/sso/loginOTP`, { email });
+
+export const otpLoginVerifyReq = async (
+  email: string,
+  verificationCode: string
+) => {
+  return await axios.post(`${API_URL}/merchant/auth/sso/loginOTPVerify`, {
+    email,
+    verificationCode,
+  });
+};
+
 export const logoutReq = async () => {
   const token = localStorage.getItem("merchantToken");
   return await axios.post(

@@ -20,7 +20,6 @@ import { togglePublishReq } from "../requests";
 const options: SelectProps["options"] = [];
 
 const APP_PATH = import.meta.env.BASE_URL;
-const API_URL = import.meta.env.VITE_API_URL;
 
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;

@@ -19,6 +19,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { Layout, Menu, message, theme } from "antd";
+import { useMerchantInfoStore } from "./stores";
 
 import Dashboard from "./components/dashboard";
 import PricePlans from "./components/pricePlans";
@@ -78,6 +79,7 @@ const APP_PATH = import.meta.env.BASE_URL; // import.meta.env.VITE_APP_PATH;
 const noSiderRoutes = [`${APP_PATH}login`, `${APP_PATH}signup`];
 
 const App: React.FC = () => {
+  const merchantInfoStore = useMerchantInfoStore();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [activeMenuItem, setActiveMenuItem] = useState<string[]>([
@@ -157,7 +159,14 @@ const App: React.FC = () => {
                 margin: "16px 0",
               }}
             >
-              <img src={`${APP_PATH}multiloginLogo.png`} height={"80px"} />
+              <img
+                src={
+                  merchantInfoStore.companyLogo == ""
+                    ? APP_PATH + "multiloginLogo.png"
+                    : merchantInfoStore.companyLogo
+                }
+                height={"80px"}
+              />
             </div>
             <Menu
               theme="dark"

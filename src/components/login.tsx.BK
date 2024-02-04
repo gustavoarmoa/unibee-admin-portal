@@ -1,19 +1,25 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import type { RadioChangeEvent } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Form, Input, Radio, message } from "antd";
+import {
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  Tabs,
+  Radio,
+  message,
+  Divider,
+} from "antd";
 import { useMerchantInfoStore } from "../stores";
 import OtpInput from "react-otp-input";
-import {
-  passwordloginReq,
-  otpLoginReq,
-  otpLoginVerifyReq,
-  getMerchantInfoReq,
-} from "../requests";
+import axios from "axios";
+import { passwordloginReq, otpLoginReq, otpLoginVerifyReq } from "../requests";
 import AppHeader from "./appHeader";
 import AppFooter from "./appFooter";
 
 const APP_PATH = import.meta.env.BASE_URL; // if not specified in build command, default is /
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Index = () => {
   const location = useLocation();
@@ -24,9 +30,11 @@ const Index = () => {
     setEmail(evt.target.value);
   const onPasswordChange = (evt: ChangeEvent<HTMLInputElement>) =>
     setPassword(evt.target.value);
-  const [loginType, setLoginType] = useState("password"); // password | OTP
+  const [loginType, setLoginType] = useState("password"); // [password, OTP]
+
   const onLoginTypeChange = (e: RadioChangeEvent) =>
     setLoginType(e.target.value);
+
   const goSignup = () => navigate(`${APP_PATH}signup`);
 
   useEffect(() => {
@@ -132,15 +140,13 @@ const Login1 = ({
     setSubmitting(true);
     try {
       const res = await passwordloginReq(email, password);
+      setSubmitting(false);
       console.log("login res: ", res);
       if (res.data.code != 0) {
         throw new Error(res.data.message);
       }
+      // merchantInfoStore.setMerchantInfo();
       localStorage.setItem("merchantToken", res.data.data.Token);
-      const infoRes = await getMerchantInfoReq();
-      setSubmitting(false);
-      console.log("info res: ", infoRes);
-      merchantInfoStore.setMerchantInfo(infoRes.data.data.MerchantInfo);
       navigate(`${APP_PATH}subscription/list`);
     } catch (err) {
       setSubmitting(false);
@@ -292,7 +298,6 @@ const Login2 = ({
         throw new Error(res.data.message);
       }
       localStorage.setItem("merchantToken", res.data.data.Token);
-      // set profile, setMerchantInfo
       navigate(`${APP_PATH}subscription/list`);
     } catch (err) {
       setSubmitting(false);
@@ -305,13 +310,50 @@ const Login2 = ({
     }
   };
 
-  const submit = async () => {
+  const submit = () => {
     setErrMsg("");
     setSubmitting(true);
+    console.log("submitting..");
     if (currentStep == 0) {
-      await loginOTP_step1();
+      axios
+        .post(`${API_URL}/merchant/auth/sso/loginOTP`, {
+          email,
+        })
+        .then((res) => {
+          setSubmitting(false);
+          console.log("login res: ", res);
+          if (res.data.code != 0) {
+            setErrMsg(res.data.message);
+            throw new Error(res.data.message);
+          }
+          setCurrentStep(1);
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          console.log("login err: ", err.message);
+          setErrMsg(err.message);
+        });
     } else {
-      await loginOTP_step2();
+      axios
+        .post(`${API_URL}/merchant/auth/sso/loginOTPVerify`, {
+          email,
+          verificationCode: otp,
+        })
+        .then((res) => {
+          console.log("otp loginVerify res: ", res);
+          setSubmitting(false);
+          if (res.data.code != 0) {
+            setErrMsg(res.data.message);
+            throw new Error(res.data.message);
+          }
+          localStorage.setItem("merchantToken", res.data.data.Token);
+          navigate(`${APP_PATH}subscription/list`);
+        })
+        .catch((err) => {
+          setSubmitting(false);
+          console.log("login err: ", err.message);
+          setErrMsg(err.message);
+        });
     }
   };
 

@@ -1,8 +1,7 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Space, Table, Tag, Button, Form, Input, Select, message } from "antd";
-import { PLAN_STATUS, CURRENCY } from "../constants";
+import { Button, Form, Input, Select, message } from "antd";
+import { CURRENCY } from "../constants";
 import { createPlan } from "../requests";
 
 const APP_PATH = import.meta.env.BASE_URL;
