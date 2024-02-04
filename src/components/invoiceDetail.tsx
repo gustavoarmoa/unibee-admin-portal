@@ -21,7 +21,7 @@ const Index = () => {
         marginTop: "200px",
       }}
     >
-      Invoice list for all customers
+      Invoice detail
     </div>
   );
 };

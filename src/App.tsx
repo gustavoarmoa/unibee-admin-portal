@@ -21,7 +21,6 @@ import {
 import { Layout, Menu, message, theme } from "antd";
 
 import Dashboard from "./components/dashboard";
-import Invoices from "./components/invoices";
 import PricePlans from "./components/pricePlans";
 import PricePlanList from "./components/pricePlansList";
 import PlanNew from "./components/newSubplan";
@@ -33,6 +32,10 @@ import Subscriptions from "./components/subscriptions";
 import CustomerEntry from "./components/userEntryPage";
 import CustomerDetail from "./components/userDetail";
 import CustomerList from "./components/userList";
+
+import InvoiceEntry from "./components/invoiceEntryPage";
+import InvoiceList from "./components/invoiceList";
+import InvoiceDetail from "./components/invoiceDetail";
 
 import Settings from "./components/settings";
 // import Users from "./components/userList";
@@ -64,7 +67,7 @@ function getItem(
 const items: MenuItem[] = [
   getItem("Plan", "/plan/list", <DesktopOutlined />),
   getItem("Subscription", "/subscription/list", <PieChartOutlined />),
-  getItem("Invoices", "/invoices", <PieChartOutlined />),
+  getItem("Invoice", "/invoice/list", <PieChartOutlined />),
   getItem("Customer", "/customer/list", <PieChartOutlined />),
   getItem("Analytics", "/analytics", <PieChartOutlined />),
   getItem("Profile", "/profile", <PieChartOutlined />),
@@ -121,6 +124,8 @@ const App: React.FC = () => {
       setActiveMenuItem(["/plan/list"]);
     } else if (pathItems[0] == "customer") {
       setActiveMenuItem(["/customer/list"]);
+    } else if (pathItems[0] == "invoice") {
+      setActiveMenuItem(["/invoice/list"]);
     } else {
       setActiveMenuItem(["/" + pathItems[0]]);
     }
@@ -202,11 +207,11 @@ const App: React.FC = () => {
                   <Route path="*" Component={NotFound} />
                   <Route
                     path={APP_PATH}
-                    element={<Navigate to={`${APP_PATH}subscription/list`} />}
+                    element={<Navigate to={`${APP_PATH}subscription/list`} />} // default page after login
                   />
                   <Route path={`${APP_PATH}profile`} Component={Profile} />
                   <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
-                  <Route path={`${APP_PATH}invoices`} Component={Invoices} />
+                  {/* <Route path={`${APP_PATH}invoice`} Component={Invoices} /> */}
                   <Route path={`${APP_PATH}settings`} Component={Settings} />
                   {/* <Route path={`${APP_PATH}users`} Component={Users} /> */}
                   <Route
@@ -229,6 +234,11 @@ const App: React.FC = () => {
                     <Route path="list" element={<CustomerList />} />
                     {/* <Route path="new" element={<PlanNew />} /> */}
                     <Route path=":userId" element={<CustomerDetail />} />
+                  </Route>
+
+                  <Route path={`${APP_PATH}invoice`} Component={InvoiceEntry}>
+                    <Route path="list" element={<InvoiceList />} />
+                    <Route path=":invoiceId" element={<InvoiceDetail />} />
                   </Route>
                 </Routes>
               </div>

@@ -372,7 +372,7 @@ export const getInvoiceList = async ({
   page = 0,
   count = 10,
 }: {
-  userId: number;
+  userId?: number;
   page: number;
   count?: number;
 }) => {
@@ -389,6 +389,7 @@ export const getInvoiceList = async ({
     page,
     count,
   };
+
   return await axios.post(
     `${API_URL}/merchant/invoice/subscription_invoice_list`,
     body,

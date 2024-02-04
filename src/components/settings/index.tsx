@@ -209,45 +209,39 @@ type TEmailTmpl = {
   updatedAt: string;
 };
 
+const RAW_TEXT2 = " <ol><li>a</li><li>b</li><li>c</li></ol>";
 const RAW_TEXT = `
-<p>Dear [customer.name]:</p>
 <p>
-    <br>
+Dear [customer.name]:
 </p>
-<p>Congratulation on your successful subscription on our Premium plan. Your benefits include:</p>
+<p><br></p>
 <p>
-    <br>
+Congratulation on your successful subscription on our Premium plan. Your benefits include:
 </p>
+<p><br></p>
+<p><br></p>
 <ul>
-    <li>Local and cloud stored browser profiles</li>
-    <li>Mimic and Stealthfox privacy browsers</li>
-    <li>Custom browser fingerprint based on real-user data</li>
-    <li>Easy proxy integration and verification</li>
-    <li>Open API and knowledge center</li>
-    <li>Browser automation with Playwright (Mimic only), Selenium Hardened, and Puppeteer Hardened</li>
-    <li>10 Team member seats</li>
-    <li>Advanced team management</li>
-    <li>Profile sharing</li>
-    <li>24/7 in-app live chat and email support</li>
+<li>Local and cloud stored browser profiles</li>
+<li>Mimic and Stealthfox privacy browsers</li>
+<li>Custom browser fingerprint based on real-user data</li>
+<li>Easy proxy integration and verification</li>
+<li>Open API and knowledge center</li>
+<li>Browser automation with Playwright (Mimic only), Selenium Hardened, and Puppeteer Hardened</li>
+<li>10 Team member seats</li><li>Advanced team management</li>
+<li>Profile sharing24/7 in-app live chat and email support</li>
 </ul>
-<p>
-    <br>
-</p>
-<p>Your subscription fee will be charged on every [intervalCount] [intervalUnit] with [subscription.amount].</p>
-<p>
-    <br>
-</p>
+<p><br></p>
+<p><br></p>
+<p>Your subscription fee will be charged on every [intervalCount] [intervalUnit] with [subscription.currency] [subscription.amount].</p>
+<p><br></p>
 `;
-
 const PreviewText = () => (
   <>
     <p>Dear [customer.name]:</p>
-    <p></p>
     <p>
       Congratulation on your successful subscription on our Premium plan. Your
       benefits include:
     </p>
-    <p></p>
     <ul>
       <li>Local and cloud stored browser profiles</li>
       <li>Mimic and Stealthfox privacy browsers</li>
@@ -277,9 +271,13 @@ const PreviewText = () => (
 );
 const EditTemplate = () => {
   const [value, setValue] = useState(RAW_TEXT);
+  const onTextChange = (content: string) => {
+    setValue(content);
+  };
+  // console.log("txt: ", value);
   return (
     <div>
-      <ReactQuill theme="snow" value={value} onChange={setValue} />
+      <ReactQuill theme="snow" value={value} onChange={onTextChange} />
     </div>
   );
 };
@@ -549,165 +547,173 @@ const PermissionTab = () => (
         Analytics
       </Col>
     </Row>
-    {roles.map((r) => (
-      <div key={r}>
-        <Row
-          // gutter={[32, 128]}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignContent: "center",
-          }}
-        >
-          <Col span={2}>{r}</Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].appConfig.read}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].appConfig.write}
-            >
-              Write
-            </Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].emailTemplate.read}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].emailTemplate.write}
-            >
-              Write
-            </Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].invoiceTemplate.read}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].invoiceTemplate.write}
-            >
-              Write
-            </Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].plan.read}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].plan.write}
-            >
-              Write
-            </Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].subscription.read}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].subscription.write}
-            >
-              Write
-            </Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].invoice.read}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].invoice.write}
-            >
-              Write
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].invoice.generate}
-            >
-              Generate
-            </Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].accountData.write}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].accountData.read}
-            >
-              Write
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].accountData.invite}
-            >
-              Invite
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].accountData.permissionSetting}
-            >
-              set Permission
-            </Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].customerData.read}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].customerData.write}
-            >
-              Write
-            </Checkbox>
-          </Col>
-          <Col span={2}>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].analytic.read}
-            >
-              Read
-            </Checkbox>
-            <Checkbox
-              disabled={r == "App Owner"}
-              defaultChecked={role[r].analytic.export}
-            >
-              Export
-            </Checkbox>
-          </Col>
-        </Row>
-        <Divider />
-      </div>
-    ))}
+    <div
+      style={{
+        height: "calc(100vh - 410px)",
+        overflowY: "auto",
+        marginBottom: "16px",
+      }}
+    >
+      {roles.map((r) => (
+        <div key={r}>
+          <Row
+            // gutter={[32, 128]}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignContent: "center",
+            }}
+          >
+            <Col span={2}>{r}</Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].appConfig.read}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].appConfig.write}
+              >
+                Write
+              </Checkbox>
+            </Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].emailTemplate.read}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].emailTemplate.write}
+              >
+                Write
+              </Checkbox>
+            </Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].invoiceTemplate.read}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].invoiceTemplate.write}
+              >
+                Write
+              </Checkbox>
+            </Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].plan.read}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].plan.write}
+              >
+                Write
+              </Checkbox>
+            </Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].subscription.read}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].subscription.write}
+              >
+                Write
+              </Checkbox>
+            </Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].invoice.read}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].invoice.write}
+              >
+                Write
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].invoice.generate}
+              >
+                Generate
+              </Checkbox>
+            </Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].accountData.write}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].accountData.read}
+              >
+                Write
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].accountData.invite}
+              >
+                Invite
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].accountData.permissionSetting}
+              >
+                set Permission
+              </Checkbox>
+            </Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].customerData.read}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].customerData.write}
+              >
+                Write
+              </Checkbox>
+            </Col>
+            <Col span={2}>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].analytic.read}
+              >
+                Read
+              </Checkbox>
+              <Checkbox
+                disabled={r == "App Owner"}
+                defaultChecked={role[r].analytic.export}
+              >
+                Export
+              </Checkbox>
+            </Col>
+          </Row>
+          <Divider />
+        </div>
+      ))}
+    </div>
     <div style={{ display: "flex", justifyContent: "end", gap: "16px" }}>
       <Button>Add New Role</Button>
       <Button>Apply Change</Button>
