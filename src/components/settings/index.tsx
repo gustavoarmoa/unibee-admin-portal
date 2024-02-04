@@ -1,10 +1,14 @@
 import React, { CSSProperties, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Col, Divider, Row, Tabs } from "antd";
+import { Button, Col, Divider, Input, Modal, Row, Table, Tabs } from "antd";
 import type { TabsProps } from "antd";
 import { Checkbox } from "antd";
 import type { CheckboxProps } from "antd";
 import { IProfile } from "../../shared.types";
+import { ColumnsType } from "antd/es/table";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import "../../shared.css";
 
 type TPermission = {
   appConfig: { read: boolean; write: boolean };
@@ -125,12 +129,12 @@ const Index = () => {
     {
       key: "AppConfig",
       label: "App Config",
-      children: "App config",
+      children: <AppConfig />,
     },
     {
       key: "emailTemplate",
       label: "Email Template",
-      children: "email template",
+      children: <EmailTemplate />,
     },
     {
       key: "invoiceTemplate",
@@ -147,10 +151,10 @@ const Index = () => {
     // console.log(key);
   };
 
-  const x: keyof TPermission = "appConfig";
+  // const x: keyof TPermission = "appConfig";
   // const allPerm = Object.keys()
 
-  console.log("key of : ", x);
+  // console.log("key of : ", x);
 
   return (
     <div style={{ width: "100%" }}>
@@ -164,6 +168,343 @@ const Index = () => {
 };
 
 export default Index;
+
+const AppConfig = () => {
+  return (
+    <div style={{ margin: "32px 0" }}>
+      <Row gutter={[16, 32]} style={{ marginBottom: "16px" }}>
+        <Col span={4}>SendGrid Email Key</Col>
+        <Col span={12}>
+          <Input.Password
+            defaultValue={"1234567890-abcdefghijklmnopq"}
+            style={{ width: "80%" }}
+          />
+        </Col>
+        <Col span={4}>
+          <Button>Save</Button>
+        </Col>
+      </Row>
+      <Row gutter={[16, 32]} style={{ marginBottom: "16px" }}>
+        <Col span={4}>VAT Sense Key</Col>
+        <Col span={12}>
+          <Input.Password
+            defaultValue={"1234567890-abcdefghijklmnopq"}
+            style={{ width: "80%" }}
+          />
+        </Col>
+        <Col span={4}>
+          <Button>Save</Button>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+type TEmailTmpl = {
+  id: number;
+  name: string;
+  description: string;
+  status: string;
+  createdBy: string;
+  updatedAt: string;
+};
+
+const RAW_TEXT = `
+<p>Dear [customer.name]:</p>
+<p>
+    <br>
+</p>
+<p>Congratulation on your successful subscription on our Premium plan. Your benefits include:</p>
+<p>
+    <br>
+</p>
+<ul>
+    <li>Local and cloud stored browser profiles</li>
+    <li>Mimic and Stealthfox privacy browsers</li>
+    <li>Custom browser fingerprint based on real-user data</li>
+    <li>Easy proxy integration and verification</li>
+    <li>Open API and knowledge center</li>
+    <li>Browser automation with Playwright (Mimic only), Selenium Hardened, and Puppeteer Hardened</li>
+    <li>10 Team member seats</li>
+    <li>Advanced team management</li>
+    <li>Profile sharing</li>
+    <li>24/7 in-app live chat and email support</li>
+</ul>
+<p>
+    <br>
+</p>
+<p>Your subscription fee will be charged on every [intervalCount] [intervalUnit] with [subscription.amount].</p>
+<p>
+    <br>
+</p>
+`;
+
+const PreviewText = () => (
+  <>
+    <p>Dear [customer.name]:</p>
+    <p></p>
+    <p>
+      Congratulation on your successful subscription on our Premium plan. Your
+      benefits include:
+    </p>
+    <p></p>
+    <ul>
+      <li>Local and cloud stored browser profiles</li>
+      <li>Mimic and Stealthfox privacy browsers</li>
+      <li>Custom browser fingerprint based on real-user data</li>
+      <li>Easy proxy integration and verification</li>
+      <li>Open API and knowledge center</li>
+      <li>
+        Browser automation with Playwright (Mimic only), Selenium Hardened, and
+        Puppeteer Hardened
+      </li>
+      <li>10 Team member seats</li>
+      <li>Advanced team management</li>
+      <li>Profile sharing</li>
+      <li>24/7 in-app live chat and email support</li>
+    </ul>
+    <p>
+      <br />
+    </p>
+    <p>
+      Your subscription fee will be charged on every [intervalCount]
+      [intervalUnit] with [subscription.amount].
+    </p>
+    <p>
+      <br />
+    </p>
+  </>
+);
+const EditTemplate = () => {
+  const [value, setValue] = useState(RAW_TEXT);
+  return (
+    <div>
+      <ReactQuill theme="snow" value={value} onChange={setValue} />
+    </div>
+  );
+};
+
+const PreviewTemplate = () => {
+  return <PreviewText />;
+};
+
+const EmailTemplate = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [tabKey, setTabKey] = useState("Edit");
+  const toggleModal = () => setModalOpen(!modalOpen);
+
+  const tabItems: TabsProps["items"] = [
+    {
+      key: "Edit",
+      label: "Edit",
+      children: <EditTemplate />,
+    },
+    {
+      key: "Preview",
+      label: "Preview",
+      children: <PreviewTemplate />,
+    },
+  ];
+  const onTabChange = (key: string) => {
+    setTabKey(key);
+  };
+
+  const columns: ColumnsType<TEmailTmpl> = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      // render: (text) => <a>{text}</a>,
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+    },
+    {
+      title: "Updated at",
+      dataIndex: "updatedAt",
+      key: "gmtCreate",
+      render: (d, plan) => new Date(d).toLocaleDateString(),
+    },
+    {
+      title: "Created by",
+      dataIndex: "createdBy",
+      key: "createdBy",
+    },
+  ];
+  const data: TEmailTmpl[] = [
+    {
+      id: 1,
+      name: "login via OTP",
+      description: "send OTP in email",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 2,
+      name: "signup email confirm",
+      description: "signup email confirm",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 3,
+      name: "reset password",
+      description: "reset password",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 4,
+      name: "Successful subscription",
+      description: "Subscription with successful payment",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 5,
+      name: "Reminder to charge subscription fee",
+      description: "Reminder to charge subscription fee",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 6,
+      name: "Subscription with pending payment",
+      description: "Subscription with pending payment",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 7,
+      name: "Subscription with failed payment",
+      description: "Subscription with failed payment",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 8,
+      name: "Subscription fee charged successfully",
+      description: "Subscription fee charged successfully",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 9,
+      name: "Fail to charge subscription fee",
+      description: "Fail to charge subscription fee",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 10,
+      name: "Invoice delivered",
+      description: "Invoice delivered",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 11,
+      name: "Subscription plan upgraded",
+      description: "Subscription plan upgraded",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 12,
+      name: "Subscription plan downgraded",
+      description: "Subscription plan downgraded",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 13,
+      name: "Subscription due date extended",
+      description: "Subscription due date extended by *** days to ****-**-**",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 14,
+      name: "Subscription cancelled",
+      description: "Subscription cancelled",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+    {
+      id: 15,
+      name: "Subscription resumed",
+      description: "Subscription resumed",
+      status: "Active",
+      updatedAt: "2024-02-01",
+      createdBy: "Admin",
+    },
+  ];
+  return (
+    <div>
+      <Modal
+        title="Email Template"
+        open={modalOpen}
+        width={"720px"}
+        footer={null}
+        closeIcon={null}
+      >
+        <Tabs activeKey={tabKey} items={tabItems} onChange={onTabChange} />
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            alignItems: "center",
+            gap: "18px",
+            marginTop: "24px",
+          }}
+        >
+          <Button onClick={toggleModal}>Close</Button>
+          <Button type="primary" onClick={toggleModal}>
+            Save
+          </Button>
+          <Button onClick={toggleModal}>Inactivate</Button>
+        </div>
+      </Modal>
+      <Table
+        columns={columns}
+        dataSource={data}
+        rowKey={"id"}
+        rowClassName="clickable-tbl-row"
+        pagination={false}
+        onRow={(user, rowIndex) => {
+          return {
+            onClick: (event) => {
+              // console.log("row click: ", user, "///", rowIndex);
+              toggleModal();
+            },
+          };
+        }}
+      />
+    </div>
+  );
+};
 
 const PermissionTab = () => (
   <div style={{ width: "calc(100vw - 300px)", overflowX: "auto" }}>

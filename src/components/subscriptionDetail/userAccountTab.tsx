@@ -323,8 +323,10 @@ const UserAccountTab = ({
             display: "flex",
             justifyContent: "center",
             margin: "36px",
+            gap: "24px",
           }}
         >
+          <Button danger>Suspend</Button>
           <Button type="primary" onClick={onSave} disabled={loading}>
             Save
           </Button>
