@@ -671,7 +671,7 @@ const SubscriptionInfoSection = ({
         <Col span={4} style={colStyle}>
           Next due date
         </Col>
-        <Col span={6}>
+        <Col span={10}>
           {subInfo && (
             <DatePicker
               format="YYYY-MM-DD"
@@ -688,12 +688,24 @@ const SubscriptionInfoSection = ({
               }
             />
           )}
-          {/* activeSub?.currentPeriodEnd &&
-              new Date(activeSub?.currentPeriodEnd * 1000).toLocaleDateString() */}
-          TrialEnd:{" "}
-          {subInfo == null
-            ? ""
-            : new Date(subInfo?.trialEnd * 1000).toLocaleDateString()}
+          {subInfo != null &&
+            subInfo.trialEnd != 0 &&
+            subInfo.trialEnd > subInfo.currentPeriodEnd && (
+              <span
+                style={{
+                  fontSize: "11px",
+                  color: "#f44336",
+                  marginLeft: "6px",
+                }}
+              >
+                +
+                {daysBetweenDate(
+                  subInfo.currentPeriodEnd * 1000,
+                  subInfo.trialEnd * 1000
+                )}{" "}
+                days → {new Date(subInfo.trialEnd * 1000).toLocaleDateString()}
+              </span>
+            )}
         </Col>
       </Row>
 
