@@ -6,6 +6,7 @@ import { ColumnsType } from "antd/es/table";
 import { SUBSCRIPTION_STATUS } from "../constants";
 import { LoadingOutlined } from "@ant-design/icons";
 import { searchUserReq } from "../requests";
+import dayjs from "dayjs";
 import "../shared.css";
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -30,7 +31,7 @@ const columns: ColumnsType<IProfile> = [
     title: "Created at",
     dataIndex: "gmtCreate",
     key: "gmtCreate",
-    render: (d, plan) => new Date(d).toLocaleDateString(),
+    render: (d, plan) => dayjs(d).format("YYYY-MMM-DD"), // new Date(d).toLocaleDateString(),
   },
   {
     title: "Subscription",

@@ -5,6 +5,7 @@ import { getSublist } from "../requests";
 import type { ColumnsType } from "antd/es/table";
 import { showAmount } from "../helpers";
 import { SUBSCRIPTION_STATUS } from "../constants";
+import dayjs from "dayjs";
 import { ISubscriptionType } from "../shared.types";
 import { LoadingOutlined } from "@ant-design/icons";
 import "../shared.css";
@@ -63,25 +64,15 @@ const columns: ColumnsType<ISubscriptionType> = [
     title: "Start",
     dataIndex: "currentPeriodStart",
     key: "currentPeriodStart",
-    render: (_, sub) => {
-      return (
-        <span>{`${new Date(
-          sub.currentPeriodStart * 1000
-        ).toLocaleString()}`}</span>
-      );
-    },
+    render: (_, sub) =>
+      dayjs(sub.currentPeriodStart * 1000).format("YYYY-MMM-DD HH:MM"),
   },
   {
     title: "End",
     dataIndex: "currentPeriodEnd",
     key: "currentPeriodEnd",
-    render: (_, sub) => {
-      return (
-        <span>{`${new Date(
-          sub.currentPeriodEnd * 1000
-        ).toLocaleString()}`}</span>
-      );
-    },
+    render: (_, sub) =>
+      dayjs(sub.currentPeriodEnd * 1000).format("YYYY-MMM-DD HH:MM"),
   },
   {
     title: "User",

@@ -6,6 +6,7 @@ import { ColumnsType } from "antd/es/table";
 import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from "../constants";
 import { LoadingOutlined } from "@ant-design/icons";
 import { getInvoiceList } from "../requests";
+import dayjs from "dayjs";
 import "../shared.css";
 import { showAmount } from "../helpers";
 const APP_PATH = import.meta.env.BASE_URL;
@@ -59,13 +60,15 @@ const Index = () => {
       title: "Start",
       dataIndex: "periodStart",
       key: "periodStart",
-      render: (d, plan) => new Date(d * 1000).toLocaleDateString(),
+      render: (d, plan) =>
+        d == 0 ? "" : dayjs(d * 1000).format("YYYY-MMM-DD"), // new Date(d * 1000).toLocaleDateString(),
     },
     {
       title: "End",
       dataIndex: "periodEnd",
       key: "periodEnd",
-      render: (d, plan) => new Date(d * 1000).toLocaleDateString(),
+      render: (d, plan) =>
+        d == 0 ? "" : dayjs(d * 1000).format("YYYY-MMM-DD"), // new Date(d * 1000).toLocaleDateString(),
     },
     {
       title: "User Id",

@@ -14,6 +14,7 @@ import {
   Col,
   Row,
 } from "antd";
+import dayjs from "dayjs";
 import type { ColumnsType } from "antd/es/table";
 // import { ISubscriptionType } from "../../shared.types";
 import { getInvoiceList, downloadInvoice } from "../../requests";
@@ -143,7 +144,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       title: "Created at",
       dataIndex: "gmtCreate",
       key: "gmtCreate",
-      render: (d, invoice) => <span>{new Date(d).toLocaleDateString()}</span>,
+      render: (d, invoice) => dayjs(d).format("YYYY-MMM-DD"), // <span>{new Date(d).toLocaleDateString()}</span>,
     },
     {
       title: "Action",

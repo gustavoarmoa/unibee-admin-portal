@@ -674,7 +674,14 @@ const SubscriptionInfoSection = ({
         <Col span={4} style={colStyle}>
           First pay
         </Col>
-        <Col span={6}>{subInfo?.firstPayTime}</Col>
+        <Col span={6}>
+          {subInfo && subInfo.firstPayTime && (
+            <span>
+              {" "}
+              {dayjs(subInfo.firstPayTime).format("YYYY-MMM-DD HH:MM")}
+            </span>
+          )}
+        </Col>
         <Col span={4} style={colStyle}>
           Next due date
         </Col>
@@ -910,13 +917,13 @@ const SubTimeline = ({
       title: "Start",
       dataIndex: "periodStart",
       key: "periodStart",
-      render: (d) => new Date(d * 1000).toLocaleDateString(),
+      render: (d) => dayjs(d * 1000).format("YYYY-MMM-DD"), // new Date(d * 1000).toLocaleDateString(),
     },
     {
       title: "End",
       dataIndex: "periodEnd",
       key: "periodEnd",
-      render: (d) => new Date(d * 1000).toLocaleDateString(),
+      render: (d) => dayjs(d * 1000).format("YYYY-MMM-DD"), // new Date(d * 1000).toLocaleDateString(),
     },
     {
       title: "Subscription Id",
