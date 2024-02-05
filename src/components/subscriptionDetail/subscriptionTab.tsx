@@ -35,6 +35,7 @@ import ResumeSubModal from "./modals/resumeSub";
 import ExtendSubModal from "./modals/extendSub";
 import ChangePlanModal from "./modals/changePlan";
 import UpdateSubPreviewModal from "./modals/updateSubPreview";
+import CancelPendingSubModal from "./modals/cancelPendingSub";
 import { SUBSCRIPTION_STATUS } from "../../constants";
 import {
   CheckCircleOutlined,
@@ -57,6 +58,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [dueDateModal, setDueDateModal] = useState(false);
   const [newDueDate, setNewDueDate] = useState("");
   const [changePlanModal, setChangePlanModal] = useState(false);
+  const [cancelSubModalOpen, setCancelSubModalOpen] = useState(false); // newly created sub has status == created if user hasn't paid yet, user(or admin) can cancel this sub.
   const [preview, setPreview] = useState<IPreview | null>(null);
   // const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(true);
@@ -74,6 +76,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const toggleResumeSubModal = () => setResumeModal(!resumeModal);
   const toggleSetDueDateModal = () => setDueDateModal(!dueDateModal);
   const toggleChangPlanModal = () => setChangePlanModal(!changePlanModal);
+  const toggleCancelSubModal = () => setCancelSubModalOpen(!cancelSubModalOpen);
 
   const onAddonChange = (
     addonId: number,
@@ -213,18 +216,13 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     }
 
     if (updateSubRes.data.data.paid) {
-      togglePreviewModal();
-      toggleChangPlanModal();
-      fetchData();
       message.success("Plan updated");
-      return;
     } else {
-      togglePreviewModal();
-      toggleChangPlanModal();
-      fetchData();
       message.success("Plan updated, but not paid");
-      return;
     }
+    togglePreviewModal();
+    toggleChangPlanModal();
+    fetchData();
   };
 
   const onTerminateSub = async () => {
@@ -514,6 +512,13 @@ interface ISubAddon extends IPlan {
         onCancel={togglePreviewModal}
         onConfirm={onConfirm}
       />
+      {cancelSubModalOpen && (
+        <CancelPendingSubModal
+          subInfo={activeSub}
+          closeModal={toggleCancelSubModal}
+          refresh={fetchData}
+        />
+      )}
       {/* <UserInfoSection user={activeSub?.user || null} /> */}
       <SubscriptionInfoSection
         subInfo={activeSub}
@@ -523,6 +528,7 @@ interface ISubAddon extends IPlan {
         toggleTerminateModal={toggleTerminateModal}
         toggleResumeSubModal={toggleResumeSubModal}
         toggleChangPlanModal={toggleChangPlanModal}
+        toggleCancelSubModal={toggleCancelSubModal}
       />
     </>
   );
@@ -545,6 +551,7 @@ interface ISubSectionProps {
   toggleTerminateModal: () => void;
   toggleResumeSubModal: () => void;
   toggleChangPlanModal: () => void;
+  toggleCancelSubModal: () => void;
 }
 const SubscriptionInfoSection = ({
   subInfo,
@@ -554,6 +561,7 @@ const SubscriptionInfoSection = ({
   toggleTerminateModal,
   toggleResumeSubModal,
   toggleChangPlanModal,
+  toggleCancelSubModal,
 }: ISubSectionProps) => {
   return (
     <>
@@ -579,6 +587,11 @@ const SubscriptionInfoSection = ({
           >
             <SyncOutlined />
           </span>
+          {subInfo && subInfo.status == 1 && (
+            <Button type="link" onClick={toggleCancelSubModal}>
+              Cancel
+            </Button>
+          )}
         </Col>
         <Col span={4} style={colStyle}>
           Subscription Id

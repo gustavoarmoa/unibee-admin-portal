@@ -330,12 +330,12 @@ const Index = () => {
           </Form.Item>
 
           <Form.Item
-            label="Amount"
+            label="Price"
             name="amount"
             rules={[
               {
                 required: true,
-                message: "Please input your plan amount!",
+                message: "Please input your plan price!",
               },
             ]}
           >

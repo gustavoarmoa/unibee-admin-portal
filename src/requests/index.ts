@@ -239,6 +239,24 @@ export const getSubDetail = async (subscriptionId: string) => {
   );
 };
 
+// new user has choosen a sub plan, but not paid yet, befoer the payment due date, user and admin can cancel it
+// this fn is for this purpose only, it's not the same as terminate an active sub, this call only work for sub.status == created
+export const cancelSubReq = async (subscriptionId: string) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = {
+    subscriptionId,
+  };
+  return await axios.post(
+    `${API_URL}/merchant/subscription/subscription_cancel`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
 export const createPreviewReq = async (
   subscriptionId: string,
   newPlanId: number,
