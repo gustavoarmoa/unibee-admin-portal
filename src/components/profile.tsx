@@ -18,8 +18,9 @@ const Index = () => {
   const merchantInfoStore = useMerchantInfoStore();
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false); // page loading/submitting
+  const [loading, setLoading] = useState(false); // page loading
   const [uploading, setUploading] = useState(false); // logo upload
+  const [submitting, setSubmitting] = useState(false);
   const [logoUrl, setLogoUrl] = useState("");
   const [merchantInfo, setMerchantInfo] = useState<TMerchantInfo | null>(null);
 
@@ -98,11 +99,11 @@ const Index = () => {
       return;
     }
 
-    setUploading(true);
+    setSubmitting(true);
     try {
       const res = await updateMerchantInfoReq(info);
       console.log("update info res: ", res);
-      setUploading(false);
+      setSubmitting(false);
       const statusCode = res.data.code;
       if (statusCode != 0) {
         statusCode == 61 && relogin();
@@ -111,7 +112,7 @@ const Index = () => {
       message.success("Info Updated");
       merchantInfoStore.setMerchantInfo(res.data.data.MerchantInfo);
     } catch (err) {
-      setUploading(false);
+      setSubmitting(false);
       if (err instanceof Error) {
         console.log("err getting profile: ", err.message);
         message.error(err.message);
@@ -263,10 +264,10 @@ const Index = () => {
                 type="primary"
                 htmlType="submit"
                 onClick={onSubmit}
-                loading={loading}
-                disabled={loading || uploading}
+                loading={submitting || uploading}
+                disabled={submitting || uploading}
               >
-                Submit
+                {uploading ? "Uploading" : submitting ? "Submiting" : "Save"}
               </Button>
             </Form.Item>
           </Form>

@@ -193,6 +193,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         preview?.currency as string,
         preview?.prorationDate as number
       );
+      setConfirming(false);
       console.log("update subscription submit res: ", updateSubRes);
       const code = updateSubRes.data.code;
       code == 61 && relogin();
@@ -212,25 +213,18 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     }
 
     if (updateSubRes.data.data.paid) {
-      /*
-        navigate(`${APP_PATH}profile/subscription`, {
-          state: { msg: "Subscription updated" },
-        });
-        */
-      // navigate(-1);
       togglePreviewModal();
-      // setChangePlanModal(false);
       toggleChangPlanModal();
-      setConfirming(false);
       fetchData();
       message.success("Plan updated");
       return;
+    } else {
+      togglePreviewModal();
+      toggleChangPlanModal();
+      fetchData();
+      message.success("Plan updated, but not paid");
+      return;
     }
-    setConfirming(false);
-    togglePreviewModal();
-    // ??????????????????
-    // what if checkout form is opened, you can't ask admin to pay user's subscription fee.
-    // window.open(updateSubRes.data.data.link, "_blank");
   };
 
   const onTerminateSub = async () => {

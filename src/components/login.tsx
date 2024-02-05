@@ -139,6 +139,9 @@ const Login1 = ({
       localStorage.setItem("merchantToken", res.data.data.Token);
       const infoRes = await getMerchantInfoReq();
       setSubmitting(false);
+      if (infoRes.data.code != 0) {
+        throw new Error(infoRes.data.message);
+      }
       console.log("info res: ", infoRes);
       merchantInfoStore.setMerchantInfo(infoRes.data.data.MerchantInfo);
       navigate(`${APP_PATH}subscription/list`);
@@ -196,17 +199,6 @@ const Login1 = ({
         <Input.Password value={password} onChange={onPasswordChange} />
       </Form.Item>
 
-      {/* <Form.Item
-        name="remember"
-        valuePropName="checked"
-        wrapperCol={{
-          offset: 8,
-          span: 16,
-        }}
-      >
-        <Checkbox>Remember me</Checkbox>
-      </Form.Item>*/}
-
       <Form.Item
         name="errMsg"
         wrapperCol={{
@@ -245,6 +237,7 @@ const Login2 = ({
   email: string;
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
+  const merchantInfoStore = useMerchantInfoStore();
   const [currentStep, setCurrentStep] = useState(0); // 0: input email, 1: input verification code
   const [submitting, setSubmitting] = useState(false);
   const [otp, setOtp] = useState("");
@@ -286,13 +279,20 @@ const Login2 = ({
     try {
       const res = await otpLoginVerifyReq(email, otp);
       console.log("otp loginVerify res: ", res);
-      setSubmitting(false);
       if (res.data.code != 0) {
         setErrMsg(res.data.message);
         throw new Error(res.data.message);
       }
       localStorage.setItem("merchantToken", res.data.data.Token);
-      // set profile, setMerchantInfo
+      const infoRes = await getMerchantInfoReq();
+      console.log("info res: ", infoRes);
+      if (infoRes.data.code != 0) {
+        setErrMsg(infoRes.data.message);
+        throw new Error(infoRes.data.message);
+      }
+      setSubmitting(false);
+      merchantInfoStore.setMerchantInfo(infoRes.data.data.MerchantInfo);
+      // set profile
       navigate(`${APP_PATH}subscription/list`);
     } catch (err) {
       setSubmitting(false);
