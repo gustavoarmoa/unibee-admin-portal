@@ -14,6 +14,7 @@ import {
   revokeInvoice,
   deleteInvoice,
   refund,
+  sendInvoiceInMailReq,
 } from "../../../requests";
 import { CURRENCY } from "../../../constants";
 import update from "immutability-helper";
@@ -355,6 +356,34 @@ const Index = ({
     }
   };
 
+  const onSendInvoice = async () => {
+    if (detail == null || detail.invoiceId == "" || detail.invoiceId == null) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await sendInvoiceInMailReq(detail.invoiceId);
+      console.log("send invoice in mail res: ", res);
+      setLoading(false);
+      const code = res.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(res.data.message);
+      }
+      message.success("Invoice sent.");
+      closeModal();
+      // refresh(); // no need to refresh parent.
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log(`err sending invoice: `, err.message);
+        message.error(err.message);
+      } else {
+        message.error("Unknown error");
+      }
+    }
+  };
+
   const onFieldChange =
     (invoiceId: string, fieldName: string) =>
     (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -673,6 +702,16 @@ const Index = ({
           <Button onClick={closeModal} disabled={loading}>
             {`${!permission.editable ? "Close" : "Close"}`}
           </Button>
+          {permission.sendable && (
+            <Button
+              type="primary"
+              onClick={onSendInvoice}
+              loading={loading}
+              disabled={loading}
+            >
+              Send Invoice
+            </Button>
+          )}
           {(permission.savable || permission.creatable) && (
             <Button
               type="primary"

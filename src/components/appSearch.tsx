@@ -104,7 +104,7 @@ const Index = () => {
         style={{
           position: "absolute",
           top: "52px",
-          width: "480px",
+          width: "640px",
           height: "640px",
           visibility: `${showResult ? "visible" : "hidden"}`,
           background: "#FAFAFA",

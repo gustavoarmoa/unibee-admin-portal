@@ -17,8 +17,6 @@ import {
 import { IPlan } from "../shared.types";
 import { togglePublishReq } from "../requests";
 
-const options: SelectProps["options"] = [];
-
 const APP_PATH = import.meta.env.BASE_URL;
 
 const getAmount = (amt: number, currency: string) =>
@@ -157,7 +155,7 @@ const Index = () => {
         statuCode == 61 && relogin();
         throw new Error(activateRes.data.message);
       }
-      message.success("plan published");
+      message.success("Plan activated");
       setTimeout(() => {
         navigate(-1);
       }, 2000);

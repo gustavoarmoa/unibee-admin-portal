@@ -62,6 +62,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
   4: "Failed", // user not pay the invoice before it get expired
   5: "Cancelled", // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
     */
+
   const getPermission = (iv: UserInvoice | null): TInvoicePerm => {
     const p = {
       editable: false,
@@ -151,7 +152,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       key: "action",
       render: (
         _,
-        record // use fn to generate these icons, only show available ones.
+        invoice // use fn to generate these icons, only show available ones.
       ) => (
         <Space size="middle">
           <Tooltip title="Edit">
@@ -159,7 +160,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
               onClick={toggleNewInvoiceModal}
               icon={<EditOutlined />}
               style={{ border: "unset" }}
-              disabled={!getPermission(record).editable}
+              disabled={!getPermission(invoice).editable}
             />
           </Tooltip>
           {/* <Tooltip title="Delete">
@@ -169,15 +170,15 @@ const Index = ({ user }: { user: IProfile | null }) => {
               }}
               icon={<CloseOutlined />}
               style={{ border: "unset" }}
-              disabled={!getPermission(record).deletable}
+              disabled={!getPermission(invoice).deletable}
             />
             </Tooltip>*/}
-          <Tooltip title="Send Mail">
+          <Tooltip title="Send Invoice in Mail">
             <Button
               onClick={toggleNewInvoiceModal}
               icon={<MailOutlined />}
               style={{ border: "unset" }}
-              disabled={!getPermission(record).sendable}
+              disabled={!getPermission(invoice).sendable}
             />
           </Tooltip>
           <Tooltip title="Refund">
@@ -185,28 +186,15 @@ const Index = ({ user }: { user: IProfile | null }) => {
               onClick={refund}
               icon={<MoneyCollectOutlined />}
               style={{ border: "unset" }}
-              disabled={!getPermission(record).refundable}
+              disabled={!getPermission(invoice).refundable}
             />
           </Tooltip>
-
-          {/* <span
-            onClick={() => downloadInvoice(record.sendPdf)}
-            style={{
-              cursor: `${
-                record.sendPdf != null && record.sendPdf != ""
-                  ? "pointer"
-                  : "not-allowed"
-              }`,
-            }}
-          >
-            <DownloadOutlined />
-          </span> */}
           <Tooltip title="Download Invoice">
             <Button
               onClick={toggleNewInvoiceModal}
               icon={<DownloadOutlined />}
               style={{ border: "unset" }}
-              disabled={!getPermission(record).downloadable}
+              disabled={!getPermission(invoice).downloadable}
             />
           </Tooltip>
         </Space>

@@ -642,6 +642,20 @@ export const refund = async (
   );
 };
 
+export const sendInvoiceInMailReq = async (invoiceId: string) => {
+  const token = localStorage.getItem("merchantToken");
+  const body = { invoiceId };
+  return axios.post(
+    `${API_URL}/merchant/invoice/subscription_invoice_send_user_email`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    }
+  );
+};
+
 export const downloadInvoice = (url: string) => {
   if (url == null || url == "") {
     return;
