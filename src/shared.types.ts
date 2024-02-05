@@ -146,7 +146,7 @@ interface UserInvoice {
   subscriptionId: string;
   invoiceId: string;
   invoiceName: string;
-  channelInvoiceId: string;
+  gatewayInvoiceId: string;
   uniqueId: string;
   gmtCreate: string;
   gmtModify: string;
@@ -156,7 +156,7 @@ interface UserInvoice {
   subscriptionAmount: number;
   currency: string;
   lines: InvoiceItem[];
-  channelId: number;
+  gatewayId: number;
   status: number; // go check INVOICE_STATUS in constants.ts
   sendStatus: number;
   sendEmail: string;
@@ -164,10 +164,10 @@ interface UserInvoice {
   data: string;
   isDeleted: number;
   link: string;
-  channelStatus: string;
-  channelPaymentId: string;
-  channelUserId: string;
-  channelInvoicePdf: string;
+  gatewayStatus: string;
+  gatewayPaymentId: string;
+  gatewayUserId: string;
+  gatewayInvoicePdf: string;
   taxPercentage: number;
   sendNote: string;
   sendTerms: string;

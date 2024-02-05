@@ -273,7 +273,7 @@ export const createPreviewReq = async (
     subscriptionId,
     newPlanId,
     quantity: 1,
-    // channelId: 25,
+    // gatewayId: 25,
     addonParams: addons,
   };
   return await axios.post(
@@ -511,7 +511,7 @@ export const createInvoice = async ({
     merchantId: 15621,
     userId,
     taxScale,
-    channelId: 25,
+    gatewayId: 25,
     currency,
     name,
     lines: invoiceItems,
@@ -545,7 +545,7 @@ export const saveInvoice = async ({
   const body = {
     invoiceId,
     taxScale,
-    channelId: 25,
+    gatewayId: 25,
     currency,
     name,
     lines: invoiceItems,
