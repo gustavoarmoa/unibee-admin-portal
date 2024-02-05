@@ -400,7 +400,7 @@ const Index = ({
     // if (asNumber == null) {
     // asNumber = false;
     // }
-    const total = invoices.reduce(
+    let total = invoices.reduce(
       (accu, curr) =>
         accu +
         Math.round(
@@ -419,6 +419,7 @@ const Index = ({
       // return "";
     }
 
+    total = Math.round((total + Number.EPSILON) * 100) / 100;
     // 3rd argument is 'whether ignoreFactor',
     // readonly: false, is used when admin need to create a new invoice, $100 need to be shown as $100, no factor considered
     return asNumber ? total : showAmount(total, currency, true);
