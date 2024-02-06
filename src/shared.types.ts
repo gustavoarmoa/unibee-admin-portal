@@ -56,8 +56,7 @@ interface IPlan {
   status: number; // 1: editing，2: active, 3: inactive，4: expired
   publishStatus: number; // 1: unpublished(not visible to users), 2: published(users could see and choose this plan)
   addons?: IAddon[];
-  gmtCreate: string;
-  gmtModify: string;
+  createAt: number;
   companyId: number;
   merchantId: number;
 }
@@ -75,7 +74,7 @@ interface ISubscriptionType {
   planId: number;
   userId: number;
   status: number;
-  firstPayTime: string;
+  firstPaidAt: number;
   currentPeriodStart: number;
   currentPeriodEnd: number;
   trialEnd: number; // if it's non-zero (seconds from Epoch): subscription'll end on that date(it should be >= currentPeriodEnd)
@@ -148,8 +147,7 @@ interface UserInvoice {
   invoiceName: string;
   gatewayInvoiceId: string;
   uniqueId: string;
-  gmtCreate: string;
-  gmtModify: string;
+  createAt: number;
   totalAmount: number;
   taxAmount: number;
   taxScale: number;

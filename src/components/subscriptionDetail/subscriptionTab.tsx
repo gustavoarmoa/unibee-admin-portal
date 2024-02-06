@@ -675,10 +675,10 @@ const SubscriptionInfoSection = ({
           First pay
         </Col>
         <Col span={6}>
-          {subInfo && subInfo.firstPayTime && (
+          {subInfo && subInfo.firstPaidAt && (
             <span>
               {" "}
-              {dayjs(subInfo.firstPayTime).format("YYYY-MMM-DD HH:MM")}
+              {new Date(subInfo.firstPaidAt * 1000).toLocaleDateString()}
             </span>
           )}
         </Col>
