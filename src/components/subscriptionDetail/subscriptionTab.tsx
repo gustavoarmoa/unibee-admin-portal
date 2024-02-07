@@ -10,6 +10,7 @@ import {
   Col,
   DatePicker,
   Divider,
+  Pagination,
   Popover,
   Row,
   Spin,
@@ -20,9 +21,9 @@ import { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import update from 'immutability-helper';
 import { CSSProperties, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { SUBSCRIPTION_STATUS } from '../../constants';
 import { daysBetweenDate, showAmount } from '../../helpers';
+import { useRelogin } from '../../hooks';
 import {
   createPreviewReq,
   extendDueDate,
@@ -47,10 +48,11 @@ import ResumeSubModal from './modals/resumeSub';
 import TerminateSubModal from './modals/terminateSub';
 import UpdateSubPreviewModal from './modals/updateSubPreview';
 
-const APP_PATH = import.meta.env.BASE_URL;
+// const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  const relogin = useRelogin();
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -60,17 +62,11 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [changePlanModal, setChangePlanModal] = useState(false);
   const [cancelSubModalOpen, setCancelSubModalOpen] = useState(false); // newly created sub has status == created if user hasn't paid yet, user(or admin) can cancel this sub.
   const [preview, setPreview] = useState<IPreview | null>(null);
-  // const [messageApi, contextHolder] = message.useMessage();
   const [loading, setLoading] = useState(true);
   const [terminateModal, setTerminateModal] = useState(false);
   const [resumeModal, setResumeModal] = useState(false);
   const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null); // null: when page is loading, no data is ready yet.
   const [endSubMode, setEndSubMode] = useState<1 | 2 | null>(null); // 1: immediate, 2: end of this billing cycole, null: not selected
-
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: 'session expired, please re-login' },
-    });
 
   const toggleTerminateModal = () => setTerminateModal(!terminateModal);
   const toggleResumeSubModal = () => setResumeModal(!resumeModal);
@@ -690,7 +686,7 @@ const SubscriptionInfoSection = ({
         <Col span={10}>
           {subInfo && (
             <DatePicker
-              format="YYYY-MM-DD"
+              format="YYYY-MMM-DD"
               allowClear={false}
               onChange={onDueDateChange}
               // defaultValue={dayjs()}
@@ -905,9 +901,12 @@ const SubTimeline = ({
   userId: number | undefined;
   plans: IPlan[];
 }) => {
+  const relogin = useRelogin();
   // parent updated, how can I knwo that, and update myself
   const [timeline, setTimeline] = useState<SubTimeline[]>([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 10;
 
   const columns: ColumnsType<SubTimeline> = [
     {
@@ -940,32 +939,45 @@ const SubTimeline = ({
     },
   ];
 
+  const fetchTimeline = async () => {
+    if (userId == null) {
+      return;
+    }
+    try {
+      setLoading(true);
+      const timelineRes = await getSubTimeline({
+        userId,
+        page,
+        count: PAGE_SIZE,
+      });
+      setLoading(false);
+      console.log('timeline res: ', timelineRes);
+      const code = timelineRes.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(timelineRes.data.message);
+      }
+      setTimeline(timelineRes.data.data.subscriptionTimeLines);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log('err getting sub timeline: ', err.message);
+        message.error(err.message);
+      } else {
+        message.error('Unknown error');
+      }
+    }
+  };
+
+  const onPageChange = (page: number, pageSize: number) => {
+    setPage(page - 1);
+  };
+
   useEffect(() => {
-    const fetchTimeline = async () => {
-      if (userId == null) {
-        return;
-      }
-      try {
-        setLoading(true);
-        const timelineRes = await getSubTimeline({ userId });
-        setLoading(false);
-        console.log('timeline res: ', timelineRes);
-        const code = timelineRes.data.code;
-        // code == 61 && relogin();
-        if (code != 0) {
-          throw new Error(timelineRes.data.message);
-        }
-        setTimeline(timelineRes.data.data.subscriptionTimeLines);
-      } catch (err) {
-        setLoading(false);
-        if (err instanceof Error) {
-          console.log('err getting sub timeline: ', err.message);
-          message.error(err.message);
-        } else {
-          message.error('Unknown error');
-        }
-      }
-    };
+    fetchTimeline();
+  }, [page]);
+
+  useEffect(() => {
     fetchTimeline();
   }, [userId]);
   return (
@@ -988,14 +1000,21 @@ const SubTimeline = ({
             onClick: (event) => {
               // console.log("row click: ", record, "///", rowIndex);
               // navigate(`${APP_PATH}plan/${record.id}`);
-            }, // click row
-            // onDoubleClick: (event) => {}, // double click row
-            // onContextMenu: (event) => {}, // right button click row
-            // onMouseEnter: (event) => {}, // mouse enter row
-            // onMouseLeave: (event) => {}, // mouse leave row
+            },
           };
         }}
       />
+      <div className="my-5 flex justify-end">
+        <Pagination
+          current={page + 1} // back-end starts with 0, front-end starts with 1
+          pageSize={PAGE_SIZE}
+          total={500}
+          size="small"
+          onChange={onPageChange}
+          disabled={loading}
+          showSizeChanger={false}
+        />
+      </div>
     </>
   );
 };
