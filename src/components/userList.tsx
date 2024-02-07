@@ -87,9 +87,10 @@ const Index = () => {
     fetchData();
   }, []);
 
-  console.log("users: ", users);
+  // console.log("users: ", users);
   return (
     <div>
+      <Search />
       <Table
         columns={columns}
         dataSource={users}
@@ -114,3 +115,13 @@ const Index = () => {
 };
 
 export default Index;
+
+const Search = () => {
+  return (
+    <div>
+      <div>payment method dropdown</div>
+      <div>subscription plan dropdown</div>
+      <div>subscription amt from/to Input</div>
+    </div>
+  );
+};

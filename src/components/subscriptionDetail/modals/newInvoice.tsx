@@ -702,16 +702,17 @@ const Index = ({
           <Button onClick={closeModal} disabled={loading}>
             {`${!permission.editable ? "Close" : "Close"}`}
           </Button>
-          {permission.sendable && (
-            <Button
-              type="primary"
-              onClick={onSendInvoice}
-              loading={loading}
-              disabled={loading}
-            >
-              Send Invoice
-            </Button>
-          )}
+          {permission.sendable &&
+            !refundMode && ( // when in refundMode, I don't want this "send invoice" button to appear even it's sendable == true
+              <Button
+                type="primary"
+                onClick={onSendInvoice}
+                loading={loading}
+                disabled={loading}
+              >
+                Send Invoice
+              </Button>
+            )}
           {(permission.savable || permission.creatable) && (
             <Button
               type="primary"
