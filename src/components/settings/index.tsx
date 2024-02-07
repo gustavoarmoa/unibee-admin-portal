@@ -338,8 +338,8 @@ const EmailTemplate = () => {
     },
     {
       title: "Updated at",
-      dataIndex: "updatedAt",
-      key: "gmtCreate",
+      dataIndex: "createTime",
+      key: "createTime",
       render: (d, plan) => new Date(d).toLocaleDateString(),
     },
     {

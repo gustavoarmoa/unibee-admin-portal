@@ -29,8 +29,8 @@ const columns: ColumnsType<IProfile> = [
   },
   {
     title: "Created at",
-    dataIndex: "gmtCreate",
-    key: "gmtCreate",
+    dataIndex: "createTime",
+    key: "createTime",
     render: (d, plan) => dayjs(d).format("YYYY-MMM-DD"), // new Date(d).toLocaleDateString(),
   },
   {

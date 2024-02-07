@@ -367,7 +367,7 @@ interface ISubAddon extends IPlan {
 
     console.log("active sub: ", localActiveSub);
 
-    setSelectedPlan(s.planId.id);
+    setSelectedPlan(s.plan.id);
     setUserId(s.user.id);
 
     let plans: IPlan[] = planListRes.data.data.Plans.map((p: any) => {
@@ -396,7 +396,7 @@ interface ISubAddon extends IPlan {
       };
     });
     plans = plans.filter((p) => p != null);
-    const planIdx = plans.findIndex((p) => p.id == s.planId.id);
+    const planIdx = plans.findIndex((p) => p.id == s.plan.id);
     // let's say we have planA(which has addonA1, addonA2, addonA3), planB, planC, user has subscribed to planA, and selected addonA1, addonA3
     // I need to find the index of addonA1,3 in planA.addons array,
     // then set their {quantity, checked: true} props on planA.addons, these props value are from subscription.addons array.
@@ -675,10 +675,10 @@ const SubscriptionInfoSection = ({
           First pay
         </Col>
         <Col span={6}>
-          {subInfo && subInfo.firstPayTime && (
+          {subInfo && subInfo.firstPaidTime && (
             <span>
               {" "}
-              {dayjs(subInfo.firstPayTime).format("YYYY-MMM-DD HH:MM")}
+              {new Date(subInfo.firstPaidTime * 1000).toLocaleDateString()}
             </span>
           )}
         </Col>
