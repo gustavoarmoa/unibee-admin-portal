@@ -25,7 +25,7 @@ import InvoiceList from './components/invoiceList';
 import PlanNew from './components/newSubplan';
 import OutletPage from './components/outletPage';
 import PlanDetail from './components/planDetail';
-import PricePlans from './components/pricePlans';
+// import PricePlans from './components/pricePlans';
 import PricePlanList from './components/pricePlansList';
 import Settings from './components/settings';
 import SubscriptionDetail from './components/subscriptionDetail';
@@ -226,7 +226,7 @@ const App: React.FC = () => {
                       element={<SubscriptionDetail />}
                     />
                   </Route>
-                  <Route path={`${APP_PATH}plan`} Component={PricePlans}>
+                  <Route path={`${APP_PATH}plan`} Component={OutletPage}>
                     <Route path="list" element={<PricePlanList />} />
                     <Route path="new" element={<PlanNew />} />
                     <Route path=":planId" element={<PlanDetail />} />
