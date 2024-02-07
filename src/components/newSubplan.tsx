@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button, Form, Input, Select, message } from "antd";
-import { CURRENCY } from "../constants";
-import { createPlan } from "../requests";
-
-const APP_PATH = import.meta.env.BASE_URL;
-const API_URL = import.meta.env.VITE_API_URL;
+import { Button, Form, Input, Select, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CURRENCY } from '../constants';
+import { useRelogin } from '../hooks';
+import { createPlan } from '../requests';
 
 const DEFAULT_FORM_VALUES = {
-  currency: "USD",
-  intervalUnit: "month",
+  currency: 'USD',
+  intervalUnit: 'month',
   type: 1, // 1: main, 2: add-on
-  imageUrl: "http://www.google.com",
-  homeUrl: "http://www.google.com",
+  imageUrl: 'http://www.google.com',
+  homeUrl: 'http://www.google.com',
 };
 
 // new plan: 之后就是old plan了, 需要edit了, default form value 也不能用了.
@@ -21,11 +19,7 @@ const Index = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: "session expired, please re-login" },
-    });
+  const relogin = useRelogin();
 
   const onCreatePlan = async (values: any) => {
     const f = JSON.parse(JSON.stringify(values));
@@ -33,29 +27,29 @@ const Index = () => {
     f.amount *= CURRENCY[f.currency].stripe_factor;
     f.intervalCount = Number(f.intervalCount);
     f.addonIds = [];
-    console.log("saving form: ", f);
+    console.log('saving form: ', f);
 
     try {
       setLoading(true);
       const createPlanRes = await createPlan(f);
       setLoading(false);
-      console.log("create plan res: ", createPlanRes);
+      console.log('create plan res: ', createPlanRes);
       const statusCode = createPlanRes.data.code;
       if (statusCode != 0) {
         statusCode == 61 && relogin();
         throw new Error(createPlanRes.data.message);
       }
-      message.success("Plan created");
+      message.success('Plan created');
       setTimeout(() => {
         navigate(-1);
       }, 1500);
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
-        console.log("err in creatign plan: ", err.message);
+        console.log('err in creatign plan: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -87,7 +81,7 @@ const Index = () => {
           rules={[
             {
               required: true,
-              message: "Please input your plan name!",
+              message: 'Please input your plan name!',
             },
           ]}
         >
@@ -104,7 +98,7 @@ const Index = () => {
           rules={[
             {
               required: true,
-              message: "Please input your plan amount!",
+              message: 'Please input your plan amount!',
             },
           ]}
         >
@@ -117,16 +111,16 @@ const Index = () => {
           rules={[
             {
               required: true,
-              message: "Please select your plan currency!",
+              message: 'Please select your plan currency!',
             },
           ]}
         >
           <Select
             style={{ width: 120 }}
             options={[
-              { value: "EUR", label: "EUR" },
-              { value: "USD", label: "USD" },
-              { value: "JPY", label: "JPY" },
+              { value: 'EUR', label: 'EUR' },
+              { value: 'USD', label: 'USD' },
+              { value: 'JPY', label: 'JPY' },
             ]}
           />
         </Form.Item>
@@ -137,17 +131,17 @@ const Index = () => {
           rules={[
             {
               required: true,
-              message: "Please select interval unit!",
+              message: 'Please select interval unit!',
             },
           ]}
         >
           <Select
             style={{ width: 120 }}
             options={[
-              { value: "day", label: "day" },
-              { value: "week", label: "week" },
-              { value: "month", label: "month" },
-              { value: "year", label: "year" },
+              { value: 'day', label: 'day' },
+              { value: 'week', label: 'week' },
+              { value: 'month', label: 'month' },
+              { value: 'year', label: 'year' },
             ]}
           />
         </Form.Item>
@@ -158,7 +152,7 @@ const Index = () => {
           rules={[
             {
               required: true,
-              message: "Please input interval count!",
+              message: 'Please input interval count!',
             },
           ]}
         >
@@ -169,8 +163,8 @@ const Index = () => {
           <Select
             style={{ width: 120 }}
             options={[
-              { value: 1, label: "Main plan" },
-              { value: 2, label: "Addon" },
+              { value: 1, label: 'Main plan' },
+              { value: 2, label: 'Addon' },
             ]}
           />
         </Form.Item>
@@ -192,7 +186,7 @@ const Index = () => {
         </Form.Item>
 
         {/* <Form.Item label=""> */}
-        <div style={{ display: "flex", justifyContent: "center", gap: "18px" }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '18px' }}>
           <Button onClick={() => navigate(-1)} disabled={loading}>
             Go Back
           </Button>

@@ -30,6 +30,7 @@ import {
 } from '@ant-design/icons';
 import { CURRENCY, INVOICE_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
+import { useRelogin } from '../../hooks';
 import { downloadInvoice, getInvoiceList } from '../../requests';
 import '../../shared.css';
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types';
@@ -46,11 +47,8 @@ const Index = ({ user }: { user: IProfile | null }) => {
   const [invoiceIdx, setInvoiceIdx] = useState(-1); // -1: not selected, any action button: (delete, edit,refund) will set this value to the selected invoiceIdx
   const [deleteMode, setDeleteMode] = useState(false); // looks like I am not using it,
   const [refundMode, setRefundMode] = useState(false);
-  const navigate = useNavigate();
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: 'session expired, please re-login' },
-    });
+  // const navigate = useNavigate();
+  const relogin = useRelogin();
 
   /*
   0: "Initiating", // this status only exist for a very short period, users/admin won't even know it exist

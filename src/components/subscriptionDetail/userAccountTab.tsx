@@ -8,15 +8,16 @@ import {
   Row,
   Select,
   message,
-} from "antd";
-import { useNavigate } from "react-router-dom";
-import { Country, IProfile } from "../../shared.types";
-import { useEffect, useState } from "react";
+} from 'antd';
+import { useEffect, useState } from 'react';
+// import { useNavigate } from 'react-router-dom';
+import { useRelogin } from '../../hooks';
 import {
   getCountryList,
   getUserProfile,
   saveUserProfile,
-} from "../../requests";
+} from '../../requests';
+import { Country, IProfile } from '../../shared.types';
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -28,49 +29,45 @@ const UserAccountTab = ({
   setUserProfile: (u: IProfile) => void;
 }) => {
   const [form] = Form.useForm();
-  const navigate = useNavigate();
+  //   const navigate = useNavigate();
   const [countryList, setCountryList] = useState<Country[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: "session expired, please re-login" },
-    });
+  const relogin = useRelogin();
 
   const filterOption = (
     input: string,
-    option?: { label: string; value: string }
-  ) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+    option?: { label: string; value: string },
+  ) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
 
   const onSave = async () => {
     const userProfile = form.getFieldsValue();
 
     const isInvalid = form.getFieldsError().some((f) => f.errors.length > 0);
-    console.log("is invalid: ", isInvalid);
+    console.log('is invalid: ', isInvalid);
     if (isInvalid) {
       return;
     }
-    console.log("form values: ", userProfile);
+    console.log('form values: ', userProfile);
     setLoading(true);
 
     try {
       const saveProfileRes = await saveUserProfile(form.getFieldsValue());
-      console.log("save profile res: ", saveProfileRes);
+      console.log('save profile res: ', saveProfileRes);
       const code = saveProfileRes.data.code;
       if (code != 0) {
         code == 61 && relogin();
         throw new Error(saveProfileRes.data.message);
       }
-      message.success("User Info Saved");
+      message.success('User Info Saved');
       setUserProfile(userProfile);
       setLoading(false);
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
-        console.log("profile update err: ", err.message);
+        console.log('profile update err: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -83,7 +80,7 @@ const UserAccountTab = ({
         const res = ([countryListRes] = await Promise.all([
           getCountryList(15621),
         ]));
-        console.log("country: ", countryListRes);
+        console.log('country: ', countryListRes);
         res.forEach((r) => {
           const code = r.data.code;
           code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
@@ -96,10 +93,10 @@ const UserAccountTab = ({
       } catch (err) {
         setLoading(false);
         if (err instanceof Error) {
-          console.log("profile update err: ", err.message);
+          console.log('profile update err: ', err.message);
           message.error(err.message);
         } else {
-          message.error("Unknown error");
+          message.error('Unknown error');
         }
         return;
       }
@@ -107,20 +104,20 @@ const UserAccountTab = ({
         countryListRes.data.data.vatCountryList.map((c: any) => ({
           code: c.countryCode,
           name: c.countryName,
-        }))
+        })),
       );
     };
 
     fetchData();
   }, []);
 
-  const countryCode = Form.useWatch("countryCode", form);
+  const countryCode = Form.useWatch('countryCode', form);
   useEffect(() => {
     countryCode &&
       countryList.length > 0 &&
       form.setFieldValue(
-        "countryName",
-        countryList.find((c) => c.code == countryCode)!.name
+        'countryName',
+        countryList.find((c) => c.code == countryCode)!.name,
       );
   }, [countryCode]);
 
@@ -146,7 +143,7 @@ const UserAccountTab = ({
           <Input />
         </Form.Item>
 
-        <Divider orientation="left" style={{ margin: "16px 0" }}>
+        <Divider orientation="left" style={{ margin: '16px 0' }}>
           General
         </Divider>
         <Row>
@@ -157,11 +154,11 @@ const UserAccountTab = ({
               rules={[
                 {
                   required: true,
-                  message: "Please input your first name!",
+                  message: 'Please input your first name!',
                 },
               ]}
             >
-              <Input style={{ width: "240px" }} />
+              <Input style={{ width: '240px' }} />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -171,11 +168,11 @@ const UserAccountTab = ({
               rules={[
                 {
                   required: true,
-                  message: "Please input your last name!",
+                  message: 'Please input your last name!',
                 },
               ]}
             >
-              <Input style={{ width: "240px" }} />
+              <Input style={{ width: '240px' }} />
             </Form.Item>
           </Col>
         </Row>
@@ -183,12 +180,12 @@ const UserAccountTab = ({
         <Row>
           <Col span={12}>
             <Form.Item label="Email" name="email">
-              <Input disabled style={{ width: "240px" }} />
+              <Input disabled style={{ width: '240px' }} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item label="Company name" name="companyName">
-              <Input style={{ width: "240px" }} />
+              <Input style={{ width: '240px' }} />
             </Form.Item>
           </Col>
         </Row>
@@ -196,7 +193,7 @@ const UserAccountTab = ({
         <Row>
           <Col span={12}>
             <Form.Item label="VAT number" name="vATNumber">
-              <Input style={{ width: "240px" }} />
+              <Input style={{ width: '240px' }} />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -211,7 +208,7 @@ const UserAccountTab = ({
           </Col>
         </Row>
 
-        <Divider orientation="left" style={{ margin: "16px 0" }}>
+        <Divider orientation="left" style={{ margin: '16px 0' }}>
           Contact Info
         </Divider>
 
@@ -223,7 +220,7 @@ const UserAccountTab = ({
               rules={[
                 {
                   required: true,
-                  message: "Please select your first country!",
+                  message: 'Please select your first country!',
                 },
               ]}
             >
@@ -249,7 +246,7 @@ const UserAccountTab = ({
               rules={[
                 {
                   required: true,
-                  message: "Please input your billing address!",
+                  message: 'Please input your billing address!',
                 },
               ]}
             >
@@ -266,7 +263,7 @@ const UserAccountTab = ({
           </Col>
         </Row>
 
-        <Divider orientation="left" style={{ margin: "16px 0" }}>
+        <Divider orientation="left" style={{ margin: '16px 0' }}>
           Social Info
         </Divider>
 
@@ -311,7 +308,7 @@ const UserAccountTab = ({
 
         <Row>
           <Col span={12}>
-            {" "}
+            {' '}
             <Form.Item label="Other social info" name="otherSocialInfo">
               <Input />
             </Form.Item>
@@ -320,10 +317,10 @@ const UserAccountTab = ({
 
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            margin: "36px",
-            gap: "24px",
+            display: 'flex',
+            justifyContent: 'center',
+            margin: '36px',
+            gap: '24px',
           }}
         >
           <Button danger>Suspend</Button>

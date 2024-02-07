@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SUBSCRIPTION_STATUS } from '../constants';
 import { showAmount } from '../helpers';
+import { useRelogin } from '../hooks';
 import { getSublist } from '../requests';
 import '../shared.css';
 import { ISubscriptionType } from '../shared.types';
@@ -84,11 +85,7 @@ const Index = () => {
   const [subList, setSubList] = useState<ISubscriptionType[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: 'session expired, please re-login' },
-    });
+  const relogin = useRelogin();
 
   useEffect(() => {
     setLoading(true);

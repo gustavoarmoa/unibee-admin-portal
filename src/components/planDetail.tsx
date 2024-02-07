@@ -8,6 +8,7 @@ import { Button, Form, Input, Select, Spin, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CURRENCY, PLAN_STATUS } from '../constants';
+import { useRelogin } from '../hooks';
 import {
   activatePlan,
   getPlanDetail,
@@ -17,7 +18,7 @@ import {
 } from '../requests';
 import { IPlan } from '../shared.types';
 
-const APP_PATH = import.meta.env.BASE_URL;
+// const APP_PATH = import.meta.env.BASE_URL;
 
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
@@ -33,11 +34,7 @@ const Index = () => {
   const [selectedAddon, setSelectedAddon] = useState<number[]>([]); // from the above selectAddons, which are selected(addon Id array)
   const navigate = useNavigate();
   const [form] = Form.useForm();
-
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: 'session expired, please re-login' },
-    });
+  const relogin = useRelogin();
 
   const itvCountValue = Form.useWatch('intervalCount', form);
   const itvCountUnit = Form.useWatch('intervalUnit', form);
