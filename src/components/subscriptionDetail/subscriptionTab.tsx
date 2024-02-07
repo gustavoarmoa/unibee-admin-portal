@@ -1,4 +1,11 @@
 import {
+  CheckCircleOutlined,
+  InfoCircleOutlined,
+  LoadingOutlined,
+  MinusOutlined,
+  SyncOutlined,
+} from '@ant-design/icons';
+import {
   Button,
   Col,
   DatePicker,
@@ -8,17 +15,14 @@ import {
   Spin,
   Table,
   message,
-} from "antd";
-import dayjs from "dayjs";
-import { CSSProperties, useEffect, useState } from "react";
-import {
-  IPlan,
-  IPreview,
-  IProfile,
-  ISubscriptionType,
-} from "../../shared.types";
-import { useNavigate } from "react-router-dom";
-import update from "immutability-helper";
+} from 'antd';
+import { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
+import update from 'immutability-helper';
+import { CSSProperties, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SUBSCRIPTION_STATUS } from '../../constants';
+import { daysBetweenDate, showAmount } from '../../helpers';
 import {
   createPreviewReq,
   extendDueDate,
@@ -28,24 +32,20 @@ import {
   resumeSub,
   terminateSub,
   updateSubscription,
-} from "../../requests";
-import { daysBetweenDate, showAmount } from "../../helpers";
-import TerminateSubModal from "./modals/terminateSub";
-import ResumeSubModal from "./modals/resumeSub";
-import ExtendSubModal from "./modals/extendSub";
-import ChangePlanModal from "./modals/changePlan";
-import UpdateSubPreviewModal from "./modals/updateSubPreview";
-import CancelPendingSubModal from "./modals/cancelPendingSub";
-import { SUBSCRIPTION_STATUS } from "../../constants";
+} from '../../requests';
+import '../../shared.css';
 import {
-  CheckCircleOutlined,
-  InfoCircleOutlined,
-  LoadingOutlined,
-  MinusOutlined,
-  SyncOutlined,
-} from "@ant-design/icons";
-import { ColumnsType } from "antd/es/table";
-import "../../shared.css";
+  IPlan,
+  IPreview,
+  IProfile,
+  ISubscriptionType,
+} from '../../shared.types';
+import CancelPendingSubModal from './modals/cancelPendingSub';
+import ChangePlanModal from './modals/changePlan';
+import ExtendSubModal from './modals/extendSub';
+import ResumeSubModal from './modals/resumeSub';
+import TerminateSubModal from './modals/terminateSub';
+import UpdateSubPreviewModal from './modals/updateSubPreview';
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -56,7 +56,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [confirmming, setConfirming] = useState(false);
   const [dueDateModal, setDueDateModal] = useState(false);
-  const [newDueDate, setNewDueDate] = useState("");
+  const [newDueDate, setNewDueDate] = useState('');
   const [changePlanModal, setChangePlanModal] = useState(false);
   const [cancelSubModalOpen, setCancelSubModalOpen] = useState(false); // newly created sub has status == created if user hasn't paid yet, user(or admin) can cancel this sub.
   const [preview, setPreview] = useState<IPreview | null>(null);
@@ -69,7 +69,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
 
   const relogin = () =>
     navigate(`${APP_PATH}login`, {
-      state: { msg: "session expired, please re-login" },
+      state: { msg: 'session expired, please re-login' },
     });
 
   const toggleTerminateModal = () => setTerminateModal(!terminateModal);
@@ -81,7 +81,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const onAddonChange = (
     addonId: number,
     quantity: number | null, // null means: don't update this field, keep its original value. I don't want to define 2 fn to do similar jobs.
-    checked: boolean | null // ditto
+    checked: boolean | null, // ditto
   ) => {
     const planIdx = plans.findIndex((p) => p.id == selectedPlan);
     if (planIdx == -1) {
@@ -117,7 +117,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       for (let i = 0; i < plan.addons.length; i++) {
         if (plan.addons[i].checked) {
           const q = Number(plan.addons[i].quantity);
-          console.log("q: ", q);
+          console.log('q: ', q);
           if (!Number.isInteger(q) || q <= 0) {
             valid = false;
             break;
@@ -126,7 +126,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       }
     }
     if (!valid) {
-      message.error("Addon quantity must be greater than 0.");
+      message.error('Addon quantity must be greater than 0.');
       return;
     }
     togglePreviewModal();
@@ -140,7 +140,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       plan != null && plan.addons != null
         ? plan.addons.filter((a) => a.checked)
         : [];
-    console.log("active sub addon bfr preview: ", addons);
+    console.log('active sub addon bfr preview: ', addons);
     let previewRes;
     try {
       previewRes = await createPreviewReq(
@@ -149,9 +149,9 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         addons.map((a) => ({
           quantity: a.quantity as number,
           addonPlanId: a.id,
-        }))
+        })),
       );
-      console.log("subscription update preview res: ", previewRes);
+      console.log('subscription update preview res: ', previewRes);
       const code = previewRes.data.code;
       code == 61 && relogin();
       if (code != 0) {
@@ -163,10 +163,10 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       // togglePreviewModal();
       setPreviewModalOpen(false);
       if (err instanceof Error) {
-        console.log("err creating preview: ", err.message);
+        console.log('err creating preview: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
       return;
     }
@@ -194,10 +194,10 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         })),
         preview?.totalAmount as number,
         preview?.currency as string,
-        preview?.prorationDate as number
+        preview?.prorationDate as number,
       );
       setConfirming(false);
-      console.log("update subscription submit res: ", updateSubRes);
+      console.log('update subscription submit res: ', updateSubRes);
       const code = updateSubRes.data.code;
       code == 61 && relogin();
       if (code != 0) {
@@ -207,18 +207,18 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       setConfirming(false);
       setPreviewModalOpen(false);
       if (err instanceof Error) {
-        console.log("err submitting plan update: ", err.message);
+        console.log('err submitting plan update: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
       return;
     }
 
     if (updateSubRes.data.data.paid) {
-      message.success("Plan updated");
+      message.success('Plan updated');
     } else {
-      message.success("Plan updated, but not paid");
+      message.success('Plan updated, but not paid');
     }
     togglePreviewModal();
     toggleChangPlanModal();
@@ -227,16 +227,16 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
 
   const onTerminateSub = async () => {
     if (endSubMode == null) {
-      message.error("Please choose when to end this subscription");
+      message.error('Please choose when to end this subscription');
       return;
     }
     try {
       setLoading(true);
       const terminateRes = await terminateSub(
         activeSub?.subscriptionId as string,
-        endSubMode == 1
+        endSubMode == 1,
       );
-      console.log("terminate sub res: ", terminateRes);
+      console.log('terminate sub res: ', terminateRes);
       const code = terminateRes.data.code;
       code == 61 && relogin();
       if (code != 0) {
@@ -247,8 +247,8 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       toggleTerminateModal();
       message.success(
         endSubMode == 1
-          ? "Subscription ended"
-          : "Subscription will end on the end of this billing cycle"
+          ? 'Subscription ended'
+          : 'Subscription will end on the end of this billing cycle',
       );
       setEndSubMode(null); // force users to choose a endMode before submitting.
       fetchData();
@@ -257,10 +257,10 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       // setTerminateModal(false);
       toggleTerminateModal();
       if (err instanceof Error) {
-        console.log("err terminating sub: ", err.message);
+        console.log('err terminating sub: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -269,7 +269,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     try {
       setLoading(true);
       const resumeRes = await resumeSub(activeSub?.subscriptionId as string);
-      console.log("resume sub res: ", resumeRes);
+      console.log('resume sub res: ', resumeRes);
       const code = resumeRes.data.code;
       code == 61 && relogin();
       if (code != 0) {
@@ -278,17 +278,17 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       setLoading(false);
       // setResumeModal(false);
       toggleResumeSubModal();
-      message.success("Subscription resumed.");
+      message.success('Subscription resumed.');
       fetchData();
     } catch (err) {
       setLoading(false);
       // setResumeModal(false);
       toggleResumeSubModal();
       if (err instanceof Error) {
-        console.log("err resuming sub: ", err.message);
+        console.log('err resuming sub: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -296,7 +296,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   // fetch current subscription detail, and all active plans.
   const fetchData = async () => {
     // const subId = location.state && location.state.subscriptionId;
-    const pathName = window.location.pathname.split("/");
+    const pathName = window.location.pathname.split('/');
     const subId = pathName.pop();
     if (subId == null) {
       // TODO: show page not exist, OR invalid subscription
@@ -310,7 +310,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         getSubDetail(subId),
         getPlanList({ type: 1, status: 2 }), // type:1 (main plan), status: 2 (active)
       ]));
-      console.log("subDetail/planList: ", subDetailRes, "//", planListRes);
+      console.log('subDetail/planList: ', subDetailRes, '//', planListRes);
       res.forEach((r) => {
         const code = r.data.code;
         code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
@@ -322,10 +322,10 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
-        console.log("err: ", err.message);
+        console.log('err: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
       return;
     }
@@ -351,7 +351,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
               ...a.addonPlan,
               quantity: a.quantity,
               addonPlanId: a.addonPlan.id,
-            })
+            }),
           );
       }
     }
@@ -365,7 +365,7 @@ interface ISubAddon extends IPlan {
 }
     */
 
-    console.log("active sub: ", localActiveSub);
+    console.log('active sub: ', localActiveSub);
 
     setSelectedPlan(s.plan.id);
     setUserId(s.user.id);
@@ -407,7 +407,7 @@ interface ISubAddon extends IPlan {
             ? -1
             : localActiveSub.addons.findIndex(
                 (subAddon) =>
-                  subAddon.addonPlanId == plans[planIdx].addons![i].id
+                  subAddon.addonPlanId == plans[planIdx].addons![i].id,
               );
         if (addonIdx != -1) {
           plans[planIdx].addons![i].checked = true;
@@ -422,7 +422,7 @@ interface ISubAddon extends IPlan {
   };
 
   const onDueDateChange = (date: any, dateStr: string) => {
-    console.log(date, "//", dateStr, "///", activeSub?.currentPeriodEnd);
+    console.log(date, '//', dateStr, '///', activeSub?.currentPeriodEnd);
     setNewDueDate(dateStr);
     toggleSetDueDateModal();
   };
@@ -434,7 +434,7 @@ interface ISubAddon extends IPlan {
       const hours =
         daysBetweenDate(activeSub!.currentPeriodEnd * 1000, newDueDate) * 24;
       extendRes = await extendDueDate(activeSub!.subscriptionId, hours);
-      console.log("extend due date res: ", extendRes);
+      console.log('extend due date res: ', extendRes);
       const code = extendRes.data.code;
       code == 61 && relogin();
       if (code != 0) {
@@ -444,15 +444,15 @@ interface ISubAddon extends IPlan {
       setLoading(false);
       toggleSetDueDateModal();
       if (err instanceof Error) {
-        console.log("err: ", err.message);
+        console.log('err: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
       return;
     }
     setLoading(false);
-    message.success("Due date extended");
+    message.success('Due date extended');
     toggleSetDueDateModal();
     fetchData(); // better to call message.success in fetchData cb(add a cb parameter to fetchData)
   };
@@ -466,10 +466,10 @@ interface ISubAddon extends IPlan {
       <Spin
         spinning={loading}
         indicator={
-          <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
+          <LoadingOutlined style={{ fontSize: 32, color: '#FFF' }} spin />
         }
         fullscreen
-      />{" "}
+      />{' '}
       <TerminateSubModal
         isOpen={terminateModal}
         loading={loading}
@@ -537,11 +537,11 @@ interface ISubAddon extends IPlan {
 export default Index;
 
 const rowStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  height: "32px",
+  display: 'flex',
+  alignItems: 'center',
+  height: '32px',
 };
-const colStyle: CSSProperties = { fontWeight: "bold" };
+const colStyle: CSSProperties = { fontWeight: 'bold' };
 
 interface ISubSectionProps {
   subInfo: ISubscriptionType | null;
@@ -580,9 +580,9 @@ const SubscriptionInfoSection = ({
           Status
         </Col>
         <Col span={6}>
-          {subInfo && SUBSCRIPTION_STATUS[subInfo.status]}{" "}
+          {subInfo && SUBSCRIPTION_STATUS[subInfo.status]}{' '}
           <span
-            style={{ cursor: "pointer", marginLeft: "8px" }}
+            style={{ cursor: 'pointer', marginLeft: '8px' }}
             onClick={refresh}
           >
             <SyncOutlined />
@@ -616,11 +616,11 @@ const SubscriptionInfoSection = ({
               subInfo!.addons!.reduce(
                 (
                   sum,
-                  { quantity, amount }: { quantity: number; amount: number }
+                  { quantity, amount }: { quantity: number; amount: number },
                 ) => sum + quantity * amount,
-                0
+                0,
               ),
-              subInfo!.currency
+              subInfo!.currency,
             )}
 
           {subInfo && subInfo.addons && subInfo.addons.length > 0 && (
@@ -628,12 +628,12 @@ const SubscriptionInfoSection = ({
               placement="top"
               title="Addon breakdown"
               content={
-                <div style={{ width: "280px" }}>
+                <div style={{ width: '280px' }}>
                   {subInfo?.addons.map((a) => (
                     <Row key={a.id}>
                       <Col span={10}>{a.planName}</Col>
                       <Col span={14}>
-                        {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
+                        {showAmount(a.amount, a.currency)} × {a.quantity} ={' '}
                         {showAmount(a.amount * a.quantity, a.currency)}
                       </Col>
                     </Row>
@@ -641,7 +641,7 @@ const SubscriptionInfoSection = ({
                 </div>
               }
             >
-              <span style={{ marginLeft: "8px", cursor: "pointer" }}>
+              <span style={{ marginLeft: '8px', cursor: 'pointer' }}>
                 <InfoCircleOutlined />
               </span>
             </Popover>
@@ -655,7 +655,7 @@ const SubscriptionInfoSection = ({
         <Col span={6}>
           {subInfo?.amount && showAmount(subInfo.amount, subInfo.currency)}
           {subInfo && subInfo.taxScale && subInfo.taxScale != 0 ? (
-            <span style={{ color: "#757575", fontSize: "11px" }}>
+            <span style={{ color: '#757575', fontSize: '11px' }}>
               {` (${subInfo.taxScale / 100}% tax incl)`}
             </span>
           ) : null}
@@ -667,7 +667,7 @@ const SubscriptionInfoSection = ({
         <Col span={6}>
           {subInfo != null && subInfo.plan != null
             ? `${subInfo.plan.intervalCount} ${subInfo.plan.intervalUnit}`
-            : ""}
+            : ''}
         </Col>
       </Row>
       <Row style={rowStyle}>
@@ -677,8 +677,10 @@ const SubscriptionInfoSection = ({
         <Col span={6}>
           {subInfo && subInfo.firstPaidTime && (
             <span>
-              {" "}
-              {new Date(subInfo.firstPaidTime * 1000).toLocaleDateString()}
+              {' '}
+              {dayjs(new Date(subInfo.firstPaidTime * 1000)).format(
+                'YYYY-MMM-DD',
+              )}
             </span>
           )}
         </Col>
@@ -696,8 +698,8 @@ const SubscriptionInfoSection = ({
               disabledDate={(d) =>
                 d.isBefore(
                   new Date(
-                    subInfo?.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24
-                  )
+                    subInfo?.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24,
+                  ),
                 )
               }
             />
@@ -707,17 +709,18 @@ const SubscriptionInfoSection = ({
             subInfo.trialEnd > subInfo.currentPeriodEnd && (
               <span
                 style={{
-                  fontSize: "11px",
-                  color: "#f44336",
-                  marginLeft: "6px",
+                  fontSize: '11px',
+                  color: '#f44336',
+                  marginLeft: '6px',
                 }}
               >
                 +
                 {daysBetweenDate(
                   subInfo.currentPeriodEnd * 1000,
-                  subInfo.trialEnd * 1000
-                )}{" "}
-                days → {new Date(subInfo.trialEnd * 1000).toLocaleDateString()}
+                  subInfo.trialEnd * 1000,
+                )}{' '}
+                days →{' '}
+                {dayjs(new Date(subInfo.trialEnd * 1000)).format('YYYY-MMM-DD')}
               </span>
             )}
         </Col>
@@ -726,22 +729,22 @@ const SubscriptionInfoSection = ({
       {subInfo && subInfo.status == 2 && (
         <div
           style={{
-            margin: "24px 0",
-            display: "flex",
-            justifyContent: "start",
-            alignItems: "center",
-            gap: "36px",
+            margin: '24px 0',
+            display: 'flex',
+            justifyContent: 'start',
+            alignItems: 'center',
+            gap: '36px',
           }}
         >
           <Button onClick={toggleChangPlanModal}>Change Plan</Button>
           {subInfo.cancelAtPeriodEnd == 0 ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <Button onClick={toggleTerminateModal}>End Subscription</Button>
             </div>
           ) : (
             <div>
               <span>Subscription will end on </span>
-              <span style={{ color: "red", marginRight: "8px" }}>
+              <span style={{ color: 'red', marginRight: '8px' }}>
                 {subInfo &&
                   // new Date(activeSub!.trialEnd * 1000).toLocaleString()
                   new Date(subInfo!.currentPeriodEnd * 1000).toLocaleString()}
@@ -763,7 +766,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
   const i = subInfo.unfinishedSubscriptionPendingUpdate;
   return (
     <>
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
+      <Divider orientation="left" style={{ margin: '32px 0' }}>
         Pending Update
       </Divider>
       <Row style={rowStyle}>
@@ -793,11 +796,11 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
               i.updateAddons!.reduce(
                 (
                   sum,
-                  { quantity, amount }: { quantity: number; amount: number }
+                  { quantity, amount }: { quantity: number; amount: number },
                 ) => sum + quantity * amount,
-                0
+                0,
               ),
-              i.updateCurrency
+              i.updateCurrency,
             )}
 
           {i?.updateAddons && i.updateAddons.length > 0 && (
@@ -805,12 +808,12 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
               placement="top"
               title="Addon breakdown"
               content={
-                <div style={{ width: "280px" }}>
+                <div style={{ width: '280px' }}>
                   {i?.updateAddons.map((a) => (
                     <Row key={a.id}>
                       <Col span={10}>{a.planName}</Col>
                       <Col span={14}>
-                        {showAmount(a.amount, a.currency)} × {a.quantity} ={" "}
+                        {showAmount(a.amount, a.currency)} × {a.quantity} ={' '}
                         {showAmount(a.amount * a.quantity, a.currency)}
                       </Col>
                     </Row>
@@ -818,7 +821,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
                 </div>
               }
             >
-              <span style={{ marginLeft: "8px", cursor: "pointer" }}>
+              <span style={{ marginLeft: '8px', cursor: 'pointer' }}>
                 <InfoCircleOutlined />
               </span>
             </Popover>
@@ -835,15 +838,15 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
         </Col>
         <Col span={6}>
           {i!.paid == 1 ? (
-            <CheckCircleOutlined style={{ color: "green" }} />
+            <CheckCircleOutlined style={{ color: 'green' }} />
           ) : (
-            <MinusOutlined style={{ color: "red" }} />
+            <MinusOutlined style={{ color: 'red' }} />
           )}
-          {i!.link != "" && (
+          {i!.link != '' && (
             <a
               href={i!.link}
               target="_blank"
-              style={{ marginLeft: "8px", fontSize: "11px" }}
+              style={{ marginLeft: '8px', fontSize: '11px' }}
             >
               Payment Link
             </a>
@@ -856,7 +859,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
           Total Amount
         </Col>
         <Col span={6}>
-          {" "}
+          {' '}
           {showAmount(i!.updateAmount, i!.updatePlan.currency)}
         </Col>
         <Col span={4} style={colStyle}>
@@ -908,32 +911,32 @@ const SubTimeline = ({
 
   const columns: ColumnsType<SubTimeline> = [
     {
-      title: "Plan",
-      dataIndex: "planId",
-      key: "planId",
+      title: 'Plan',
+      dataIndex: 'planId',
+      key: 'planId',
       render: (planId) => plans.find((p) => p.id == planId)?.planName,
     },
     {
-      title: "Start",
-      dataIndex: "periodStart",
-      key: "periodStart",
-      render: (d) => dayjs(d * 1000).format("YYYY-MMM-DD"), // new Date(d * 1000).toLocaleDateString(),
+      title: 'Start',
+      dataIndex: 'periodStart',
+      key: 'periodStart',
+      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD'), // new Date(d * 1000).toLocaleDateString(),
     },
     {
-      title: "End",
-      dataIndex: "periodEnd",
-      key: "periodEnd",
-      render: (d) => dayjs(d * 1000).format("YYYY-MMM-DD"), // new Date(d * 1000).toLocaleDateString(),
+      title: 'End',
+      dataIndex: 'periodEnd',
+      key: 'periodEnd',
+      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD'), // new Date(d * 1000).toLocaleDateString(),
     },
     {
-      title: "Subscription Id",
-      dataIndex: "subscriptionId",
-      key: "subscriptionId",
+      title: 'Subscription Id',
+      dataIndex: 'subscriptionId',
+      key: 'subscriptionId',
     },
     {
-      title: "Invoice Id",
-      dataIndex: "invoiceId",
-      key: "invoiceId",
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId',
     },
   ];
 
@@ -946,7 +949,7 @@ const SubTimeline = ({
         setLoading(true);
         const timelineRes = await getSubTimeline({ userId });
         setLoading(false);
-        console.log("timeline res: ", timelineRes);
+        console.log('timeline res: ', timelineRes);
         const code = timelineRes.data.code;
         // code == 61 && relogin();
         if (code != 0) {
@@ -956,10 +959,10 @@ const SubTimeline = ({
       } catch (err) {
         setLoading(false);
         if (err instanceof Error) {
-          console.log("err getting sub timeline: ", err.message);
+          console.log('err getting sub timeline: ', err.message);
           message.error(err.message);
         } else {
-          message.error("Unknown error");
+          message.error('Unknown error');
         }
       }
     };
@@ -967,13 +970,13 @@ const SubTimeline = ({
   }, [userId]);
   return (
     <>
-      <Divider orientation="left" style={{ margin: "32px 0" }}>
+      <Divider orientation="left" style={{ margin: '32px 0' }}>
         Subscription History
       </Divider>
       <Table
         columns={columns}
         dataSource={timeline}
-        rowKey={"id"}
+        rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{

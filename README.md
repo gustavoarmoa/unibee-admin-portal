@@ -1,4 +1,4 @@
-# React + TypeScript + Vite
+# React + TypeScript + Vite + Zustand + TailwindCSS
 
 Merchant portal
 
