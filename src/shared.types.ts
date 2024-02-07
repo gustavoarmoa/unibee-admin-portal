@@ -56,7 +56,7 @@ interface IPlan {
   status: number; // 1: editing，2: active, 3: inactive，4: expired
   publishStatus: number; // 1: unpublished(not visible to users), 2: published(users could see and choose this plan)
   addons?: IAddon[];
-  createAt: number;
+  createTime: number;
   companyId: number;
   merchantId: number;
 }
@@ -147,7 +147,7 @@ interface UserInvoice {
   invoiceName: string;
   gatewayInvoiceId: string;
   uniqueId: string;
-  createAt: number;
+  createTime: number;
   totalAmount: number;
   taxAmount: number;
   taxScale: number;

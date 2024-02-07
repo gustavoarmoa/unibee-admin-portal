@@ -143,8 +143,8 @@ const Index = ({ user }: { user: IProfile | null }) => {
     },
     {
       title: "Created at",
-      dataIndex: "createAt",
-      key: "createAt",
+      dataIndex: "createTime",
+      key: "createTime",
       render: (d, invoice) => dayjs(d).format("YYYY-MMM-DD"), // <span>{new Date(d).toLocaleDateString()}</span>,
     },
     {
