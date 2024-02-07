@@ -192,7 +192,13 @@ export const togglePublishReq = async ({
   });
 };
 
-export const getSublist = async () => {
+export const getSublist = async ({
+  page,
+  pageSize,
+}: {
+  page: number;
+  pageSize: number;
+}) => {
   const token = localStorage.getItem('merchantToken');
   const body = {
     merchantId: 15621,
@@ -200,8 +206,8 @@ export const getSublist = async () => {
     // status: 0,
     // sortField: "string",
     // sortType: "string",
-    page: 0,
-    count: 100,
+    page,
+    count: pageSize,
   };
   return await axios.post(
     `${API_URL}/merchant/subscription/subscription_list`,
@@ -212,17 +218,6 @@ export const getSublist = async () => {
       },
     },
   );
-  /**
-     * {
-  "merchantId": 0,
-  "userId": 0,
-  "status": 0,
-  "sortField": "string",
-  "sortType": "string",
-  "page": 0,
-  "count": 0
-}
-     */
 };
 
 export const getSubDetail = async (subscriptionId: string) => {
