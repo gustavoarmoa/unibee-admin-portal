@@ -675,10 +675,10 @@ const SubscriptionInfoSection = ({
           First pay
         </Col>
         <Col span={6}>
-          {subInfo && subInfo.firstPaidAt && (
+          {subInfo && subInfo.firstPaidTime && (
             <span>
               {" "}
-              {new Date(subInfo.firstPaidAt * 1000).toLocaleDateString()}
+              {new Date(subInfo.firstPaidTime * 1000).toLocaleDateString()}
             </span>
           )}
         </Col>

@@ -74,7 +74,7 @@ interface ISubscriptionType {
   planId: number;
   userId: number;
   status: number;
-  firstPaidAt: number;
+  firstPaidTime: number;
   currentPeriodStart: number;
   currentPeriodEnd: number;
   trialEnd: number; // if it's non-zero (seconds from Epoch): subscription'll end on that date(it should be >= currentPeriodEnd)

@@ -1263,7 +1263,7 @@ const SubscriptionTab = ({
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>First pay</span>
         </Col>
-        <Col span={6}>{new Date(activeSub?.firstPaidAt * 1000).toLocaleDateString()}</Col>
+        <Col span={6}>{new Date(activeSub?.firstPaidTime * 1000).toLocaleDateString()}</Col>
         <Col span={4}>
           <span style={{ fontWeight: "bold" }}>Next due date</span>
           <DatePicker
