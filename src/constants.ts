@@ -28,7 +28,7 @@ export const CURRENCY: {
   EUR: { symbol: '€', stripe_factor: 100 },
 };
 
-export const INVOICE_STATUS = {
+export const INVOICE_STATUS: { [key: number]: string } = {
   0: 'Initiating', // this status only exist for a very short period, users/admin won't even know it exist
   1: 'Pending', // admin manually create an invoice, ready for edit, but not published yet, users won't see it, won't receive email.
   // in pending, admin can also delete the invoice

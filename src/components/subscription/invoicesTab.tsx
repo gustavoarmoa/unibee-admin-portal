@@ -243,7 +243,11 @@ const Index = ({ user }: { user: IProfile | null }) => {
     setLoading(true);
     let invoiceListRes;
     try {
-      invoiceListRes = await getInvoiceList({ page, userId: user!.id });
+      invoiceListRes = await getInvoiceList({
+        page,
+        count: PAGE_SIZE,
+        userId: user!.id,
+      });
       console.log('invoice list res: ', invoiceListRes);
       const code = invoiceListRes.data.code;
       code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login

@@ -4,7 +4,7 @@ import {
   MinusOutlined,
 } from '@ant-design/icons';
 import { Button, Pagination, Space, Table, Tag, Tooltip, message } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import type { ColumnsType, TableProps } from 'antd/es/table';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,14 @@ import { IPlan } from '../../shared.types';
 
 const PAGE_SIZE = 10;
 const APP_PATH = import.meta.env.BASE_URL;
+const PLAN_STATUS_FILTER = Object.keys(PLAN_STATUS)
+  .map((s) => ({
+    text: PLAN_STATUS[Number(s)],
+    value: Number(s),
+  }))
+  .sort((a, b) => (a.value < b.value ? -1 : 1));
+console.log('plan fiiltr: ', PLAN_STATUS_FILTER);
+
 const columns: ColumnsType<IPlan> = [
   {
     title: 'Name',
@@ -53,9 +61,9 @@ const columns: ColumnsType<IPlan> = [
     title: 'Status',
     dataIndex: 'status',
     key: 'status',
-    render: (_, plan) => {
-      return <span>{PLAN_STATUS[plan.status]}</span>;
-    },
+    render: (_, plan) => <span>{PLAN_STATUS[plan.status]}</span>,
+    filters: PLAN_STATUS_FILTER,
+    onFilter: (value, record) => record.status == value,
   },
   {
     title: 'Published',
@@ -91,8 +99,8 @@ const Index = () => {
     setLoading(true);
     try {
       const planListRes = await getPlanList({
-        type: undefined, // get main plan and addon
-        status: undefined, // active, inactive, expired, editing, all of them
+        // type: undefined, // get main plan and addon
+        // status: undefined, // active, inactive, expired, editing, all of them
         page,
         pageSize: PAGE_SIZE,
       });
@@ -116,6 +124,19 @@ const Index = () => {
         message.error('Unknown error');
       }
     }
+  };
+
+  const onTableChange: TableProps<IPlan>['onChange'] = (
+    pagination,
+    filters,
+    sorter,
+    extra,
+  ) => {
+    console.log('params', pagination, filters, sorter, extra);
+    if (filters.status == null) {
+      return;
+    }
+    // setStatusFilter(filters.status as number[]);
   };
 
   const onNewPlan = () => {
@@ -150,16 +171,13 @@ const Index = () => {
           spinning: loading,
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
         }}
+        onChange={onTableChange}
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
               console.log('row click: ', record, '///', rowIndex);
               navigate(`${APP_PATH}plan/${record.id}`);
-            }, // click row
-            // onDoubleClick: (event) => {}, // double click row
-            // onContextMenu: (event) => {}, // right button click row
-            // onMouseEnter: (event) => {}, // mouse enter row
-            // onMouseLeave: (event) => {}, // mouse leave row
+            },
           };
         }}
       />

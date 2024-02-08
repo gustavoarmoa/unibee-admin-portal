@@ -459,17 +459,35 @@ export const appSearchReq = async (searchKey: string) => {
 
 export const getInvoiceList = async ({
   userId,
-  page = 0,
-  count = 10,
+  page,
+  count,
+  firstName,
+  lastName,
+  currency,
+  status,
+  amountStart,
+  amountEnd,
 }: {
   userId?: number;
   page: number;
-  count?: number;
+  count: number;
+  firstName?: string;
+  lastName?: string;
+  currency?: string;
+  status?: number[];
+  amountStart?: number;
+  amountEnd?: number;
 }) => {
   const token = localStorage.getItem('merchantToken');
   const body = {
     merchantId: 15621,
     userId,
+    firstName,
+    lastName,
+    currency,
+    status,
+    amountStart,
+    amountEnd,
     /*
     "sendEmail": 0,
     "sortField": "string",

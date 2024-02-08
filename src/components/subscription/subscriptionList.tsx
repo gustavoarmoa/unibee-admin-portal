@@ -19,7 +19,7 @@ const SUB_STATUS_FILTER = Object.keys(SUBSCRIPTION_STATUS)
     value: Number(s),
   }))
   .sort((a, b) => (a.value < b.value ? -1 : 1));
-console.log('sub sts fiiltr: ', SUB_STATUS_FILTER);
+// console.log('sub sts fiiltr: ', SUB_STATUS_FILTER);
 
 const columns: ColumnsType<ISubscriptionType> = [
   {

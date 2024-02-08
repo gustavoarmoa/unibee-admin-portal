@@ -175,6 +175,7 @@ interface UserInvoice {
   periodEnd: number;
   paymentId: string;
   refundId: string;
+  userAccount: IProfile;
 }
 
 type TInvoicePerm = {
@@ -190,13 +191,13 @@ type TInvoicePerm = {
 };
 
 export type {
-  IProfile,
-  TMerchantInfo,
-  IPlan,
-  ISubscriptionType,
   Country,
+  IPlan,
   IPreview,
-  UserInvoice,
+  IProfile,
+  ISubscriptionType,
   InvoiceItem,
   TInvoicePerm,
+  TMerchantInfo,
+  UserInvoice,
 };
