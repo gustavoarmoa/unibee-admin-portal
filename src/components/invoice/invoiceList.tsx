@@ -103,28 +103,27 @@ const Index = () => {
     const searchTerm = form.getFieldsValue();
     let amtFrom = searchTerm.amountStart,
       amtTo = searchTerm.amountEnd;
-    for (const key in searchTerm) {
-      if (key == 'amountStart' && amtFrom != '' && amtFrom != null) {
-        amtFrom = Number(amtFrom) * CURRENCY[searchTerm.currency].stripe_factor;
-      }
-      if (key == 'amountEnd' && amtTo != '' && amtTo != null) {
-        amtTo = Number(amtTo) * CURRENCY[searchTerm.currency].stripe_factor;
-      }
-      if (isNaN(amtFrom) || amtFrom < 0) {
-        message.error('Invalid amount-from value.' + amtFrom);
-        return;
-      }
-      if (isNaN(amtTo) || amtTo < 0) {
-        message.error('Invalid amount-to value');
-        return;
-      }
-      if (amtFrom < amtTo) {
-        message.error('Amount-from must be greater than or equal to amount-to');
-        return;
-      }
-      searchTerm.amountStart = amtFrom;
-      searchTerm.amountEnd = amtTo;
+    if (amtFrom != '' && amtFrom != null) {
+      amtFrom = Number(amtFrom) * CURRENCY[searchTerm.currency].stripe_factor;
     }
+    if (amtTo != '' && amtTo != null) {
+      amtTo = Number(amtTo) * CURRENCY[searchTerm.currency].stripe_factor;
+    }
+    if (isNaN(amtFrom) || amtFrom < 0) {
+      message.error('Invalid amount-from value.');
+      return;
+    }
+    if (isNaN(amtTo) || amtTo < 0) {
+      message.error('Invalid amount-to value');
+      return;
+    }
+    if (amtFrom > amtTo) {
+      message.error('Amount-from must be less than or equal to amount-to');
+      return;
+    }
+    searchTerm.amountStart = amtFrom;
+    searchTerm.amountEnd = amtTo;
+
     try {
       setLoading(true);
       const res = await getInvoiceList({
@@ -160,7 +159,7 @@ const Index = () => {
 
   return (
     <div>
-      <Search form={form} goSearch={fetchData} />
+      <Search form={form} goSearch={fetchData} searching={loading} />
       <Table
         columns={columns}
         dataSource={invoiceList}
@@ -194,12 +193,19 @@ const Index = () => {
 
 export default Index;
 
-const DEFAULT_TERM = { currency: 'EUR', status: [] };
+const DEFAULT_TERM = {
+  currency: 'EUR',
+  status: [],
+  amountStart: '',
+  amountEnd: '',
+};
 const Search = ({
   form,
+  searching,
   goSearch,
 }: {
   form: FormInstance<any>;
+  searching: boolean;
   goSearch: () => void;
 }) => {
   const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
@@ -231,9 +237,16 @@ const Search = ({
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Button onClick={clear}>Clear</Button>
+            <Button onClick={clear} disabled={searching}>
+              Clear
+            </Button>
             &nbsp;&nbsp;&nbsp;&nbsp;
-            <Button onClick={goSearch} type="primary">
+            <Button
+              onClick={goSearch}
+              type="primary"
+              loading={searching}
+              disabled={searching}
+            >
               Search
             </Button>
           </Col>
