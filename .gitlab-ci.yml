@@ -15,7 +15,7 @@ build:
   only:
     - main
   stage: build
-  image: node:21 # 利用Golang容器进行打包Golang项目
+  image: node:21 
   script:
     - yarn add typescript --dev
     - yarn
