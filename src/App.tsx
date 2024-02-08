@@ -1,61 +1,54 @@
-import React, { useEffect, useState } from "react";
 import {
   DesktopOutlined,
   LogoutOutlined,
   // FileOutlined,
   PieChartOutlined,
-  // TeamOutlined,
-  // UserOutlined,
-} from "@ant-design/icons";
-import type { MenuProps } from "antd";
+} from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Layout, Menu, message, theme } from 'antd';
+import React, { useEffect, useState } from 'react';
 import {
+  Navigate,
+  Route,
   // BrowserRouter as Router,
   Routes,
-  Route,
+  useLocation,
   // Outlet,
   // Link,
   useNavigate,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
-import { Layout, Menu, message, theme } from "antd";
-import { useMerchantInfoStore } from "./stores";
+} from 'react-router-dom';
+import { useMerchantInfoStore } from './stores';
 
-import Dashboard from "./components/dashboard";
-import PricePlans from "./components/pricePlans";
-import PricePlanList from "./components/pricePlansList";
-import PlanNew from "./components/newSubplan";
-import PlanDetail from "./components/planDetail";
-import SubscriptionList from "./components/subscriptionList";
-import SubscriptionDetail from "./components/subscriptionDetail";
-import Subscriptions from "./components/subscriptions";
-
-import CustomerEntry from "./components/userEntryPage";
-import CustomerDetail from "./components/userDetail";
-import CustomerList from "./components/userList";
-
-import InvoiceEntry from "./components/invoiceEntryPage";
-import InvoiceList from "./components/invoiceList";
-import InvoiceDetail from "./components/invoiceDetail";
-
-import Settings from "./components/settings";
+import Dashboard from './components/dashboard';
+import InvoiceDetail from './components/invoice/invoiceDetail';
+import InvoiceList from './components/invoice/invoiceList';
+import OutletPage from './components/outletPage';
+import PlanNew from './components/plan/newPlan';
+import PlanDetail from './components/plan/planDetail';
+// import PricePlans from './components/pricePlans';
+import PricePlanList from './components/plan/plansList';
+import Settings from './components/settings';
+import SubscriptionDetail from './components/subscription';
+import SubscriptionList from './components/subscription/subscriptionList';
+import CustomerDetail from './components/user/userDetail';
+import CustomerList from './components/user/userList';
 // import Users from "./components/userList";
-import Login from "./components/login";
-import Signup from "./components/signup";
-import Profile from "./components/profile";
-import NotFound from "./components/notFound";
-import AppSearch from "./components/appSearch";
-import { logoutReq } from "./requests";
+import AppSearch from './components/appSearch';
+import Login from './components/login';
+import NotFound from './components/notFound';
+import Profile from './components/profile';
+import Signup from './components/signup';
+import { logoutReq } from './requests';
 
 const { Header, Content, Footer, Sider } = Layout;
 
-type MenuItem = Required<MenuProps>["items"][number];
+type MenuItem = Required<MenuProps>['items'][number];
 
 function getItem(
   label: React.ReactNode,
   key: React.Key,
   icon?: React.ReactNode,
-  children?: MenuItem[]
+  children?: MenuItem[],
 ): MenuItem {
   return {
     key,
@@ -66,13 +59,13 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("Plan", "/plan/list", <DesktopOutlined />),
-  getItem("Subscription", "/subscription/list", <PieChartOutlined />),
-  getItem("Invoice", "/invoice/list", <PieChartOutlined />),
-  getItem("Customer", "/customer/list", <PieChartOutlined />),
-  getItem("Analytics", "/analytics", <PieChartOutlined />),
-  getItem("Profile", "/profile", <PieChartOutlined />),
-  getItem("Settings", "/settings", <PieChartOutlined />),
+  getItem('Plan', '/plan/list', <DesktopOutlined />),
+  getItem('Subscription', '/subscription/list', <PieChartOutlined />),
+  getItem('Invoice', '/invoice/list', <PieChartOutlined />),
+  getItem('Customer', '/customer/list', <PieChartOutlined />),
+  getItem('Analytics', '/analytics', <PieChartOutlined />),
+  getItem('Profile', '/profile', <PieChartOutlined />),
+  getItem('Settings', '/settings', <PieChartOutlined />),
 ];
 
 const APP_PATH = import.meta.env.BASE_URL; // import.meta.env.VITE_APP_PATH;
@@ -95,7 +88,7 @@ const App: React.FC = () => {
   const navigate = useNavigate();
 
   const onItemClick = ({ key }: { key: string; needNavigate?: boolean }) => {
-    console.log("on item click, key: ", key);
+    console.log('on item click, key: ', key);
     navigate(`${APP_PATH}${key.substring(1)}`); // remove the leading '/' character, coz APP_PATH already has it
     setActiveMenuItem([key]);
   };
@@ -103,13 +96,13 @@ const App: React.FC = () => {
   const logout = async () => {
     try {
       const logoutRes = await logoutReq();
-      console.log("logout res: ", logoutRes);
-      localStorage.removeItem("merchantToken");
+      console.log('logout res: ', logoutRes);
+      localStorage.removeItem('merchantToken');
       navigate(`${APP_PATH}login`);
     } catch (err) {
       navigate(`${APP_PATH}login`);
       if (err instanceof Error) {
-        console.log("err logging out: ", err.message);
+        console.log('err logging out: ', err.message);
         // message.error(err.message);
       } else {
         // message.error("Unknown error");
@@ -118,32 +111,32 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log("pathname: ", location.pathname);
-    const pathItems = location.pathname.split("/").filter((p) => p != "");
-    if (pathItems[0] == "subscription") {
-      setActiveMenuItem(["/subscription/list"]);
-    } else if (pathItems[0] == "plan") {
-      setActiveMenuItem(["/plan/list"]);
-    } else if (pathItems[0] == "customer") {
-      setActiveMenuItem(["/customer/list"]);
-    } else if (pathItems[0] == "invoice") {
-      setActiveMenuItem(["/invoice/list"]);
+    console.log('pathname: ', location.pathname);
+    const pathItems = location.pathname.split('/').filter((p) => p != '');
+    if (pathItems[0] == 'subscription') {
+      setActiveMenuItem(['/subscription/list']);
+    } else if (pathItems[0] == 'plan') {
+      setActiveMenuItem(['/plan/list']);
+    } else if (pathItems[0] == 'customer') {
+      setActiveMenuItem(['/customer/list']);
+    } else if (pathItems[0] == 'invoice') {
+      setActiveMenuItem(['/invoice/list']);
     } else {
-      setActiveMenuItem(["/" + pathItems[0]]);
+      setActiveMenuItem(['/' + pathItems[0]]);
     }
   }, [location, location.pathname]);
 
   return (
     <>
       {noSiderRoutes.findIndex((r) => r == location.pathname) != -1 ? (
-        <Layout style={{ minHeight: "100vh" }}>
+        <Layout style={{ minHeight: '100vh' }}>
           <Routes>
             <Route path={`${APP_PATH}login`} Component={Login} />
             <Route path={`${APP_PATH}signup`} Component={Signup} />
           </Routes>
         </Layout>
       ) : (
-        <Layout style={{ minHeight: "100vh" }}>
+        <Layout style={{ minHeight: '100vh' }}>
           <Sider
             // theme="light"
             collapsible
@@ -153,19 +146,19 @@ const App: React.FC = () => {
             <div className="demo-logo-vertical" />
             <div
               style={{
-                color: "#FFF",
-                display: "flex",
-                justifyContent: "center",
-                margin: "16px 0",
+                color: '#FFF',
+                display: 'flex',
+                justifyContent: 'center',
+                margin: '16px 0',
               }}
             >
               <img
                 src={
-                  merchantInfoStore.companyLogo == ""
-                    ? APP_PATH + "multiloginLogo.png"
+                  merchantInfoStore.companyLogo == ''
+                    ? APP_PATH + 'multiloginLogo.png'
                     : merchantInfoStore.companyLogo
                 }
-                height={"80px"}
+                height={'80px'}
               />
             </div>
             <Menu
@@ -178,14 +171,14 @@ const App: React.FC = () => {
             <div
               onClick={logout}
               style={{
-                color: "#FFF",
-                position: "absolute",
-                bottom: "80px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "100%",
-                cursor: "pointer",
+                color: '#FFF',
+                position: 'absolute',
+                bottom: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                cursor: 'pointer',
               }}
             >
               <LogoutOutlined />
@@ -198,9 +191,9 @@ const App: React.FC = () => {
             </Header>
             <Content
               style={{
-                padding: "16px",
-                height: "calc(100vh - 180px)",
-                overflowY: "auto",
+                padding: '16px',
+                height: 'calc(100vh - 180px)',
+                overflowY: 'auto',
               }}
             >
               <div
@@ -225,7 +218,7 @@ const App: React.FC = () => {
                   {/* <Route path={`${APP_PATH}users`} Component={Users} /> */}
                   <Route
                     path={`${APP_PATH}subscription`}
-                    Component={Subscriptions}
+                    Component={OutletPage}
                   >
                     <Route path="list" element={<SubscriptionList />} />
                     <Route
@@ -233,26 +226,26 @@ const App: React.FC = () => {
                       element={<SubscriptionDetail />}
                     />
                   </Route>
-                  <Route path={`${APP_PATH}plan`} Component={PricePlans}>
+                  <Route path={`${APP_PATH}plan`} Component={OutletPage}>
                     <Route path="list" element={<PricePlanList />} />
                     <Route path="new" element={<PlanNew />} />
                     <Route path=":planId" element={<PlanDetail />} />
                   </Route>
 
-                  <Route path={`${APP_PATH}customer`} Component={CustomerEntry}>
+                  <Route path={`${APP_PATH}customer`} Component={OutletPage}>
                     <Route path="list" element={<CustomerList />} />
                     {/* <Route path="new" element={<PlanNew />} /> */}
                     <Route path=":userId" element={<CustomerDetail />} />
                   </Route>
 
-                  <Route path={`${APP_PATH}invoice`} Component={InvoiceEntry}>
+                  <Route path={`${APP_PATH}invoice`} Component={OutletPage}>
                     <Route path="list" element={<InvoiceList />} />
                     <Route path=":invoiceId" element={<InvoiceDetail />} />
                   </Route>
                 </Routes>
               </div>
             </Content>
-            <Footer style={{ textAlign: "center" }}>Multilogin ©2024</Footer>
+            <Footer style={{ textAlign: 'center' }}>Multilogin ©2024</Footer>
           </Layout>
         </Layout>
       )}

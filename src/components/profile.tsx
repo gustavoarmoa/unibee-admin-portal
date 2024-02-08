@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button, Form, Input, Spin, Skeleton } from "antd";
-import { message } from "antd";
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Skeleton, Spin, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { emailValidate } from '../helpers';
+import { useRelogin } from '../hooks';
 import {
   getMerchantInfoReq,
   updateMerchantInfoReq,
   uploadLogoReq,
-} from "../requests";
-import { useMerchantInfoStore } from "../stores";
-import { TMerchantInfo } from "../shared.types";
-import { emailValidate } from "../helpers";
+} from '../requests';
+import { TMerchantInfo } from '../shared.types';
+import { useMerchantInfoStore } from '../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -21,13 +21,9 @@ const Index = () => {
   const [loading, setLoading] = useState(false); // page loading
   const [uploading, setUploading] = useState(false); // logo upload
   const [submitting, setSubmitting] = useState(false);
-  const [logoUrl, setLogoUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState('');
   const [merchantInfo, setMerchantInfo] = useState<TMerchantInfo | null>(null);
-
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: "session expired, please re-login" },
-    });
+  const relogin = useRelogin();
 
   const getInfo = async () => {
     setLoading(true);
@@ -44,10 +40,10 @@ const Index = () => {
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
-        console.log("err getting profile: ", err.message);
+        console.log('err getting profile: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -62,32 +58,32 @@ const Index = () => {
     }
 
     if (file.size > 4 * 1024 * 1024) {
-      message.error("Max logo file size: 4M.");
+      message.error('Max logo file size: 4M.');
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
     setUploading(true);
     try {
       const res = await uploadLogoReq(formData);
       setUploading(false);
-      console.log("upload res: ", res);
+      console.log('upload res: ', res);
       const statusCode = res.data.code;
       if (statusCode != 0) {
         statusCode == 61 && relogin();
         throw new Error(res.data.message);
       }
       const logoUrl = res.data.data.url;
-      form.setFieldValue("companyLogo", logoUrl);
+      form.setFieldValue('companyLogo', logoUrl);
       setLogoUrl(logoUrl);
     } catch (err) {
       setUploading(false);
       if (err instanceof Error) {
-        console.log("err uploading logo: ", err.message);
+        console.log('err uploading logo: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -102,22 +98,22 @@ const Index = () => {
     setSubmitting(true);
     try {
       const res = await updateMerchantInfoReq(info);
-      console.log("update info res: ", res);
+      console.log('update info res: ', res);
       setSubmitting(false);
       const statusCode = res.data.code;
       if (statusCode != 0) {
         statusCode == 61 && relogin();
         throw new Error(res.data.message);
       }
-      message.success("Info Updated");
+      message.success('Info Updated');
       merchantInfoStore.setMerchantInfo(res.data.data.MerchantInfo);
     } catch (err) {
       setSubmitting(false);
       if (err instanceof Error) {
-        console.log("err getting profile: ", err.message);
+        console.log('err getting profile: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -132,7 +128,7 @@ const Index = () => {
         <Spin
           spinning={loading}
           indicator={
-            <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
+            <LoadingOutlined style={{ fontSize: 32, color: '#FFF' }} spin />
           }
           fullscreen
         />
@@ -160,7 +156,7 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: "Please input your company name!",
+                  message: 'Please input your company name!',
                 },
               ]}
             >
@@ -173,11 +169,11 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: "Please upload your company logo! (Max size: 4M)",
+                  message: 'Please upload your company logo! (Max size: 4M)',
                 },
                 ({ getFieldValue }) => ({
                   validator(rule, value) {
-                    if (value != "") {
+                    if (value != '') {
                       return Promise.resolve();
                     }
                     return Promise.reject();
@@ -185,16 +181,16 @@ const Index = () => {
                 }),
               ]}
             >
-              <label htmlFor="comapnyLogoURL" style={{ cursor: "pointer" }}>
-                {logoUrl == "" ? (
-                  <div style={{ width: "48px", height: "48px" }}>
+              <label htmlFor="comapnyLogoURL" style={{ cursor: 'pointer' }}>
+                {logoUrl == '' ? (
+                  <div style={{ width: '48px', height: '48px' }}>
                     <Skeleton.Image
                       active={uploading}
-                      style={{ width: "48px", height: "48px" }}
+                      style={{ width: '48px', height: '48px' }}
                     />
                   </div>
                 ) : (
-                  <img src={logoUrl} style={{ maxWidth: "64px" }} />
+                  <img src={logoUrl} style={{ maxWidth: '64px' }} />
                 )}
               </label>
             </Form.Item>
@@ -204,7 +200,7 @@ const Index = () => {
               onChange={onFileUplaod}
               id="comapnyLogoURL"
               name="comapnyLogoURL"
-              style={{ display: "none" }}
+              style={{ display: 'none' }}
             />
 
             <Form.Item
@@ -213,7 +209,7 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: "Please input your company address!",
+                  message: 'Please input your company address!',
                 },
               ]}
             >
@@ -226,14 +222,14 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: "Please input your Email!",
+                  message: 'Please input your Email!',
                 },
                 ({ getFieldValue }) => ({
                   validator(rule, value) {
                     if (emailValidate(value)) {
                       return Promise.resolve();
                     }
-                    return Promise.reject("Invalid email address");
+                    return Promise.reject('Invalid email address');
                   },
                 }),
               ]}
@@ -247,7 +243,7 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: "Please input company phone!",
+                  message: 'Please input company phone!',
                 },
               ]}
             >
@@ -267,7 +263,7 @@ const Index = () => {
                 loading={submitting || uploading}
                 disabled={submitting || uploading}
               >
-                {uploading ? "Uploading" : submitting ? "Submiting" : "Save"}
+                {uploading ? 'Uploading' : submitting ? 'Submiting' : 'Save'}
               </Button>
             </Form.Item>
           </Form>

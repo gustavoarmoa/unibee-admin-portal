@@ -1,13 +1,14 @@
-import { LoadingOutlined, SearchOutlined } from "@ant-design/icons";
-import { Col, Divider, Input, Row, Spin, message } from "antd";
-import { CSSProperties, ChangeEvent, useEffect, useRef, useState } from "react";
-import { appSearchReq } from "../requests";
-import { useNavigate } from "react-router-dom";
-import { useOnClickOutside } from "usehooks-ts";
-import { UserInvoice, IProfile } from "../shared.types";
-import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from "../constants";
-import { showAmount } from "../helpers";
-import "./appSearch.css";
+import { LoadingOutlined, SearchOutlined } from '@ant-design/icons';
+import { Col, Divider, Input, Row, Spin, message } from 'antd';
+import { CSSProperties, ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useOnClickOutside } from 'usehooks-ts';
+import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../constants';
+import { showAmount } from '../helpers';
+import { useRelogin } from '../hooks';
+import { appSearchReq } from '../requests';
+import { IProfile, UserInvoice } from '../shared.types';
+import './appSearch.css';
 
 const { Search } = Input;
 const APP_PATH = import.meta.env.BASE_URL;
@@ -19,17 +20,13 @@ interface IAccountInfo extends IProfile {
 
 const Index = () => {
   const navigate = useNavigate();
-  const [term, setTerm] = useState("");
+  const [term, setTerm] = useState('');
   const [searching, setSearching] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const resultWrapperRef = useRef(null);
   const [invoiceList, setInvoiceList] = useState<UserInvoice[] | null>(null);
   const [accountList, setAccountList] = useState<IAccountInfo[] | null>(null);
-
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: "session expired, please re-login" },
-    });
+  const relogin = useRelogin();
 
   const hide = () => setShowResult(false);
   const show = () => setShowResult(true);
@@ -41,7 +38,7 @@ const Index = () => {
   };
 
   const onEnter = async () => {
-    if (term.trim() == "") {
+    if (term.trim() == '') {
       return;
     }
 
@@ -52,7 +49,7 @@ const Index = () => {
       setShowResult(true);
       res = await appSearchReq(term);
       setSearching(false);
-      console.log("app search res: ", res);
+      console.log('app search res: ', res);
       const code = res.data.code;
       if (code != 0) {
         code == 61 && relogin();
@@ -62,12 +59,12 @@ const Index = () => {
       setSearching(false);
       setShowResult(false);
       if (err instanceof Error) {
-        console.log("profile update err: ", err.message);
+        console.log('profile update err: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
-      console.log("app search err: ", err);
+      console.log('app search err: ', err);
       return;
     }
     const d = res.data.data;
@@ -83,10 +80,10 @@ const Index = () => {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-        position: "relative",
+        display: 'flex',
+        alignItems: 'center',
+        height: '100%',
+        position: 'relative',
       }}
     >
       <Search
@@ -97,52 +94,52 @@ const Index = () => {
         allowClear={true}
         // prefix={<SearchOutlined />}
         placeholder="Search invoiceId, customer email"
-        style={{ width: "320px" }}
+        style={{ width: '320px' }}
       />
       <div
         ref={resultWrapperRef}
         style={{
-          position: "absolute",
-          top: "52px",
-          width: "640px",
-          height: "640px",
-          visibility: `${showResult ? "visible" : "hidden"}`,
-          background: "#FAFAFA",
-          zIndex: "800",
-          border: "1px solid #E0E0E0",
-          borderRadius: "6px",
-          boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px",
+          position: 'absolute',
+          top: '52px',
+          width: '640px',
+          height: '640px',
+          visibility: `${showResult ? 'visible' : 'hidden'}`,
+          background: '#FAFAFA',
+          zIndex: '800',
+          border: '1px solid #E0E0E0',
+          borderRadius: '6px',
+          boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
         }}
       >
         {searching ? (
           <div
             style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
-            {" "}
+            {' '}
             <Spin
               spinning={true}
-              indicator={<LoadingOutlined style={{ fontSize: "32px" }} spin />}
+              indicator={<LoadingOutlined style={{ fontSize: '32px' }} spin />}
             />
           </div>
         ) : (
-          <div style={{ position: "relative" }}>
+          <div style={{ position: 'relative' }}>
             <div>precision match</div>
             <Divider
               orientation="left"
-              style={{ margin: "2px 0", color: "#757575" }}
+              style={{ margin: '2px 0', color: '#757575' }}
             >
               Invoices
             </Divider>
             <InvoiceMatch list={invoiceList} goToDetail={goToDetail} />
             <Divider
               orientation="left"
-              style={{ margin: "2px 0", color: "#757575" }}
+              style={{ margin: '2px 0', color: '#757575' }}
             >
               Customers
             </Divider>
@@ -157,10 +154,10 @@ const Index = () => {
 export default Index;
 
 const colStyle: CSSProperties = {
-  fontWeight: "bold",
-  height: "32px",
-  display: "flex",
-  alignItems: "center",
+  fontWeight: 'bold',
+  height: '32px',
+  display: 'flex',
+  alignItems: 'center',
 };
 
 const InvoiceMatch = ({
@@ -174,15 +171,15 @@ const InvoiceMatch = ({
   return (
     <>
       <Row
-        align={"middle"}
-        justify={"space-between"}
+        align={'middle'}
+        justify={'space-between'}
         style={{
-          display: "flex",
-          width: "100%",
-          height: "32px",
-          padding: "0 6px",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          width: '100%',
+          height: '32px',
+          padding: '0 6px',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
         <Col span={7} style={colStyle}>
@@ -204,29 +201,29 @@ const InvoiceMatch = ({
       {list == null ? (
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           No Match Found
         </div>
       ) : (
         <div
-          style={{ maxHeight: "160px", minHeight: "48px", overflowY: "auto" }}
+          style={{ maxHeight: '160px', minHeight: '48px', overflowY: 'auto' }}
         >
           {list.map((iv) => (
             <Row
               style={{
-                display: "flex",
-                width: "100%",
-                height: "32px",
-                padding: "0 6px",
-                justifyContent: "space-between",
-                alignItems: "center",
-                color: "#757575",
+                display: 'flex',
+                width: '100%',
+                height: '32px',
+                padding: '0 6px',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                color: '#757575',
               }}
-              align={"middle"}
+              align={'middle'}
               // style={{ height: "32px", margin: "6px 0" }}
               className="clickable-item"
               key={iv.id}
@@ -236,9 +233,9 @@ const InvoiceMatch = ({
               <Col
                 span={7}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <span>{iv.invoiceName}</span>
@@ -246,17 +243,17 @@ const InvoiceMatch = ({
               <Col
                 span={3}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    width: "68px",
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
+                    width: '68px',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {INVOICE_STATUS[iv.status as keyof typeof INVOICE_STATUS]}
@@ -265,9 +262,9 @@ const InvoiceMatch = ({
               <Col
                 span={4}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <span>{showAmount(iv.totalAmount, iv.currency)}</span>
@@ -275,9 +272,9 @@ const InvoiceMatch = ({
               <Col
                 span={5}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <span>
@@ -287,9 +284,9 @@ const InvoiceMatch = ({
               <Col
                 span={5}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <span>
@@ -315,15 +312,15 @@ const AccountMatch = ({
   return (
     <>
       <Row
-        align={"middle"}
-        justify={"space-between"}
+        align={'middle'}
+        justify={'space-between'}
         style={{
-          display: "flex",
-          width: "100%",
-          height: "32px",
-          padding: "0 6px",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          width: '100%',
+          height: '32px',
+          padding: '0 6px',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
         <Col span={5} style={colStyle}>
@@ -345,29 +342,29 @@ const AccountMatch = ({
       {list == null ? (
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           No Match Found
         </div>
       ) : (
         <div
-          style={{ maxHeight: "160px", minHeight: "48px", overflowY: "auto" }}
+          style={{ maxHeight: '160px', minHeight: '48px', overflowY: 'auto' }}
         >
           {list.map((u) => (
             <Row
               style={{
-                display: "flex",
-                width: "100%",
-                height: "32px",
-                padding: "0 6px",
-                justifyContent: "space-between",
-                alignItems: "center",
-                color: "#757575",
+                display: 'flex',
+                width: '100%',
+                height: '32px',
+                padding: '0 6px',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                color: '#757575',
               }}
-              align={"middle"}
+              align={'middle'}
               // style={{ height: "32px", margin: "6px 0" }}
               className="clickable-item"
               key={u.id}
@@ -376,12 +373,12 @@ const AccountMatch = ({
               <Col
                 span={5}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
-                  textOverflow: "ellipsis",
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 <span>{u.firstName}</span>
@@ -389,17 +386,17 @@ const AccountMatch = ({
               <Col
                 span={5}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    width: "64px",
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
+                    width: '64px',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {u.email}
@@ -408,17 +405,17 @@ const AccountMatch = ({
               <Col
                 span={4}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <div
                   style={{
-                    width: "68px",
-                    textOverflow: "ellipsis",
-                    overflow: "hidden",
-                    whiteSpace: "nowrap",
+                    width: '68px',
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {u.countryName}
@@ -427,9 +424,9 @@ const AccountMatch = ({
               <Col
                 span={5}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <span>{u.subscriptionId}</span>
@@ -437,9 +434,9 @@ const AccountMatch = ({
               <Col
                 span={5}
                 style={{
-                  height: "32px",
-                  display: "flex",
-                  alignItems: "center",
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
                 <span> {SUBSCRIPTION_STATUS[u.subscriptionStatus]}</span>

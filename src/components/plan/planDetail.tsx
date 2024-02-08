@@ -1,46 +1,45 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Input, Select, message, Spin } from "antd";
-import type { SelectProps } from "antd";
-import {
-  getPlanDetail,
-  getPlanList,
-  activatePlan,
-  savePlan,
-} from "../requests";
-import { CURRENCY, PLAN_STATUS } from "../constants";
 import {
   CheckCircleOutlined,
   LoadingOutlined,
   MinusOutlined,
-} from "@ant-design/icons";
-import { IPlan } from "../shared.types";
-import { togglePublishReq } from "../requests";
+} from '@ant-design/icons';
+import type { SelectProps } from 'antd';
+import { Button, Form, Input, Select, Spin, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { CURRENCY, PLAN_STATUS } from '../../constants';
+import { useRelogin } from '../../hooks';
+import {
+  activatePlan,
+  getPlanDetail,
+  getPlanList,
+  savePlan,
+  togglePublishReq,
+} from '../../requests';
+import { IPlan } from '../../shared.types';
 
-const APP_PATH = import.meta.env.BASE_URL;
+// const APP_PATH = import.meta.env.BASE_URL;
 
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
 
+// this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
   const params = useParams();
   const [loading, setLoading] = useState(false);
   const [activating, setActivating] = useState(false);
+  const [publishing, setPublishing] = useState(false); // when toggling publish/unpublish
   const [plan, setPlan] = useState<IPlan | null>(null);
   const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
   const [selectedAddon, setSelectedAddon] = useState<number[]>([]); // from the above selectAddons, which are selected(addon Id array)
   const navigate = useNavigate();
   const [form] = Form.useForm();
+  const relogin = useRelogin();
 
-  const relogin = () =>
-    navigate(`${APP_PATH}login`, {
-      state: { msg: "session expired, please re-login" },
-    });
-
-  const itvCountValue = Form.useWatch("intervalCount", form);
-  const itvCountUnit = Form.useWatch("intervalUnit", form);
-  const addonCurrency = Form.useWatch("currency", form);
+  const itvCountValue = Form.useWatch('intervalCount', form);
+  const itvCountUnit = Form.useWatch('intervalUnit', form);
+  const addonCurrency = Form.useWatch('currency', form);
   // The selector is static and does not support closures.
   // const customValue = Form.useWatch((values) => `name: ${values.itvCountValue || ''}`, form);
 
@@ -58,7 +57,7 @@ const Index = () => {
       (a) =>
         a.intervalCount == itvCountValue &&
         a.intervalUnit == itvCountUnit &&
-        a.currency == addonCurrency
+        a.currency == addonCurrency,
     );
     setSelectAddons(newAddons);
     // when editing addon, don't do anything in this effect.
@@ -74,7 +73,7 @@ const Index = () => {
     f.intervalCount = Number(f.intervalCount);
     f.planId = values.id;
     f.addonIds = selectedAddon;
-    console.log("saving plan form: ", f);
+    console.log('saving plan form: ', f);
 
     try {
       setLoading(true);
@@ -85,14 +84,14 @@ const Index = () => {
         statuCode == 61 && relogin();
         throw new Error(savePlanRes.data.message);
       }
-      message.success("Plan saved");
+      message.success('Plan saved');
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
-        console.log("plan saving err: ", err.message);
+        console.log('plan saving err: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
       return;
     }
@@ -142,30 +141,30 @@ const Index = () => {
   const onActivate = async () => {
     const planId = Number(params.planId);
     if (isNaN(planId)) {
-      message.error("Invalid planId");
+      message.error('Invalid planId');
       return;
     }
     try {
       setActivating(true);
       const activateRes = await activatePlan(planId);
       setActivating(false);
-      console.log("activate plan res: ", activateRes);
+      console.log('activate plan res: ', activateRes);
       const statuCode = activateRes.data.code;
       if (statuCode != 0) {
         statuCode == 61 && relogin();
         throw new Error(activateRes.data.message);
       }
-      message.success("Plan activated");
+      message.success('Plan activated');
       setTimeout(() => {
         navigate(-1);
       }, 2000);
     } catch (err) {
       setActivating(false);
       if (err instanceof Error) {
-        console.log("plan activate err: ", err.message);
+        console.log('plan activate err: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
       return;
     }
@@ -181,15 +180,15 @@ const Index = () => {
       setLoading(true);
       const res = ([planListRes, planDetailRes] = await Promise.all([
         // any rejected promise will jump to the catch block, this is what we want.
-        getPlanList({ type: 2, status: 2 }), // type: 2 (addon), status: 2 (active),
+        getPlanList({ type: 2, status: 2, page: 0, pageSize: 100 }), // type: 2 (addon), status: 2 (active), let's assume there are at most 100 addons.
         getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
       ]));
       setLoading(false);
       console.log(
-        "[planListRes, planDetailRes]",
+        '[planListRes, planDetailRes]',
         planListRes,
-        "///",
-        planDetailRes
+        '///',
+        planDetailRes,
       );
 
       res.forEach((r) => {
@@ -202,23 +201,23 @@ const Index = () => {
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
-        console.log("err in detail page: ", err.message);
+        console.log('err in detail page: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
       return;
     }
 
     planDetailRes.data.data.Plan.plan.amount = getAmount(
       planDetailRes.data.data.Plan.plan.amount,
-      planDetailRes.data.data.Plan.plan.currency
+      planDetailRes.data.data.Plan.plan.currency,
     ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
 
     setPlan(planDetailRes.data.data.Plan.plan);
     if (planDetailRes.data.data.Plan.addons != null) {
       setSelectedAddon(
-        planDetailRes.data.data.Plan.addons.map((a: any) => a.id)
+        planDetailRes.data.data.Plan.addons.map((a: any) => a.id),
       );
     }
     const addons = planListRes.data.data.Plans.map((p: any) => p.plan);
@@ -228,18 +227,20 @@ const Index = () => {
         (a: any) =>
           a.intervalCount == planDetailRes.data.data.Plan.plan.intervalCount &&
           a.intervalUnit == planDetailRes.data.data.Plan.plan.intervalUnit &&
-          a.currency == planDetailRes.data.data.Plan.plan.currency
-      )
+          a.currency == planDetailRes.data.data.Plan.plan.currency,
+      ),
     );
   };
 
   const togglePublish = async () => {
+    setPublishing(true);
     try {
       const publishRes = await togglePublishReq({
         planId: plan!.id,
-        publishAction: plan!.publishStatus == 1 ? "PUBLISH" : "UNPUBLISH",
+        publishAction: plan!.publishStatus == 1 ? 'PUBLISH' : 'UNPUBLISH',
       });
-      console.log("toggle publish res: ", publishRes);
+      setPublishing(false);
+      console.log('toggle publish res: ', publishRes);
       const statusCode = publishRes.data.code;
       if (statusCode != 0) {
         statusCode == 61 && relogin();
@@ -247,11 +248,12 @@ const Index = () => {
       }
       fetchData();
     } catch (err) {
+      setPublishing(false);
       if (err instanceof Error) {
-        console.log("err toggleing publish status: ", err.message);
+        console.log('err toggleing publish status: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -265,7 +267,7 @@ const Index = () => {
       <Spin
         spinning={loading}
         indicator={
-          <LoadingOutlined style={{ fontSize: 32, color: "#FFF" }} spin />
+          <LoadingOutlined style={{ fontSize: 32, color: '#FFF' }} spin />
         }
         fullscreen
       />
@@ -290,7 +292,7 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: "Please input your plan name!",
+                message: 'Please input your plan name!',
               },
             ]}
           >
@@ -310,34 +312,22 @@ const Index = () => {
               <span>
                 {plan.publishStatus == 2 ? (
                   <CheckCircleOutlined
-                    style={{ color: "green", fontSize: "18px" }}
+                    style={{ color: 'green', fontSize: '18px' }}
                   />
                 ) : (
-                  <MinusOutlined style={{ color: "red", fontSize: "18px" }} />
-                )}{" "}
+                  <MinusOutlined style={{ color: 'red', fontSize: '18px' }} />
+                )}{' '}
               </span>
               <Button
-                style={{ marginLeft: "12px" }}
+                style={{ marginLeft: '12px' }}
                 onClick={togglePublish}
-                disabled={plan.status != 2}
+                loading={publishing || loading}
+                disabled={plan.status != 2 || publishing || loading}
               >
                 {/* 2: active, you can only publish/unpublish an active plan */}
-                {plan.publishStatus == 2 ? "Unpublish" : "Publish"}
+                {plan.publishStatus == 2 ? 'Unpublish' : 'Publish'}
               </Button>
             </div>
-          </Form.Item>
-
-          <Form.Item
-            label="Price"
-            name="amount"
-            rules={[
-              {
-                required: true,
-                message: "Please input your plan price!",
-              },
-            ]}
-          >
-            <Input />
           </Form.Item>
 
           <Form.Item
@@ -346,17 +336,34 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: "Please select your plan currency!",
+                message: 'Please select your plan currency!',
               },
             ]}
           >
             <Select
               style={{ width: 120 }}
               options={[
-                { value: "EUR", label: "EUR" },
-                { value: "USD", label: "USD" },
-                { value: "JPY", label: "JPY" },
+                { value: 'EUR', label: 'EUR' },
+                { value: 'USD', label: 'USD' },
+                { value: 'JPY', label: 'JPY' },
               ]}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Price"
+            name="amount"
+            rules={[
+              {
+                required: true,
+                message: 'Please input your plan price!',
+              },
+            ]}
+          >
+            <Input
+              prefix={
+                CURRENCY[form.getFieldValue('currency') ?? plan.currency].symbol
+              }
             />
           </Form.Item>
 
@@ -366,17 +373,17 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: "Please select interval unit!",
+                message: 'Please select interval unit!',
               },
             ]}
           >
             <Select
               style={{ width: 120 }}
               options={[
-                { value: "day", label: "day" },
-                { value: "week", label: "week" },
-                { value: "month", label: "month" },
-                { value: "year", label: "year" },
+                { value: 'day', label: 'day' },
+                { value: 'week', label: 'week' },
+                { value: 'month', label: 'month' },
+                { value: 'year', label: 'year' },
               ]}
             />
           </Form.Item>
@@ -387,7 +394,7 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: "Please input interval count!",
+                message: 'Please input interval count!',
               },
             ]}
           >
@@ -399,8 +406,8 @@ const Index = () => {
               style={{ width: 120 }}
               disabled
               options={[
-                { value: 1, label: "Main plan" },
-                { value: 2, label: "Addon" },
+                { value: 1, label: 'Main plan' },
+                { value: 2, label: 'Addon' },
               ]}
             />
           </Form.Item>
@@ -410,10 +417,10 @@ const Index = () => {
               <Select
                 mode="multiple"
                 allowClear
-                style={{ width: "100%" }}
+                style={{ width: '100%' }}
                 value={selectedAddon}
                 onChange={(value) => {
-                  console.log("on sleecgt change: ", setSelectedAddon(value));
+                  console.log('on sleecgt change: ', setSelectedAddon(value));
                 }}
                 options={selectAddons.map((a) => ({
                   label: a.planName,
@@ -439,9 +446,7 @@ const Index = () => {
             <Input disabled />
           </Form.Item>
 
-          <div
-            style={{ display: "flex", justifyContent: "center", gap: "18px" }}
-          >
+          <div className="flex justify-center gap-5">
             <Button
               onClick={() => navigate(-1)}
               disabled={loading || activating}

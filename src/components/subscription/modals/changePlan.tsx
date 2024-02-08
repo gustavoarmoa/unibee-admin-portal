@@ -1,6 +1,6 @@
-import { Divider, Modal, Select } from "antd";
-import Plan from "../../plan";
-import { IPlan, ISubscriptionType } from "../../../shared.types";
+import { Divider, Modal, Select } from 'antd';
+import { IPlan, ISubscriptionType } from '../../../shared.types';
+import Plan from '../plan';
 
 interface Props {
   isOpen: boolean;
@@ -13,7 +13,7 @@ interface Props {
   onAddonChange: (
     addonId: number,
     quantity: number | null,
-    checked: boolean | null
+    checked: boolean | null,
   ) => void;
   onCancel: () => void;
   onConfirm: () => void;
@@ -41,7 +41,7 @@ const ChangePlan = ({
     <Modal
       title="Change plan"
       open={isOpen}
-      width={"480px"}
+      width={'480px'}
       onOk={onConfirm}
       onCancel={onCancel}
       closeIcon={null}
@@ -49,10 +49,10 @@ const ChangePlan = ({
       <Divider>Choose a new subscription plan</Divider>
       <div
         style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          margin: "12px",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          margin: '12px',
         }}
       >
         <Select
@@ -68,10 +68,10 @@ const ChangePlan = ({
 
       <div
         style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: "48px",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: '48px',
         }}
       >
         <Plan
