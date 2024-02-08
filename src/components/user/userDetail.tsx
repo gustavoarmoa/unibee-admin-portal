@@ -2,10 +2,10 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Spin, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useRelogin } from '../hooks';
-import { getUserProfile } from '../requests';
-import { IProfile } from '../shared.types';
-import UserAccountTab from './subscriptionDetail/userAccountTab';
+import { useRelogin } from '../../hooks';
+import { getUserProfile } from '../../requests';
+import { IProfile } from '../../shared.types';
+import UserAccountTab from '../subscription/userAccountTab';
 
 const APP_PATH = import.meta.env.BASE_URL;
 

@@ -3,18 +3,19 @@ import {
   LoadingOutlined,
   MinusOutlined,
 } from '@ant-design/icons';
-import { Button, Space, Table, Tag, Tooltip, message } from 'antd';
+import { Button, Pagination, Space, Table, Tag, Tooltip, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PLAN_STATUS } from '../constants';
-import { showAmount } from '../helpers';
-import { useRelogin } from '../hooks';
-import { getPlanList } from '../requests';
-import '../shared.css';
-import { IPlan } from '../shared.types';
+import { PLAN_STATUS } from '../../constants';
+import { showAmount } from '../../helpers';
+import { useRelogin } from '../../hooks';
+import { getPlanList } from '../../requests';
+import '../../shared.css';
+import { IPlan } from '../../shared.types';
 
+const PAGE_SIZE = 10;
 const APP_PATH = import.meta.env.BASE_URL;
 const columns: ColumnsType<IPlan> = [
   {
@@ -82,51 +83,60 @@ const Index = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<IPlan[]>([]);
+  const [page, setPage] = useState(0); // pagination props
+  const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
   const relogin = useRelogin();
 
-  useEffect(() => {
-    const fetchPlan = async () => {
-      setLoading(true);
-      try {
-        const planListRes = await getPlanList({
-          type: undefined, // get main plan and addon
-          status: undefined, // active, inactive, expired, editing, all of them
-        });
-        setLoading(false);
-        console.log('plan list res: ', planListRes);
-        const statusCode = planListRes.data.code;
-        if (statusCode != 0) {
-          statusCode == 61 && relogin();
-          throw new Error(planListRes.data.message);
-        }
-        if (planListRes.data.data.Plans == null) {
-          return;
-        }
-        setPlan(planListRes.data.data.Plans.map((p: any) => ({ ...p.plan })));
-      } catch (err) {
-        setLoading(false);
-        if (err instanceof Error) {
-          console.log('err getting planlist: ', err.message);
-          message.error(err.message);
-        } else {
-          message.error('Unknown error');
-        }
+  const fetchPlan = async () => {
+    setLoading(true);
+    try {
+      const planListRes = await getPlanList({
+        type: undefined, // get main plan and addon
+        status: undefined, // active, inactive, expired, editing, all of them
+        page,
+        pageSize: PAGE_SIZE,
+      });
+      setLoading(false);
+      console.log('plan list res: ', planListRes);
+      const statusCode = planListRes.data.code;
+      if (statusCode != 0) {
+        statusCode == 61 && relogin();
+        throw new Error(planListRes.data.message);
       }
-    };
+      if (planListRes.data.data.Plans == null) {
+        return;
+      }
+      setPlan(planListRes.data.data.Plans.map((p: any) => ({ ...p.plan })));
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log('err getting planlist: ', err.message);
+        message.error(err.message);
+      } else {
+        message.error('Unknown error');
+      }
+    }
+  };
+
+  const onNewPlan = () => {
+    setPage(0); // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
+    navigate(`${APP_PATH}plan/new`);
+  };
+
+  useEffect(() => {
     fetchPlan();
   }, []);
+
+  useEffect(() => {
+    fetchPlan();
+  }, [page]);
 
   return (
     <>
       <div
         style={{ padding: '16px 0', display: 'flex', justifyContent: 'end' }}
       >
-        <Button
-          type="primary"
-          onClick={() => {
-            navigate(`${APP_PATH}plan/new`);
-          }}
-        >
+        <Button type="primary" onClick={onNewPlan}>
           New plan
         </Button>
       </div>
@@ -153,6 +163,17 @@ const Index = () => {
           };
         }}
       />
+      <div className="mx-0 my-4 flex items-center justify-end">
+        <Pagination
+          current={page + 1} // back-end starts with 0, front-end starts with 1
+          pageSize={PAGE_SIZE}
+          total={500}
+          size="small"
+          onChange={onPageChange}
+          disabled={loading}
+          showSizeChanger={false}
+        />
+      </div>
     </>
   );
 };

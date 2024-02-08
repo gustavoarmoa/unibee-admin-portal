@@ -7,22 +7,23 @@ import type { SelectProps } from 'antd';
 import { Button, Form, Input, Select, Spin, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CURRENCY, PLAN_STATUS } from '../constants';
-import { useRelogin } from '../hooks';
+import { CURRENCY, PLAN_STATUS } from '../../constants';
+import { useRelogin } from '../../hooks';
 import {
   activatePlan,
   getPlanDetail,
   getPlanList,
   savePlan,
   togglePublishReq,
-} from '../requests';
-import { IPlan } from '../shared.types';
+} from '../../requests';
+import { IPlan } from '../../shared.types';
 
 // const APP_PATH = import.meta.env.BASE_URL;
 
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
 
+// this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
   const params = useParams();
   const [loading, setLoading] = useState(false);
@@ -179,7 +180,7 @@ const Index = () => {
       setLoading(true);
       const res = ([planListRes, planDetailRes] = await Promise.all([
         // any rejected promise will jump to the catch block, this is what we want.
-        getPlanList({ type: 2, status: 2 }), // type: 2 (addon), status: 2 (active),
+        getPlanList({ type: 2, status: 2, page: 0, pageSize: 100 }), // type: 2 (addon), status: 2 (active), let's assume there are at most 100 addons.
         getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
       ]));
       setLoading(false);
@@ -320,26 +321,13 @@ const Index = () => {
               <Button
                 style={{ marginLeft: '12px' }}
                 onClick={togglePublish}
-                loading={publishing}
-                disabled={plan.status != 2 || publishing}
+                loading={publishing || loading}
+                disabled={plan.status != 2 || publishing || loading}
               >
                 {/* 2: active, you can only publish/unpublish an active plan */}
                 {plan.publishStatus == 2 ? 'Unpublish' : 'Publish'}
               </Button>
             </div>
-          </Form.Item>
-
-          <Form.Item
-            label="Price"
-            name="amount"
-            rules={[
-              {
-                required: true,
-                message: 'Please input your plan price!',
-              },
-            ]}
-          >
-            <Input />
           </Form.Item>
 
           <Form.Item
@@ -359,6 +347,23 @@ const Index = () => {
                 { value: 'USD', label: 'USD' },
                 { value: 'JPY', label: 'JPY' },
               ]}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Price"
+            name="amount"
+            rules={[
+              {
+                required: true,
+                message: 'Please input your plan price!',
+              },
+            ]}
+          >
+            <Input
+              prefix={
+                CURRENCY[form.getFieldValue('currency') ?? plan.currency].symbol
+              }
             />
           </Form.Item>
 
@@ -441,9 +446,7 @@ const Index = () => {
             <Input disabled />
           </Form.Item>
 
-          <div
-            style={{ display: 'flex', justifyContent: 'center', gap: '18px' }}
-          >
+          <div className="flex justify-center gap-5">
             <Button
               onClick={() => navigate(-1)}
               disabled={loading || activating}

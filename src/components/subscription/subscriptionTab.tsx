@@ -304,7 +304,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     try {
       const res = ([subDetailRes, planListRes] = await Promise.all([
         getSubDetail(subId),
-        getPlanList({ type: 1, status: 2 }), // type:1 (main plan), status: 2 (active)
+        getPlanList({ type: 1, status: 2, page: 0, pageSize: 100 }), // type:1 (main plan), status: 2 (active), let's assume there are at most 100 active plan
       ]));
       console.log('subDetail/planList: ', subDetailRes, '//', planListRes);
       res.forEach((r) => {

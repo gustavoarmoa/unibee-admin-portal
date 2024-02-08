@@ -1,12 +1,12 @@
 import { Button, Form, Input, Select, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CURRENCY } from '../constants';
-import { useRelogin } from '../hooks';
-import { createPlan } from '../requests';
+import { CURRENCY } from '../../constants';
+import { useRelogin } from '../../hooks';
+import { createPlan } from '../../requests';
 
 const DEFAULT_FORM_VALUES = {
-  currency: 'USD',
+  currency: 'EUR',
   intervalUnit: 'month',
   type: 1, // 1: main, 2: add-on
   imageUrl: 'http://www.google.com',
@@ -14,12 +14,16 @@ const DEFAULT_FORM_VALUES = {
 };
 
 // new plan: 之后就是old plan了, 需要edit了, default form value 也不能用了.
-
+// this component has the similar structure with planDetail.tsx, try to refactor them into one.
 const Index = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const relogin = useRelogin();
+  const watchCurrency = Form.useWatch('currency', form);
+  useEffect(() => {
+    // just to make the page rerender when currency changed, so the currency symbol (the prefix in amount's <Input />) will also change
+  }, [watchCurrency]);
 
   const onCreatePlan = async (values: any) => {
     const f = JSON.parse(JSON.stringify(values));
@@ -93,19 +97,6 @@ const Index = () => {
         </Form.Item>
 
         <Form.Item
-          label="Amount"
-          name="amount"
-          rules={[
-            {
-              required: true,
-              message: 'Please input your plan amount!',
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
           label="Currency"
           name="currency"
           rules={[
@@ -122,6 +113,25 @@ const Index = () => {
               { value: 'USD', label: 'USD' },
               { value: 'JPY', label: 'JPY' },
             ]}
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="Price"
+          name="amount"
+          rules={[
+            {
+              required: true,
+              message: 'Please input your plan price!',
+            },
+          ]}
+        >
+          <Input
+            prefix={
+              CURRENCY[
+                form.getFieldValue('currency') ?? DEFAULT_FORM_VALUES.currency
+              ].symbol
+            }
           />
         </Form.Item>
 
@@ -185,8 +195,7 @@ const Index = () => {
           <Input disabled />
         </Form.Item>
 
-        {/* <Form.Item label=""> */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '18px' }}>
+        <div className="flex justify-center gap-5">
           <Button onClick={() => navigate(-1)} disabled={loading}>
             Go Back
           </Button>
@@ -198,28 +207,10 @@ const Index = () => {
           >
             Create
           </Button>
-          {/* <Button>Publish</Button> */}
         </div>
-        {/* </Form.Item>  */}
       </Form>
     </div>
   );
 };
 
 export default Index;
-
-/*
-  "merchantId": 15621,
-  "planName": "string",
-  "amount": 0,
-  "currency": "string",
-  "intervalUnit": "string",
-  "intervalCount": 1,
-  "type": 1,
-  "description": "string",
-  "productName": "string",
-  "productDescription": "string",
-  "imageUrl": "string",
-  "homeUrl": "string"
-
-*/

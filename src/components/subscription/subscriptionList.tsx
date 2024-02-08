@@ -4,12 +4,12 @@ import type { ColumnsType, TableProps } from 'antd/es/table';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SUBSCRIPTION_STATUS } from '../constants';
-import { showAmount } from '../helpers';
-import { useRelogin } from '../hooks';
-import { getSublist } from '../requests';
-import '../shared.css';
-import { ISubscriptionType } from '../shared.types';
+import { SUBSCRIPTION_STATUS } from '../../constants';
+import { showAmount } from '../../helpers';
+import { useRelogin } from '../../hooks';
+import { getSublist } from '../../requests';
+import '../../shared.css';
+import { ISubscriptionType } from '../../shared.types';
 
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;

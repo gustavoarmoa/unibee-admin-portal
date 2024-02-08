@@ -4,11 +4,11 @@ import { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SUBSCRIPTION_STATUS } from '../constants';
-import { useRelogin } from '../hooks';
-import { searchUserReq } from '../requests';
-import '../shared.css';
-import { IProfile } from '../shared.types';
+import { SUBSCRIPTION_STATUS } from '../../constants';
+import { useRelogin } from '../../hooks';
+import { searchUserReq } from '../../requests';
+import '../../shared.css';
+import { IProfile } from '../../shared.types';
 const APP_PATH = import.meta.env.BASE_URL;
 
 const columns: ColumnsType<IProfile> = [

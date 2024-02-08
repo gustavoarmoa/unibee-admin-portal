@@ -87,9 +87,13 @@ export const uploadLogoReq = async (f: FormData) => {
 export const getPlanList = async ({
   type,
   status,
+  page,
+  pageSize,
 }: {
   type?: number;
   status?: number;
+  page: number;
+  pageSize: number;
 }) => {
   const token = localStorage.getItem('merchantToken');
   const body: {
@@ -101,8 +105,8 @@ export const getPlanList = async ({
   } = {
     merchantId: 15621,
     // currency: "usd",
-    page: 0,
-    count: 100,
+    page,
+    count: pageSize,
   };
   if (type != null) {
     body.type = type; // null: all types, 1: main plan, 2: addon

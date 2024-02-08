@@ -20,18 +20,18 @@ import {
 import { useMerchantInfoStore } from './stores';
 
 import Dashboard from './components/dashboard';
-import InvoiceDetail from './components/invoiceDetail';
-import InvoiceList from './components/invoiceList';
-import PlanNew from './components/newSubplan';
+import InvoiceDetail from './components/invoice/invoiceDetail';
+import InvoiceList from './components/invoice/invoiceList';
 import OutletPage from './components/outletPage';
-import PlanDetail from './components/planDetail';
+import PlanNew from './components/plan/newPlan';
+import PlanDetail from './components/plan/planDetail';
 // import PricePlans from './components/pricePlans';
-import PricePlanList from './components/pricePlansList';
+import PricePlanList from './components/plan/plansList';
 import Settings from './components/settings';
-import SubscriptionDetail from './components/subscriptionDetail';
-import SubscriptionList from './components/subscriptionList';
-import CustomerDetail from './components/userDetail';
-import CustomerList from './components/userList';
+import SubscriptionDetail from './components/subscription';
+import SubscriptionList from './components/subscription/subscriptionList';
+import CustomerDetail from './components/user/userDetail';
+import CustomerList from './components/user/userList';
 // import Users from "./components/userList";
 import AppSearch from './components/appSearch';
 import Login from './components/login';
