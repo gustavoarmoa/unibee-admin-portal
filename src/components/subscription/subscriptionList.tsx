@@ -1,10 +1,22 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Pagination, Spin, Table, message } from 'antd';
+import {
+  Button,
+  Col,
+  Form,
+  FormInstance,
+  Input,
+  Pagination,
+  Row,
+  Select,
+  Spin,
+  Table,
+  message,
+} from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SUBSCRIPTION_STATUS } from '../../constants';
+import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { getSublist } from '../../requests';
@@ -19,7 +31,6 @@ const SUB_STATUS_FILTER = Object.keys(SUBSCRIPTION_STATUS)
     value: Number(s),
   }))
   .sort((a, b) => (a.value < b.value ? -1 : 1));
-// console.log('sub sts fiiltr: ', SUB_STATUS_FILTER);
 
 const columns: ColumnsType<ISubscriptionType> = [
   {
@@ -65,7 +76,7 @@ const columns: ColumnsType<ISubscriptionType> = [
     key: 'status',
     render: (_, sub) => <span>{SUBSCRIPTION_STATUS[sub.status]}</span>,
     filters: SUB_STATUS_FILTER,
-    onFilter: (value, record) => record.status == value,
+    // onFilter: (value, record) => record.status == value,
   },
   {
     title: 'Start',
@@ -104,13 +115,16 @@ const Index = () => {
     setLoading(true);
     let subListRes;
     try {
-      subListRes = await getSublist({ page, pageSize: PAGE_SIZE });
+      subListRes = await getSublist({
+        page,
+        pageSize: PAGE_SIZE,
+        status: statusFilter,
+      });
       setLoading(false);
       console.log('sublist res: ', subListRes);
       const code = subListRes.data.code;
       code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
       if (code != 0) {
-        // TODO: save all the code as ENUM in constant,
         throw new Error(subListRes.data.message);
       }
     } catch (err) {
@@ -149,16 +163,18 @@ const Index = () => {
     sorter,
     extra,
   ) => {
-    console.log('params', pagination, filters, sorter, extra);
+    // console.log('params', pagination, filters, sorter, extra);
     if (filters.status == null) {
+      setStatusFilter([]);
       return;
     }
     setStatusFilter(filters.status as number[]);
   };
 
   useEffect(() => {
+    // console.log('page/statusFilter chnaged: ', page, '//', statusFilter);
     fetchData();
-  }, [page]);
+  }, [page, statusFilter]);
 
   useEffect(() => {
     fetchData();
@@ -206,3 +222,96 @@ const Index = () => {
 };
 
 export default Index;
+
+/*
+const DEFAULT_TERM = { currency: 'EUR', status: [] };
+const Search = ({
+  form,
+  goSearch,
+}: {
+  form: FormInstance<any>;
+  goSearch: () => void;
+}) => {
+  const statusOpt = Object.keys(SUBSCRIPTION_STATUS).map((s) => ({
+    value: Number(s),
+    label: SUBSCRIPTION_STATUS[Number(s)],
+  }));
+  const clear = () => form.resetFields();
+  const watchCurrency = Form.useWatch('currency', form);
+  useEffect(() => {
+    // just to trigger rerender when currency changed
+  }, [watchCurrency]);
+
+  const currencySymbol =
+    CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol;
+
+  return (
+    <div>
+      <Form form={form} initialValues={DEFAULT_TERM}>
+        <Row className="flex items-center" gutter={[8, 8]}>
+          <Col span={4}>First/Last name</Col>
+          <Col span={4}>
+            <Form.Item name="firstName" noStyle={true}>
+              <Input onPressEnter={goSearch} />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="lastName" noStyle={true}>
+              <Input onPressEnter={goSearch} />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Button onClick={clear}>Clear</Button>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <Button onClick={goSearch} type="primary">
+              Search
+            </Button>
+          </Col>
+        </Row>
+
+        <Row className="flex items-center" gutter={[8, 8]}>
+          <Col span={4}>
+            <div className="flex items-center">
+              <span className="mr-2">Amount</span>
+              <Form.Item name="currency" noStyle={true}>
+                <Select
+                  style={{ width: 80 }}
+                  options={[
+                    { value: 'EUR', label: 'EUR' },
+                    { value: 'USD', label: 'USD' },
+                    { value: 'JPY', label: 'JPY' },
+                  ]}
+                />
+              </Form.Item>
+            </div>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="amountStart" noStyle={true}>
+              <Input
+                prefix={`from ${currencySymbol}`}
+                onPressEnter={goSearch}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="amountEnd" noStyle={true}>
+              <Input prefix={`to ${currencySymbol}`} onPressEnter={goSearch} />
+            </Form.Item>
+          </Col>
+
+          <Col span={12}>
+            <span className="mr-2">Status</span>
+            <Form.Item name="status" noStyle={true}>
+              <Select
+                mode="multiple"
+                options={statusOpt}
+                style={{ maxWidth: 420, minWidth: 100, margin: '8px 0' }}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </div>
+  );
+};
+*/

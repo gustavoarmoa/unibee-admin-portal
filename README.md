@@ -1,6 +1,12 @@
-# React + TypeScript + Vite + Zustand + TailwindCSS
+# Description
 
 Merchant portal
+
+# Tools
+
+React + TypeScript + Vite + Zustand + TailwindCSS
+
+# Build
 
 ```
 cd <PROJECT-FOLDER>

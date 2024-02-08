@@ -101,25 +101,29 @@ const Index = () => {
 
   const fetchData = async () => {
     const searchTerm = form.getFieldsValue();
+    let amtFrom = searchTerm.amountStart,
+      amtTo = searchTerm.amountEnd;
     for (const key in searchTerm) {
-      if (
-        key == 'amountStart' &&
-        searchTerm.amountStart != '' &&
-        searchTerm.amountStart != null
-      ) {
-        searchTerm.amountStart =
-          Number(searchTerm.amountStart) *
-          CURRENCY[searchTerm.currency].stripe_factor;
+      if (key == 'amountStart' && amtFrom != '' && amtFrom != null) {
+        amtFrom = Number(amtFrom) * CURRENCY[searchTerm.currency].stripe_factor;
       }
-      if (
-        key == 'amountEnd' &&
-        searchTerm.amountEnd != '' &&
-        searchTerm.amountEnd != null
-      ) {
-        searchTerm.amountEnd =
-          Number(searchTerm.amountEnd) *
-          CURRENCY[searchTerm.currency].stripe_factor;
+      if (key == 'amountEnd' && amtTo != '' && amtTo != null) {
+        amtTo = Number(amtTo) * CURRENCY[searchTerm.currency].stripe_factor;
       }
+      if (isNaN(amtFrom) || amtFrom < 0) {
+        message.error('Invalid amount-from value.' + amtFrom);
+        return;
+      }
+      if (isNaN(amtTo) || amtTo < 0) {
+        message.error('Invalid amount-to value');
+        return;
+      }
+      if (amtFrom < amtTo) {
+        message.error('Amount-from must be greater than or equal to amount-to');
+        return;
+      }
+      searchTerm.amountStart = amtFrom;
+      searchTerm.amountEnd = amtTo;
     }
     try {
       setLoading(true);
@@ -191,7 +195,6 @@ const Index = () => {
 export default Index;
 
 const DEFAULT_TERM = { currency: 'EUR', status: [] };
-
 const Search = ({
   form,
   goSearch,
@@ -219,12 +222,12 @@ const Search = ({
           <Col span={4}>First/Last name</Col>
           <Col span={4}>
             <Form.Item name="firstName" noStyle={true}>
-              <Input />
+              <Input onPressEnter={goSearch} placeholder="first name" />
             </Form.Item>
           </Col>
           <Col span={4}>
             <Form.Item name="lastName" noStyle={true}>
-              <Input />
+              <Input onPressEnter={goSearch} placeholder="last name" />
             </Form.Item>
           </Col>
           <Col span={8}>
@@ -254,12 +257,15 @@ const Search = ({
           </Col>
           <Col span={4}>
             <Form.Item name="amountStart" noStyle={true}>
-              <Input prefix={`from ${currencySymbol}`} />
+              <Input
+                prefix={`from ${currencySymbol}`}
+                onPressEnter={goSearch}
+              />
             </Form.Item>
           </Col>
           <Col span={4}>
             <Form.Item name="amountEnd" noStyle={true}>
-              <Input prefix={`to ${currencySymbol}`} />
+              <Input prefix={`to ${currencySymbol}`} onPressEnter={goSearch} />
             </Form.Item>
           </Col>
 
