@@ -121,7 +121,6 @@ const Index = () => {
           CURRENCY[searchTerm.currency].stripe_factor;
       }
     }
-    console.log('searching...', { page, count: PAGE_SIZE, ...searchTerm });
     try {
       setLoading(true);
       const res = await getInvoiceList({
@@ -204,8 +203,14 @@ const Search = ({
     value: Number(s),
     label: INVOICE_STATUS[Number(s)],
   }));
-
   const clear = () => form.resetFields();
+  const watchCurrency = Form.useWatch('currency', form);
+  useEffect(() => {
+    // just to trigger rerender when currency changed
+  }, [watchCurrency]);
+
+  const currencySymbol =
+    CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol;
 
   return (
     <div>
@@ -249,12 +254,12 @@ const Search = ({
           </Col>
           <Col span={4}>
             <Form.Item name="amountStart" noStyle={true}>
-              <Input prefix="from" />
+              <Input prefix={`from ${currencySymbol}`} />
             </Form.Item>
           </Col>
           <Col span={4}>
             <Form.Item name="amountEnd" noStyle={true}>
-              <Input prefix="to" />
+              <Input prefix={`to ${currencySymbol}`} />
             </Form.Item>
           </Col>
 

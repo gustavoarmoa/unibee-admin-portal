@@ -86,7 +86,7 @@ const columns: ColumnsType<ISubscriptionType> = [
     dataIndex: 'userId',
     key: 'userId',
     render: (_, sub) => (
-      <span>{`${sub.user != null ? sub.user.email : ''}`}</span>
+      <span>{`${sub.user != null ? sub.user.firstName + ' ' + sub.user.lastName : ''}`}</span>
     ),
   },
 ];
