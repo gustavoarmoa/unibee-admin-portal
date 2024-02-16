@@ -5,19 +5,20 @@ import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
 import { getUserProfile } from '../../requests';
 import { IProfile } from '../../shared.types';
+import UserInfoSection from '../shared/userInfo';
 import AdminNote from './adminNote';
 import InvoiceTab from './invoicesTab';
 import SubscriptionTab from './subscriptionTab';
 import UserAccount from './userAccountTab';
 
-// const APP_PATH = import.meta.env.BASE_URL;
+const APP_PATH = import.meta.env.BASE_URL; // import.meta.env.VITE_APP_PATH;
 
 const Index = () => {
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<IProfile | null>(null);
-  const [userId, setUserId] = useState<number | null>(null); // subscription obj has user profile data, but admin can update user profile in AccountTab.
-  // so the data on subscription obj might be obsolete,
-  // so I just use userId from subscription Obj, use this userId to run getUserProfile(userId), even after admin update the user info AccontTab, re-call getUserProfile
+  const [userId, setUserId] = useState<number | null>(null); // subscription obj has user account data, and admin can update it in AccountTab.
+  // so the user data on subscription obj might be obsolete,
+  // so I use userId from subscription Obj, use this userId to run getUserProfile(userId), even after admin update the user info in AccontTab, re-call getUserProfile
 
   const relogin = useRelogin();
 
@@ -88,7 +89,9 @@ const Index = () => {
             marginTop: '64px',
           }}
         >
-          <Button onClick={() => navigate(-1)}>Back</Button>
+          <Button onClick={() => navigate(`${APP_PATH}subscription/list`)}>
+            Go Back
+          </Button>
         </div>
       </div>
       <AdminNote />
@@ -98,6 +101,7 @@ const Index = () => {
 
 export default Index;
 
+/*
 const rowStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -105,15 +109,7 @@ const rowStyle: CSSProperties = {
   color: '#757575',
 };
 const UserInfoSection = ({ user }: { user: IProfile | null }) => {
-  const [loading, setLoading] = useState(false);
-  //  const [user, setUser] = useState<IProfile | null>(null)
-  /* 
- if (user == null) {
-    return null;
-  }
-*/
-
-  useEffect(() => {}, []);
+  // useEffect(() => {}, []);
 
   return (
     <div style={{ marginBottom: '24px' }}>
@@ -165,3 +161,4 @@ const UserInfoSection = ({ user }: { user: IProfile | null }) => {
     </div>
   );
 };
+*/

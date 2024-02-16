@@ -1,6 +1,7 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import {
   Button,
+  Checkbox,
   Col,
   Form,
   FormInstance,
@@ -198,6 +199,7 @@ const DEFAULT_TERM = {
   status: [],
   amountStart: '',
   amountEnd: '',
+  refunded: false,
 };
 const Search = ({
   form,
@@ -236,7 +238,13 @@ const Search = ({
               <Input onPressEnter={goSearch} placeholder="last name" />
             </Form.Item>
           </Col>
-          <Col span={8}>
+          <Col span={4}>
+            <span></span>
+            <Form.Item name="refunded" noStyle={true} valuePropName="checked">
+              <Checkbox>Refunded</Checkbox>
+            </Form.Item>
+          </Col>
+          <Col span={8} className="flex justify-end">
             <Button onClick={clear} disabled={searching}>
               Clear
             </Button>

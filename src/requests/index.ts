@@ -512,6 +512,20 @@ export const getInvoiceList = async ({
   );
 };
 
+export const getInvoiceDetailReq = async (invoiceId: string) => {
+  const body = { invoiceId };
+  const token = localStorage.getItem('merchantToken');
+  return await axios.post(
+    `${API_URL}/merchant/invoice/subscription_invoice_detail`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    },
+  );
+};
+
 type TInvoiceItems = {
   unitAmountExcludingTax: number;
   description: string;

@@ -28,7 +28,7 @@ import PlanDetail from './components/plan/planDetail';
 // import PricePlans from './components/pricePlans';
 import PricePlanList from './components/plan/plansList';
 import Settings from './components/settings';
-import SubscriptionDetail from './components/subscription';
+import SubscriptionDetail from './components/subscription/detail';
 import SubscriptionList from './components/subscription/subscriptionList';
 import CustomerDetail from './components/user/userDetail';
 import CustomerList from './components/user/userList';
