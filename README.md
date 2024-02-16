@@ -4,9 +4,16 @@ Merchant portal
 
 # Tools
 
-React + TypeScript + Vite + Zustand + TailwindCSS
+React, TypeScript, Ant design, Zustand, TailwindCSS, Vite
 
-# Build
+# Build and deploy
+
+## environment
+
+Define the following env variables in .env file.( .env.local for development, .env.production for production build)
+
+- VITE_API_URL=http://unibee.top/unib
+- VITE_STRIPE_PUBLIC_KEY=YOUR_STRIPE_PUBLIC_KEY
 
 ```
 cd <PROJECT-FOLDER>
