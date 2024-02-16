@@ -418,6 +418,23 @@ export const extendDueDate = async (
   );
 };
 
+export const setSimDateReq = async (
+  subscriptionId: string,
+  newTestClock: number,
+) => {
+  const body = { subscriptionId, newTestClock };
+  const token = localStorage.getItem('merchantToken');
+  return await axios.post(
+    `${API_URL}/system/subscription/subscription_test_clock_walk`,
+    body,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    },
+  );
+};
+
 // billing admin can also get user profile.
 export const getUserProfile = async (userId: number) => {
   const token = localStorage.getItem('merchantToken');

@@ -27,9 +27,9 @@ const API_URL = import.meta.env.VITE_API_URL;
 const rowStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  height: '24px',
-  color: '#757575',
+  height: '32px',
 };
+const colStyle: CSSProperties = { fontWeight: 'bold' };
 
 const Index = () => {
   const navigate = useNavigate();
@@ -118,13 +118,19 @@ const Index = () => {
         fullscreen
       />
       <Row style={rowStyle} gutter={[16, 16]}>
-        <Col span={4}>Invoice Id</Col>
+        <Col span={4} style={colStyle}>
+          Invoice Id
+        </Col>
         <Col span={6}>{invoiceDetail?.invoiceId}</Col>
-        <Col span={4}>Invoice Name</Col>
+        <Col span={4} style={colStyle}>
+          Invoice Name
+        </Col>
         <Col span={6}>{invoiceDetail?.invoiceName}</Col>
       </Row>
       <Row style={rowStyle} gutter={[16, 16]}>
-        <Col span={4}>Invoice Amount</Col>
+        <Col span={4} style={colStyle}>
+          Invoice Amount
+        </Col>
         <Col span={6}>
           {invoiceDetail == null
             ? ''
@@ -135,13 +141,17 @@ const Index = () => {
               : ` (${invoiceDetail.taxScale / 100}% tax incl)`}
           </span>
         </Col>
-        <Col span={4}>Status</Col>
+        <Col span={4} style={colStyle}>
+          Status
+        </Col>
         <Col span={6}>
           {invoiceDetail == null ? '' : INVOICE_STATUS[invoiceDetail.status]}
         </Col>
       </Row>
       <Row style={rowStyle} gutter={[16, 16]}>
-        <Col span={4}>User Id</Col>
+        <Col span={4} style={colStyle}>
+          User Id
+        </Col>
         <Col span={6}>
           <span
             className="cursor-pointer text-blue-600"
@@ -150,7 +160,9 @@ const Index = () => {
             {invoiceDetail?.userId}
           </span>
         </Col>
-        <Col span={4}>Subscription Id</Col>
+        <Col span={4} style={colStyle}>
+          Subscription Id
+        </Col>
         <Col span={6}>
           {' '}
           {invoiceDetail == null ||

@@ -86,6 +86,7 @@ interface ISubscriptionType {
   plan: IPlan | undefined; // ?????????? why it can be undefined.
   addons: ISubAddon[];
   user: IProfile | null;
+  testClock?: number;
   unfinishedSubscriptionPendingUpdate?: {
     // downgrading will be effective on the next cycle, this props show this pending stat
     effectImmediate: number;

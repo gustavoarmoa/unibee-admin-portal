@@ -31,6 +31,7 @@ import {
   getSubDetail,
   getSubTimeline,
   resumeSub,
+  setSimDateReq,
   terminateSub,
   updateSubscription,
 } from '../../requests';
@@ -67,12 +68,58 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [resumeModal, setResumeModal] = useState(false);
   const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null); // null: when page is loading, no data is ready yet.
   const [endSubMode, setEndSubMode] = useState<1 | 2 | null>(null); // 1: immediate, 2: end of this billing cycole, null: not selected
+  const [simDate, setSimDate] = useState('');
+  const [simDateOpen, setSimDateOpen] = useState(false);
 
   const toggleTerminateModal = () => setTerminateModal(!terminateModal);
   const toggleResumeSubModal = () => setResumeModal(!resumeModal);
   const toggleSetDueDateModal = () => setDueDateModal(!dueDateModal);
   const toggleChangPlanModal = () => setChangePlanModal(!changePlanModal);
   const toggleCancelSubModal = () => setCancelSubModalOpen(!cancelSubModalOpen);
+
+  const onSimDateChange = async (date: any, dateString: string) => {
+    console.log(
+      date,
+      '///',
+      dateString,
+      '///',
+      dayjs(new Date(dateString)).unix(),
+    );
+    try {
+      const res = await setSimDateReq(
+        activeSub?.subscriptionId as string,
+        dayjs(new Date(dateString)).unix(),
+      );
+      console.log('set sim date res: ', res);
+      const code = res.data.code;
+      code == 61 && relogin();
+      if (code != 0) {
+        throw new Error(res.data.message);
+      }
+      message.success('New simulation date set.');
+      fetchData();
+      toggleSimDateOpen();
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log('err creating preview: ', err.message);
+        message.error(err.message);
+      } else {
+        message.error('Unknown error');
+      }
+    }
+  };
+  const toggleSimDateOpen = () => setSimDateOpen(!simDateOpen);
+
+  const showSimDatePicker = () => {
+    if (
+      activeSub == null ||
+      activeSub.testClock == null ||
+      activeSub.testClock < 0
+    ) {
+      return false;
+    }
+    return true;
+  };
 
   const onAddonChange = (
     addonId: number,
@@ -459,6 +506,41 @@ interface ISubAddon extends IPlan {
 
   return (
     <>
+      <div
+        style={{
+          display: showSimDatePicker() ? 'flex' : 'none',
+          width: '540px',
+        }}
+        className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
+      >
+        <div>
+          <span>current simulation time</span>
+          <span>
+            {' '}
+            {activeSub != null && activeSub.testClock! > 0
+              ? dayjs(new Date(activeSub.testClock! * 1000)).format(
+                  'YYYY-MM-DD HH:mm:ss',
+                )
+              : ''}
+          </span>
+        </div>
+        <div>
+          <Button onClick={toggleSimDateOpen}>Advance Time</Button>
+          <DatePicker
+            value={dayjs(
+              activeSub == null || activeSub.testClock === 0
+                ? new Date()
+                : new Date(activeSub!.testClock! * 1000),
+            )}
+            onChange={onSimDateChange}
+            open={simDateOpen}
+            onBlur={toggleSimDateOpen}
+            showTime
+            style={{ visibility: 'hidden', width: 0, height: 0 }}
+            format={'YYYY-MMM-DD HH:mm:ss'}
+          />
+        </div>
+      </div>
       <Spin
         spinning={loading}
         indicator={
@@ -689,7 +771,6 @@ const SubscriptionInfoSection = ({
               format="YYYY-MMM-DD"
               allowClear={false}
               onChange={onDueDateChange}
-              // defaultValue={dayjs()}
               value={dayjs(new Date(subInfo.currentPeriodEnd * 1000))}
               disabledDate={(d) =>
                 d.isBefore(
