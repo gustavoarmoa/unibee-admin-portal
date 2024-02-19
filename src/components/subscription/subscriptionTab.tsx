@@ -514,14 +514,14 @@ interface ISubAddon extends IPlan {
         className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
       >
         <div>
-          <span>current simulation time</span>
+          <span>current simulation time: &nbsp;</span>
           <span>
-            {' '}
-            {activeSub != null && activeSub.testClock! > 0
+            {activeSub?.testClock}
+            {/* activeSub != null && activeSub.testClock! > 0
               ? dayjs(new Date(activeSub.testClock! * 1000)).format(
                   'YYYY-MM-DD HH:mm:ss',
                 )
-              : ''}
+              : '' */}
           </span>
         </div>
         <div>
@@ -537,6 +537,7 @@ interface ISubAddon extends IPlan {
             onBlur={toggleSimDateOpen}
             showTime
             style={{ visibility: 'hidden', width: 0, height: 0 }}
+            // style={{ width: 100, height: 30 }}
             format={'YYYY-MMM-DD HH:mm:ss'}
           />
         </div>
