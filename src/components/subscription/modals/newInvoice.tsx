@@ -431,7 +431,7 @@ const Index = ({
       (accu, curr) =>
         accu +
         Math.round(
-          (Number(curr.unitAmountExcludingTax) +
+          (Number(curr.unitAmountExcludingTax) * (curr.quantity as number) +
             Number(curr.tax) +
             Number.EPSILON) *
             100,

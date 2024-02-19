@@ -155,7 +155,6 @@ interface UserInvoice {
   subscriptionAmount: number;
   currency: string;
   lines: InvoiceItem[];
-  gatewayId: number;
   status: number; // go check INVOICE_STATUS in constants.ts
   sendStatus: number;
   sendEmail: string;
@@ -163,6 +162,8 @@ interface UserInvoice {
   data: string;
   isDeleted: number;
   link: string;
+  gateway: { gatewayId: number; gatewayName: string };
+  gatewayId: number;
   gatewayStatus: string;
   gatewayPaymentId: string;
   gatewayUserId: string;

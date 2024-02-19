@@ -18,9 +18,23 @@ import { INVOICE_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { getInvoiceDetailReq } from '../../requests';
-import { IProfile, UserInvoice } from '../../shared.types';
+import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types';
+import { normalizeAmt } from '../helpers';
 import UserInfo from '../shared/userInfo';
+import InvoiceItemsModal from '../subscription/modals/newInvoice';
 import UserAccount from '../subscription/userAccountTab';
+
+const invoicePerm: TInvoicePerm = {
+  editable: false,
+  savable: false,
+  creatable: false,
+  publishable: false,
+  revokable: false,
+  deletable: false,
+  refundable: false,
+  downloadable: true,
+  sendable: true,
+};
 
 const APP_PATH = import.meta.env.BASE_URL; // if not specified in build command, default is /
 const API_URL = import.meta.env.VITE_API_URL;
@@ -36,6 +50,8 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [invoiceDetail, setInvoiceDetail] = useState<UserInvoice | null>(null);
   const [userProfile, setUserProfile] = useState<IProfile | null>(null);
+  const [showInvoiceItems, setShowInvoiceItems] = useState(false);
+  const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems);
 
   const goBack = () => navigate(`${APP_PATH}invoice/list`);
   const goToUser = (userId: number) => () =>
@@ -91,6 +107,7 @@ const Index = () => {
       if (code != 0) {
         throw new Error(res.data.message);
       }
+      normalizeAmt([res.data.data.Invoice]);
       setInvoiceDetail(res.data.data.Invoice);
       setUserProfile(res.data.data.userAccount);
     } catch (err) {
@@ -117,6 +134,18 @@ const Index = () => {
         }
         fullscreen
       />
+      {invoiceDetail && showInvoiceItems && (
+        <InvoiceItemsModal
+          user={invoiceDetail.userAccount}
+          isOpen={true}
+          detail={invoiceDetail}
+          closeModal={toggleInvoiceItems}
+          refresh={() => {}}
+          refundMode={false}
+          permission={invoicePerm}
+        />
+      )}
+
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
           Invoice Id
@@ -134,8 +163,12 @@ const Index = () => {
         <Col span={6}>
           {invoiceDetail == null
             ? ''
-            : showAmount(invoiceDetail?.totalAmount, invoiceDetail?.currency)}
-          <span>
+            : showAmount(
+                invoiceDetail?.totalAmount,
+                invoiceDetail?.currency,
+                true,
+              )}
+          <span className="text-xs text-gray-500">
             {invoiceDetail == null
               ? ''
               : ` (${invoiceDetail.taxScale / 100}% tax incl)`}
@@ -150,16 +183,12 @@ const Index = () => {
       </Row>
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
-          User Id
+          Invoice Items
         </Col>
         <Col span={6}>
-          <span
-            className="cursor-pointer text-blue-600"
-            onClick={goToUser(invoiceDetail?.userId as number)}
-          >
-            {invoiceDetail?.userId}
-          </span>
+          <Button onClick={toggleInvoiceItems}>Show Detail</Button>
         </Col>
+
         <Col span={4} style={colStyle}>
           Subscription Id
         </Col>
@@ -178,6 +207,25 @@ const Index = () => {
           )}
         </Col>
       </Row>
+      <Row style={rowStyle} gutter={[16, 16]}>
+        <Col span={4} style={colStyle}>
+          Payment Gateway
+        </Col>
+        <Col span={6}>{invoiceDetail?.gateway.gatewayName}</Col>
+        <Col span={4} style={colStyle}>
+          User Id{' '}
+        </Col>
+        <Col span={6}>
+          <span
+            className="cursor-pointer text-blue-600"
+            onClick={goToUser(invoiceDetail?.userId as number)}
+          >
+            {invoiceDetail &&
+              `${invoiceDetail?.userAccount.firstName} ${invoiceDetail.userAccount.lastName}`}
+          </span>
+        </Col>
+      </Row>
+
       {/* <UserInfo user={userProfile} /> */}
       {/* <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} /> */}
 
@@ -195,8 +243,10 @@ const Index = () => {
           </p>
         </object>
       )}
-      <div>
-        <Button onClick={goBack}>Go Back</Button>
+      <div className="m-8 flex justify-center">
+        <Button onClick={goBack} type="primary">
+          Go Back
+        </Button>
       </div>
     </div>
   );

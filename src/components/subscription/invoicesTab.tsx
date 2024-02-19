@@ -34,6 +34,7 @@ import { useRelogin } from '../../hooks';
 import { downloadInvoice, getInvoiceList } from '../../requests';
 import '../../shared.css';
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types';
+import { normalizeAmt } from '../helpers';
 import InvoiceModal from './modals/newInvoice';
 
 const APP_PATH = import.meta.env.BASE_URL;
@@ -112,6 +113,11 @@ const Index = ({ user }: { user: IProfile | null }) => {
   };
 
   const columns: ColumnsType<UserInvoice> = [
+    {
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId',
+    },
     {
       title: 'Title',
       dataIndex: 'invoiceName',
@@ -218,6 +224,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
     setPage(page - 1);
   };
 
+  /*
   const normalizeAmt = (iv: UserInvoice[]) => {
     iv.forEach((v) => {
       const c = v.currency;
@@ -235,6 +242,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       });
     });
   };
+  */
 
   const fetchData = async () => {
     if (user == null) {
