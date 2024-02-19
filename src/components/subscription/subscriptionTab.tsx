@@ -20,7 +20,8 @@ import {
 import { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import update from 'immutability-helper';
-import { CSSProperties, useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { useOnClickOutside } from 'usehooks-ts';
 import { SUBSCRIPTION_STATUS } from '../../constants';
 import { daysBetweenDate, showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
@@ -68,8 +69,11 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [resumeModal, setResumeModal] = useState(false);
   const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null); // null: when page is loading, no data is ready yet.
   const [endSubMode, setEndSubMode] = useState<1 | 2 | null>(null); // 1: immediate, 2: end of this billing cycole, null: not selected
-  const [simDate, setSimDate] = useState('');
+  // const [simDate, setSimDate] = useState('');
   const [simDateOpen, setSimDateOpen] = useState(false);
+  const simDateContainerRef = useRef(null);
+  const hideSimDate = () => setSimDateOpen(false);
+  useOnClickOutside(simDateContainerRef, hideSimDate);
 
   const toggleTerminateModal = () => setTerminateModal(!terminateModal);
   const toggleResumeSubModal = () => setResumeModal(!resumeModal);
@@ -524,7 +528,7 @@ interface ISubAddon extends IPlan {
               : '' */}
           </span>
         </div>
-        <div>
+        <div ref={simDateContainerRef}>
           <Button onClick={toggleSimDateOpen}>Advance Time</Button>
           <DatePicker
             value={dayjs(
@@ -536,8 +540,11 @@ interface ISubAddon extends IPlan {
             open={simDateOpen}
             onBlur={toggleSimDateOpen}
             showTime
+            showNow={false}
+            getPopupContainer={(trigger: HTMLElement) =>
+              trigger.parentNode as HTMLElement
+            }
             style={{ visibility: 'hidden', width: 0, height: 0 }}
-            // style={{ width: 100, height: 30 }}
             format={'YYYY-MMM-DD HH:mm:ss'}
           />
         </div>
