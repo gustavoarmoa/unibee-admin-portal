@@ -81,7 +81,7 @@ const Index = () => {
       dataIndex: 'periodStart',
       key: 'periodStart',
       render: (d, plan) =>
-        d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'), // new Date(d * 1000).toLocaleDateString(),
+        d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'),
     },
     {
       title: 'End',

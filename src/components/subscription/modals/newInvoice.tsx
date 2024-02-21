@@ -370,7 +370,6 @@ const Index = ({
       }
       message.success('Invoice sent.');
       closeModal();
-      // refresh(); // no need to refresh parent.
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {

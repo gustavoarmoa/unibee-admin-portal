@@ -739,6 +739,71 @@ export const downloadInvoice = (url: string) => {
     URL.revokeObjectURL(href);
   });
 };
+/*
+
+export const getInvoiceList = async ({
+  userId,
+  page,
+  count,
+  firstName,
+  lastName,
+  currency,
+  status,
+  amountStart,
+  amountEnd,
+}: {
+  userId?: number;
+  page: number;
+  count: number;
+  firstName?: string;
+  lastName?: string;
+  currency?: string;
+  status?: number[];
+  amountStart?: number;
+  amountEnd?: number;
+}) => {
+  const token = localStorage.getItem('merchantToken');
+  const body = {
+    merchantId: 15621,
+    userId,
+    firstName,
+    lastName,
+    currency,
+    status,
+    amountStart,
+    amountEnd,
+    "sendEmail": 0,
+    "sortField": "string",
+    "sortType": "string",
+    "deleteInclude": true,
+    page,
+    count,
+  };
+
+*/
+type TUserList = {
+  merchantId?: number;
+  userId?: number;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  status?: number[];
+  page: number;
+  count: number;
+};
+export const getUserListReq = async (users: TUserList) => {
+  users.merchantId = 15621;
+  const token = localStorage.getItem('merchantToken');
+  return await axios.post(
+    `${API_URL}/merchant/merchant_user/user_list`,
+    users,
+    {
+      headers: {
+        Authorization: `${token}`,
+      },
+    },
+  );
+};
 
 export const searchUserReq = async () => {
   const token = localStorage.getItem('merchantToken');

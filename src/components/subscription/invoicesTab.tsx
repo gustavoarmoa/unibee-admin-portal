@@ -304,7 +304,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
         />
       )}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <Searchbar refresh={fetchData} />
+        {/* <Searchbar refresh={fetchData} /> */}
         <Table
           columns={columns}
           dataSource={invoiceList}

@@ -9,7 +9,7 @@ import {
   Select,
   message,
 } from 'antd';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
 import {
@@ -24,9 +24,11 @@ const APP_PATH = import.meta.env.BASE_URL;
 const UserAccountTab = ({
   user,
   setUserProfile,
+  extraButton,
 }: {
   user: IProfile | null;
   setUserProfile: (u: IProfile) => void;
+  extraButton?: ReactElement;
 }) => {
   const [form] = Form.useForm();
   //   const navigate = useNavigate();
@@ -323,6 +325,7 @@ const UserAccountTab = ({
             gap: '24px',
           }}
         >
+          {extraButton}
           <Button danger>Suspend</Button>
           <Button type="primary" onClick={onSave} disabled={loading}>
             Save

@@ -33,7 +33,7 @@ const invoicePerm: TInvoicePerm = {
   deletable: false,
   refundable: false,
   downloadable: true,
-  sendable: true,
+  sendable: false,
 };
 
 const APP_PATH = import.meta.env.BASE_URL; // if not specified in build command, default is /
@@ -59,34 +59,6 @@ const Index = () => {
   const goToSub = (subId: string) => () =>
     navigate(`${APP_PATH}subscription/${subId}`);
   const relogin = useRelogin();
-
-  const tabItems: TabsProps['items'] = [
-    {
-      key: 'detail',
-      label: 'Detail',
-      children: 'subscription detail',
-      // <SubscriptionTab setUserId={setUserId} />,
-    },
-    {
-      key: 'subscription',
-      label: 'Subscription',
-      children: 'invoice detail',
-      // <InvoiceTab user={userProfile} />,
-    },
-    {
-      key: 'Account',
-      label: 'User Account',
-      children: (
-        <UserAccount user={userProfile} setUserProfile={setUserProfile} />
-      ),
-    },
-    {
-      key: 'Payment',
-      label: 'Payment',
-      children: 'content of payment',
-    },
-  ];
-  const onTabChange = (key: string) => {};
 
   const fetchData = async () => {
     // const subId = location.state && location.state.subscriptionId;

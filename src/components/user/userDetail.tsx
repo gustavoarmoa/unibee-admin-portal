@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { Spin, message } from 'antd';
+import { Button, Spin, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
@@ -58,7 +58,15 @@ const Index = () => {
         }
         fullscreen
       />
-      <UserAccountTab user={userProfile} setUserProfile={setUserProfile} />
+      <UserAccountTab
+        user={userProfile}
+        setUserProfile={setUserProfile}
+        extraButton={
+          <Button onClick={() => navigate(`${APP_PATH}customer/list`)}>
+            Go Back
+          </Button>
+        }
+      />
     </div>
   );
 };
