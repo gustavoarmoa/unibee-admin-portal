@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { CURRENCY } from '../../constants';
 import { useRelogin } from '../../hooks';
 import { createPlan } from '../../requests';
+import { useAppConfigStore } from '../../stores';
 
 const DEFAULT_FORM_VALUES = {
   currency: 'EUR',
@@ -17,9 +18,10 @@ const DEFAULT_FORM_VALUES = {
 // this component has the similar structure with planDetail.tsx, try to refactor them into one.
 const Index = () => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+  const appConfigStore = useAppConfigStore();
   const navigate = useNavigate();
   const relogin = useRelogin();
+  const [loading, setLoading] = useState(false);
   const watchCurrency = Form.useWatch('currency', form);
   useEffect(() => {
     // just to make the page rerender when currency changed, so the currency symbol (the prefix in amount's <Input />) will also change
@@ -74,7 +76,7 @@ const Index = () => {
           label="merchantId"
           name="merchantId"
           hidden
-          initialValue={15621}
+          initialValue={appConfigStore.MerchantId}
         >
           <Input disabled />
         </Form.Item>

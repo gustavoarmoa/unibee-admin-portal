@@ -22,12 +22,14 @@ import { useRelogin } from '../../hooks';
 import { getInvoiceList } from '../../requests';
 import '../../shared.css';
 import { IProfile, UserInvoice } from '../../shared.types';
+import { useAppConfigStore } from '../../stores';
 
 const PAGE_SIZE = 10;
 const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = () => {
   const navigate = useNavigate();
+  const appConfigStore = useAppConfigStore();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0); // pagination props
@@ -128,6 +130,7 @@ const Index = () => {
     try {
       setLoading(true);
       const res = await getInvoiceList({
+        merchantId: appConfigStore.MerchantId,
         page,
         count: PAGE_SIZE,
         ...searchTerm,

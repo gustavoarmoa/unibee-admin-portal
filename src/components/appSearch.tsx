@@ -8,6 +8,7 @@ import { showAmount } from '../helpers';
 import { useRelogin } from '../hooks';
 import { appSearchReq } from '../requests';
 import { IProfile, UserInvoice } from '../shared.types';
+import { useAppConfigStore } from '../stores';
 import './appSearch.css';
 
 const { Search } = Input;
@@ -20,6 +21,7 @@ interface IAccountInfo extends IProfile {
 
 const Index = () => {
   const navigate = useNavigate();
+  const appConfigStore = useAppConfigStore();
   const [term, setTerm] = useState('');
   const [searching, setSearching] = useState(false);
   const [showResult, setShowResult] = useState(false);
@@ -47,7 +49,7 @@ const Index = () => {
     try {
       setSearching(true);
       setShowResult(true);
-      res = await appSearchReq(term);
+      res = await appSearchReq(term, appConfigStore.MerchantId);
       setSearching(false);
       console.log('app search res: ', res);
       const code = res.data.code;

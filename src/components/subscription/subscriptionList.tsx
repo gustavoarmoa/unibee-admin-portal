@@ -22,6 +22,7 @@ import { useRelogin } from '../../hooks';
 import { getSublist } from '../../requests';
 import '../../shared.css';
 import { ISubscriptionType } from '../../shared.types';
+import { useAppConfigStore } from '../../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
@@ -107,6 +108,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const relogin = useRelogin();
+  const appConfigStore = useAppConfigStore();
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
   const [statusFilter, setStatusFilter] = useState<number[]>([]);
@@ -116,6 +118,7 @@ const Index = () => {
     let subListRes;
     try {
       subListRes = await getSublist({
+        merchantId: appConfigStore.MerchantId,
         page,
         pageSize: PAGE_SIZE,
         status: statusFilter,

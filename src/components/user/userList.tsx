@@ -17,9 +17,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SUBSCRIPTION_STATUS } from '../../constants';
 import { useRelogin } from '../../hooks';
-import { getUserListReq, searchUserReq } from '../../requests';
+import { getUserListReq } from '../../requests';
 import '../../shared.css';
 import { IProfile } from '../../shared.types';
+import { useAppConfigStore } from '../../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
@@ -43,8 +44,8 @@ const columns: ColumnsType<IProfile> = [
   },
   {
     title: 'Created at',
-    dataIndex: 'createTime',
-    key: 'createTime',
+    dataIndex: 'gmtCreate',
+    key: 'gmtCreate',
     render: (d, plan) => dayjs(d).format('YYYY-MMM-DD'), // new Date(d).toLocaleDateString(),
   },
   {
@@ -67,6 +68,7 @@ const columns: ColumnsType<IProfile> = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<IProfile[]>([]);
   const [page, setPage] = useState(0); // pagination props
@@ -79,6 +81,7 @@ const Index = () => {
     try {
       setLoading(true);
       const res = await getUserListReq({
+        merchantId: appConfigStore.MerchantId,
         page,
         count: PAGE_SIZE,
         ...searchTerm,

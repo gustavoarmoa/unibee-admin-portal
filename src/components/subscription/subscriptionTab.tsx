@@ -36,13 +36,13 @@ import {
   terminateSub,
   updateSubscription,
 } from '../../requests';
-import '../../shared.css';
 import {
   IPlan,
   IPreview,
   IProfile,
   ISubscriptionType,
 } from '../../shared.types';
+import { useAppConfigStore } from '../../stores';
 import CancelPendingSubModal from './modals/cancelPendingSub';
 import ChangePlanModal from './modals/changePlan';
 import ExtendSubModal from './modals/extendSub';
@@ -50,10 +50,12 @@ import ResumeSubModal from './modals/resumeSub';
 import TerminateSubModal from './modals/terminateSub';
 import UpdateSubPreviewModal from './modals/updateSubPreview';
 
+import '../../shared.css';
 // const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   // const navigate = useNavigate();
+  const appConfigStore = useAppConfigStore();
   const relogin = useRelogin();
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
@@ -355,7 +357,13 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     try {
       const res = ([subDetailRes, planListRes] = await Promise.all([
         getSubDetail(subId),
-        getPlanList({ type: 1, status: 2, page: 0, pageSize: 100 }), // type:1 (main plan), status: 2 (active), let's assume there are at most 100 active plan
+        getPlanList({
+          merchantId: appConfigStore.MerchantId,
+          type: 1,
+          status: 2,
+          page: 0,
+          pageSize: 100,
+        }), // type:1 (main plan), status: 2 (active), let's assume there are at most 100 active plan
       ]));
       console.log('subDetail/planList: ', subDetailRes, '//', planListRes);
       res.forEach((r) => {
@@ -991,6 +999,7 @@ const SubTimeline = ({
   plans: IPlan[];
 }) => {
   const relogin = useRelogin();
+  const appConfigStore = useAppConfigStore();
   // parent updated, how can I knwo that, and update myself
   const [timeline, setTimeline] = useState<SubTimeline[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1035,6 +1044,7 @@ const SubTimeline = ({
     try {
       setLoading(true);
       const timelineRes = await getSubTimeline({
+        merchantId: appConfigStore.MerchantId,
         userId,
         page,
         count: PAGE_SIZE,

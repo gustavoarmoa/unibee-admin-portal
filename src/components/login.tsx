@@ -1,30 +1,31 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import type { RadioChangeEvent } from "antd";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Form, Input, Radio, message } from "antd";
-import { useMerchantInfoStore } from "../stores";
-import OtpInput from "react-otp-input";
+import type { RadioChangeEvent } from 'antd';
+import { Button, Form, Input, Radio, message } from 'antd';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import OtpInput from 'react-otp-input';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  passwordloginReq,
+  getAppConfigReq,
+  getMerchantInfoReq,
   otpLoginReq,
   otpLoginVerifyReq,
-  getMerchantInfoReq,
-} from "../requests";
-import AppHeader from "./appHeader";
-import AppFooter from "./appFooter";
+  passwordloginReq,
+} from '../requests';
+import { useAppConfigStore, useMerchantInfoStore } from '../stores';
+import AppFooter from './appFooter';
+import AppHeader from './appHeader';
 
 const APP_PATH = import.meta.env.BASE_URL; // if not specified in build command, default is /
 
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const onEmailChange = (evt: ChangeEvent<HTMLInputElement>) =>
     setEmail(evt.target.value);
   const onPasswordChange = (evt: ChangeEvent<HTMLInputElement>) =>
     setPassword(evt.target.value);
-  const [loginType, setLoginType] = useState("password"); // password | OTP
+  const [loginType, setLoginType] = useState('password'); // password | OTP
   const onLoginTypeChange = (e: RadioChangeEvent) =>
     setLoginType(e.target.value);
   const goSignup = () => navigate(`${APP_PATH}signup`);
@@ -38,47 +39,47 @@ const Index = () => {
   return (
     <div
       style={{
-        height: "calc(100vh - 164px)",
-        overflowY: "auto",
+        height: 'calc(100vh - 164px)',
+        overflowY: 'auto',
       }}
     >
-      {" "}
+      {' '}
       <AppHeader />
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          marginTop: "200px",
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: '200px',
         }}
       >
-        <h1 style={{ marginBottom: "36px" }}>Merchant Login</h1>
+        <h1 style={{ marginBottom: '36px' }}>Merchant Login</h1>
         <Radio.Group
           options={[
-            { label: "Password", value: "password" },
-            { label: "OTP", value: "OTP" },
+            { label: 'Password', value: 'password' },
+            { label: 'OTP', value: 'OTP' },
           ]}
           onChange={onLoginTypeChange}
           value={loginType}
         />
         <div
           style={{
-            width: "640px",
-            height: "320px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            border: "1px solid #e0e0e0",
-            borderRadius: "8px",
-            marginTop: "36px",
-            background: "#FFF",
+            width: '640px',
+            height: '320px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            border: '1px solid #e0e0e0',
+            borderRadius: '8px',
+            marginTop: '36px',
+            background: '#FFF',
           }}
         >
           {/* <div style={{ height: "36px" }}></div> */}
           {/* <div style={{ height: "48px" }}></div> */}
-          {loginType == "password" ? (
+          {loginType == 'password' ? (
             <Login1
               email={email}
               onEmailChange={onEmailChange}
@@ -91,10 +92,10 @@ const Index = () => {
         </div>
         <div
           style={{
-            display: "flex",
-            color: "#757575",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            color: '#757575',
+            justifyContent: 'center',
+            alignItems: 'center',
             // margin: "-48px 0 18px 0",
           }}
         >
@@ -124,34 +125,43 @@ const Login1 = ({
   onPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const merchantInfoStore = useMerchantInfoStore();
+  const appConfigStore = useAppConfigStore();
   const [submitting, setSubmitting] = useState(false);
-  const [errMsg, setErrMsg] = useState("");
+  const [errMsg, setErrMsg] = useState('');
   const navigate = useNavigate();
   const onSubmit = async () => {
-    setErrMsg("");
+    setErrMsg('');
     setSubmitting(true);
     try {
+      // TODO: use promise.all() to make 2 calls at the same time.
       const res = await passwordloginReq(email, password);
-      console.log("login res: ", res);
+      console.log('login res: ', res);
       if (res.data.code != 0) {
         throw new Error(res.data.message);
       }
-      localStorage.setItem("merchantToken", res.data.data.Token);
+      localStorage.setItem('merchantToken', res.data.data.Token);
       const infoRes = await getMerchantInfoReq();
-      setSubmitting(false);
       if (infoRes.data.code != 0) {
         throw new Error(infoRes.data.message);
       }
-      console.log("info res: ", infoRes);
+      console.log('info res: ', infoRes);
       merchantInfoStore.setMerchantInfo(infoRes.data.data.MerchantInfo);
+
+      const appConfigRes = await getAppConfigReq();
+      setSubmitting(false);
+      console.log('app config res: ', appConfigRes);
+      if (appConfigRes.data.code != 0) {
+        throw new Error(appConfigRes.data.message);
+      }
+      appConfigStore.setAppConfig(appConfigRes.data.data);
       navigate(`${APP_PATH}subscription/list`);
     } catch (err) {
       setSubmitting(false);
       if (err instanceof Error) {
-        console.log("login err: ", err.message);
+        console.log('login err: ', err.message);
         message.error(err.message);
       } else {
-        message.error("Unknown error");
+        message.error('Unknown error');
       }
     }
   };
@@ -179,7 +189,7 @@ const Login1 = ({
         rules={[
           {
             required: true,
-            message: "Please input your Email!",
+            message: 'Please input your Email!',
           },
         ]}
       >
@@ -192,7 +202,7 @@ const Login1 = ({
         rules={[
           {
             required: true,
-            message: "Please input your password!",
+            message: 'Please input your password!',
           },
         ]}
       >
@@ -206,7 +216,7 @@ const Login1 = ({
           span: 16,
         }}
       >
-        <span style={{ color: "red" }}>{errMsg}</span>
+        <span style={{ color: 'red' }}>{errMsg}</span>
       </Form.Item>
 
       <Form.Item
@@ -240,8 +250,8 @@ const Login2 = ({
   const merchantInfoStore = useMerchantInfoStore();
   const [currentStep, setCurrentStep] = useState(0); // 0: input email, 1: input verification code
   const [submitting, setSubmitting] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [errMsg, setErrMsg] = useState("");
+  const [otp, setOtp] = useState('');
+  const [errMsg, setErrMsg] = useState('');
   const navigate = useNavigate();
 
   const onOTPchange = (value: string) => {
@@ -250,11 +260,11 @@ const Login2 = ({
 
   const loginOTP_step1 = async () => {
     setSubmitting(true);
-    setOtp("");
+    setOtp('');
     try {
       const res = await otpLoginReq(email);
       setSubmitting(false);
-      console.log("login otp step 1 res: ", res);
+      console.log('login otp step 1 res: ', res);
       if (res.data.code != 0) {
         setErrMsg(res.data.message);
         throw new Error(res.data.message);
@@ -263,29 +273,29 @@ const Login2 = ({
     } catch (err) {
       setSubmitting(false);
       if (err instanceof Error) {
-        console.log("login err: ", err.message);
+        console.log('login err: ', err.message);
         // message.error(err.message);
         setErrMsg(err.message);
       } else {
         // message.error("Unknown error");
-        setErrMsg("Unknown error");
+        setErrMsg('Unknown error');
       }
     }
   };
 
   const loginOTP_step2 = async () => {
-    setErrMsg("");
+    setErrMsg('');
     setSubmitting(true);
     try {
       const res = await otpLoginVerifyReq(email, otp);
-      console.log("otp loginVerify res: ", res);
+      console.log('otp loginVerify res: ', res);
       if (res.data.code != 0) {
         setErrMsg(res.data.message);
         throw new Error(res.data.message);
       }
-      localStorage.setItem("merchantToken", res.data.data.Token);
+      localStorage.setItem('merchantToken', res.data.data.Token);
       const infoRes = await getMerchantInfoReq();
-      console.log("info res: ", infoRes);
+      console.log('info res: ', infoRes);
       if (infoRes.data.code != 0) {
         setErrMsg(infoRes.data.message);
         throw new Error(infoRes.data.message);
@@ -297,16 +307,16 @@ const Login2 = ({
     } catch (err) {
       setSubmitting(false);
       if (err instanceof Error) {
-        console.log("login err: ", err.message);
+        console.log('login err: ', err.message);
         setErrMsg(err.message);
       } else {
-        setErrMsg("Unknown error");
+        setErrMsg('Unknown error');
       }
     }
   };
 
   const submit = async () => {
-    setErrMsg("");
+    setErrMsg('');
     setSubmitting(true);
     if (currentStep == 0) {
       await loginOTP_step1();
@@ -340,7 +350,7 @@ const Login2 = ({
             rules={[
               {
                 required: true,
-                message: "Please input your Email!",
+                message: 'Please input your Email!',
               },
             ]}
           >
@@ -368,10 +378,10 @@ const Login2 = ({
         <>
           <div
             style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "78px",
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '78px',
             }}
           >
             <h3>Enter verification code for {email}</h3>
@@ -383,26 +393,26 @@ const Login2 = ({
             shouldAutoFocus={true}
             skipDefaultStyles={true}
             inputStyle={{
-              height: "80px",
-              width: "60px",
-              border: "1px solid gray",
-              borderRadius: "6px",
-              textAlign: "center",
-              fontSize: "36px",
+              height: '80px',
+              width: '60px',
+              border: '1px solid gray',
+              borderRadius: '6px',
+              textAlign: 'center',
+              fontSize: '36px',
             }}
-            renderSeparator={<span style={{ width: "36px" }}></span>}
+            renderSeparator={<span style={{ width: '36px' }}></span>}
             renderInput={(props) => <input {...props} />}
           />
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: "48px",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: '48px',
             }}
           >
-            <span style={{ marginBottom: "18px", color: "red" }}>{errMsg}</span>
+            <span style={{ marginBottom: '18px', color: 'red' }}>{errMsg}</span>
             <Button
               type="primary"
               block

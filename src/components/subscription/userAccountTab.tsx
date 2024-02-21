@@ -18,8 +18,7 @@ import {
   saveUserProfile,
 } from '../../requests';
 import { Country, IProfile } from '../../shared.types';
-
-const APP_PATH = import.meta.env.BASE_URL;
+import { useAppConfigStore } from '../../stores';
 
 const UserAccountTab = ({
   user,
@@ -31,6 +30,7 @@ const UserAccountTab = ({
   extraButton?: ReactElement;
 }) => {
   const [form] = Form.useForm();
+  const appConfigStore = useAppConfigStore();
   //   const navigate = useNavigate();
   const [countryList, setCountryList] = useState<Country[]>([]);
   const [loading, setLoading] = useState(false);
@@ -80,7 +80,7 @@ const UserAccountTab = ({
       let countryListRes;
       try {
         const res = ([countryListRes] = await Promise.all([
-          getCountryList(15621),
+          getCountryList(appConfigStore.MerchantId),
         ]));
         console.log('country: ', countryListRes);
         res.forEach((r) => {

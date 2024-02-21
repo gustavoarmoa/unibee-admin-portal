@@ -17,6 +17,7 @@ import {
   togglePublishReq,
 } from '../../requests';
 import { IPlan } from '../../shared.types';
+import { useAppConfigStore } from '../../stores';
 
 // const APP_PATH = import.meta.env.BASE_URL;
 
@@ -26,6 +27,7 @@ const getAmount = (amt: number, currency: string) =>
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
   const params = useParams();
+  const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false);
   const [activating, setActivating] = useState(false);
   const [publishing, setPublishing] = useState(false); // when toggling publish/unpublish
@@ -180,7 +182,13 @@ const Index = () => {
       setLoading(true);
       const res = ([planListRes, planDetailRes] = await Promise.all([
         // any rejected promise will jump to the catch block, this is what we want.
-        getPlanList({ type: 2, status: 2, page: 0, pageSize: 100 }), // type: 2 (addon), status: 2 (active), let's assume there are at most 100 addons.
+        getPlanList({
+          merchantId: appConfigStore.MerchantId,
+          type: 2,
+          status: 2,
+          page: 0,
+          pageSize: 100,
+        }), // type: 2 (addon), status: 2 (active), let's assume there are at most 100 addons.
         getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
       ]));
       setLoading(false);

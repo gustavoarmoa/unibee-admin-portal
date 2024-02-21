@@ -22,6 +22,7 @@ import {
   TInvoicePerm,
   UserInvoice,
 } from '../../../shared.types';
+import { useAppConfigStore } from '../../../stores';
 
 // const APP_PATH = import.meta.env.BASE_URL;
 
@@ -58,7 +59,7 @@ const Index = ({
   refresh,
 }: Props) => {
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const appConfigStore = useAppConfigStore();
   if (detail != null) {
     detail.lines.forEach((item) => {
       item.id = ramdonString(8);
@@ -163,6 +164,7 @@ const Index = ({
       if (detail == null) {
         // creating a new invoice
         saveInvoiceRes = await createInvoice({
+          merchantId: appConfigStore.MerchantId,
           userId: user!.id,
           taxScale: Number(taxScale) * 100,
           currency,

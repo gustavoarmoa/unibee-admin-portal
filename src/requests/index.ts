@@ -2,6 +2,7 @@ import axios from 'axios';
 // import { useProfileStore } from "../stores";
 import { CURRENCY } from '../constants';
 import { IProfile, TMerchantInfo } from '../shared.types';
+import { useAppConfigStore } from '../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
@@ -56,6 +57,10 @@ export const updateProfileReq = async () => {
 }
 */
 
+export const getAppConfigReq = async () => {
+  return await axios.post(`${API_URL}/system/merchant/merchant_information`);
+};
+
 export const getMerchantInfoReq = async () => {
   const token = localStorage.getItem('merchantToken');
   return await axios.get(`${API_URL}/merchant/merchant_info/info`, {
@@ -85,11 +90,13 @@ export const uploadLogoReq = async (f: FormData) => {
 };
 
 export const getPlanList = async ({
+  merchantId,
   type,
   status,
   page,
   pageSize,
 }: {
+  merchantId: number;
   type?: number;
   status?: number;
   page: number;
@@ -103,7 +110,7 @@ export const getPlanList = async ({
     page: number;
     count: number;
   } = {
-    merchantId: 15621,
+    merchantId,
     // currency: "usd",
     page,
     count: pageSize,
@@ -197,10 +204,12 @@ export const togglePublishReq = async ({
 };
 
 export const getSublist = async ({
+  merchantId,
   status,
   page,
   pageSize,
 }: {
+  merchantId: number;
   status: number[];
   page: number;
   pageSize: number;
@@ -208,7 +217,7 @@ export const getSublist = async ({
   const token = localStorage.getItem('merchantToken');
   const body = {
     status,
-    merchantId: 15621,
+    merchantId,
     // userId: 0,
     // sortField: "string",
     // sortType: "string",
@@ -361,17 +370,19 @@ export const resumeSub = async (subscriptionId: string) => {
 };
 
 export const getSubTimeline = async ({
+  merchantId,
   userId,
   page,
   count,
 }: {
+  merchantId: number;
   userId: number;
   page: number;
   count: number;
 }) => {
   const token = localStorage.getItem('merchantToken');
   const body = {
-    merchantId: 15621,
+    merchantId,
     userId,
     // "sortField": "string",
     // "sortType": "string",
@@ -464,9 +475,9 @@ export const saveUserProfile = async (newProfile: IProfile) => {
   );
 };
 
-export const appSearchReq = async (searchKey: string) => {
+export const appSearchReq = async (searchKey: string, merchantId: number) => {
   const body = {
-    merchantId: 15621,
+    merchantId,
     searchKey,
   };
   const token = localStorage.getItem('merchantToken');
@@ -478,6 +489,7 @@ export const appSearchReq = async (searchKey: string) => {
 };
 
 export const getInvoiceList = async ({
+  merchantId,
   userId,
   page,
   count,
@@ -488,6 +500,7 @@ export const getInvoiceList = async ({
   amountStart,
   amountEnd,
 }: {
+  merchantId: number;
   userId?: number;
   page: number;
   count: number;
@@ -500,7 +513,7 @@ export const getInvoiceList = async ({
 }) => {
   const token = localStorage.getItem('merchantToken');
   const body = {
-    merchantId: 15621,
+    merchantId,
     userId,
     firstName,
     lastName,
@@ -551,6 +564,7 @@ type TInvoiceItems = {
 // admin manually create an invoice, still editable until the following publishInvoice() is called.
 // before that, users won't see(or receive) this invoice.
 export const createInvoice = async ({
+  merchantId,
   name,
   userId,
   currency,
@@ -558,6 +572,7 @@ export const createInvoice = async ({
   invoiceItems,
   finish,
 }: {
+  merchantId: number;
   name: string;
   userId: number;
   currency: string;
@@ -567,7 +582,7 @@ export const createInvoice = async ({
 }) => {
   const token = localStorage.getItem('merchantToken');
   const body = {
-    merchantId: 15621,
+    merchantId,
     userId,
     taxScale,
     gatewayId: 25,
@@ -724,65 +739,20 @@ export const downloadInvoice = (url: string) => {
     method: 'GET',
     responseType: 'blob', // important
   }).then((response) => {
-    // create file link in browser's memory
     const href = URL.createObjectURL(response.data);
-
-    // create "a" HTML element with href to file & click
     const link = document.createElement('a');
     link.href = href;
-    link.setAttribute('download', 'invoice.pdf'); //or any other extension
+    link.setAttribute('download', 'invoice.pdf');
     document.body.appendChild(link);
     link.click();
-
-    // clean up "a" element & remove ObjectURL
     document.body.removeChild(link);
     URL.revokeObjectURL(href);
   });
 };
-/*
 
-export const getInvoiceList = async ({
-  userId,
-  page,
-  count,
-  firstName,
-  lastName,
-  currency,
-  status,
-  amountStart,
-  amountEnd,
-}: {
-  userId?: number;
-  page: number;
-  count: number;
-  firstName?: string;
-  lastName?: string;
-  currency?: string;
-  status?: number[];
-  amountStart?: number;
-  amountEnd?: number;
-}) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = {
-    merchantId: 15621,
-    userId,
-    firstName,
-    lastName,
-    currency,
-    status,
-    amountStart,
-    amountEnd,
-    "sendEmail": 0,
-    "sortField": "string",
-    "sortType": "string",
-    "deleteInclude": true,
-    page,
-    count,
-  };
-
-*/
+// ------------------
 type TUserList = {
-  merchantId?: number;
+  merchantId: number;
   userId?: number;
   firstName?: string;
   lastName?: string;
@@ -792,7 +762,6 @@ type TUserList = {
   count: number;
 };
 export const getUserListReq = async (users: TUserList) => {
-  users.merchantId = 15621;
   const token = localStorage.getItem('merchantToken');
   return await axios.post(
     `${API_URL}/merchant/merchant_user/user_list`,
@@ -804,16 +773,4 @@ export const getUserListReq = async (users: TUserList) => {
     },
   );
 };
-
-export const searchUserReq = async () => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/merchant_user/user_search`,
-    { merchantId: 15621 },
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
-};
+// -----------------

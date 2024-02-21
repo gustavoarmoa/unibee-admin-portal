@@ -5,15 +5,16 @@ import {
 } from '@ant-design/icons';
 import { Button, Pagination, Space, Table, Tag, Tooltip, message } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PLAN_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { getPlanList } from '../../requests';
-import '../../shared.css';
 import { IPlan } from '../../shared.types';
+import { useAppConfigStore } from '../../stores';
+
+import '../../shared.css';
 
 const PAGE_SIZE = 10;
 const APP_PATH = import.meta.env.BASE_URL;
@@ -89,6 +90,7 @@ const columns: ColumnsType<IPlan> = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<IPlan[]>([]);
   const [page, setPage] = useState(0); // pagination props
@@ -99,6 +101,7 @@ const Index = () => {
     setLoading(true);
     try {
       const planListRes = await getPlanList({
+        merchantId: appConfigStore.MerchantId,
         // type: undefined, // get main plan and addon
         // status: undefined, // active, inactive, expired, editing, all of them
         page,

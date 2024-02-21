@@ -34,6 +34,7 @@ import { useRelogin } from '../../hooks';
 import { downloadInvoice, getInvoiceList } from '../../requests';
 import '../../shared.css';
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types';
+import { useAppConfigStore } from '../../stores';
 import { normalizeAmt } from '../helpers';
 import InvoiceModal from './modals/newInvoice';
 
@@ -41,6 +42,7 @@ const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
 
 const Index = ({ user }: { user: IProfile | null }) => {
+  const appConfigStore = useAppConfigStore();
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0); // pagination props
@@ -252,6 +254,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
     let invoiceListRes;
     try {
       invoiceListRes = await getInvoiceList({
+        merchantId: appConfigStore.MerchantId,
         page,
         count: PAGE_SIZE,
         userId: user!.id,

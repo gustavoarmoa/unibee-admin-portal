@@ -39,6 +39,14 @@ type Country = {
   name: string;
 };
 
+interface IAppConfig {
+  SupportCurrency: { Currency: string; Symbol: string; Scale: number }[];
+  SupportTimeZone: string[];
+  MerchantId: number;
+  MerchantInfo: TMerchantInfo;
+  Gateway: { gatewayId: number; gatewayName: string }[];
+}
+
 interface IAddon extends IPlan {
   quantity: number | null;
   checked: boolean;
@@ -194,6 +202,7 @@ type TInvoicePerm = {
 
 export type {
   Country,
+  IAppConfig,
   IPlan,
   IPreview,
   IProfile,
