@@ -76,6 +76,19 @@ interface ISubAddon extends IPlan {
   addonPlanId: number;
 }
 
+interface IBillableMetrics {
+  id: number;
+  merchantId: number;
+  code: string;
+  metricName: string;
+  metricDescription: string;
+  type: number; // 1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)
+  aggregationType: number; // 0-count，1-count unique, 2-latest, 3-max, 4-sum
+  aggregationProperty: string;
+  gmtModify: string;
+  createTime: string;
+}
+
 interface ISubscriptionType {
   id: number;
   subscriptionId: string;
@@ -203,6 +216,7 @@ type TInvoicePerm = {
 export type {
   Country,
   IAppConfig,
+  IBillableMetrics,
   IPlan,
   IPreview,
   IProfile,

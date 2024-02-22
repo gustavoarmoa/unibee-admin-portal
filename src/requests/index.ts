@@ -1,7 +1,7 @@
 import axios from 'axios';
 // import { useProfileStore } from "../stores";
 import { CURRENCY } from '../constants';
-import { IProfile, TMerchantInfo } from '../shared.types';
+import { IBillableMetrics, IProfile, TMerchantInfo } from '../shared.types';
 import { useAppConfigStore } from '../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
@@ -200,6 +200,34 @@ export const togglePublishReq = async ({
       Authorization: `${token}`, // Bearer: ******
     },
   });
+};
+
+export const getMetricsListReq = async () => {
+  const appConfig = useAppConfigStore.getState();
+  const token = localStorage.getItem('merchantToken');
+  return await axios.get(
+    `${API_URL}/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    },
+  );
+};
+
+export const createMetricsReq = async (metrics: any) => {
+  const token = localStorage.getItem('merchantToken');
+  const appConfig = useAppConfigStore.getState();
+  metrics.merchantId = appConfig.MerchantId;
+  return await axios.post(
+    `${API_URL}/merchant/merchant_metric/new_merchant_metric`,
+    metrics,
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    },
+  );
 };
 
 export const getSublist = async ({

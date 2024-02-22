@@ -26,6 +26,8 @@ import OutletPage from './components/outletPage';
 import PlanNew from './components/plan/newPlan';
 import PlanDetail from './components/plan/planDetail';
 // import PricePlans from './components/pricePlans';
+import BillableMetricsDetail from './components/billableMetrics/detail';
+import BillableMetricsList from './components/billableMetrics/list';
 import PricePlanList from './components/plan/plansList';
 import Settings from './components/settings';
 import SubscriptionDetail from './components/subscription/detail';
@@ -60,6 +62,7 @@ function getItem(
 
 const items: MenuItem[] = [
   getItem('Plan', '/plan/list', <DesktopOutlined />),
+  getItem('Billable metrics', '/billable-metrics/list', <DesktopOutlined />),
   getItem('Subscription', '/subscription/list', <PieChartOutlined />),
   getItem('Invoice', '/invoice/list', <PieChartOutlined />),
   getItem('Customer', '/customer/list', <PieChartOutlined />),
@@ -109,6 +112,7 @@ const App: React.FC = () => {
       }
     }
   };
+  //   getItem('Billable metrics', '/billable-metrics/list', <DesktopOutlined />),
 
   useEffect(() => {
     console.log('pathname: ', location.pathname);
@@ -121,6 +125,8 @@ const App: React.FC = () => {
       setActiveMenuItem(['/customer/list']);
     } else if (pathItems[0] == 'invoice') {
       setActiveMenuItem(['/invoice/list']);
+    } else if (pathItems[0] == 'billable-metrics') {
+      setActiveMenuItem(['/billable-metrics/list']);
     } else {
       setActiveMenuItem(['/' + pathItems[0]]);
     }
@@ -169,17 +175,8 @@ const App: React.FC = () => {
               onClick={onItemClick}
             />
             <div
+              className="absolute bottom-24 flex w-full cursor-pointer items-center justify-center text-gray-50"
               onClick={logout}
-              style={{
-                color: '#FFF',
-                position: 'absolute',
-                bottom: '80px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                cursor: 'pointer',
-              }}
             >
               <LogoutOutlined />
               &nbsp;&nbsp;Logout
@@ -226,10 +223,23 @@ const App: React.FC = () => {
                       element={<SubscriptionDetail />}
                     />
                   </Route>
+
                   <Route path={`${APP_PATH}plan`} Component={OutletPage}>
                     <Route path="list" element={<PricePlanList />} />
                     <Route path="new" element={<PlanNew />} />
                     <Route path=":planId" element={<PlanDetail />} />
+                  </Route>
+
+                  <Route
+                    path={`${APP_PATH}billable-metrics`}
+                    Component={OutletPage}
+                  >
+                    <Route path="list" element={<BillableMetricsList />} />
+                    <Route path="new" element={<BillableMetricsDetail />} />
+                    <Route
+                      path=":metricsId"
+                      element={<BillableMetricsDetail />}
+                    />
                   </Route>
 
                   <Route path={`${APP_PATH}customer`} Component={OutletPage}>
