@@ -90,7 +90,7 @@ const columns: ColumnsType<IPlan> = [
 
 const Index = () => {
   const navigate = useNavigate();
-  const appConfigStore = useAppConfigStore();
+  // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false);
   const [plan, setPlan] = useState<IPlan[]>([]);
   const [page, setPage] = useState(0); // pagination props
@@ -101,7 +101,6 @@ const Index = () => {
     setLoading(true);
     try {
       const planListRes = await getPlanList({
-        merchantId: appConfigStore.MerchantId,
         // type: undefined, // get main plan and addon
         // status: undefined, // active, inactive, expired, editing, all of them
         page,

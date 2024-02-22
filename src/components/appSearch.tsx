@@ -49,7 +49,7 @@ const Index = () => {
     try {
       setSearching(true);
       setShowResult(true);
-      res = await appSearchReq(term, appConfigStore.MerchantId);
+      res = await appSearchReq(term);
       setSearching(false);
       console.log('app search res: ', res);
       const code = res.data.code;

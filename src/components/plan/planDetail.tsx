@@ -183,7 +183,6 @@ const Index = () => {
       const res = ([planListRes, planDetailRes] = await Promise.all([
         // any rejected promise will jump to the catch block, this is what we want.
         getPlanList({
-          merchantId: appConfigStore.MerchantId,
           type: 2,
           status: 2,
           page: 0,

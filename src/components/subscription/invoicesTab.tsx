@@ -42,7 +42,7 @@ const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
 
 const Index = ({ user }: { user: IProfile | null }) => {
-  const appConfigStore = useAppConfigStore();
+  // const appConfigStore = useAppConfigStore();
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0); // pagination props
@@ -254,7 +254,6 @@ const Index = ({ user }: { user: IProfile | null }) => {
     let invoiceListRes;
     try {
       invoiceListRes = await getInvoiceList({
-        merchantId: appConfigStore.MerchantId,
         page,
         count: PAGE_SIZE,
         userId: user!.id,

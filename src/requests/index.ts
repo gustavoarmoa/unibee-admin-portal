@@ -90,18 +90,17 @@ export const uploadLogoReq = async (f: FormData) => {
 };
 
 export const getPlanList = async ({
-  merchantId,
   type,
   status,
   page,
   pageSize,
 }: {
-  merchantId: number;
   type?: number;
   status?: number;
   page: number;
   pageSize: number;
 }) => {
+  const appConfig = useAppConfigStore.getState();
   const token = localStorage.getItem('merchantToken');
   const body: {
     merchantId: number;
@@ -110,7 +109,7 @@ export const getPlanList = async ({
     page: number;
     count: number;
   } = {
-    merchantId,
+    merchantId: appConfig.MerchantId,
     // currency: "usd",
     page,
     count: pageSize,
@@ -204,20 +203,19 @@ export const togglePublishReq = async ({
 };
 
 export const getSublist = async ({
-  merchantId,
   status,
   page,
   pageSize,
 }: {
-  merchantId: number;
   status: number[];
   page: number;
   pageSize: number;
 }) => {
   const token = localStorage.getItem('merchantToken');
+  const appConfig = useAppConfigStore.getState();
   const body = {
     status,
-    merchantId,
+    merchantId: appConfig.MerchantId,
     // userId: 0,
     // sortField: "string",
     // sortType: "string",
@@ -370,19 +368,18 @@ export const resumeSub = async (subscriptionId: string) => {
 };
 
 export const getSubTimeline = async ({
-  merchantId,
   userId,
   page,
   count,
 }: {
-  merchantId: number;
   userId: number;
   page: number;
   count: number;
 }) => {
+  const appConfig = useAppConfigStore.getState();
   const token = localStorage.getItem('merchantToken');
   const body = {
-    merchantId,
+    merchantId: appConfig.MerchantId,
     userId,
     // "sortField": "string",
     // "sortType": "string",
@@ -400,10 +397,11 @@ export const getSubTimeline = async ({
   );
 };
 
-export const getCountryList = async (merchantId: number) => {
+export const getCountryList = async () => {
+  const appConfig = useAppConfigStore.getState();
   const token = localStorage.getItem('merchantToken');
   const body = {
-    merchantId,
+    merchantId: appConfig.MerchantId,
   };
   return await axios.post(`${API_URL}/merchant/vat/vat_country_list`, body, {
     headers: {
@@ -475,9 +473,10 @@ export const saveUserProfile = async (newProfile: IProfile) => {
   );
 };
 
-export const appSearchReq = async (searchKey: string, merchantId: number) => {
+export const appSearchReq = async (searchKey: string) => {
+  const appConfig = useAppConfigStore.getState();
   const body = {
-    merchantId,
+    merchantId: appConfig.MerchantId,
     searchKey,
   };
   const token = localStorage.getItem('merchantToken');
@@ -489,7 +488,6 @@ export const appSearchReq = async (searchKey: string, merchantId: number) => {
 };
 
 export const getInvoiceList = async ({
-  merchantId,
   userId,
   page,
   count,
@@ -500,7 +498,6 @@ export const getInvoiceList = async ({
   amountStart,
   amountEnd,
 }: {
-  merchantId: number;
   userId?: number;
   page: number;
   count: number;
@@ -511,9 +508,10 @@ export const getInvoiceList = async ({
   amountStart?: number;
   amountEnd?: number;
 }) => {
+  const appConfig = useAppConfigStore.getState();
   const token = localStorage.getItem('merchantToken');
   const body = {
-    merchantId,
+    merchantId: appConfig.MerchantId,
     userId,
     firstName,
     lastName,
@@ -564,7 +562,6 @@ type TInvoiceItems = {
 // admin manually create an invoice, still editable until the following publishInvoice() is called.
 // before that, users won't see(or receive) this invoice.
 export const createInvoice = async ({
-  merchantId,
   name,
   userId,
   currency,
@@ -572,7 +569,6 @@ export const createInvoice = async ({
   invoiceItems,
   finish,
 }: {
-  merchantId: number;
   name: string;
   userId: number;
   currency: string;
@@ -580,9 +576,10 @@ export const createInvoice = async ({
   invoiceItems: TInvoiceItems[];
   finish: boolean;
 }) => {
+  const appConfig = useAppConfigStore.getState();
   const token = localStorage.getItem('merchantToken');
   const body = {
-    merchantId,
+    merchantId: appConfig.MerchantId,
     userId,
     taxScale,
     gatewayId: 25,

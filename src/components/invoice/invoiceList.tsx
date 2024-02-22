@@ -130,7 +130,6 @@ const Index = () => {
     try {
       setLoading(true);
       const res = await getInvoiceList({
-        merchantId: appConfigStore.MerchantId,
         page,
         count: PAGE_SIZE,
         ...searchTerm,

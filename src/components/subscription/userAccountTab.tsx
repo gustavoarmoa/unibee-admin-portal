@@ -79,9 +79,7 @@ const UserAccountTab = ({
     const fetchData = async () => {
       let countryListRes;
       try {
-        const res = ([countryListRes] = await Promise.all([
-          getCountryList(appConfigStore.MerchantId),
-        ]));
+        const res = ([countryListRes] = await Promise.all([getCountryList()]));
         console.log('country: ', countryListRes);
         res.forEach((r) => {
           const code = r.data.code;

@@ -108,7 +108,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const relogin = useRelogin();
-  const appConfigStore = useAppConfigStore();
+  // const appConfigStore = useAppConfigStore();
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
   const [statusFilter, setStatusFilter] = useState<number[]>([]);
@@ -118,7 +118,6 @@ const Index = () => {
     let subListRes;
     try {
       subListRes = await getSublist({
-        merchantId: appConfigStore.MerchantId,
         page,
         pageSize: PAGE_SIZE,
         status: statusFilter,

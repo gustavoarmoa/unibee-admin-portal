@@ -55,7 +55,7 @@ import '../../shared.css';
 
 const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   // const navigate = useNavigate();
-  const appConfigStore = useAppConfigStore();
+  // const appConfigStore = useAppConfigStore();
   const relogin = useRelogin();
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
@@ -358,7 +358,6 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       const res = ([subDetailRes, planListRes] = await Promise.all([
         getSubDetail(subId),
         getPlanList({
-          merchantId: appConfigStore.MerchantId,
           type: 1,
           status: 2,
           page: 0,
@@ -999,7 +998,7 @@ const SubTimeline = ({
   plans: IPlan[];
 }) => {
   const relogin = useRelogin();
-  const appConfigStore = useAppConfigStore();
+  // const appConfigStore = useAppConfigStore();
   // parent updated, how can I knwo that, and update myself
   const [timeline, setTimeline] = useState<SubTimeline[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1044,7 +1043,6 @@ const SubTimeline = ({
     try {
       setLoading(true);
       const timelineRes = await getSubTimeline({
-        merchantId: appConfigStore.MerchantId,
         userId,
         page,
         count: PAGE_SIZE,

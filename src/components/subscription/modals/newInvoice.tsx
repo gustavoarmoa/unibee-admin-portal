@@ -59,7 +59,7 @@ const Index = ({
   refresh,
 }: Props) => {
   const [loading, setLoading] = useState(false);
-  const appConfigStore = useAppConfigStore();
+  // const appConfigStore = useAppConfigStore();
   if (detail != null) {
     detail.lines.forEach((item) => {
       item.id = ramdonString(8);
@@ -164,7 +164,6 @@ const Index = ({
       if (detail == null) {
         // creating a new invoice
         saveInvoiceRes = await createInvoice({
-          merchantId: appConfigStore.MerchantId,
           userId: user!.id,
           taxScale: Number(taxScale) * 100,
           currency,
