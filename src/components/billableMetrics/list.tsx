@@ -5,13 +5,17 @@ import {
 } from '@ant-design/icons';
 import { Button, Pagination, Space, Table, Tag, Tooltip, message } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import React, { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PLAN_STATUS } from '../../constants';
-import { showAmount } from '../../helpers';
+import {
+  METRICS_AGGREGATE_TYPE,
+  METRICS_TYPE,
+  PLAN_STATUS,
+} from '../../constants';
 import { useRelogin } from '../../hooks';
-import { getMetricsListReq, getPlanList } from '../../requests';
-import { IBillableMetrics, IPlan } from '../../shared.types';
+import { getMetricsListReq } from '../../requests';
+import { IBillableMetrics } from '../../shared.types';
 import { useAppConfigStore } from '../../stores';
 
 import '../../shared.css';
@@ -26,56 +30,53 @@ const PLAN_STATUS_FILTER = Object.keys(PLAN_STATUS)
   .sort((a, b) => (a.value < b.value ? -1 : 1));
 console.log('plan fiiltr: ', PLAN_STATUS_FILTER);
 
-const columns: ColumnsType<IPlan> = [
+const columns: ColumnsType<IBillableMetrics> = [
   {
     title: 'Name',
-    dataIndex: 'planName',
-    key: 'planName',
+    dataIndex: 'metricName',
+    key: 'metricName',
     // render: (text) => <a>{text}</a>,
+  },
+
+  {
+    title: 'Code',
+    dataIndex: 'code',
+    key: 'code',
   },
   {
     title: 'Description',
-    dataIndex: 'description',
-    key: 'description',
-  },
-  {
-    title: 'Price',
-    dataIndex: 'price',
-    key: 'price',
-    render: (_, p) => {
-      return (
-        <span>{` ${showAmount(p.amount, p.currency)} /${
-          p.intervalCount == 1 ? '' : p.intervalCount
-        }${p.intervalUnit} `}</span>
-      );
-    },
+    dataIndex: 'metricDescription',
+    key: 'metricDescription',
   },
   {
     title: 'Type',
     dataIndex: 'type',
     key: 'type',
-    render: (_, plan) => {
-      return plan.type == 1 ? <span>Main plan</span> : <span>Add-on</span>;
+    render: (t, metrics) => {
+      return <span>{METRICS_TYPE[t]}</span>;
     },
   },
   {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    render: (_, plan) => <span>{PLAN_STATUS[plan.status]}</span>,
-    filters: PLAN_STATUS_FILTER,
-    onFilter: (value, record) => record.status == value,
+    title: 'Aggregation Type',
+    dataIndex: 'aggregationType',
+    key: 'aggregationType',
+    render: (aggreType, metrics) => {
+      return <span>{METRICS_AGGREGATE_TYPE[aggreType]}</span>;
+    },
   },
   {
-    title: 'Published',
-    dataIndex: 'publishStatus',
-    key: 'publishStatus',
-    render: (publishStatus, plan) =>
-      publishStatus == 2 ? (
-        <CheckCircleOutlined style={{ color: 'green' }} />
-      ) : (
-        <MinusOutlined style={{ color: 'red' }} />
-      ),
+    title: 'Aggregation Property',
+    dataIndex: 'aggregationProperty',
+    key: 'aggregationProperty',
+    render: (prop, metrics) => <span>{prop}</span>,
+    // filters: PLAN_STATUS_FILTER,
+    // onFilter: (value, record) => record.status == value,
+  },
+  {
+    title: 'Updated at',
+    dataIndex: 'gmtModify',
+    key: 'gmtModify',
+    render: (d, metrics) => dayjs(d * 1000).format('YYYY-MMM-DD'),
   },
   {
     title: 'Action',
@@ -92,41 +93,10 @@ const Index = () => {
   const navigate = useNavigate();
   // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState<IPlan[]>([]);
+  const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]);
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
   const relogin = useRelogin();
-
-  const fetchPlan = async () => {
-    setLoading(true);
-    try {
-      const planListRes = await getPlanList({
-        // type: undefined, // get main plan and addon
-        // status: undefined, // active, inactive, expired, editing, all of them
-        page,
-        pageSize: PAGE_SIZE,
-      });
-      setLoading(false);
-      console.log('plan list res: ', planListRes);
-      const statusCode = planListRes.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(planListRes.data.message);
-      }
-      if (planListRes.data.data.Plans == null) {
-        return;
-      }
-      setPlan(planListRes.data.data.Plans.map((p: any) => ({ ...p.plan })));
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err getting planlist: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
-    }
-  };
 
   const fetchMetricsList = async () => {
     setLoading(true);
@@ -139,8 +109,7 @@ const Index = () => {
         statusCode == 61 && relogin();
         throw new Error(metricsListRes.data.message);
       }
-
-      // setPlan(planListRes.data.data.Plans.map((p: any) => ({ ...p.plan })));
+      setMetricsList(metricsListRes.data.data.MerchantMetrics);
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
@@ -152,7 +121,7 @@ const Index = () => {
     }
   };
 
-  const onTableChange: TableProps<IPlan>['onChange'] = (
+  const onTableChange: TableProps<IBillableMetrics>['onChange'] = (
     pagination,
     filters,
     sorter,
@@ -192,7 +161,7 @@ const Index = () => {
       </div>
       <Table
         columns={columns}
-        dataSource={plan}
+        dataSource={metricsList}
         rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}
@@ -205,7 +174,7 @@ const Index = () => {
           return {
             onClick: (event) => {
               console.log('row click: ', record, '///', rowIndex);
-              navigate(`${APP_PATH}plan/${record.id}`);
+              navigate(`${APP_PATH}billable-metrics/${record.id}`);
             },
           };
         }}

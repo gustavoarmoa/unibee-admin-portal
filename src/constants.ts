@@ -37,3 +37,17 @@ export const INVOICE_STATUS: { [key: number]: string } = {
   4: 'Failed', // user not pay the invoice before it get expired
   5: 'Cancelled', // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
 };
+
+export const METRICS_TYPE: { [key: number]: string } = {
+  1: 'limit_metered',
+  2: 'charge_metered', // not used yet
+  3: 'charge_recurring', // not used yet
+};
+
+export const METRICS_AGGREGATE_TYPE: { [key: number]: string } = {
+  0: 'count',
+  1: 'count unique',
+  2: 'latest',
+  3: 'max',
+  4: 'sum',
+};
