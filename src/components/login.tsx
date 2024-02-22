@@ -178,9 +178,7 @@ const Login1 = ({
       style={{
         maxWidth: 640,
       }}
-      initialValues={{
-        remember: true,
-      }}
+      initialValues={{}}
       autoComplete="off"
     >
       <Form.Item
@@ -248,6 +246,7 @@ const Login2 = ({
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) => {
   const merchantInfoStore = useMerchantInfoStore();
+  const appConfigStore = useAppConfigStore();
   const [currentStep, setCurrentStep] = useState(0); // 0: input email, 1: input verification code
   const [submitting, setSubmitting] = useState(false);
   const [otp, setOtp] = useState('');
@@ -300,8 +299,15 @@ const Login2 = ({
         setErrMsg(infoRes.data.message);
         throw new Error(infoRes.data.message);
       }
-      setSubmitting(false);
       merchantInfoStore.setMerchantInfo(infoRes.data.data.MerchantInfo);
+
+      const appConfigRes = await getAppConfigReq();
+      setSubmitting(false);
+      console.log('app config res: ', appConfigRes);
+      if (appConfigRes.data.code != 0) {
+        throw new Error(appConfigRes.data.message);
+      }
+      appConfigStore.setAppConfig(appConfigRes.data.data);
       // set profile
       navigate(`${APP_PATH}subscription/list`);
     } catch (err) {
