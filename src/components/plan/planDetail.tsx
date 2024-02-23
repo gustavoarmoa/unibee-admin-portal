@@ -11,6 +11,7 @@ import { CURRENCY, PLAN_STATUS } from '../../constants';
 import { useRelogin } from '../../hooks';
 import {
   activatePlan,
+  getMetricsListReq,
   getPlanDetail,
   getPlanList,
   savePlan,
@@ -24,10 +25,6 @@ import { useAppConfigStore } from '../../stores';
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
 
-interface IPlanDetail extends IPlan {
-  addonIds: number[];
-}
-
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
   const params = useParams();
@@ -35,7 +32,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [activating, setActivating] = useState(false);
   const [publishing, setPublishing] = useState(false); // when toggling publish/unpublish
-  const [plan, setPlan] = useState<IPlanDetail | null>(null);
+  const [plan, setPlan] = useState<IPlan | null>(null);
   const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
   const navigate = useNavigate();
@@ -100,47 +97,6 @@ const Index = () => {
     }
   };
 
-  /*
-  const bindAddon = () => {
-    const token = localStorage.getItem("merchantToken");
-    // const addonField = form.getFieldsValue(["addons"]);
-    console.log("selectedAddon: ", selectedAddon);
-    axios
-      .post(
-        `${API_URL}/merchant/plan/subscription_plan_addons_binding`,
-        {
-          planId: plan?.id,
-          action: 0,
-          addonIds: selectedAddon,
-        },
-        {
-          headers: {
-            Authorization: `${token}`, // Bearer: ******
-          },
-        }
-      )
-      .then((res) => {
-        console.log("edit plan res: ", res);
-        const statuCode = res.data.code;
-        if (statuCode != 0) {
-          if (statuCode == 61) {
-            console.log("invalid token");
-            navigate(`${APP_PATH}login`, {
-              state: { msg: "session expired, please re-login" },
-            });
-            return;
-          }
-          throw new Error(res.data.message);
-        }
-        message.success("Addons bound");
-      })
-      .catch((err) => {
-        console.log("edit plan err: ", err.message);
-        message.error(err.message);
-      });
-  };
-  */
-
   const onActivate = async () => {
     const planId = Number(params.planId);
     if (isNaN(planId)) {
@@ -178,24 +134,28 @@ const Index = () => {
     if (isNaN(planId)) {
       return;
     }
-    let addonListRes: any, planDetailRes: any;
+    let addonListRes: any, planDetailRes: any, metricsListRes: any;
     try {
       setLoading(true);
-      const res = ([addonListRes, planDetailRes] = await Promise.all([
-        getPlanList({
-          type: 2, // addon
-          status: 2, // active
-          page: 0,
-          pageSize: 100,
-        }), // let's assume there are at most 100 addons.
-        getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
-      ]));
+      const res = ([addonListRes, planDetailRes, metricsListRes] =
+        await Promise.all([
+          getPlanList({
+            type: 2, // addon
+            status: 2, // active
+            page: 0,
+            pageSize: 100,
+          }), // let's assume there are at most 100 addons.
+          getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
+          getMetricsListReq(),
+        ]));
       setLoading(false);
       console.log(
-        '[addonListRes, planDetailRes]',
+        '[addonListRes, planDetailRes, metricsListRes]',
         addonListRes,
         '///',
         planDetailRes,
+        '///',
+        metricsListRes,
       );
 
       res.forEach((r) => {
@@ -216,18 +176,18 @@ const Index = () => {
       return;
     }
 
+    // plan obj and addon obj are at the same level in planDetailRes.data.data obj
+    // but I want to put addonIds obj as a props of the local plan obj.
     planDetailRes.data.data.Plan.plan.amount = getAmount(
       planDetailRes.data.data.Plan.plan.amount,
       planDetailRes.data.data.Plan.plan.currency,
     ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
 
-    planDetailRes.data.data.Plan.plan.addonIds = [];
+    planDetailRes.data.data.Plan.plan.addonIds =
+      planDetailRes.data.data.Plan.addonIds == null
+        ? []
+        : planDetailRes.data.data.Plan.addonIds;
 
-    if (planDetailRes.data.data.Plan.addons != null) {
-      console.log('found attached addons');
-      planDetailRes.data.data.Plan.plan.addonIds =
-        planDetailRes.data.data.Plan.addons.map((a: any) => a.id);
-    }
     setPlan(planDetailRes.data.data.Plan.plan);
 
     const addons = addonListRes.data.data.Plans.map((p: any) => p.plan);
@@ -436,19 +396,23 @@ const Index = () => {
             </Form.Item>
           )}
 
-          <Form.Item label="Product Name" name="productName">
+          <Form.Item label="Product Name" name="productName" hidden>
             <Input />
           </Form.Item>
 
-          <Form.Item label="Product Description" name="productDescription">
+          <Form.Item
+            label="Product Description"
+            name="productDescription"
+            hidden
+          >
             <Input />
           </Form.Item>
 
-          <Form.Item label="imageUrl" name="imageUrl">
+          <Form.Item label="imageUrl" name="imageUrl" hidden>
             <Input disabled />
           </Form.Item>
 
-          <Form.Item label="homeUrl" name="homeUrl">
+          <Form.Item label="homeUrl" name="homeUrl" hidden>
             <Input disabled />
           </Form.Item>
 

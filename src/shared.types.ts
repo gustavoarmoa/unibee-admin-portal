@@ -63,7 +63,8 @@ interface IPlan {
   amount: number;
   status: number; // 1: editing，2: active, 3: inactive，4: expired
   publishStatus: number; // 1: unpublished(not visible to users), 2: published(users could see and choose this plan)
-  addons?: IAddon[];
+  addons?: IAddon[]; // bad design, make a ISubscriptionPlan interface extending from IPlan with quantity/checked
+  addonIds?: number[]; // which addons have been attached to this plan.
   createTime: number;
   companyId: number;
   merchantId: number;
