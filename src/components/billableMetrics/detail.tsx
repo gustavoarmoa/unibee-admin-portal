@@ -16,38 +16,26 @@ import {
   message,
 } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { CURRENCY, PLAN_STATUS } from '../../constants';
 import { useRelogin } from '../../hooks';
 import {
-  activatePlan,
   createMetricsReq,
-  getPlanDetail,
-  getPlanList,
-  savePlan,
-  togglePublishReq,
+  getMetricDetailReq,
+  updateMetricsReq,
 } from '../../requests';
-import { IPlan } from '../../shared.types';
 import { useAppConfigStore } from '../../stores';
 
 const { TextArea } = Input;
 
 const APP_PATH = import.meta.env.BASE_URL;
 
-const getAmount = (amt: number, currency: string) =>
-  amt / CURRENCY[currency].stripe_factor;
-
-// this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
   const params = useParams();
-  const appConfigStore = useAppConfigStore();
+  const metricsId = params.metricsId;
+  const isNew = metricsId == null;
+
   const [loading, setLoading] = useState(false);
-  const [activating, setActivating] = useState(false);
-  const [publishing, setPublishing] = useState(false); // when toggling publish/unpublish
-  const [plan, setPlan] = useState<IPlan | null>(null);
-  const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have
-  const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
-  const [selectedAddon, setSelectedAddon] = useState<number[]>([]); // from the above selectAddons, which are selected(addon Id array)
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [aggrePropDisabled, setAggrePropDisabled] = useState(true);
@@ -57,29 +45,38 @@ const Index = () => {
     setAggrePropDisabled(watchAggreType == 0);
   }, [watchAggreType]);
 
-  // const onTypeChange =
-
   const onSave = async () => {
-    // TODO: remove aggreProps if aggrType == 0
     console.log('form values: ', form.getFieldsValue());
-    const m = JSON.parse(JSON.stringify(form.getFieldsValue()));
-    if (m.watchAggreType == 0) {
-      delete m.aggregationProperty;
+    let m;
+    if (isNew) {
+      m = JSON.parse(JSON.stringify(form.getFieldsValue()));
+      if (m.watchAggreType == 0) {
+        delete m.aggregationProperty;
+      }
+    } else {
+      m = {
+        metricId: Number(metricsId),
+        metricName: form.getFieldValue('metricName'),
+        metricDescription: form.getFieldValue('metricDescription'),
+      };
     }
+
+    const actionMethod = isNew ? createMetricsReq : updateMetricsReq;
     setLoading(true);
     try {
-      const res = await createMetricsReq(m);
+      const res = await actionMethod(m);
       setLoading(false);
       const statusCode = res.data.code;
       if (statusCode != 0) {
         statusCode == 61 && relogin();
         throw new Error(res.data.message);
       }
-      message.success('Metrics created'); // TODO: redirect to /billable-metrics/:id
+      message.success(`Metrics ${isNew ? 'created' : 'updated'}.`);
+      navigate(`${APP_PATH}billable-metrics/list`);
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
-        console.log('err in creatign metrics: ', err.message);
+        console.log('err in creatign/updating metrics: ', err.message);
         message.error(err.message);
       } else {
         message.error('Unknown error');
@@ -87,7 +84,34 @@ const Index = () => {
     }
   };
 
-  useEffect(() => {}, []);
+  const fetchMetrics = async () => {
+    setLoading(true);
+    try {
+      const res = await getMetricDetailReq(Number(metricsId));
+      setLoading(false);
+      console.log('fetch metrics detail: ', res);
+      const statusCode = res.data.code;
+      if (statusCode != 0) {
+        statusCode == 61 && relogin();
+        throw new Error(res.data.message);
+      }
+      form.setFieldsValue(res.data.data.merchantMetric);
+    } catch (err) {
+      setLoading(false);
+      if (err instanceof Error) {
+        console.log('err in fetching metrics detail: ', err.message);
+        message.error(err.message);
+      } else {
+        message.error('Unknown error');
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!isNew) {
+      fetchMetrics();
+    }
+  }, []);
 
   return (
     <div className="h-full">
@@ -117,7 +141,7 @@ const Index = () => {
             <Row gutter={[16, 16]}>
               <Col span={10}>
                 <Form.Item
-                  name="name"
+                  name="metricName"
                   noStyle={true}
                   rules={[
                     {
@@ -140,7 +164,7 @@ const Index = () => {
                     },
                   ]}
                 >
-                  <Input />
+                  <Input disabled={!isNew} />
                 </Form.Item>
               </Col>
             </Row>
@@ -150,7 +174,7 @@ const Index = () => {
             </Row>
             <Row gutter={[16, 16]}>
               <Col span={20}>
-                <Form.Item name="description" noStyle={true}>
+                <Form.Item name="metricDescription" noStyle={true}>
                   <TextArea rows={6} />
                 </Form.Item>
               </Col>
@@ -163,7 +187,7 @@ const Index = () => {
             <Row>
               <Col>
                 <Form.Item name="type">
-                  <Radio.Group>
+                  <Radio.Group disabled={!isNew}>
                     <Radio.Button value={1}>Limit metered</Radio.Button>
                     <Radio.Button value={2} disabled>
                       Charge metered
@@ -193,15 +217,13 @@ const Index = () => {
                   ]}
                 >
                   <Select
-                    // defaultValue="lucy"
                     style={{ width: 160 }}
-                    // onChange={handleChange}
                     options={[
-                      { value: 0, label: 'Count' },
-                      { value: 1, label: 'Count unique' },
-                      { value: 2, label: 'Latest' },
-                      { value: 3, label: 'Max' },
-                      { value: 4, label: 'Sum' },
+                      { value: 0, label: 'Count', disabled: !isNew },
+                      { value: 1, label: 'Count unique', disabled: !isNew },
+                      { value: 2, label: 'Latest', disabled: !isNew },
+                      { value: 3, label: 'Max', disabled: !isNew },
+                      { value: 4, label: 'Sum', disabled: !isNew },
                     ]}
                   />
                 </Form.Item>
@@ -217,7 +239,7 @@ const Index = () => {
                       },
                     ]}
                   >
-                    <Input disabled={aggrePropDisabled} />
+                    <Input disabled={aggrePropDisabled || !isNew} />
                   </Form.Item>
                 </Col>
               )}

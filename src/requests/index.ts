@@ -230,6 +230,40 @@ export const createMetricsReq = async (metrics: any) => {
   );
 };
 
+export const updateMetricsReq = async ({
+  metricId,
+  metricName,
+  metricDescription,
+}: {
+  metricId: number;
+  metricName: string;
+  metricDescription: string;
+}) => {
+  const token = localStorage.getItem('merchantToken');
+  return await axios.post(
+    `${API_URL}/merchant/merchant_metric/edit_merchant_metric`,
+    { metricId, metricName, metricDescription },
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    },
+  );
+};
+
+export const getMetricDetailReq = async (metricId: number) => {
+  const token = localStorage.getItem('merchantToken');
+  return await axios.post(
+    `${API_URL}/merchant/merchant_metric/merchant_metric_detail`,
+    { metricId },
+    {
+      headers: {
+        Authorization: `${token}`, // Bearer: ******
+      },
+    },
+  );
+};
+
 export const getSublist = async ({
   status,
   page,

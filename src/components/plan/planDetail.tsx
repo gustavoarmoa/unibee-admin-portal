@@ -24,6 +24,10 @@ import { useAppConfigStore } from '../../stores';
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
 
+interface IPlanDetail extends IPlan {
+  addonIds: number[];
+}
+
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
   const params = useParams();
@@ -31,10 +35,9 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [activating, setActivating] = useState(false);
   const [publishing, setPublishing] = useState(false); // when toggling publish/unpublish
-  const [plan, setPlan] = useState<IPlan | null>(null);
+  const [plan, setPlan] = useState<IPlanDetail | null>(null);
   const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
-  const [selectedAddon, setSelectedAddon] = useState<number[]>([]); // from the above selectAddons, which are selected(addon Id array)
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const relogin = useRelogin();
@@ -63,7 +66,6 @@ const Index = () => {
     );
     setSelectAddons(newAddons);
     // when editing addon, don't do anything in this effect.
-
     // once changed, I'm gonna clear the selected addons,
   }, [itvCountUnit, itvCountValue, addonCurrency]);
 
@@ -74,7 +76,6 @@ const Index = () => {
 
     f.intervalCount = Number(f.intervalCount);
     f.planId = values.id;
-    f.addonIds = selectedAddon;
     console.log('saving plan form: ', f);
 
     try {
@@ -177,23 +178,22 @@ const Index = () => {
     if (isNaN(planId)) {
       return;
     }
-    let planListRes: any, planDetailRes: any;
+    let addonListRes: any, planDetailRes: any;
     try {
       setLoading(true);
-      const res = ([planListRes, planDetailRes] = await Promise.all([
-        // any rejected promise will jump to the catch block, this is what we want.
+      const res = ([addonListRes, planDetailRes] = await Promise.all([
         getPlanList({
-          type: 2,
-          status: 2,
+          type: 2, // addon
+          status: 2, // active
           page: 0,
           pageSize: 100,
-        }), // type: 2 (addon), status: 2 (active), let's assume there are at most 100 addons.
+        }), // let's assume there are at most 100 addons.
         getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
       ]));
       setLoading(false);
       console.log(
-        '[planListRes, planDetailRes]',
-        planListRes,
+        '[addonListRes, planDetailRes]',
+        addonListRes,
         '///',
         planDetailRes,
       );
@@ -221,13 +221,16 @@ const Index = () => {
       planDetailRes.data.data.Plan.plan.currency,
     ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
 
-    setPlan(planDetailRes.data.data.Plan.plan);
+    planDetailRes.data.data.Plan.plan.addonIds = [];
+
     if (planDetailRes.data.data.Plan.addons != null) {
-      setSelectedAddon(
-        planDetailRes.data.data.Plan.addons.map((a: any) => a.id),
-      );
+      console.log('found attached addons');
+      planDetailRes.data.data.Plan.plan.addonIds =
+        planDetailRes.data.data.Plan.addons.map((a: any) => a.id);
     }
-    const addons = planListRes.data.data.Plans.map((p: any) => p.plan);
+    setPlan(planDetailRes.data.data.Plan.plan);
+
+    const addons = addonListRes.data.data.Plans.map((p: any) => p.plan);
     setAddons(addons);
     setSelectAddons(
       addons.filter(
@@ -420,15 +423,11 @@ const Index = () => {
           </Form.Item>
 
           {plan.type == 1 && (
-            <Form.Item label="Add-ons" name="addons">
+            <Form.Item label="Add-ons" name="addonIds">
               <Select
                 mode="multiple"
                 allowClear
                 style={{ width: '100%' }}
-                value={selectedAddon}
-                onChange={(value) => {
-                  console.log('on sleecgt change: ', setSelectedAddon(value));
-                }}
                 options={selectAddons.map((a) => ({
                   label: a.planName,
                   value: a.id,

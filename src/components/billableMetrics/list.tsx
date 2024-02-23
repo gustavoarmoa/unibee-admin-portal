@@ -109,7 +109,7 @@ const Index = () => {
         statusCode == 61 && relogin();
         throw new Error(metricsListRes.data.message);
       }
-      setMetricsList(metricsListRes.data.data.MerchantMetrics);
+      setMetricsList(metricsListRes.data.data.merchantMetrics);
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
@@ -195,3 +195,8 @@ const Index = () => {
 };
 
 export default Index;
+/*
+  navigate(`${APP_PATH}profile/subscription`, {
+        state: { from: 'login' },
+      });
+*/
