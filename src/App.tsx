@@ -20,18 +20,17 @@ import {
 import { useMerchantInfoStore } from './stores';
 
 import Dashboard from './components/dashboard';
-import InvoiceDetail from './components/invoice/invoiceDetail';
-import InvoiceList from './components/invoice/invoiceList';
+import InvoiceDetail from './components/invoice/detail';
+import InvoiceList from './components/invoice/list';
 import OutletPage from './components/outletPage';
-import PlanNew from './components/plan/newPlan';
-import PlanDetail from './components/plan/planDetail';
+import PlanDetail from './components/plan/detail';
 // import PricePlans from './components/pricePlans';
 import BillableMetricsDetail from './components/billableMetrics/detail';
 import BillableMetricsList from './components/billableMetrics/list';
-import PricePlanList from './components/plan/plansList';
+import PricePlanList from './components/plan/list';
 import Settings from './components/settings';
 import SubscriptionDetail from './components/subscription/detail';
-import SubscriptionList from './components/subscription/subscriptionList';
+import SubscriptionList from './components/subscription/list';
 import CustomerDetail from './components/user/userDetail';
 import CustomerList from './components/user/userList';
 // import Users from "./components/userList";
@@ -101,6 +100,8 @@ const App: React.FC = () => {
       const logoutRes = await logoutReq();
       console.log('logout res: ', logoutRes);
       localStorage.removeItem('merchantToken');
+      localStorage.removeItem('appConfig');
+      localStorage.removeItem('merchantInfo');
       navigate(`${APP_PATH}login`);
     } catch (err) {
       navigate(`${APP_PATH}login`);
@@ -226,7 +227,8 @@ const App: React.FC = () => {
 
                   <Route path={`${APP_PATH}plan`} Component={OutletPage}>
                     <Route path="list" element={<PricePlanList />} />
-                    <Route path="new" element={<PlanNew />} />
+                    <Route path="new" element={<PlanDetail />} />
+                    {/* <Route path="new" element={<PlanNew />} /> */}
                     <Route path=":planId" element={<PlanDetail />} />
                   </Route>
 
@@ -244,7 +246,6 @@ const App: React.FC = () => {
 
                   <Route path={`${APP_PATH}customer`} Component={OutletPage}>
                     <Route path="list" element={<CustomerList />} />
-                    {/* <Route path="new" element={<PlanNew />} /> */}
                     <Route path=":userId" element={<CustomerDetail />} />
                   </Route>
 

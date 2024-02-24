@@ -3,80 +3,41 @@ import axios from 'axios';
 import { CURRENCY } from '../constants';
 import { IBillableMetrics, IProfile, TMerchantInfo } from '../shared.types';
 import { useAppConfigStore } from '../stores';
+import { request } from './client';
 
-const APP_PATH = import.meta.env.BASE_URL;
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const passwordloginReq = async (email: string, password: string) => {
-  return await axios.post(`${API_URL}/merchant/auth/sso/login`, {
-    email,
-    password,
-  });
+  return await request.post('/merchant/auth/sso/login', { email, password });
 };
 
 export const otpLoginReq = async (email: string) =>
-  await axios.post(`${API_URL}/merchant/auth/sso/loginOTP`, { email });
+  await request.post(`/merchant/auth/sso/loginOTP`, { email });
 
 export const otpLoginVerifyReq = async (
   email: string,
   verificationCode: string,
 ) => {
-  return await axios.post(`${API_URL}/merchant/auth/sso/loginOTPVerify`, {
+  return await request.post(`/merchant/auth/sso/loginOTPVerify`, {
     email,
     verificationCode,
   });
 };
 
 export const logoutReq = async () => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/user_logout`,
-    {},
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  return await request.post(`/merchant/user_logout`, {});
 };
-
-/*
-export const getProfileReq = async () => {
-  const token = localStorage.getItem("merchantToken");
-  return await axios.get(`${API_URL}/merchant/profile`, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
-  });
-};
-*/
-
-/*
-export const updateProfileReq = async () => {
-
-}
-*/
 
 export const getAppConfigReq = async () => {
-  return await axios.post(`${API_URL}/system/merchant/merchant_information`);
+  return await request.post(`/system/merchant/merchant_information`);
 };
 
 export const getMerchantInfoReq = async () => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.get(`${API_URL}/merchant/merchant_info/info`, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
-  });
+  return await request.get(`/merchant/merchant_info/info`);
 };
 
 export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(`${API_URL}/merchant/merchant_info/update`, body, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
-  });
+  return await request.post(`/merchant/merchant_info/update`, body);
 };
 
 export const uploadLogoReq = async (f: FormData) => {
@@ -89,97 +50,47 @@ export const uploadLogoReq = async (f: FormData) => {
   });
 };
 
-export const getPlanList = async ({
-  type,
-  status,
-  page,
-  pageSize,
-}: {
+// ---------------
+type TPlanListBody = {
+  merchantId?: number;
   type?: number;
   status?: number;
   page: number;
-  pageSize: number;
-}) => {
+  count: number;
+};
+export const getPlanList = async (body: TPlanListBody) => {
   const appConfig = useAppConfigStore.getState();
-  const token = localStorage.getItem('merchantToken');
-  const body: {
-    merchantId: number;
-    type?: number;
-    status?: number;
-    page: number;
-    count: number;
-  } = {
-    merchantId: appConfig.MerchantId,
-    // currency: "usd",
-    page,
-    count: pageSize,
-  };
-  if (type != null) {
-    body.type = type; // null: all types, 1: main plan, 2: addon
-  }
-  if (status != null) {
-    body.status = status; // 1: editing, 2: active, 3: inactive, 4: expired
-  }
-  return axios.post(`${API_URL}/merchant/plan/subscription_plan_list`, body, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
+  body.merchantId = appConfig.MerchantId;
+  return await request.post('/merchant/plan/subscription_plan_list', body);
+};
+// -----------------
+
+export const getPlanDetail = async (planId: number) => {
+  return await request.post('/merchant/plan/subscription_plan_detail', {
+    planId,
   });
 };
 
-export const getPlanDetail = async (planId: number) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/plan/subscription_plan_detail`,
-    {
-      planId,
-    },
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
-};
-
+// create a new plan
 export const createPlan = async (planDetail: any) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/plan/subscription_plan_create`,
+  return await request.post(
+    '/merchant/plan/subscription_plan_create',
     planDetail,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
   );
 };
 
+// save an existing plan
 export const savePlan = async (planDetail: any) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/plan/subscription_plan_edit`,
+  return await request.post(
+    `/merchant/plan/subscription_plan_edit`,
     planDetail,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
   );
 };
 
 export const activatePlan = async (planId: number) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = { planId };
-  return await axios.post(
-    `${API_URL}/merchant/plan/subscription_plan_activate`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  return await request.post(`/merchant/plan/subscription_plan_activate`, {
+    planId,
+  });
 };
 
 export const togglePublishReq = async ({
@@ -189,143 +100,76 @@ export const togglePublishReq = async ({
   planId: number;
   publishAction: 'PUBLISH' | 'UNPUBLISH';
 }) => {
-  // 1: to publish, 0: to unpublish
-  const token = localStorage.getItem('merchantToken');
-  const body = { planId };
-  const url = `${API_URL}/merchant/plan/subscription_plan_${
+  const url = `/merchant/plan/subscription_plan_${
     publishAction === 'PUBLISH' ? 'publish' : 'unpublished'
   }`;
-  return await axios.post(url, body, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
-  });
+  return await request.post(url, { planId });
 };
 
 export const getMetricsListReq = async () => {
   const appConfig = useAppConfigStore.getState();
-  const token = localStorage.getItem('merchantToken');
-  return await axios.get(
-    `${API_URL}/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
+  return await request.get(
+    `/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
   );
 };
 
 export const createMetricsReq = async (metrics: any) => {
-  const token = localStorage.getItem('merchantToken');
   const appConfig = useAppConfigStore.getState();
   metrics.merchantId = appConfig.MerchantId;
-  return await axios.post(
-    `${API_URL}/merchant/merchant_metric/new_merchant_metric`,
+  return await request.post(
+    `/merchant/merchant_metric/new_merchant_metric`,
     metrics,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
   );
 };
 
-export const updateMetricsReq = async ({
-  metricId,
-  metricName,
-  metricDescription,
-}: {
+// --------
+type TMetricsBody = {
   metricId: number;
   metricName: string;
   metricDescription: string;
-}) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/merchant_metric/edit_merchant_metric`,
-    { metricId, metricName, metricDescription },
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
+};
+export const updateMetricsReq = async (body: TMetricsBody) => {
+  return await request.post(
+    `/merchant/merchant_metric/edit_merchant_metric`,
+    body,
   );
 };
+// ---------
 
 export const getMetricDetailReq = async (metricId: number) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/merchant_metric/merchant_metric_detail`,
+  return await request.post(
+    `/merchant/merchant_metric/merchant_metric_detail`,
     { metricId },
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
   );
 };
 
-export const getSublist = async ({
-  status,
-  page,
-  pageSize,
-}: {
+// ----------
+type TSubListReq = {
+  merchantId?: number;
   status: number[];
   page: number;
-  pageSize: number;
-}) => {
-  const token = localStorage.getItem('merchantToken');
-  const appConfig = useAppConfigStore.getState();
-  const body = {
-    status,
-    merchantId: appConfig.MerchantId,
-    // userId: 0,
-    // sortField: "string",
-    // sortType: "string",
-    page,
-    count: pageSize,
-  };
-  console.log('get sub list body: ', body);
-  return await axios.post(
-    `${API_URL}/merchant/subscription/subscription_list`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  count: number;
 };
+export const getSublist = async (body: TSubListReq) => {
+  const appConfig = useAppConfigStore.getState();
+  body.merchantId = appConfig.MerchantId;
+  return await request.post(`/merchant/subscription/subscription_list`, body);
+};
+// ------------
 
 export const getSubDetail = async (subscriptionId: string) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = { subscriptionId };
-  return await axios.post(
-    `${API_URL}/merchant/subscription/subscription_detail`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  return await request.post(`/merchant/subscription/subscription_detail`, {
+    subscriptionId,
+  });
 };
 
-// new user has choosen a sub plan, but not paid yet, befoer the payment due date, user and admin can cancel it
-// this fn is for this purpose only, it's not the same as terminate an active sub, this call only work for sub.status == created
+// new user has choosen a sub plan, but not paid yet, before the payment due date, user and admin can cancel it.
+// this fn is for this purpose only, this call only work for sub.status == created.
+// it's not the same as terminate an active sub,
 export const cancelSubReq = async (subscriptionId: string) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = {
+  return await request.post(`/merchant/subscription/subscription_cancel`, {
     subscriptionId,
-  };
-  return await axios.post(
-    `${API_URL}/merchant/subscription/subscription_cancel`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  });
 };
 
 export const createPreviewReq = async (
@@ -333,27 +177,13 @@ export const createPreviewReq = async (
   newPlanId: number,
   addons: { quantity: number; addonPlanId: number }[],
 ) => {
-  const token = localStorage.getItem('merchantToken');
-  // isNew: true: create new subscription, false: update existing sub
-  /*
-  const urlPath = isNew
-    ? "subscription_create_preview"
-    : "subscription_update_preview";
-  */
-  const body = {
-    subscriptionId,
-    newPlanId,
-    quantity: 1,
-    // gatewayId: 25,
-    addonParams: addons,
-  };
-  return await axios.post(
-    `${API_URL}/merchant/subscription/subscription_update_preview`,
-    body,
+  return await request.post(
+    `/merchant/subscription/subscription_update_preview`,
     {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
+      subscriptionId,
+      newPlanId,
+      quantity: 1,
+      addonParams: addons,
     },
   );
 };
@@ -366,24 +196,16 @@ export const updateSubscription = async (
   confirmCurrency: string,
   prorationDate: number,
 ) => {
-  const token = localStorage.getItem('merchantToken');
-  // "subscription_create_submit"
-  const body = {
-    subscriptionId,
-    newPlanId,
-    quantity: 1,
-    addonParams: addons,
-    confirmTotalAmount,
-    confirmCurrency,
-    prorationDate,
-  };
-  return await axios.post(
-    `${API_URL}/merchant/subscription/subscription_update_submit`,
-    body,
+  return await request.post(
+    `/merchant/subscription/subscription_update_submit`,
     {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
+      subscriptionId,
+      newPlanId,
+      quantity: 1,
+      addonParams: addons,
+      confirmTotalAmount,
+      confirmCurrency,
+      prorationDate,
     },
   );
 };
@@ -393,7 +215,6 @@ export const terminateSub = async (
   SubscriptionId: string,
   immediate: boolean,
 ) => {
-  const token = localStorage.getItem('merchantToken');
   const body: {
     SubscriptionId: string;
     invoiceNow?: boolean;
@@ -401,74 +222,45 @@ export const terminateSub = async (
   } = {
     SubscriptionId,
   };
-  let url = `${API_URL}/merchant/subscription/subscription_cancel_at_period_end`;
+  let url = `/merchant/subscription/subscription_cancel_at_period_end`;
   if (immediate) {
     body.invoiceNow = true;
     body.prorate = true;
-    url = `${API_URL}/merchant/subscription/subscription_cancel`;
+    url = `/merchant/subscription/subscription_cancel`;
   }
-  return await axios.post(url, body, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
-  });
+  return await request.post(url, body);
 };
 
-// resume subscription, if it's been terminated on end of this billing cycle.
-// if it's ended immediately, no resume allowed
+// resume subscription for case that it's been terminated at the end of this billing cycle.
+// if it's ended immediately, no resume allowed.
 export const resumeSub = async (subscriptionId: string) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = {
+  const url = `/merchant/subscription/subscription_cancel_last_cancel_at_period_end`;
+  return await request.post(url, {
     subscriptionId,
-  };
-  const url = `${API_URL}/merchant/subscription/subscription_cancel_last_cancel_at_period_end`;
-  return await axios.post(url, body, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
   });
 };
 
-export const getSubTimeline = async ({
-  userId,
-  page,
-  count,
-}: {
+// -------------
+type TGetSubTimelineReq = {
   userId: number;
   page: number;
   count: number;
-}) => {
+  merchantId?: number;
+};
+export const getSubTimeline = async (body: TGetSubTimelineReq) => {
   const appConfig = useAppConfigStore.getState();
-  const token = localStorage.getItem('merchantToken');
-  const body = {
-    merchantId: appConfig.MerchantId,
-    userId,
-    // "sortField": "string",
-    // "sortType": "string",
-    page,
-    count,
-  };
-  return await axios.post(
-    `${API_URL}/merchant/subscription/subscription_timeline_list`,
+  body.merchantId = appConfig.MerchantId;
+  return await request.post(
+    `/merchant/subscription/subscription_timeline_list`,
     body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
   );
 };
+// -----------
 
 export const getCountryList = async () => {
   const appConfig = useAppConfigStore.getState();
-  const token = localStorage.getItem('merchantToken');
-  const body = {
+  return await request.post(`/merchant/vat/vat_country_list`, {
     merchantId: appConfig.MerchantId,
-  };
-  return await axios.post(`${API_URL}/merchant/vat/vat_country_list`, body, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
   });
 };
 
@@ -476,16 +268,9 @@ export const extendDueDate = async (
   subscriptionId: string,
   appendTrialEndHour: number,
 ) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = { subscriptionId, appendTrialEndHour };
-  return await axios.post(
-    `${API_URL}/merchant/subscription/subscription_add_new_trial_start`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
+  return await request.post(
+    `/merchant/subscription/subscription_add_new_trial_start`,
+    { subscriptionId, appendTrialEndHour },
   );
 };
 
@@ -493,29 +278,16 @@ export const setSimDateReq = async (
   subscriptionId: string,
   newTestClock: number,
 ) => {
-  const body = { subscriptionId, newTestClock };
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/system/subscription/subscription_test_clock_walk`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
+  return await request.post(
+    `/system/subscription/subscription_test_clock_walk`,
+    { subscriptionId, newTestClock },
   );
 };
 
 // billing admin can also get user profile.
 export const getUserProfile = async (userId: number) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.get(
-    `${API_URL}/merchant/merchant_user/get_user_profile?userId=${userId}`,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
+  return await request.get(
+    `/merchant/merchant_user/get_user_profile?userId=${userId}`,
   );
 };
 
@@ -523,43 +295,19 @@ export const getUserProfile = async (userId: number) => {
 export const saveUserProfile = async (newProfile: IProfile) => {
   const u = JSON.parse(JSON.stringify(newProfile));
   u.userId = newProfile.id;
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/merchant_user/update_user_profile`,
-    u,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  return await request.post(`/merchant/merchant_user/update_user_profile`, u);
 };
 
 export const appSearchReq = async (searchKey: string) => {
   const appConfig = useAppConfigStore.getState();
-  const body = {
+  return await request.post(`/merchant/search/key_search`, {
     merchantId: appConfig.MerchantId,
     searchKey,
-  };
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(`${API_URL}/merchant/search/key_search`, body, {
-    headers: {
-      Authorization: `${token}`, // Bearer: ******
-    },
   });
 };
 
-export const getInvoiceList = async ({
-  userId,
-  page,
-  count,
-  firstName,
-  lastName,
-  currency,
-  status,
-  amountStart,
-  amountEnd,
-}: {
+// ----------
+type TGetInvoicesReq = {
   userId?: number;
   page: number;
   count: number;
@@ -569,190 +317,94 @@ export const getInvoiceList = async ({
   status?: number[];
   amountStart?: number;
   amountEnd?: number;
-}) => {
+  merchantId?: number;
+};
+export const getInvoiceList = async (body: TGetInvoicesReq) => {
   const appConfig = useAppConfigStore.getState();
-  const token = localStorage.getItem('merchantToken');
-  const body = {
-    merchantId: appConfig.MerchantId,
-    userId,
-    firstName,
-    lastName,
-    currency,
-    status,
-    amountStart,
-    amountEnd,
-    /*
-    "sendEmail": 0,
-    "sortField": "string",
-    "sortType": "string",
-    "deleteInclude": true,
-    */
-    page,
-    count,
-  };
-
-  return await axios.post(
-    `${API_URL}/merchant/invoice/subscription_invoice_list`,
+  body.merchantId = appConfig.MerchantId;
+  return await request.post(
+    `/merchant/invoice/subscription_invoice_list`,
     body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
   );
 };
+// ----------
 
 export const getInvoiceDetailReq = async (invoiceId: string) => {
-  const body = { invoiceId };
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/invoice/subscription_invoice_detail`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  return await request.post(`/merchant/invoice/subscription_invoice_detail`, {
+    invoiceId,
+  });
 };
 
-type TInvoiceItems = {
-  unitAmountExcludingTax: number;
-  description: string;
-  quantity: number;
-};
-// admin manually create an invoice, still editable until the following publishInvoice() is called.
-// before that, users won't see(or receive) this invoice.
-export const createInvoice = async ({
-  name,
-  userId,
-  currency,
-  taxScale,
-  invoiceItems,
-  finish,
-}: {
+// ------------
+type TCreateInvoiceReq = {
+  merchantId?: number;
   name: string;
   userId: number;
   currency: string;
   taxScale: number;
   invoiceItems: TInvoiceItems[];
+  lines?: TInvoiceItems[];
   finish: boolean;
-}) => {
-  const appConfig = useAppConfigStore.getState();
-  const token = localStorage.getItem('merchantToken');
-  const body = {
-    merchantId: appConfig.MerchantId,
-    userId,
-    taxScale,
-    gatewayId: 25,
-    currency,
-    name,
-    lines: invoiceItems,
-    finish,
-  };
-  return await axios.post(
-    `${API_URL}/merchant/invoice/new_invoice_create`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  gatewayId?: number;
 };
+type TInvoiceItems = {
+  unitAmountExcludingTax: number;
+  description: string;
+  quantity: number;
+};
+// admin manually create an invoice, still editable until the publishInvoice() is called.
+// before that, customers won't see(or receive) this invoice.
+export const createInvoice = async (body: TCreateInvoiceReq) => {
+  const appConfig = useAppConfigStore.getState();
+  body.merchantId = appConfig.MerchantId;
+  body.lines = body.invoiceItems;
+  body.gatewayId = 25;
+  return await request.post(`/merchant/invoice/new_invoice_create`, body);
+};
+// -------------
 
-// before publish, admin can still edit.
-export const saveInvoice = async ({
-  invoiceId,
-  taxScale,
-  currency,
-  name,
-  invoiceItems,
-}: {
+// before publish, admin can still edit and save.
+type TSaveInvoiceReq = {
   invoiceId: string;
   taxScale: number;
   currency: string;
   name: string;
   invoiceItems: TInvoiceItems[];
-}) => {
-  const body = {
-    invoiceId,
-    taxScale,
-    gatewayId: 25,
-    currency,
-    name,
-    lines: invoiceItems,
-  };
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/invoice/new_invoice_edit`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  lines?: TInvoiceItems[];
+  gatewayId?: number;
+};
+export const saveInvoice = async (body: TSaveInvoiceReq) => {
+  body.lines = body.invoiceItems;
+  body.gatewayId = 25;
+  return await request.post(`/merchant/invoice/new_invoice_edit`, body);
 };
 
 // admin can delete the invoice, before the following publishInvoice() is called
 export const deleteInvoice = async (invoiceId: string) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = { invoiceId };
-  return await axios.post(
-    `${API_URL}/merchant/invoice/new_invoice_delete`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  return await request.post(`/merchant/invoice/new_invoice_delete`, {
+    invoiceId,
+  });
 };
 
-// after publish, user will receive an email informing him/her to make the payment.
-// admin cannot edit it anymore, but can cancel it by calling the following cancelInvoice() before user make the payment
-export const publishInvoice = async ({
-  invoiceId,
-  payMethod,
-  daysUtilDue,
-}: {
+// after publish, user will receive an email informing him/her to finish the payment.
+// admin cannot edit it anymore, but can cancel it by calling the following revokeInvoice() before user finish the payment
+type TPublishInvoiceReq = {
   invoiceId: string;
   payMethod: number;
   daysUtilDue: number;
-}) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = {
-    invoiceId,
-    payMethod,
-    daysUtilDue,
-  };
-  return await axios.post(
-    `${API_URL}/merchant/invoice/finish_new_invoice`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+};
+export const publishInvoice = async (body: TPublishInvoiceReq) => {
+  return await request.post(`/merchant/invoice/finish_new_invoice`, body);
 };
 
 // admin can cancel the invoice(make it invalid) before user make the payment.
 export const revokeInvoice = async (invoiceId: string) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = { invoiceId };
-  return await axios.post(
-    `${API_URL}/merchant/invoice/cancel_processing_invoice`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  return await request.post(`/merchant/invoice/cancel_processing_invoice`, {
+    invoiceId,
+  });
 };
 
+// TODO: let caller do the amt convert.
 export const refund = async (
   body: {
     invoiceId: string;
@@ -763,29 +415,13 @@ export const refund = async (
 ) => {
   body.refundAmount *= CURRENCY[currency].stripe_factor;
   body.refundAmount = Math.round(body.refundAmount);
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/invoice/new_invoice_refund`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
-  );
+  return await request.post(`/merchant/invoice/new_invoice_refund`, body);
 };
 
 export const sendInvoiceInMailReq = async (invoiceId: string) => {
-  const token = localStorage.getItem('merchantToken');
-  const body = { invoiceId };
-  return axios.post(
-    `${API_URL}/merchant/invoice/subscription_invoice_send_user_email`,
-    body,
-    {
-      headers: {
-        Authorization: `${token}`, // Bearer: ******
-      },
-    },
+  return request.post(
+    `/merchant/invoice/subscription_invoice_send_user_email`,
+    { invoiceId },
   );
 };
 
@@ -796,7 +432,7 @@ export const downloadInvoice = (url: string) => {
   axios({
     url,
     method: 'GET',
-    responseType: 'blob', // important
+    responseType: 'blob',
   }).then((response) => {
     const href = URL.createObjectURL(response.data);
     const link = document.createElement('a');
@@ -821,15 +457,6 @@ type TUserList = {
   count: number;
 };
 export const getUserListReq = async (users: TUserList) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(
-    `${API_URL}/merchant/merchant_user/user_list`,
-    users,
-    {
-      headers: {
-        Authorization: `${token}`,
-      },
-    },
-  );
+  return await request.post(`/merchant/merchant_user/user_list`, users);
 };
 // -----------------

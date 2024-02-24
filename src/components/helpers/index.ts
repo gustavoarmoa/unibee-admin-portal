@@ -10,11 +10,12 @@ export const normalizeAmt = (iv: UserInvoice[]) => {
     v.taxAmount /= f;
     v.totalAmount /= f;
     v.totalAmountExcludingTax /= f;
-    v.lines.forEach((l) => {
-      (l.amount as number) /= f;
-      (l.amountExcludingTax as number) /= f;
-      (l.tax as number) /= f;
-      (l.unitAmountExcludingTax as number) /= f;
-    });
+    v.lines &&
+      v.lines.forEach((l) => {
+        (l.amount as number) /= f;
+        (l.amountExcludingTax as number) /= f;
+        (l.tax as number) /= f;
+        (l.unitAmountExcludingTax as number) /= f;
+      });
   });
 };

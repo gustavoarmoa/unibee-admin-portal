@@ -11,6 +11,7 @@ import { CURRENCY, PLAN_STATUS } from '../../constants';
 import { useRelogin } from '../../hooks';
 import {
   activatePlan,
+  createPlan,
   getMetricsListReq,
   getPlanDetail,
   getPlanList,
@@ -20,19 +21,46 @@ import {
 import { IPlan } from '../../shared.types';
 import { useAppConfigStore } from '../../stores';
 
-// const APP_PATH = import.meta.env.BASE_URL;
-
+const APP_PATH = import.meta.env.BASE_URL;
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
+
+type TNewPlan = {
+  currency: string;
+  intervalUnit: string;
+  intervalCount: number;
+  status: number;
+  publishStatus: number;
+  type: number; // 1: main, 2: add-on
+  imageUrl: string;
+  homeUrl: string;
+};
+const NEW_PLAN: TNewPlan = {
+  currency: 'EUR',
+  intervalUnit: 'month',
+  intervalCount: 1,
+  status: 1, // 1: editing，2: active, 3: inactive，4: expired
+  publishStatus: 1, //  // 1: unpublished(not visible to users), 2: published(users could see and choose this plan)
+  type: 1, // 1: main, 2: add-on
+  imageUrl: 'http://www.google.com',
+  homeUrl: 'http://www.google.com',
+  // "addonIds": []
+};
 
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
   const params = useParams();
-  const appConfigStore = useAppConfigStore();
+  const planId = params.planId;
+  const isNew = planId == null;
+  console.log('planId , isNew: ', planId, '//', isNew);
+
+  // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false);
   const [activating, setActivating] = useState(false);
   const [publishing, setPublishing] = useState(false); // when toggling publish/unpublish
-  const [plan, setPlan] = useState<IPlan | null>(null);
+  const [plan, setPlan] = useState<IPlan | TNewPlan | null>(
+    isNew ? NEW_PLAN : null,
+  ); // plan obj is used for Form's initialValue, any changes is handled by Form itself, not updated here.
   const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
   const navigate = useNavigate();
@@ -42,15 +70,16 @@ const Index = () => {
   const itvCountValue = Form.useWatch('intervalCount', form);
   const itvCountUnit = Form.useWatch('intervalUnit', form);
   const addonCurrency = Form.useWatch('currency', form);
+  const planTypeWatch = Form.useWatch('type', form);
   // The selector is static and does not support closures.
   // const customValue = Form.useWatch((values) => `name: ${values.itvCountValue || ''}`, form);
 
   useEffect(() => {
-    if (plan?.status != 1) {
+    if (!isNew && plan?.status != 1) {
       // 1: editing, 2: active
       return;
     }
-    if (plan.type == 2) {
+    if (!isNew && plan?.type == 2) {
       // 1: main plan, 2: addon
       return;
     }
@@ -70,21 +99,31 @@ const Index = () => {
     const f = JSON.parse(JSON.stringify(values));
     f.amount = Number(f.amount);
     f.amount *= CURRENCY[f.currency].stripe_factor;
-
     f.intervalCount = Number(f.intervalCount);
-    f.planId = values.id;
     console.log('saving plan form: ', f);
 
+    if (!isNew) {
+      f.planId = f.id;
+      delete f.id;
+      delete f.status;
+      delete f.publishStatus;
+      delete f.type; // once plan created, you cannot change its type(main plan, addon)
+    }
+
+    const actionMethod = isNew ? createPlan : savePlan;
     try {
       setLoading(true);
-      const savePlanRes = await savePlan(f);
+      const res = await actionMethod(f);
       setLoading(false);
-      const statuCode = savePlanRes.data.code;
-      if (statuCode != 0) {
-        statuCode == 61 && relogin();
-        throw new Error(savePlanRes.data.message);
+      const statusCode = res.data.code;
+      if (statusCode != 0) {
+        statusCode == 61 && relogin();
+        throw new Error(res.data.message);
       }
-      message.success('Plan saved');
+      message.success(`Plan ${isNew ? 'created' : 'saved'}`);
+      setTimeout(() => {
+        navigate(`${APP_PATH}plan/list`);
+      }, 1500);
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {
@@ -115,7 +154,7 @@ const Index = () => {
       }
       message.success('Plan activated');
       setTimeout(() => {
-        navigate(-1);
+        navigate(`${APP_PATH}plan/list`);
       }, 2000);
     } catch (err) {
       setActivating(false);
@@ -143,7 +182,7 @@ const Index = () => {
             type: 2, // addon
             status: 2, // active
             page: 0,
-            pageSize: 100,
+            count: 100,
           }), // let's assume there are at most 100 addons.
           getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
           getMetricsListReq(),
@@ -189,7 +228,7 @@ const Index = () => {
         : planDetailRes.data.data.Plan.addonIds;
 
     setPlan(planDetailRes.data.data.Plan.plan);
-
+    form.setFieldsValue(planDetailRes.data.data.Plan.plan);
     const addons = addonListRes.data.data.Plans.map((p: any) => p.plan);
     setAddons(addons);
     setSelectAddons(
@@ -202,11 +241,12 @@ const Index = () => {
     );
   };
 
+  // used only in editing an existing plan
   const togglePublish = async () => {
     setPublishing(true);
     try {
       const publishRes = await togglePublishReq({
-        planId: plan!.id,
+        planId: (plan as IPlan).id,
         publishAction: plan!.publishStatus == 1 ? 'PUBLISH' : 'UNPUBLISH',
       });
       setPublishing(false);
@@ -229,7 +269,9 @@ const Index = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    if (!isNew) {
+      fetchData();
+    }
   }, []);
 
   return (
@@ -252,9 +294,11 @@ const Index = () => {
           style={{ maxWidth: 600 }}
           initialValues={plan}
         >
-          <Form.Item label="ID" name="id" hidden>
-            <Input disabled />
-          </Form.Item>
+          {!isNew && (
+            <Form.Item label="ID" name="id" hidden>
+              <Input disabled />
+            </Form.Item>
+          )}
 
           <Form.Item
             label="Plan Name"
@@ -374,7 +418,7 @@ const Index = () => {
           <Form.Item label="Plan Type" name="type">
             <Select
               style={{ width: 120 }}
-              disabled
+              disabled={plan.status != 1}
               options={[
                 { value: 1, label: 'Main plan' },
                 { value: 2, label: 'Addon' },
@@ -382,11 +426,12 @@ const Index = () => {
             />
           </Form.Item>
 
-          {plan.type == 1 && (
+          {!isNew && plan.type == 1 && (
             <Form.Item label="Add-ons" name="addonIds">
               <Select
                 mode="multiple"
                 allowClear
+                disabled={planTypeWatch == 2} // you cannot add addon to another addon
                 style={{ width: '100%' }}
                 options={selectAddons.map((a) => ({
                   label: a.planName,
@@ -418,7 +463,7 @@ const Index = () => {
 
           <div className="flex justify-center gap-5">
             <Button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate(`${APP_PATH}plan/list`)}
               disabled={loading || activating}
             >
               Go Back
@@ -431,13 +476,15 @@ const Index = () => {
             >
               Save
             </Button>
-            <Button
-              onClick={onActivate}
-              loading={activating}
-              disabled={plan.status != 1 || activating || loading}
-            >
-              Activate
-            </Button>
+            {!isNew && (
+              <Button
+                onClick={onActivate}
+                loading={activating}
+                disabled={isNew || plan.status != 1 || activating || loading}
+              >
+                Activate
+              </Button>
+            )}
           </div>
         </Form>
       )}

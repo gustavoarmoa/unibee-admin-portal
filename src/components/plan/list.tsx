@@ -104,7 +104,7 @@ const Index = () => {
         // type: undefined, // get main plan and addon
         // status: undefined, // active, inactive, expired, editing, all of them
         page,
-        pageSize: PAGE_SIZE,
+        count: PAGE_SIZE,
       });
       setLoading(false);
       console.log('plan list res: ', planListRes);

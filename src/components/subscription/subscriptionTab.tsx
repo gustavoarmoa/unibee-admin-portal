@@ -361,7 +361,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
           type: 1,
           status: 2,
           page: 0,
-          pageSize: 100,
+          count: 100,
         }), // type:1 (main plan), status: 2 (active), let's assume there are at most 100 active plan
       ]));
       console.log('subDetail/planList: ', subDetailRes, '//', planListRes);

@@ -33,7 +33,7 @@ const newPlaceholderItem = (): InvoiceItem => ({
   unitAmountExcludingTax: '', // item price with single unit
   amountExcludingTax: 0, // item price with quantity multiplied
   quantity: '1',
-  currency: 'USD',
+  currency: 'EUR',
   tax: 0,
   taxScale: 0,
 });
@@ -61,17 +61,18 @@ const Index = ({
   const [loading, setLoading] = useState(false);
   // const appConfigStore = useAppConfigStore();
   if (detail != null) {
-    detail.lines.forEach((item) => {
-      item.id = ramdonString(8);
-    });
+    detail.lines &&
+      detail.lines.forEach((item) => {
+        item.id = ramdonString(8);
+      });
   }
 
   const [invoiceList, setInvoiceList] = useState<InvoiceItem[]>(
     detail == null ? [newPlaceholderItem()] : detail.lines,
   );
   const defaultCurrency =
-    detail == null || detail.lines.length == 0
-      ? 'USD'
+    detail == null || detail.lines == null || detail.lines.length == 0
+      ? 'EUR'
       : detail.lines[0].currency; // assume all invoice items have the same currencies.
   const [currency, setCurrency] = useState(defaultCurrency);
   const taxScaleTmp = detail == null ? '' : detail.taxScale / 100;
@@ -294,36 +295,6 @@ const Index = ({
       return;
     }
 
-    console.log('refuding...');
-    /**
-     * 
-     * setLoading(true);
-      const res = await publishInvoice({
-        invoiceId: detail.invoiceId,
-        payMethod: 1,
-        daysUtilDue: 1,
-      });
-      setLoading(false);
-      console.log("publishing invoice res: ", res);
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      closeModal();
-      message.success("Invoice generated and sent.");
-      refresh();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log("err saving invoice: ", err.message);
-        message.error(err.message);
-      } else {
-        message.error("Unknown error");
-      }
-    }
-     */
-    //
     try {
       setLoading(true);
       const res = await refund(
@@ -427,6 +398,9 @@ const Index = ({
     // if (asNumber == null) {
     // asNumber = false;
     // }
+    if (invoices == null) {
+      invoices = [];
+    }
     let total = invoices.reduce(
       (accu, curr) =>
         accu +
@@ -541,73 +515,78 @@ const Index = ({
           </Col>
         )}
       </Row>
-      {invoiceList.map((v, i) => (
-        <Row
-          key={v.id}
-          style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}
-        >
-          <Col span={10}>
-            {!permission.editable ? (
-              <span>{v.description}</span>
-            ) : (
-              <Input
-                value={v.description}
-                onChange={onFieldChange(v.id!, 'description')}
-                style={{ width: '95%' }}
-              />
-            )}
-          </Col>
-          <Col span={4}>
-            {!permission.editable ? (
-              <span>
-                {showAmount(
-                  v.unitAmountExcludingTax as number,
-                  v.currency,
-                  true,
-                )}
-              </span>
-            ) : (
-              <>
-                {/* CURRENCY[currency].symbol */}
+      {invoiceList &&
+        invoiceList.map((v, i) => (
+          <Row
+            key={v.id}
+            style={{ margin: '8px 0', display: 'flex', alignItems: 'center' }}
+          >
+            <Col span={10}>
+              {!permission.editable ? (
+                <span>{v.description}</span>
+              ) : (
+                <Input
+                  value={v.description}
+                  onChange={onFieldChange(v.id!, 'description')}
+                  style={{ width: '95%' }}
+                />
+              )}
+            </Col>
+            <Col span={4}>
+              {!permission.editable ? (
+                <span>
+                  {showAmount(
+                    v.unitAmountExcludingTax as number,
+                    v.currency,
+                    true,
+                  )}
+                </span>
+              ) : (
+                <>
+                  {/* CURRENCY[currency].symbol */}
+                  <Input
+                    type="number"
+                    prefix={CURRENCY[currency].symbol}
+                    value={v.unitAmountExcludingTax}
+                    onChange={onFieldChange(v.id!, 'unitAmountExcludingTax')}
+                    style={{ width: '80%' }}
+                  />
+                </>
+              )}
+            </Col>
+            <Col span={1} style={{ fontSize: '18px' }}>
+              ×
+            </Col>
+            <Col span={3}>
+              {!permission.editable ? (
+                <span>{v.quantity}</span>
+              ) : (
                 <Input
                   type="number"
-                  prefix={CURRENCY[currency].symbol}
-                  value={v.unitAmountExcludingTax}
-                  onChange={onFieldChange(v.id!, 'unitAmountExcludingTax')}
-                  style={{ width: '80%' }}
+                  value={v.quantity}
+                  onChange={onFieldChange(v.id!, 'quantity')}
+                  style={{ width: '60%' }}
                 />
-              </>
-            )}
-          </Col>
-          <Col span={1} style={{ fontSize: '18px' }}>
-            ×
-          </Col>
-          <Col span={3}>
-            {!permission.editable ? (
-              <span>{v.quantity}</span>
-            ) : (
-              <Input
-                type="number"
-                value={v.quantity}
-                onChange={onFieldChange(v.id!, 'quantity')}
-                style={{ width: '60%' }}
-              />
-            )}
-          </Col>
-          <Col span={2}>{`${CURRENCY[currency].symbol} ${v.tax}`}</Col>
-          <Col span={3}>{getTotal([invoiceList[i]])}</Col>
-          {permission.editable && (
-            <Col span={1}>
-              <div
-                onClick={removeInvoiceItem(v.id!)}
-                style={{ fontWeight: 'bold', width: '64px', cursor: 'pointer' }}
-              >
-                <MinusOutlined />
-              </div>
+              )}
             </Col>
-          )}
-        </Row>
-      ))}
+            <Col span={2}>{`${CURRENCY[currency].symbol} ${v.tax}`}</Col>
+            <Col span={3}>{getTotal([invoiceList[i]])}</Col>
+            {permission.editable && (
+              <Col span={1}>
+                <div
+                  onClick={removeInvoiceItem(v.id!)}
+                  style={{
+                    fontWeight: 'bold',
+                    width: '64px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <MinusOutlined />
+                </div>
+              </Col>
+            )}
+          </Row>
+        ))}
       <Divider />
 
       <Row style={{ display: 'flex', alignItems: 'center' }}>
@@ -716,7 +695,9 @@ const Index = ({
               type="primary"
               onClick={onSave(false)}
               loading={loading}
-              disabled={loading || invoiceList.length == 0}
+              disabled={
+                loading || invoiceList == null || invoiceList.length == 0
+              }
             >
               Save
             </Button>

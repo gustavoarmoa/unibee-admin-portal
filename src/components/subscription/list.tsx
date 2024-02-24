@@ -119,7 +119,7 @@ const Index = () => {
     try {
       subListRes = await getSublist({
         page,
-        pageSize: PAGE_SIZE,
+        count: PAGE_SIZE,
         status: statusFilter,
       });
       setLoading(false);
@@ -224,96 +224,3 @@ const Index = () => {
 };
 
 export default Index;
-
-/*
-const DEFAULT_TERM = { currency: 'EUR', status: [] };
-const Search = ({
-  form,
-  goSearch,
-}: {
-  form: FormInstance<any>;
-  goSearch: () => void;
-}) => {
-  const statusOpt = Object.keys(SUBSCRIPTION_STATUS).map((s) => ({
-    value: Number(s),
-    label: SUBSCRIPTION_STATUS[Number(s)],
-  }));
-  const clear = () => form.resetFields();
-  const watchCurrency = Form.useWatch('currency', form);
-  useEffect(() => {
-    // just to trigger rerender when currency changed
-  }, [watchCurrency]);
-
-  const currencySymbol =
-    CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol;
-
-  return (
-    <div>
-      <Form form={form} initialValues={DEFAULT_TERM}>
-        <Row className="flex items-center" gutter={[8, 8]}>
-          <Col span={4}>First/Last name</Col>
-          <Col span={4}>
-            <Form.Item name="firstName" noStyle={true}>
-              <Input onPressEnter={goSearch} />
-            </Form.Item>
-          </Col>
-          <Col span={4}>
-            <Form.Item name="lastName" noStyle={true}>
-              <Input onPressEnter={goSearch} />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Button onClick={clear}>Clear</Button>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <Button onClick={goSearch} type="primary">
-              Search
-            </Button>
-          </Col>
-        </Row>
-
-        <Row className="flex items-center" gutter={[8, 8]}>
-          <Col span={4}>
-            <div className="flex items-center">
-              <span className="mr-2">Amount</span>
-              <Form.Item name="currency" noStyle={true}>
-                <Select
-                  style={{ width: 80 }}
-                  options={[
-                    { value: 'EUR', label: 'EUR' },
-                    { value: 'USD', label: 'USD' },
-                    { value: 'JPY', label: 'JPY' },
-                  ]}
-                />
-              </Form.Item>
-            </div>
-          </Col>
-          <Col span={4}>
-            <Form.Item name="amountStart" noStyle={true}>
-              <Input
-                prefix={`from ${currencySymbol}`}
-                onPressEnter={goSearch}
-              />
-            </Form.Item>
-          </Col>
-          <Col span={4}>
-            <Form.Item name="amountEnd" noStyle={true}>
-              <Input prefix={`to ${currencySymbol}`} onPressEnter={goSearch} />
-            </Form.Item>
-          </Col>
-
-          <Col span={12}>
-            <span className="mr-2">Status</span>
-            <Form.Item name="status" noStyle={true}>
-              <Select
-                mode="multiple"
-                options={statusOpt}
-                style={{ maxWidth: 420, minWidth: 100, margin: '8px 0' }}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-      </Form>
-    </div>
-  );
-};
-*/

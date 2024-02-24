@@ -222,29 +222,8 @@ const Index = ({ user }: { user: IProfile | null }) => {
   };
 
   const onPageChange = (page: number, pageSize: number) => {
-    // console.log("page change: ", page, "//", pageSize);
     setPage(page - 1);
   };
-
-  /*
-  const normalizeAmt = (iv: UserInvoice[]) => {
-    iv.forEach((v) => {
-      const c = v.currency;
-      const f = CURRENCY[c].stripe_factor;
-      v.subscriptionAmount /= f;
-      v.subscriptionAmountExcludingTax /= f;
-      v.taxAmount /= f;
-      v.totalAmount /= f;
-      v.totalAmountExcludingTax /= f;
-      v.lines.forEach((l) => {
-        (l.amount as number) /= f;
-        (l.amountExcludingTax as number) /= f;
-        (l.tax as number) /= f;
-        (l.unitAmountExcludingTax as number) /= f;
-      });
-    });
-  };
-  */
 
   const fetchData = async () => {
     if (user == null) {
@@ -265,9 +244,11 @@ const Index = ({ user }: { user: IProfile | null }) => {
         // TODO: save all the code as ENUM in constant,
         throw new Error(invoiceListRes.data.message);
       }
-      if (invoiceListRes.data.data.Invoices != null) {
-        normalizeAmt(invoiceListRes.data.data.Invoices);
-        setInvoiceList(invoiceListRes.data.data.Invoices);
+      let v = invoiceListRes.data.data.Invoices;
+      console.log('v: ', v);
+      if (v != null) {
+        normalizeAmt(v);
+        setInvoiceList(v);
       }
     } catch (err) {
       setLoading(false);
