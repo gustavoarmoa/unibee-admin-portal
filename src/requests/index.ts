@@ -7,20 +7,53 @@ import { request } from './client';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const passwordloginReq = async (email: string, password: string) => {
-  return await request.post('/merchant/auth/sso/login', { email, password });
+type TPassLogin = {
+  email: string;
+  password: string;
+};
+export const loginWithPasswordReq = async (body: TPassLogin) => {
+  return await request.post('/merchant/auth/sso/login', body);
 };
 
-export const otpLoginReq = async (email: string) =>
-  await request.post(`/merchant/auth/sso/loginOTP`, { email });
+export const loginWithOTPReq = async (email: string) => {
+  return await request.post(`/merchant/auth/sso/loginOTP`, { email });
+};
 
-export const otpLoginVerifyReq = async (
+export const loginWithOTPVerifyReq = async (
   email: string,
   verificationCode: string,
 ) => {
   return await request.post(`/merchant/auth/sso/loginOTPVerify`, {
     email,
     verificationCode,
+  });
+};
+
+export const forgetPassReq = async (email: string) => {
+  return await request.post(`/merchant/auth/sso/passwordForgetOTP`, {
+    email,
+  });
+};
+
+export const forgetPassVerifyReq = async (
+  email: string,
+  verificationCode: string,
+  newPassword: string,
+) => {
+  return await request.post(`/merchant/auth/sso/passwordForgetOTPVerify`, {
+    email,
+    verificationCode,
+    newPassword,
+  });
+};
+
+export const resetPassReq = async (
+  oldPassword: string,
+  newPassword: string,
+) => {
+  return await request.post(`/merchant/passwordReset`, {
+    oldPassword,
+    newPassword,
   });
 };
 
@@ -419,7 +452,7 @@ export const refund = async (
 };
 
 export const sendInvoiceInMailReq = async (invoiceId: string) => {
-  return request.post(
+  return await request.post(
     `/merchant/invoice/subscription_invoice_send_user_email`,
     { invoiceId },
   );

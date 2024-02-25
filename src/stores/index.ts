@@ -1,9 +1,51 @@
 import { StoreApi, UseBoundStore, create } from 'zustand';
 // import { immer } from "zustand/middleware/immer";
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { IAppConfig, TMerchantInfo } from '../shared.types';
+import { IAppConfig, IProfile, TMerchantInfo } from '../shared.types';
 // import { createStore } from "zustand";
 
+// user logged-in user profile
+const INITIAL_PROFILE: IProfile = {
+  address: '',
+  companyName: '',
+  email: '',
+  mobile: '',
+  facebook: '',
+  firstName: '',
+  lastName: '',
+  countryCode: '',
+  countryName: '',
+  id: 0,
+  phone: '',
+  paymentMethod: '',
+  linkedIn: '',
+  telegram: '',
+  tikTok: '',
+  vATNumber: '',
+  weChat: '',
+  whatsAPP: '',
+  otherSocialInfo: '',
+  token: '',
+};
+
+interface ProfileSlice extends IProfile {
+  getProfile: () => IProfile;
+  setProfile: (p: IProfile) => void;
+  // setProfileField: (field: string, value: any) => void;
+}
+
+export const useProfileStore = create<ProfileSlice>()(
+  persist(
+    (set, get) => ({
+      ...INITIAL_PROFILE,
+      getProfile: () => get(),
+      setProfile: (p) => set({ ...p }),
+    }),
+    { name: 'profile' },
+  ),
+);
+
+// the merchant which the current logged-in user is working for
 const INITIAL_INFO: TMerchantInfo = {
   id: -1,
   address: '',
