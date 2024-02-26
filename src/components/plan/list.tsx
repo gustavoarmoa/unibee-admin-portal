@@ -156,9 +156,7 @@ const Index = () => {
 
   return (
     <>
-      <div
-        style={{ padding: '16px 0', display: 'flex', justifyContent: 'end' }}
-      >
+      <div className="my-4 flex justify-end">
         <Button type="primary" onClick={onNewPlan}>
           New plan
         </Button>

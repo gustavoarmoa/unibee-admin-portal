@@ -215,6 +215,15 @@ type TInvoicePerm = {
   sendable: boolean; // send invoice via email, ditto
 };
 
+type TWebhook = {
+  id: number;
+  merchantId: number;
+  webhookUrl: string;
+  webhookEvents: string[];
+  gmtModify: number;
+  createTime: number;
+};
+
 export type {
   Country,
   IAppConfig,
@@ -226,5 +235,6 @@ export type {
   InvoiceItem,
   TInvoicePerm,
   TMerchantInfo,
+  TWebhook,
   UserInvoice,
 };

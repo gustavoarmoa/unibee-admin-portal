@@ -503,3 +503,35 @@ export const getUserListReq = async (users: TUserList) => {
   return await request.post(`/merchant/merchant_user/user_list`, users);
 };
 // -----------------
+
+/*
+export const loginWithPasswordReq = async (body: TPassLogin) => {
+  try {
+    const res = await request.post('/merchant/auth/sso/login', body);
+    console.log('login withh pass res: ', res);
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+*/
+
+export const getWebhookListReq = async () => {
+  try {
+    const res = await request.get(
+      `/merchant/merchant_webhook/webhook_endpoint_list`,
+    );
+    console.log('get webhook list res: ', res);
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
