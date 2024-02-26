@@ -418,7 +418,7 @@ const Index = () => {
           <Form.Item label="Plan Type" name="type">
             <Select
               style={{ width: 120 }}
-              disabled={plan.status != 1}
+              disabled={!isNew || plan.status != 1}
               options={[
                 { value: 1, label: 'Main plan' },
                 { value: 2, label: 'Addon' },

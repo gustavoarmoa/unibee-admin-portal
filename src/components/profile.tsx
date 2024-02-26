@@ -96,11 +96,6 @@ const Index = () => {
 
   const onSubmit = async () => {
     const info = form.getFieldsValue();
-    const isInvalid = form.getFieldsError().some((f) => f.errors.length > 0);
-    if (isInvalid) {
-      return;
-    }
-
     setSubmitting(true);
     try {
       const res = await updateMerchantInfoReq(info);

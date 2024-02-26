@@ -58,11 +58,6 @@ const Index = ({
   };
 
   const onSubmit = async () => {
-    const isInvalid = form.getFieldsError().some((f) => f.errors.length > 0);
-    if (isInvalid) {
-      return;
-    }
-
     setErrMsg('');
     setSubmitting(true);
     try {
@@ -111,6 +106,7 @@ const Index = ({
 
       <Form
         form={form}
+        onFinish={onSubmit}
         name="login-password"
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 18 }}
@@ -135,7 +131,7 @@ const Index = ({
             }),
           ]}
         >
-          <Input onPressEnter={onSubmit} />
+          <Input onPressEnter={form.submit} />
         </Form.Item>
 
         <Form.Item
@@ -148,7 +144,7 @@ const Index = ({
             },
           ]}
         >
-          <Input.Password onPressEnter={onSubmit} />
+          <Input.Password onPressEnter={form.submit} />
         </Form.Item>
 
         <div style={{ position: 'absolute', right: '-130px', top: '56px' }}>
@@ -173,7 +169,7 @@ const Index = ({
         >
           <Button
             type="primary"
-            onClick={onSubmit}
+            onClick={form.submit}
             loading={submitting}
             disabled={submitting}
           >

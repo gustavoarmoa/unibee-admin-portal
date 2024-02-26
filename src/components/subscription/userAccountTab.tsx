@@ -43,15 +43,8 @@ const UserAccountTab = ({
 
   const onSave = async () => {
     const userProfile = form.getFieldsValue();
-
-    const isInvalid = form.getFieldsError().some((f) => f.errors.length > 0);
-    console.log('is invalid: ', isInvalid);
-    if (isInvalid) {
-      return;
-    }
-    console.log('form values: ', userProfile);
+    // console.log('form values: ', userProfile);
     setLoading(true);
-
     try {
       const saveProfileRes = await saveUserProfile(form.getFieldsValue());
       console.log('save profile res: ', saveProfileRes);
@@ -126,11 +119,7 @@ const UserAccountTab = ({
       <Form
         form={form}
         labelCol={{ span: 7 }}
-        // wrapperCol={{ span: 24 }}
-        // layout="horizontal"
         onFinish={onSave}
-        // disabled={componentDisabled}
-        // style={{ maxWidth: 600 }}
         initialValues={user}
       >
         <Form.Item label="id" name="id" hidden>
@@ -308,7 +297,6 @@ const UserAccountTab = ({
 
         <Row>
           <Col span={12}>
-            {' '}
             <Form.Item label="Other social info" name="otherSocialInfo">
               <Input />
             </Form.Item>
@@ -325,7 +313,7 @@ const UserAccountTab = ({
         >
           {extraButton}
           <Button danger>Suspend</Button>
-          <Button type="primary" onClick={onSave} disabled={loading}>
+          <Button type="primary" onClick={form.submit} disabled={loading}>
             Save
           </Button>
         </div>
