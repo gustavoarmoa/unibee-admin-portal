@@ -5,7 +5,7 @@ import {
   PieChartOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import { Layout, Menu, message, theme } from 'antd';
+import { Layout, Menu, Modal, message, theme } from 'antd';
 import React, { useEffect, useState } from 'react';
 import {
   Navigate,
@@ -17,7 +17,11 @@ import {
   // Link,
   useNavigate,
 } from 'react-router-dom';
-import { useMerchantInfoStore } from './stores';
+import {
+  useMerchantInfoStore,
+  useProfileStore,
+  useSessionStore,
+} from './stores';
 
 import Dashboard from './components/dashboard';
 import InvoiceDetail from './components/invoice/detail';
@@ -36,6 +40,7 @@ import CustomerList from './components/user/userList';
 // import Users from "./components/userList";
 import AppSearch from './components/appSearch';
 import Login from './components/login';
+import LoginModal from './components/login/passwordLoginModal';
 import NotFound from './components/notFound';
 import Profile from './components/profile';
 import Signup from './components/signup';
@@ -75,6 +80,8 @@ const noSiderRoutes = [`${APP_PATH}login`, `${APP_PATH}signup`];
 
 const App: React.FC = () => {
   const merchantInfoStore = useMerchantInfoStore();
+  const profileStore = useProfileStore();
+  const sessionStore = useSessionStore();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [activeMenuItem, setActiveMenuItem] = useState<string[]>([
@@ -144,6 +151,11 @@ const App: React.FC = () => {
         </Layout>
       ) : (
         <Layout style={{ minHeight: '100vh' }}>
+          {sessionStore.expired && (
+            <Modal open={true} footer={false}>
+              <LoginModal email={profileStore.email} />
+            </Modal>
+          )}
           <Sider
             // theme="light"
             collapsible

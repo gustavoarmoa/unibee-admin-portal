@@ -214,7 +214,7 @@ const Index = () => {
                 resolve({ data: { data: null, code: 0 } }),
               )
             : getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
-          getMetricsListReq(),
+          getMetricsListReq(fetchData),
         ]));
       setLoading(false);
       console.log(

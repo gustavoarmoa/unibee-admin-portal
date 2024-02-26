@@ -1,8 +1,9 @@
 import axios from 'axios';
 // import { useProfileStore } from "../stores";
+import { useNavigate } from 'react-router-dom';
 import { CURRENCY } from '../constants';
 import { IBillableMetrics, IProfile, TMerchantInfo } from '../shared.types';
-import { useAppConfigStore } from '../stores';
+import { useAppConfigStore, useSessionStore } from '../stores';
 import { request } from './client';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -12,14 +13,17 @@ type TPassLogin = {
   password: string;
 };
 export const loginWithPasswordReq = async (body: TPassLogin) => {
+  const session = useSessionStore.getState();
   try {
     const res = await request.post('/merchant/auth/sso/login', body);
     console.log('login withh pass res: ', res);
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
+    session.setSession({ expired: false, refresh: null });
     return [res.data.data, null];
   } catch (err) {
+    session.setSession({ expired: true, refresh: null });
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
@@ -149,11 +153,25 @@ export const togglePublishReq = async ({
   return await request.post(url, { planId });
 };
 
-export const getMetricsListReq = async () => {
+export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
   const appConfig = useAppConfigStore.getState();
-  return await request.get(
-    `/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
-  );
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(
+      `/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.merchantMetrics, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const createMetricsReq = async (metrics: any) => {
@@ -520,18 +538,46 @@ export const loginWithPasswordReq = async (body: TPassLogin) => {
 };
 */
 
-export const getWebhookListReq = async () => {
+export const getWebhookListReq = async (refreshCb: () => void) => {
+  const session = useSessionStore.getState();
   try {
     const res = await request.get(
       `/merchant/merchant_webhook/webhook_endpoint_list`,
     );
     console.log('get webhook list res: ', res);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data, null];
+    return [res.data.data.endpointList, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
+
+/*
+export const getMetricsListReq = async () => {
+  const appConfig = useAppConfigStore.getState();
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(
+      `/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.merchantMetrics, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+*/

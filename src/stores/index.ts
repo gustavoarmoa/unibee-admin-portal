@@ -97,3 +97,28 @@ export const useAppConfigStore = create<AppConfigSlice>()(
     { name: 'appConfig' },
   ),
 );
+
+// ---------------
+interface ISession {
+  expired: boolean;
+  refresh: null | (() => void);
+}
+const INITIAL_SESSION: ISession = {
+  expired: true,
+  refresh: null,
+};
+interface SessionStoreSlice extends ISession {
+  getSession: () => ISession;
+  setSession: (s: ISession) => void;
+}
+
+export const useSessionStore = create<SessionStoreSlice>()(
+  persist(
+    (set, get) => ({
+      ...INITIAL_SESSION,
+      getSession: () => get(),
+      setSession: (a) => set({ ...a }),
+    }),
+    { name: 'session' },
+  ),
+);

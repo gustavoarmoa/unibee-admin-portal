@@ -91,34 +91,21 @@ const columns: ColumnsType<IBillableMetrics> = [
 
 const Index = () => {
   const navigate = useNavigate();
-  // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false);
   const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]);
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
-  const relogin = useRelogin();
 
   const fetchMetricsList = async () => {
     setLoading(true);
-    try {
-      const metricsListRes = await getMetricsListReq();
-      setLoading(false);
-      console.log('metrics list res: ', metricsListRes);
-      const statusCode = metricsListRes.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(metricsListRes.data.message);
-      }
-      setMetricsList(metricsListRes.data.data.merchantMetrics);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err getting planlist: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [list, err] = await getMetricsListReq(fetchMetricsList);
+    setLoading(false);
+    console.log('metrics list res: ', list);
+    if (err != null) {
+      message.error((err as Error).message);
+      return;
     }
+    setMetricsList(list);
   };
 
   const onTableChange: TableProps<IBillableMetrics>['onChange'] = (

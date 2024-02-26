@@ -47,14 +47,6 @@ const Index = () => {
 
   const relogin = useRelogin();
 
-  const goToDetail = (invoiceId: string) => (evt: any) => {
-    console.log('go to detail: ', evt.target);
-    if (evt.target.closest('.unibee-user-id-wrapper')) {
-      return;
-    }
-    navigate(`${APP_PATH}invoice/${invoiceId}`);
-  };
-
   const columns: ColumnsType<TWebhook> = [
     {
       title: 'id',
@@ -100,15 +92,13 @@ const Index = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    const [res, err] = await getWebhookListReq();
+    const [endpointList, err] = await getWebhookListReq(fetchData);
     setLoading(false);
     if (err != null) {
       message.error(err.message);
       return;
     }
-    const { endpointList } = res;
-    console.log('res getting webhooks: ', endpointList);
-    //  setInvoiceList(res.data.data.Invoices);
+    console.log('getting webhooks res: ', endpointList);
     setWebhookList(endpointList);
   };
 
