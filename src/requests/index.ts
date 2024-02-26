@@ -12,7 +12,17 @@ type TPassLogin = {
   password: string;
 };
 export const loginWithPasswordReq = async (body: TPassLogin) => {
-  return await request.post('/merchant/auth/sso/login', body);
+  try {
+    const res = await request.post('/merchant/auth/sso/login', body);
+    console.log('login withh pass res: ', res);
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const loginWithOTPReq = async (email: string) => {

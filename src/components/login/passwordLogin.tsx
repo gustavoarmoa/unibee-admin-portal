@@ -60,33 +60,23 @@ const Index = ({
   const onSubmit = async () => {
     setErrMsg('');
     setSubmitting(true);
-    try {
-      const loginRes = await loginWithPasswordReq(form.getFieldsValue());
-      console.log('login res: ', loginRes);
-      if (loginRes.data.code != 0) {
-        throw new Error(loginRes.data.message);
-      }
-      localStorage.setItem('merchantToken', loginRes.data.data.Token);
-      loginRes.data.data.MerchantUser.token = loginRes.data.data.Token;
-      profileStore.setProfile(loginRes.data.data.MerchantUser);
-
-      const appConfigRes = await getAppConfigReq();
-      setSubmitting(false);
-      console.log('app config res: ', appConfigRes);
-      if (appConfigRes.data.code != 0) {
-        throw new Error(appConfigRes.data.message);
-      }
-      appConfigStore.setAppConfig(appConfigRes.data.data);
-      navigate(`${APP_PATH}subscription/list`);
-    } catch (err) {
-      setSubmitting(false);
-      if (err instanceof Error) {
-        console.log('login err: ', err.message);
-        setErrMsg(err.message);
-      } else {
-        setErrMsg('Unknown error');
-      }
+    const [res, err] = await loginWithPasswordReq(form.getFieldsValue());
+    if (err != null) {
+      setErrMsg(err.message);
+      return;
     }
+    const { MerchantUser, Token } = res;
+    localStorage.setItem('merchantToken', Token);
+    MerchantUser.token = Token;
+    profileStore.setProfile(MerchantUser);
+    const appConfigRes = await getAppConfigReq();
+    setSubmitting(false);
+    console.log('app config res: ', appConfigRes);
+    if (appConfigRes.data.code != 0) {
+      throw new Error(appConfigRes.data.message);
+    }
+    appConfigStore.setAppConfig(appConfigRes.data.data);
+    navigate(`${APP_PATH}subscription/list`);
   };
 
   useEffect(() => {

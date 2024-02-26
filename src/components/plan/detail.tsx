@@ -2,12 +2,15 @@ import {
   CheckCircleOutlined,
   LoadingOutlined,
   MinusOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 import type { SelectProps } from 'antd';
-import { Button, Form, Input, Select, Spin, message } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd';
+import update from 'immutability-helper';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CURRENCY, PLAN_STATUS } from '../../constants';
+import { ramdonString } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import {
   activatePlan,
@@ -18,13 +21,18 @@ import {
   savePlan,
   togglePublishReq,
 } from '../../requests';
-import { IPlan } from '../../shared.types';
+import { IBillableMetrics, IPlan } from '../../shared.types';
 import { useAppConfigStore } from '../../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor;
 
+type TMetricsItem = {
+  localId: string;
+  metricId?: number;
+  metricLimit?: number | string;
+};
 type TNewPlan = {
   currency: string;
   intervalUnit: string;
@@ -34,6 +42,7 @@ type TNewPlan = {
   type: number; // 1: main, 2: add-on
   imageUrl: string;
   homeUrl: string;
+  metricLimits: TMetricsItem[];
 };
 const NEW_PLAN: TNewPlan = {
   currency: 'EUR',
@@ -45,6 +54,7 @@ const NEW_PLAN: TNewPlan = {
   imageUrl: 'http://www.google.com',
   homeUrl: 'http://www.google.com',
   // "addonIds": []
+  metricLimits: [],
 };
 
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
@@ -61,8 +71,10 @@ const Index = () => {
   const [plan, setPlan] = useState<IPlan | TNewPlan | null>(
     isNew ? NEW_PLAN : null,
   ); // plan obj is used for Form's initialValue, any changes is handled by Form itself, not updated here.
-  const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have
+  const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have (addon has the same structure as Plan).
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
+  const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]); // all the billable metrics, not used for edit, but used in <Select /> for user to choose.
+  const [selectedMetrics, setSelectedMetrics] = useState<TMetricsItem[]>([]);
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const relogin = useRelogin();
@@ -100,7 +112,6 @@ const Index = () => {
     f.amount = Number(f.amount);
     f.amount *= CURRENCY[f.currency].stripe_factor;
     f.intervalCount = Number(f.intervalCount);
-    console.log('saving plan form: ', f);
 
     if (!isNew) {
       f.planId = f.id;
@@ -109,7 +120,23 @@ const Index = () => {
       delete f.publishStatus;
       delete f.type; // once plan created, you cannot change its type(main plan, addon)
     }
+    let m = JSON.parse(JSON.stringify(selectedMetrics)); // selectedMetrics.map(metric => ({metricLimit: Number(metric.metricLimit)}))
+    m = m.map((metrics: any) => ({
+      metricId: metrics.metricId,
+      metricLimit: Number(metrics.metricLimit),
+    }));
+    /*
+    m.forEach((metric: any) => {
+      delete m.localId;
+      metric.metricLimit = Number(metric.metricLimit);
+    });
+    */
+    m = m.filter((metric: any) => !isNaN(metric.metricLimit));
+    f.metricLimits = m;
 
+    console.log('saving plan form: ', f);
+
+    // return;
     const actionMethod = isNew ? createPlan : savePlan;
     try {
       setLoading(true);
@@ -170,9 +197,12 @@ const Index = () => {
 
   const fetchData = async () => {
     const planId = Number(params.planId);
+    /*
     if (isNaN(planId)) {
       return;
     }
+    */
+
     let addonListRes: any, planDetailRes: any, metricsListRes: any;
     try {
       setLoading(true);
@@ -184,7 +214,11 @@ const Index = () => {
             page: 0,
             count: 100,
           }), // let's assume there are at most 100 addons.
-          getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
+          isNew
+            ? new Promise((resolve, reject) =>
+                resolve({ data: { data: null, code: 0 } }),
+              )
+            : getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
           getMetricsListReq(),
         ]));
       setLoading(false);
@@ -197,7 +231,7 @@ const Index = () => {
         metricsListRes,
       );
 
-      res.forEach((r) => {
+      res.forEach((r: any) => {
         const code = r.data.code;
         code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
         if (code != 0) {
@@ -215,6 +249,14 @@ const Index = () => {
       return;
     }
 
+    const addons = addonListRes.data.data.Plans.map((p: any) => p.plan);
+    setAddons(addons);
+    setMetricsList(metricsListRes.data.data.merchantMetrics);
+    if (isNew) {
+      return;
+    }
+    // for editing existing plan, we continue with planDetailRes
+
     // plan obj and addon obj are at the same level in planDetailRes.data.data obj
     // but I want to put addonIds obj as a props of the local plan obj.
     planDetailRes.data.data.Plan.plan.amount = getAmount(
@@ -227,10 +269,22 @@ const Index = () => {
         ? []
         : planDetailRes.data.data.Plan.addonIds;
 
+    // todo: planDetailRes.data.data.Plan.plan, add localId
+
     setPlan(planDetailRes.data.data.Plan.plan);
     form.setFieldsValue(planDetailRes.data.data.Plan.plan);
-    const addons = addonListRes.data.data.Plans.map((p: any) => p.plan);
-    setAddons(addons);
+
+    if (!isNew) {
+      const metrics = planDetailRes.data.data.Plan.metricPlanLimits.map(
+        (m: any) => ({
+          localId: ramdonString(8),
+          metricId: m.metricId,
+          metricLimit: m.metricLimit,
+        }),
+      );
+      setSelectedMetrics(metrics);
+    }
+
     setSelectAddons(
       addons.filter(
         (a: any) =>
@@ -268,10 +322,44 @@ const Index = () => {
     }
   };
 
-  useEffect(() => {
-    if (!isNew) {
-      fetchData();
+  // it just adds an empty metrics item
+  const addMetrics = () => {
+    const m: TMetricsItem = { localId: ramdonString(8) };
+    setSelectedMetrics(update(selectedMetrics, { $push: [m] }));
+  };
+
+  const removeMetrics = (localId: string) => {
+    const idx = selectedMetrics.findIndex((m) => m.localId == localId);
+    if (idx != -1) {
+      setSelectedMetrics(update(selectedMetrics, { $splice: [[idx, 1]] }));
     }
+  };
+
+  const updateMetrics =
+    (localId: string) => (evt: React.ChangeEvent<HTMLInputElement>) => {
+      const idx = selectedMetrics.findIndex((m) => m.localId == localId);
+      console.log('localId: ', localId);
+      if (idx != -1) {
+        setSelectedMetrics(
+          update(selectedMetrics, {
+            [idx]: { metricLimit: { $set: evt.target.value } },
+          }),
+        );
+      }
+    };
+
+  const onMetricSelectChange = (localId: string) => (val: number) => {
+    const idx = selectedMetrics.findIndex((m) => m.localId == localId);
+    if (idx != -1) {
+      let newMetrics = update(selectedMetrics, {
+        [idx]: { metricId: { $set: val } },
+      });
+      setSelectedMetrics(newMetrics);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   return (
@@ -287,11 +375,11 @@ const Index = () => {
         <Form
           form={form}
           onFinish={onSave}
-          labelCol={{ span: 6 }}
+          labelCol={{ span: 3 }}
           wrapperCol={{ span: 24 }}
           layout="horizontal"
           // disabled={componentDisabled}
-          style={{ maxWidth: 600 }}
+          // style={{ maxWidth: 1024 }}
           initialValues={plan}
         >
           {!isNew && (
@@ -440,6 +528,70 @@ const Index = () => {
               />
             </Form.Item>
           )}
+
+          <Form.Item label="Billable Metrics">
+            <Row gutter={[8, 8]} className="my-4 font-bold text-gray-500">
+              <Col span={5}>Name</Col>
+              <Col span={3}>Code</Col>
+              <Col span={6}>Description</Col>
+              <Col span={5}>Aggregation Property</Col>
+              <Col span={3}>Limit Value</Col>
+              <Col span={2}>
+                <div
+                  onClick={addMetrics}
+                  className="w-16 cursor-pointer font-bold"
+                >
+                  <PlusOutlined />
+                </div>
+              </Col>
+            </Row>
+            {selectedMetrics.map((m) => (
+              <Row key={m.localId} gutter={[8, 8]} className="my-4">
+                <Col span={5}>
+                  <Select
+                    value={m.metricId}
+                    onChange={onMetricSelectChange(m.localId)}
+                    style={{ width: 180 }}
+                    options={metricsList.map((m) => ({
+                      label: m.metricName,
+                      value: m.id,
+                    }))}
+                  />
+                </Col>
+                <Col span={3}>
+                  {' '}
+                  {metricsList.find((metric) => metric.id == m.metricId)?.code}
+                </Col>
+                <Col span={6}>
+                  {
+                    metricsList.find((metric) => metric.id == m.metricId)
+                      ?.metricDescription
+                  }
+                </Col>
+                <Col span={5}>
+                  {' '}
+                  {
+                    metricsList.find((metric) => metric.id == m.metricId)
+                      ?.aggregationProperty
+                  }
+                </Col>
+                <Col span={3}>
+                  <Input
+                    value={m.metricLimit}
+                    onChange={updateMetrics(m.localId)}
+                  />
+                </Col>
+                <Col span={2}>
+                  <div
+                    onClick={() => removeMetrics(m.localId)}
+                    className="w-16 cursor-pointer font-bold"
+                  >
+                    <MinusOutlined />
+                  </div>
+                </Col>
+              </Row>
+            ))}
+          </Form.Item>
 
           <Form.Item label="Product Name" name="productName" hidden>
             <Input />
