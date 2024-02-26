@@ -42,6 +42,7 @@ type TNewPlan = {
   type: number; // 1: main, 2: add-on
   imageUrl: string;
   homeUrl: string;
+  addonIds: number[];
   metricLimits: TMetricsItem[];
 };
 const NEW_PLAN: TNewPlan = {
@@ -53,7 +54,7 @@ const NEW_PLAN: TNewPlan = {
   type: 1, // 1: main, 2: add-on
   imageUrl: 'http://www.google.com',
   homeUrl: 'http://www.google.com',
-  // "addonIds": []
+  addonIds: [],
   metricLimits: [],
 };
 
@@ -125,12 +126,6 @@ const Index = () => {
       metricId: metrics.metricId,
       metricLimit: Number(metrics.metricLimit),
     }));
-    /*
-    m.forEach((metric: any) => {
-      delete m.localId;
-      metric.metricLimit = Number(metric.metricLimit);
-    });
-    */
     m = m.filter((metric: any) => !isNaN(metric.metricLimit));
     f.metricLimits = m;
 
@@ -514,7 +509,7 @@ const Index = () => {
             />
           </Form.Item>
 
-          {!isNew && plan.type == 1 && (
+          {plan.type == 1 && (
             <Form.Item label="Add-ons" name="addonIds">
               <Select
                 mode="multiple"
@@ -530,7 +525,11 @@ const Index = () => {
           )}
 
           <Form.Item label="Billable Metrics">
-            <Row gutter={[8, 8]} className="my-4 font-bold text-gray-500">
+            <Row
+              gutter={[8, 8]}
+              style={{ marginBottom: '0' }}
+              className=" font-bold text-gray-500"
+            >
               <Col span={5}>Name</Col>
               <Col span={3}>Code</Col>
               <Col span={6}>Description</Col>
