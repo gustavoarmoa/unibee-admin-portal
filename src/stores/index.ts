@@ -101,7 +101,7 @@ export const useAppConfigStore = create<AppConfigSlice>()(
 // ---------------
 interface ISession {
   expired: boolean;
-  refresh: null | (() => void);
+  refresh: null | (() => void); // if session is expired when making an async fn call, save this fn here, so after re-login, re-run this fn
 }
 const INITIAL_SESSION: ISession = {
   expired: true,

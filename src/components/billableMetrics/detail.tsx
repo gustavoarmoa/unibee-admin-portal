@@ -303,7 +303,6 @@ const Index = () => {
 # __EXTERNAL_SUBSCRIPTION_ID__, and
 # __EXTERNAL_CUSTOMER_ID__`}
           </SyntaxHighlighter>
-          {/* <pre style={{ background: '#f3f4f6', height: '100%' }}></pre> */}
         </div>
       </div>
     </div>

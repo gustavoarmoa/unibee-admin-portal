@@ -12,7 +12,12 @@ import {
 import { ReactElement, useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
-import { getCountryList, saveUserProfile } from '../../requests';
+import {
+  getCountryList,
+  getCountryList2,
+  saveUserProfile,
+  saveUserProfile2,
+} from '../../requests';
 import { Country, IProfile } from '../../shared.types';
 import { useAppConfigStore } from '../../stores';
 
@@ -39,58 +44,28 @@ const UserAccountTab = ({
 
   const onSave = async () => {
     const userProfile = form.getFieldsValue();
-    // console.log('form values: ', userProfile);
     setLoading(true);
-    try {
-      const saveProfileRes = await saveUserProfile(form.getFieldsValue());
-      console.log('save profile res: ', saveProfileRes);
-      const code = saveProfileRes.data.code;
-      if (code != 0) {
-        code == 61 && relogin();
-        throw new Error(saveProfileRes.data.message);
-      }
-      message.success('User Info Saved');
-      setUserProfile(userProfile);
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('profile update err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [_, err] = await saveUserProfile2(userProfile);
+    setLoading(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    message.success('User Info Saved');
+    setUserProfile(userProfile);
   };
 
   useEffect(() => {
-    setLoading(true);
     const fetchData = async () => {
-      let countryListRes;
-      try {
-        const res = ([countryListRes] = await Promise.all([getCountryList()]));
-        console.log('country: ', countryListRes);
-        res.forEach((r) => {
-          const code = r.data.code;
-          code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-          if (code != 0) {
-            // TODO: save all the code as ENUM in constant,
-            throw new Error(r.data.message);
-          }
-        });
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        if (err instanceof Error) {
-          console.log('profile update err: ', err.message);
-          message.error(err.message);
-        } else {
-          message.error('Unknown error');
-        }
+      setLoading(true);
+      const [list, err] = await getCountryList2();
+      setLoading(false);
+      if (err != null) {
+        message.error(err.message);
         return;
       }
       setCountryList(
-        countryListRes.data.data.vatCountryList.map((c: any) => ({
+        list.map((c: any) => ({
           code: c.countryCode,
           name: c.countryName,
         })),

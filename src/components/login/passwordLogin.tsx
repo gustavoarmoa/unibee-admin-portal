@@ -60,22 +60,25 @@ const Index = ({
   const onSubmit = async () => {
     setErrMsg('');
     setSubmitting(true);
-    const [res, err] = await loginWithPasswordReq(form.getFieldsValue());
+    const [loginRes, err] = await loginWithPasswordReq(form.getFieldsValue());
     if (err != null) {
       setErrMsg(err.message);
       return;
     }
-    const { MerchantUser, Token } = res;
+
+    const { MerchantUser, Token } = loginRes;
     localStorage.setItem('merchantToken', Token);
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
-    const appConfigRes = await getAppConfigReq();
+
+    const [appConfig, err2] = await getAppConfigReq();
     setSubmitting(false);
-    console.log('app config res: ', appConfigRes);
-    if (appConfigRes.data.code != 0) {
-      throw new Error(appConfigRes.data.message);
+    if (err2 != null) {
+      setErrMsg(err2.message);
+      return;
     }
-    appConfigStore.setAppConfig(appConfigRes.data.data);
+
+    appConfigStore.setAppConfig(appConfig);
     navigate(`${APP_PATH}subscription/list`);
   };
 

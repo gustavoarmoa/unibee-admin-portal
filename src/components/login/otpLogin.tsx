@@ -35,26 +35,15 @@ const Index = ({
 
     setSendingMailaddr(true);
     setErrMailMsg('');
-    try {
-      const loginRes = await loginWithOTPReq(email);
-      setSendingMailaddr(false);
-      console.log('login res: ', loginRes);
-      if (loginRes.data.code != 0) {
-        throw new Error(loginRes.data.message);
-      }
-      stopCounter();
-      startCount();
-      message.success('Code sent, please check your email');
-    } catch (err) {
-      setSendingMailaddr(false);
-      if (err instanceof Error) {
-        setErrMailMsg(err.message);
-        return Promise.reject(new Error(err.message));
-      } else {
-        setErrMailMsg('Unknown error');
-        return Promise.reject(new Error('Unkown error'));
-      }
+    const [_, err] = await loginWithOTPReq(email);
+    setSendingMailaddr(false);
+    if (err != null) {
+      setErrMailMsg(err.message);
+      return;
     }
+    stopCounter();
+    startCount();
+    message.success('Code sent, please check your email');
   };
 
   return (
@@ -196,37 +185,30 @@ const OTPForm = ({
       return;
     }
     setSubmitting(true);
-    try {
-      const loginRes = await loginWithOTPVerifyReq(email, otp);
-      console.log('otp loginVerify res: ', loginRes);
-      if (loginRes.data.code != 0) {
-        setErrMsg(loginRes.data.message);
-        throw new Error(loginRes.data.message);
-      }
-      const t = loginRes.data.data.Token;
-      const u = loginRes.data.data.MerchantUser;
-      localStorage.setItem('merchantToken', t);
-      u.token = t;
-      profileStore.setProfile(u);
-      console.log('otp verified user: ', u);
-
-      const appConfigRes = await getAppConfigReq();
-      setSubmitting(false);
-      console.log('app config res: ', appConfigRes);
-      if (appConfigRes.data.code != 0) {
-        throw new Error(appConfigRes.data.message);
-      }
-      appConfigStore.setAppConfig(appConfigRes.data.data);
-      navigate(`${APP_PATH}subscription/list`);
-    } catch (err) {
-      setSubmitting(false);
-      if (err instanceof Error) {
-        console.log('login err: ', err.message);
-        setErrMsg(err.message);
-      } else {
-        setErrMsg('Unknown error');
-      }
+    const [loginRes, err] = await loginWithOTPVerifyReq(email, otp);
+    if (err != null) {
+      setErrMsg(err.message);
+      return;
     }
+
+    const [appConfig, err2] = await getAppConfigReq();
+    setSubmitting(false);
+    if (err2 != 0) {
+      setErrMsg(err2.message);
+      return;
+    }
+
+    appConfigStore.setAppConfig(appConfig);
+    const { Token, MerchantUser } = loginRes;
+    localStorage.setItem('merchantToken', Token);
+    MerchantUser.token = Token;
+    profileStore.setProfile(MerchantUser);
+    navigate(`${APP_PATH}subscription/list`);
+  };
+
+  const resend = () => {
+    sendMailaddress();
+    setOtp('');
   };
 
   return (
@@ -283,7 +265,7 @@ const OTPForm = ({
           </Button>
 
           <div className="flex max-w-44 items-center justify-center">
-            <Button type="link" onClick={sendMailaddress} disabled={counting}>
+            <Button type="link" onClick={resend} disabled={counting}>
               Resend
             </Button>
             {counting && (

@@ -294,20 +294,15 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
   const [loading, setLoading] = useState(false);
 
   const logout = async () => {
+    const [_, err] = await logoutReq();
     localStorage.removeItem('merchantToken');
-    try {
-      await logoutReq();
-      navigate(`${APP_PATH}login`, {
-        state: { msg: 'Password reset succeeded, please relogin.' },
-      });
-    } catch (err) {
-      if (err instanceof Error) {
-        console.log('logout err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
-    }
+    localStorage.removeItem('appConfig');
+    localStorage.removeItem('merchantInfo');
+    localStorage.removeItem('session');
+    localStorage.removeItem('profile');
+    navigate(`${APP_PATH}login`, {
+      state: { msg: 'Password reset succeeded, please relogin.' },
+    });
   };
 
   const onConfirm = async () => {

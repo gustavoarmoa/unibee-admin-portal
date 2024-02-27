@@ -16,7 +16,6 @@ export const loginWithPasswordReq = async (body: TPassLogin) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.post('/merchant/auth/sso/login', body);
-    console.log('login withh pass res: ', res);
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
@@ -30,17 +29,37 @@ export const loginWithPasswordReq = async (body: TPassLogin) => {
 };
 
 export const loginWithOTPReq = async (email: string) => {
-  return await request.post(`/merchant/auth/sso/loginOTP`, { email });
+  try {
+    const res = await request.post(`/merchant/auth/sso/loginOTP`, { email });
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [null, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const loginWithOTPVerifyReq = async (
   email: string,
   verificationCode: string,
 ) => {
-  return await request.post(`/merchant/auth/sso/loginOTPVerify`, {
-    email,
-    verificationCode,
-  });
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.post(`/merchant/auth/sso/loginOTPVerify`, {
+      email,
+      verificationCode,
+    });
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    session.setSession({ expired: false, refresh: null });
+    return [res.data.data, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const forgetPassReq = async (email: string) => {
@@ -72,11 +91,33 @@ export const resetPassReq = async (
 };
 
 export const logoutReq = async () => {
-  return await request.post(`/merchant/user_logout`, {});
+  try {
+    const res = await request.post(`/merchant/user_logout`, {});
+    const code = res.data.code;
+    // if (code != 0 && code != 61) { }
+    return [null, null];
+  } catch (err) {
+    return [null, null];
+  }
 };
 
 export const getAppConfigReq = async () => {
-  return await request.post(`/system/merchant/merchant_information`);
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.post(`/system/merchant/merchant_information`, {});
+    if (res.data.code == 61) {
+      console.log('gochat');
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const getMerchantInfoReq = async () => {
@@ -376,6 +417,28 @@ export const getSubTimeline = async (body: TGetSubTimelineReq) => {
     body,
   );
 };
+export const getSubTimeline2 = async (body: TGetSubTimelineReq) => {
+  const appConfig = useAppConfigStore.getState();
+  const session = useSessionStore.getState();
+  body.merchantId = appConfig.MerchantId;
+  try {
+    const res = await request.post(
+      `/merchant/subscription/subscription_timeline_list`,
+      body,
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.subscriptionTimeLines, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
 // -----------
 
 export const getCountryList = async () => {
@@ -383,6 +446,26 @@ export const getCountryList = async () => {
   return await request.post(`/merchant/vat/vat_country_list`, {
     merchantId: appConfig.MerchantId,
   });
+};
+export const getCountryList2 = async () => {
+  const appConfig = useAppConfigStore.getState();
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.post(`/merchant/vat/vat_country_list`, {
+      merchantId: appConfig.MerchantId,
+    });
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.vatCountryList, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const extendDueDate = async (
@@ -405,30 +488,6 @@ export const setSimDateReq = async (
   );
 };
 
-/*
-
-export const getWebhookListReq = async (refreshCb: () => void) => {
-  const session = useSessionStore.getState();
-  try {
-    const res = await request.get(
-      `/merchant/merchant_webhook/webhook_endpoint_list`,
-    );
-    console.log('get webhook list res: ', res);
-    if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
-    return [res.data.data.endpointList, null];
-  } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
-  }
-};
-
-*/
 // billing admin can also get user profile.
 export const getUserProfile = async (userId: number) => {
   return await request.get(
@@ -464,6 +523,50 @@ export const saveUserProfile = async (newProfile: IProfile) => {
   u.userId = newProfile.id;
   return await request.post(`/merchant/merchant_user/update_user_profile`, u);
 };
+export const saveUserProfile2 = async (newProfile: IProfile) => {
+  const session = useSessionStore.getState();
+  const u = JSON.parse(JSON.stringify(newProfile));
+  u.userId = newProfile.id;
+  try {
+    const res = await request.post(
+      `/merchant/merchant_user/update_user_profile`,
+      u,
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [null, null]; // this call has no meaningful result to return
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+/*
+export const getWebhookListReq = async (refreshCb: () => void) => {
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(
+      `/merchant/merchant_webhook/webhook_endpoint_list`,
+    );
+    console.log('get webhook list res: ', res);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.endpointList, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+*/
 
 export const appSearchReq = async (searchKey: string) => {
   const appConfig = useAppConfigStore.getState();

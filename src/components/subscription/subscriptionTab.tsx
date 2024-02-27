@@ -32,6 +32,7 @@ import {
   getPlanList2,
   getSubDetail,
   getSubTimeline,
+  getSubTimeline2,
   resumeSub,
   setSimDateReq,
   terminateSub,
@@ -1031,30 +1032,18 @@ const SubTimeline = ({
     if (userId == null) {
       return;
     }
-    try {
-      setLoading(true);
-      const timelineRes = await getSubTimeline({
-        userId,
-        page,
-        count: PAGE_SIZE,
-      });
-      setLoading(false);
-      console.log('timeline res: ', timelineRes);
-      const code = timelineRes.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(timelineRes.data.message);
-      }
-      setTimeline(timelineRes.data.data.subscriptionTimeLines);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err getting sub timeline: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    setLoading(true);
+    const [timeline, err] = await getSubTimeline2({
+      userId,
+      page,
+      count: PAGE_SIZE,
+    });
+    setLoading(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    setTimeline(timeline);
   };
 
   const onPageChange = (page: number, pageSize: number) => {

@@ -19,22 +19,25 @@ const Index = ({ email }: { email: string }) => {
   const onSubmit = async () => {
     setErrMsg('');
     setSubmitting(true);
-    const [res, err] = await loginWithPasswordReq(form.getFieldsValue());
+    const [loginRes, err] = await loginWithPasswordReq(form.getFieldsValue());
     if (err != null) {
       setErrMsg(err.message);
-      setSubmitting(false);
       return;
     }
-    const { MerchantUser, Token } = res;
+
+    const [appConfig, err2] = await getAppConfigReq();
+    setSubmitting(false);
+    if (err2 != null) {
+      setErrMsg(err.message);
+      return;
+    }
+
+    const { MerchantUser, Token } = loginRes;
     localStorage.setItem('merchantToken', Token);
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
-    const appConfigRes = await getAppConfigReq();
-    setSubmitting(false);
-    if (appConfigRes.data.code != 0) {
-      throw new Error(appConfigRes.data.message);
-    }
-    appConfigStore.setAppConfig(appConfigRes.data.data);
+
+    appConfigStore.setAppConfig(appConfig);
     sessionStore.refresh && sessionStore.refresh();
     sessionStore.setSession({ expired: false, refresh: null });
     message.success('Login succeeded');

@@ -103,27 +103,16 @@ const App: React.FC = () => {
   };
 
   const logout = async () => {
-    try {
-      const logoutRes = await logoutReq();
-      console.log('logout res: ', logoutRes);
-      localStorage.removeItem('merchantToken');
-      localStorage.removeItem('appConfig');
-      localStorage.removeItem('merchantInfo');
-      navigate(`${APP_PATH}login`);
-    } catch (err) {
-      navigate(`${APP_PATH}login`);
-      if (err instanceof Error) {
-        console.log('err logging out: ', err.message);
-        // message.error(err.message);
-      } else {
-        // message.error("Unknown error");
-      }
-    }
+    const [_, err] = await logoutReq();
+    localStorage.removeItem('merchantToken');
+    localStorage.removeItem('appConfig');
+    localStorage.removeItem('merchantInfo');
+    localStorage.removeItem('session');
+    localStorage.removeItem('profile');
+    navigate(`${APP_PATH}login`);
   };
-  //   getItem('Billable metrics', '/billable-metrics/list', <DesktopOutlined />),
 
   useEffect(() => {
-    console.log('pathname: ', location.pathname);
     const pathItems = location.pathname.split('/').filter((p) => p != '');
     if (pathItems[0] == 'subscription') {
       setActiveMenuItem(['/subscription/list']);

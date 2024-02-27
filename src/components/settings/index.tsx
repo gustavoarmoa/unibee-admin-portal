@@ -131,9 +131,6 @@ const role: Record<TRoles, TPermission> = {
 // role: App Owner, Admin, Power User, Customer Support, Finance,
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [userProfile, setUserProfile] = useState<IProfile | null>(null);
-
   const tabItems: TabsProps['items'] = [
     {
       key: 'AppConfig',

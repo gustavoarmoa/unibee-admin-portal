@@ -131,26 +131,16 @@ const Index = () => {
   useEffect(() => {
     const fetchAppConfig = async () => {
       setSubmitting(true);
-      try {
-        const appConfigRes = await getAppConfigReq();
-        setSubmitting(false);
-        console.log('app config res: ', appConfigRes);
-        if (appConfigRes.data.code != 0) {
-          throw new Error(appConfigRes.data.message);
-        }
-        appConfigStore.setAppConfig(appConfigRes.data.data);
-      } catch (err) {
-        setSubmitting(false);
-        if (err instanceof Error) {
-          console.log(`err getting app config data: `, err.message);
-          message.error(err.message);
-        } else {
-          message.error('Unknown error');
-        }
+      const [appConfig, err] = await getAppConfigReq();
+      setSubmitting(false);
+      if (err != null) {
+        message.error(err.message);
+        return;
       }
-
-      fetchAppConfig();
+      appConfigStore.setAppConfig(appConfig);
     };
+
+    fetchAppConfig();
   }, []);
 
   return (
