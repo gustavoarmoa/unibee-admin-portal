@@ -78,31 +78,22 @@ const Index = () => {
 
   const fetchData = async () => {
     const searchTerm = form.getFieldsValue();
-    try {
-      setLoading(true);
-      const res = await getUserListReq({
+    setLoading(true);
+    const [users, err] = await getUserListReq(
+      {
         merchantId: appConfigStore.MerchantId,
         page,
         count: PAGE_SIZE,
         ...searchTerm,
-      });
-      setLoading(false);
-      console.log('res getting user: ', res);
-      const code = res.data.code;
-      if (code != 0) {
-        code == 61 && relogin();
-        throw new Error(res.data.message);
-      }
-      setUsers(res.data.data.userAccounts);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log(`err getting user: `, err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+      },
+      fetchData,
+    );
+    setLoading(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    setUsers(users);
   };
 
   useEffect(() => {

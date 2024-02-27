@@ -411,17 +411,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       }
     }
 
-    /*
-interface ISubAddon extends IPlan {
-  // when update subscription plan, I need to know which addons users have selected,
-  // then apply them on the plan
-  quantity: number;
-  addonPlanId: number;
-}
-    */
-
     console.log('active sub: ', localActiveSub);
-
     setSelectedPlan(s.plan.id);
     setUserId(s.user.id);
 

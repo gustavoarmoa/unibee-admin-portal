@@ -17,6 +17,8 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { CURRENCY, PLAN_STATUS } from '../../constants';
 import { useRelogin } from '../../hooks';
 import {
@@ -44,6 +46,9 @@ const Index = () => {
   useEffect(() => {
     setAggrePropDisabled(watchAggreType == 0);
   }, [watchAggreType]);
+
+  const watchCode = Form.useWatch('code', form);
+  const watchAggreProps = Form.useWatch('aggregationProperty', form);
 
   const onSave = async () => {
     console.log('form values: ', form.getFieldsValue());
@@ -107,6 +112,14 @@ const Index = () => {
     }
   };
 
+  const getPropsArg = () =>
+    watchAggreType == 0
+      ? ''
+      : `
+      "properties":  { 
+          "${watchAggreProps || 'YOUR_AGGREGATION_PROPERTY'}": 12
+      }`;
+
   useEffect(() => {
     if (!isNew) {
       fetchMetrics();
@@ -123,7 +136,7 @@ const Index = () => {
         fullscreen
       />
       <div className="flex">
-        <div className="w-4/6">
+        <div className="w-3/6">
           <Form
             form={form}
             onFinish={onSave}
@@ -264,25 +277,33 @@ const Index = () => {
             </div>
           </Form>
         </div>
-        <div className="w-2/6">
-          <pre style={{ background: '#f3f4f6', height: '100%' }}>{`
-curl --location --request POST "http://18.179.30.245:3000/api/v1/events" \
-  --header "Authorization: Bearer $__YOUR_API_KEY__" \
-  --header 'Content-Type: application/json' \
+        <div className="w-3/6">
+          <SyntaxHighlighter
+            language="javascript"
+            style={solarizedlight}
+            wrapLines={true}
+            showLineNumbers={true}
+          >
+            {`curl --location --request POST "${location.origin}/api/v1/events" \\
+  --header "Authorization: Bearer $__YOUR_API_KEY__" \\
+  --header 'Content-Type: application/json' \\
   --data-raw '{
-    "event": { 
-    "transaction_id": "__UNIQUE_ID__", 
-    "external_subscription_id": "__EXTERNAL_SUBSCRIPTION_ID__",
-    "external_customer_id": "__EXTERNAL_CUSTOMER_ID__", 
-    "code": "code-001",
-    "timestamp": $(date +%s), 
-    "properties":  { 
-      "user_id": 12
+    "event": {
+      "transaction_id": "__UNIQUE_ID__", 
+      "external_subscription_id": "__EXTERNAL_SUBSCRIPTION_ID__",
+      "external_customer_id": "__EXTERNAL_CUSTOMER_ID__", 
+      "code": "${watchCode || 'YOUR_CODE'}",
+      "timestamp": $(date +%s),${getPropsArg()}
     }
-  }
-}'
-# To use the snippet, don’t forget to edit your __YOUR_API_KEY__, __UNIQUE_ID__, __EXTERNAL_SUBSCRIPTION_ID__ and __EXTERNAL_CUSTOMER_ID__
-          `}</pre>
+  }'
+
+# To use the snippet, don’t forget to edit your
+# __YOUR_API_KEY__,
+# __UNIQUE_ID__,
+# __EXTERNAL_SUBSCRIPTION_ID__, and
+# __EXTERNAL_CUSTOMER_ID__`}
+          </SyntaxHighlighter>
+          {/* <pre style={{ background: '#f3f4f6', height: '100%' }}></pre> */}
         </div>
       </div>
     </div>

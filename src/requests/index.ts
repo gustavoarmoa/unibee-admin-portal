@@ -405,11 +405,57 @@ export const setSimDateReq = async (
   );
 };
 
+/*
+
+export const getWebhookListReq = async (refreshCb: () => void) => {
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(
+      `/merchant/merchant_webhook/webhook_endpoint_list`,
+    );
+    console.log('get webhook list res: ', res);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.endpointList, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+
+*/
 // billing admin can also get user profile.
 export const getUserProfile = async (userId: number) => {
   return await request.get(
     `/merchant/merchant_user/get_user_profile?userId=${userId}`,
   );
+};
+export const getUserProfile2 = async (
+  userId: number,
+  refreshCb: () => void,
+) => {
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(
+      `/merchant/merchant_user/get_user_profile?userId=${userId}`,
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.User, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 // billing admin can also update user profile.
@@ -577,26 +623,26 @@ type TUserList = {
   page: number;
   count: number;
 };
-export const getUserListReq = async (users: TUserList) => {
-  return await request.post(`/merchant/merchant_user/user_list`, users);
-};
-// -----------------
-
-/*
-export const loginWithPasswordReq = async (body: TPassLogin) => {
+export const getUserListReq = async (
+  users: TUserList,
+  refreshCb: () => void,
+) => {
+  const session = useSessionStore.getState();
   try {
-    const res = await request.post('/merchant/auth/sso/login', body);
-    console.log('login withh pass res: ', res);
+    const res = await request.post(`/merchant/merchant_user/user_list`, users);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data, null];
+    return [res.data.data.userAccounts, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
-*/
 
 export const getEventListReq = async () => {
   const session = useSessionStore.getState();

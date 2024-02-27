@@ -13,7 +13,7 @@ import type { Dayjs } from 'dayjs';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
-import { getUserProfile } from '../../requests';
+import { getUserProfile, getUserProfile2 } from '../../requests';
 import { IProfile } from '../../shared.types';
 import UserInfoSection from '../shared/userInfo';
 import AdminNote from './adminNote';
@@ -59,24 +59,15 @@ const Index = () => {
   const onTabChange = (key: string) => {};
 
   const fetchUserProfile = async () => {
-    try {
-      const res = await getUserProfile(userId as number);
-      console.log('res getting user profile: ', res);
-      const code = res.data.code;
-      code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      setUserProfile(res.data.data.User);
-    } catch (err) {
-      // setLoading(false);
-      if (err instanceof Error) {
-        console.log('profile update err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [user, err] = await getUserProfile2(
+      userId as number,
+      fetchUserProfile,
+    );
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    setUserProfile(user);
   };
 
   useEffect(() => {

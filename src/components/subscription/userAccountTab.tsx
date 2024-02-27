@@ -12,11 +12,7 @@ import {
 import { ReactElement, useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
-import {
-  getCountryList,
-  getUserProfile,
-  saveUserProfile,
-} from '../../requests';
+import { getCountryList, saveUserProfile } from '../../requests';
 import { Country, IProfile } from '../../shared.types';
 import { useAppConfigStore } from '../../stores';
 
