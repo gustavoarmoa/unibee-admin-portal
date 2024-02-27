@@ -224,6 +224,21 @@ type TWebhook = {
   createTime: number;
 };
 
+type TWebhookLogs = {
+  id: number;
+  merchantId: number;
+  endpointId: number;
+  webhookUrl: string;
+  webhookEvent: string;
+  requestId: string;
+  body: string;
+  response: string;
+  mamo: string;
+  gmtCreate: string;
+  gmtModify: string;
+  createTime: 0;
+};
+
 export type {
   Country,
   IAppConfig,
@@ -236,5 +251,6 @@ export type {
   TInvoicePerm,
   TMerchantInfo,
   TWebhook,
+  TWebhookLogs,
   UserInvoice,
 };

@@ -637,3 +637,31 @@ export const deleteWebhookReq = async (endpointId: number) => {
     return [null, e];
   }
 };
+
+export const getWebhookLogs = async (
+  {
+    endpointId,
+    page,
+    count,
+  }: { endpointId: number; page: number; count: number },
+  refreshCb: null | (() => void),
+) => {
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(
+      `/merchant/merchant_webhook/webhook_endpoint_log_list?endpointId=${endpointId}&page=${page}&count=${count}`,
+    );
+    console.log('webhook logs: ', res);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.endpointLogList ?? [], null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
