@@ -152,7 +152,12 @@ const App: React.FC = () => {
       ) : (
         <Layout style={{ minHeight: '100vh' }}>
           {sessionStore.expired && (
-            <Modal open={true} footer={false}>
+            <Modal
+              title="Session expired"
+              open={true}
+              footer={false}
+              closeIcon={null}
+            >
               <LoginModal email={profileStore.email} />
             </Modal>
           )}

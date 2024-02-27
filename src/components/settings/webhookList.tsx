@@ -6,37 +6,38 @@ import {
 } from '@ant-design/icons';
 import {
   Button,
-  Checkbox,
   Col,
   Form,
   FormInstance,
   Input,
   Modal,
-  Pagination,
+  Popover,
   Row,
   Select,
   Space,
   Table,
+  Tag,
   message,
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants';
+import { ramdonString, urlRegx } from '../../helpers';
 import { useRelogin } from '../../hooks';
-import { getInvoiceList, getWebhookListReq } from '../../requests';
+import {
+  deleteWebhookReq,
+  getEventListReq,
+  getWebhookListReq,
+  saveWebhookReq,
+} from '../../requests';
 import '../../shared.css';
-import { IProfile, TWebhook, UserInvoice } from '../../shared.types';
+import { IProfile, TWebhook } from '../../shared.types';
 import { useAppConfigStore } from '../../stores';
 
-const PAGE_SIZE = 10;
-const APP_PATH = import.meta.env.BASE_URL;
-
 const Index = () => {
-  const navigate = useNavigate();
-  const appConfigStore = useAppConfigStore();
-  const [form] = Form.useForm();
+  // const navigate = useNavigate();
+  // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
@@ -45,7 +46,7 @@ const Index = () => {
   const toggleModal = () => setModalOpen(!modalOpen);
   const [currentWebhookIdx, setCurrentWebhookIdx] = useState(-1);
 
-  const relogin = useRelogin();
+  // const relogin = useRelogin();
 
   const columns: ColumnsType<TWebhook> = [
     {
@@ -67,15 +68,25 @@ const Index = () => {
       title: 'Events',
       dataIndex: 'webhookEvents',
       key: 'webhookEvents',
-      render: (d, webhook) => 'aa',
+      render: (evt, webhook) => (
+        <Popover
+          placement="top"
+          // title="Addon breakdown"
+          content={
+            <Space size={[0, 8]} wrap style={{ width: '380px' }}>
+              {evt.map((e: string) => (
+                <Tag key={e}>{e}</Tag>
+              ))}
+            </Space>
+          }
+        >
+          <span style={{ marginLeft: '8px', cursor: 'pointer' }}>
+            {evt.length}
+          </span>
+        </Popover>
+      ),
     },
-    {
-      title: 'End',
-      dataIndex: 'periodEnd',
-      key: 'periodEnd',
-      render: (d, plan) =>
-        d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'), // new Date(d * 1000).toLocaleDateString(),
-    },
+
     {
       title: 'Modified at',
       dataIndex: 'gmtModify',
@@ -83,6 +94,12 @@ const Index = () => {
       render: (d, plan) => (
         <span>{dayjs(new Date(d * 1000)).format('YYYY-MMM-DD')}</span>
       ),
+    },
+    {
+      title: 'Created at',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (d, plan) => dayjs(new Date(d * 1000)).format('YYYY-MMM-DD'),
     },
   ];
 
@@ -105,30 +122,20 @@ const Index = () => {
   useEffect(() => {
     fetchData();
   }, []);
-  /*
-  useEffect(() => {
-    fetchData();
-  }, [page]);
-  */
 
   useEffect(() => {
     !modalOpen && setCurrentWebhookIdx(-1);
   }, [modalOpen]);
 
-  //  detail={webhookList[currentWebhookIdx]}
   return (
     <div>
       {modalOpen && (
         <WebhookDetail
           detail={webhookList[currentWebhookIdx]}
           closeModal={toggleModal}
+          refresh={fetchData}
         />
       )}
-      <div className="my-4 flex justify-end">
-        <Button type="primary" onClick={onNewWebhook}>
-          New
-        </Button>
-      </div>
       <Table
         columns={columns}
         dataSource={webhookList}
@@ -148,17 +155,11 @@ const Index = () => {
           };
         }}
       />
-      {/*       <div className="mx-0 my-4 flex items-center justify-end">
-       <Pagination
-          current={page + 1} // back-end starts with 0, front-end starts with 1
-          pageSize={PAGE_SIZE}
-          total={500}
-          size="small"
-          onChange={onPageChange}
-          disabled={loading}
-          showSizeChanger={false}
-      />
-      </div>*/}
+      <div className="my-4 flex justify-end">
+        <Button type="primary" onClick={onNewWebhook}>
+          New
+        </Button>
+      </div>
     </div>
   );
 };
@@ -168,32 +169,86 @@ export default Index;
 const WebhookDetail = ({
   closeModal,
   detail,
+  refresh,
 }: {
   closeModal: () => void;
   detail: TWebhook | null;
+  refresh: () => void;
 }) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-  const onConfirm = () => {
+  const [eventList, setEventList] = useState<string[]>([]); // this is to populate the event <Select />, not used for update.
+
+  const onConfirm = async () => {
     console.log('form v: ', form.getFieldsValue());
-    // closeModal();
+    setSubmitting(true);
+    const [res, err] = await saveWebhookReq(form.getFieldsValue());
+    console.log('save webhook res: ', res, '//', err);
+    if (err != null) {
+      setSubmitting(false);
+      message.error(err.message);
+      return;
+    }
+    message.success('Webhook saved');
+    refresh();
+    setTimeout(closeModal, 1500);
   };
+
+  const onDelete = async () => {
+    if (detail == null) {
+      return;
+    }
+    setSubmitting(true);
+    const [res, err] = await deleteWebhookReq(detail?.id);
+    console.log('delete webhook res: ', res, '//', err);
+    if (err != null) {
+      setSubmitting(false);
+      message.error(err.message);
+      return;
+    }
+    message.success('Webhook deleted');
+    refresh();
+    setTimeout(closeModal, 1500);
+  };
+
+  const fetchEventList = async () => {
+    setSubmitting(true);
+    const [eventList, err] = await getEventListReq();
+    setSubmitting(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
+    }
+    setEventList(eventList);
+  };
+
+  const isEvtSelected = (evt: string) =>
+    form.getFieldValue('events').findIndex((e: string) => e == evt) != -1;
+
+  useEffect(() => {
+    fetchEventList();
+  }, []);
 
   console.log('webhook detail: ', detail);
 
-  useEffect(() => {
-    form.setFieldValue('events', ['abc', 'xyz']);
-  }, []);
   return (
-    <Modal open={true} footer={null} title="Webhook Detail">
+    <Modal open={true} footer={null} title="Webhook Detail" closeIcon={null}>
       <Form
         form={form}
-        initialValues={{ ur: 'http://www.google.com', events: ['abc', 'xyz'] }}
+        onFinish={onConfirm}
+        initialValues={{
+          endpointId: detail == null ? null : detail.id,
+          url: detail == null ? '' : detail.webhookUrl,
+          events: detail == null ? [''] : detail.webhookEvents,
+        }}
         name="web-hook-detail"
-        // labelCol={{ span: 6 }}
-        // wrapperCol={{ span: 18 }}
         style={{ maxWidth: 640, width: 480 }}
       >
+        {detail != null && (
+          <Form.Item name="endpointId" hidden>
+            <Input />
+          </Form.Item>
+        )}
         <Row style={{ marginTop: '32px' }}>
           <Col span={4}>URL</Col>
           <Col span={18}>
@@ -205,9 +260,17 @@ const WebhookDetail = ({
                   required: true,
                   message: 'Please input your endpoint URL!',
                 },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (urlRegx.test(value)) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject('Please input a valid URL');
+                  },
+                }),
               ]}
             >
-              <Input />
+              <Input placeholder="Starts with http:// or https://" />
             </Form.Item>
           </Col>
           <Col span={2}></Col>
@@ -220,40 +283,48 @@ const WebhookDetail = ({
               {(fields, { add, remove }) => {
                 return (
                   <>
-                    {fields.map((field, index) => {
-                      return (
-                        <div
-                          className="flex items-center"
-                          style={{ marginBottom: '12px' }}
-                        >
-                          <Form.Item
-                            name={field.name}
-                            //label={`skill - ${index + 1}`}
-                            //  style={{ width: '400px' }}
-                            noStyle={true}
-                            rules={[{ required: true }]}
-                          >
-                            <Input style={{ width: '80%' }} />
-                          </Form.Item>
-                          &nbsp;&nbsp;&nbsp;&nbsp;
+                    {fields &&
+                      fields.map((field, index) => {
+                        return (
                           <div
-                            onClick={() => {
-                              if (fields.length == 1) {
-                                return;
-                              }
-                              remove(field.name);
-                            }}
-                            style={{
-                              fontWeight: 'bold',
-                              width: '32px',
-                              cursor: `${fields.length == 1 ? 'not-allowed' : 'pointer'}`,
-                            }}
+                            key={ramdonString(8)}
+                            className="flex items-center"
+                            style={{ marginBottom: '12px' }}
                           >
-                            <MinusOutlined />
+                            <Form.Item
+                              name={field.name}
+                              label={`Event - ${index + 1}`}
+                              noStyle={true}
+                              rules={[{ required: true }]}
+                            >
+                              <Select
+                                style={{ width: 200, margin: '8px 0' }}
+                                options={eventList.map((e) => ({
+                                  label: e,
+                                  value: e,
+                                  disabled: isEvtSelected(e),
+                                }))}
+                              />
+                            </Form.Item>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <div
+                              onClick={() => {
+                                if (fields.length == 1) {
+                                  return;
+                                }
+                                remove(field.name);
+                              }}
+                              style={{
+                                fontWeight: 'bold',
+                                width: '32px',
+                                cursor: `${fields.length == 1 ? 'not-allowed' : 'pointer'}`,
+                              }}
+                            >
+                              <MinusOutlined />
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                     <Form.Item>
                       <Button
                         type="dashed"
@@ -272,19 +343,28 @@ const WebhookDetail = ({
           </Col>
         </Row>
       </Form>
-      <div className="my-6 flex items-center justify-end">
-        <Button onClick={closeModal} disabled={submitting}>
-          Cancel
-        </Button>
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <Button
-          type="primary"
-          onClick={onConfirm}
-          loading={submitting}
-          disabled={submitting}
-        >
-          OK
-        </Button>
+      <div className="my-6 flex items-center justify-between">
+        {detail == null ? (
+          <span></span>
+        ) : (
+          <Button danger onClick={onDelete} disabled={submitting}>
+            Delete
+          </Button>
+        )}
+        <div>
+          <Button onClick={closeModal} disabled={submitting}>
+            Cancel
+          </Button>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <Button
+            type="primary"
+            onClick={form.submit}
+            loading={submitting}
+            disabled={submitting}
+          >
+            OK
+          </Button>
+        </div>
       </div>
     </Modal>
   );

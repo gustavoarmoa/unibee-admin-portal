@@ -22,6 +22,7 @@ const Index = ({ email }: { email: string }) => {
     const [res, err] = await loginWithPasswordReq(form.getFieldsValue());
     if (err != null) {
       setErrMsg(err.message);
+      setSubmitting(false);
       return;
     }
     const { MerchantUser, Token } = res;

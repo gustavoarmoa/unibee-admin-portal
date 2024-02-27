@@ -538,6 +538,27 @@ export const loginWithPasswordReq = async (body: TPassLogin) => {
 };
 */
 
+export const getEventListReq = async () => {
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(
+      `/merchant/merchant_webhook/webhook_event_list`,
+    );
+    console.log('get event list res: ', res);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.eventList, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+
 export const getWebhookListReq = async (refreshCb: () => void) => {
   const session = useSessionStore.getState();
   try {
@@ -559,25 +580,60 @@ export const getWebhookListReq = async (refreshCb: () => void) => {
   }
 };
 
-/*
-export const getMetricsListReq = async () => {
-  const appConfig = useAppConfigStore.getState();
+// used for both creation and update
+export const saveWebhookReq = async ({
+  url,
+  events,
+  endpointId,
+}: {
+  url: string;
+  events: string[];
+  endpointId?: number;
+}) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.get(
-      `/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
-    );
+    const actionUrl =
+      endpointId == null
+        ? '/merchant/merchant_webhook/new_webhook_endpoint'
+        : '/merchant/merchant_webhook/update_webhook_endpoint';
+    const body: any = { url, events };
+    if (endpointId != null) {
+      body.endpointId = endpointId;
+    }
+    const res = await request.post(actionUrl, body);
+    console.log('save webhook res: ', res);
     if (res.data.code == 61) {
-      session.setSession({ expired: true });
+      session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.merchantMetrics, null];
+    return [null, null]; // this call has no meaningful result
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
-*/
+
+export const deleteWebhookReq = async (endpointId: number) => {
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.post(
+      '/merchant/merchant_webhook/delete_webhook_endpoint',
+      { endpointId },
+    );
+    console.log('delete webhook res: ', res);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [null, null]; // this call has no meaningful result
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
