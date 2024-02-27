@@ -192,61 +192,51 @@ const Index = () => {
 
   const fetchData = async () => {
     const planId = Number(params.planId);
-    /*
-    if (isNaN(planId)) {
+
+    let addonList: any, planDetail: any, metricsList: any;
+    let errAddonList: Error, errPlanDetail: Error, errMetricList: Error;
+
+    setLoading(true);
+    const res = ([
+      [addonList, errAddonList],
+      [planDetail, errPlanDetail],
+      [metricsList, errMetricList],
+    ] = await Promise.all([
+      getPlanList({
+        type: 2, // addon
+        status: 2, // active
+        page: 0,
+        count: 100,
+      }), // let's assume there are at most 100 addons.
+      isNew
+        ? Promise.resolve([{ data: { data: null, code: 0 } }, null])
+        : getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
+      getMetricsListReq(fetchData),
+    ]));
+    setLoading(false);
+    console.log(
+      '[addonListRes, planDetailRes, metricsListRes]',
+      addonList,
+      '///',
+      planDetail,
+      '///',
+      metricsList,
+    );
+
+    if (errAddonList != null) {
+      message.error(errAddonList.message);
       return;
-    }
-    */
-
-    let addonListRes: any, planDetailRes: any, metricsListRes: any;
-    try {
-      setLoading(true);
-      const res = ([addonListRes, planDetailRes, metricsListRes] =
-        await Promise.all([
-          getPlanList({
-            type: 2, // addon
-            status: 2, // active
-            page: 0,
-            count: 100,
-          }), // let's assume there are at most 100 addons.
-          isNew
-            ? new Promise((resolve, reject) =>
-                resolve({ data: { data: null, code: 0 } }),
-              )
-            : getPlanDetail(planId), // plan detail page need to show a list of addons to attach.
-          getMetricsListReq(fetchData),
-        ]));
-      setLoading(false);
-      console.log(
-        '[addonListRes, planDetailRes, metricsListRes]',
-        addonListRes,
-        '///',
-        planDetailRes,
-        '///',
-        metricsListRes,
-      );
-
-      res.forEach((r: any) => {
-        const code = r.data.code;
-        code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-        if (code != 0) {
-          throw new Error(r.data.message);
-        }
-      });
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err in detail page: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    } else if (errPlanDetail != null) {
+      message.error(errPlanDetail.message);
+      return;
+    } else if (errMetricList != null) {
+      message.error(errMetricList.message);
       return;
     }
 
-    const addons = addonListRes.data.data.Plans.map((p: any) => p.plan);
+    const addons = addonList.map((p: any) => p.plan);
     setAddons(addons);
-    setMetricsList(metricsListRes.data.data.merchantMetrics);
+    setMetricsList(metricsList);
     if (isNew) {
       return;
     }
@@ -254,38 +244,34 @@ const Index = () => {
 
     // plan obj and addon obj are at the same level in planDetailRes.data.data obj
     // but I want to put addonIds obj as a props of the local plan obj.
-    planDetailRes.data.data.Plan.plan.amount = getAmount(
-      planDetailRes.data.data.Plan.plan.amount,
-      planDetailRes.data.data.Plan.plan.currency,
+    planDetail.amount = getAmount(
+      planDetail.plan.amount,
+      planDetail.plan.currency,
     ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
 
-    planDetailRes.data.data.Plan.plan.addonIds =
-      planDetailRes.data.data.Plan.addonIds == null
-        ? []
-        : planDetailRes.data.data.Plan.addonIds;
+    planDetail.plan.addonIds =
+      planDetail.addonIds == null ? [] : planDetail.addonIds;
 
     // todo: planDetailRes.data.data.Plan.plan, add localId
 
-    setPlan(planDetailRes.data.data.Plan.plan);
-    form.setFieldsValue(planDetailRes.data.data.Plan.plan);
+    setPlan(planDetail.plan);
+    form.setFieldsValue(planDetail.plan);
 
     if (!isNew) {
-      const metrics = planDetailRes.data.data.Plan.metricPlanLimits.map(
-        (m: any) => ({
-          localId: ramdonString(8),
-          metricId: m.metricId,
-          metricLimit: m.metricLimit,
-        }),
-      );
+      const metrics = planDetail.metricPlanLimits.map((m: any) => ({
+        localId: ramdonString(8),
+        metricId: m.metricId,
+        metricLimit: m.metricLimit,
+      }));
       setSelectedMetrics(metrics);
     }
 
     setSelectAddons(
       addons.filter(
         (a: any) =>
-          a.intervalCount == planDetailRes.data.data.Plan.plan.intervalCount &&
-          a.intervalUnit == planDetailRes.data.data.Plan.plan.intervalUnit &&
-          a.currency == planDetailRes.data.data.Plan.plan.currency,
+          a.intervalCount == planDetail.plan.intervalCount &&
+          a.intervalUnit == planDetail.plan.intervalUnit &&
+          a.currency == planDetail.plan.currency,
       ),
     );
   };

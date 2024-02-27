@@ -97,6 +97,28 @@ export const uploadLogoReq = async (f: FormData) => {
   });
 };
 
+/*
+export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
+  const appConfig = useAppConfigStore.getState();
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(
+      `/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.merchantMetrics, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+*/
 // ---------------
 type TPlanListBody = {
   merchantId?: number;
@@ -106,16 +128,54 @@ type TPlanListBody = {
   count: number;
 };
 export const getPlanList = async (body: TPlanListBody) => {
+  const session = useSessionStore.getState();
+  const appConfig = useAppConfigStore.getState();
+  body.merchantId = appConfig.MerchantId;
+  try {
+    const res = await request.post(
+      '/merchant/plan/subscription_plan_list',
+      body,
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.Plans, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+
+export const getPlanList2 = async (body: TPlanListBody) => {
   const appConfig = useAppConfigStore.getState();
   body.merchantId = appConfig.MerchantId;
   return await request.post('/merchant/plan/subscription_plan_list', body);
 };
+
 // -----------------
 
 export const getPlanDetail = async (planId: number) => {
-  return await request.post('/merchant/plan/subscription_plan_detail', {
-    planId,
-  });
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.post('/merchant/plan/subscription_plan_detail', {
+      planId,
+    });
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.Plan, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 // create a new plan

@@ -29,6 +29,7 @@ import {
   createPreviewReq,
   extendDueDate,
   getPlanList,
+  getPlanList2,
   getSubDetail,
   getSubTimeline,
   resumeSub,
@@ -357,7 +358,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     try {
       const res = ([subDetailRes, planListRes] = await Promise.all([
         getSubDetail(subId),
-        getPlanList({
+        getPlanList2({
           type: 1,
           status: 2,
           page: 0,

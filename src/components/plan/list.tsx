@@ -99,33 +99,24 @@ const Index = () => {
 
   const fetchPlan = async () => {
     setLoading(true);
-    try {
-      const planListRes = await getPlanList({
-        // type: undefined, // get main plan and addon
-        // status: undefined, // active, inactive, expired, editing, all of them
-        page,
-        count: PAGE_SIZE,
-      });
-      setLoading(false);
-      console.log('plan list res: ', planListRes);
-      const statusCode = planListRes.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(planListRes.data.message);
-      }
-      if (planListRes.data.data.Plans == null) {
-        return;
-      }
-      setPlan(planListRes.data.data.Plans.map((p: any) => ({ ...p.plan })));
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err getting planlist: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+
+    const [planList, err] = await getPlanList({
+      // type: undefined, // get main plan and addon
+      // status: undefined, // active, inactive, expired, editing, all of them
+      page,
+      count: PAGE_SIZE,
+    });
+    setLoading(false);
+
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    console.log('planList: ', planList);
+    if (planList == null) {
+      return;
+    }
+    setPlan(planList.map((p: any) => ({ ...p.plan })));
   };
 
   const onTableChange: TableProps<IPlan>['onChange'] = (
@@ -138,7 +129,6 @@ const Index = () => {
     if (filters.status == null) {
       return;
     }
-    // setStatusFilter(filters.status as number[]);
   };
 
   const onNewPlan = () => {
