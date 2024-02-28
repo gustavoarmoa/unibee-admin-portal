@@ -8,7 +8,11 @@ import {
   getAppConfigReq,
   loginWithPasswordReq,
 } from '../../requests';
-import { useAppConfigStore, useProfileStore } from '../../stores';
+import {
+  useAppConfigStore,
+  useProfileStore,
+  useSessionStore,
+} from '../../stores';
 const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = ({
@@ -20,6 +24,7 @@ const Index = ({
 }) => {
   const profileStore = useProfileStore();
   const appConfigStore = useAppConfigStore();
+  const sessionStore = useSessionStore();
   const [errMsg, setErrMsg] = useState('');
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false); // login submit
@@ -69,6 +74,7 @@ const Index = ({
     localStorage.setItem('merchantToken', Token);
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
+    sessionStore.setSession({ expired: false, refresh: null });
 
     const [appConfig, err2] = await getAppConfigReq();
     setSubmitting(false);

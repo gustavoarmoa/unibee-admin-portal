@@ -9,7 +9,11 @@ import {
   loginWithOTPReq,
   loginWithOTPVerifyReq,
 } from '../../requests';
-import { useAppConfigStore, useProfileStore } from '../../stores';
+import {
+  useAppConfigStore,
+  useProfileStore,
+  useSessionStore,
+} from '../../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -170,6 +174,7 @@ const OTPForm = ({
   const navigate = useNavigate();
   const appConfigStore = useAppConfigStore();
   const profileStore = useProfileStore();
+  const sessionStore = useSessionStore();
   const [submitting, setSubmitting] = useState(false);
   const [otp, setOtp] = useState('');
   const [errMsg, setErrMsg] = useState('');
@@ -195,6 +200,7 @@ const OTPForm = ({
     localStorage.setItem('merchantToken', Token);
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
+    sessionStore.setSession({ expired: false, refresh: null });
 
     const [appConfig, err2] = await getAppConfigReq();
     setSubmitting(false);

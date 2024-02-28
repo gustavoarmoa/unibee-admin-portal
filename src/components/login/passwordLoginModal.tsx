@@ -21,13 +21,7 @@ const Index = ({ email }: { email: string }) => {
     setSubmitting(true);
     const [loginRes, err] = await loginWithPasswordReq(form.getFieldsValue());
     if (err != null) {
-      setErrMsg(err.message);
-      return;
-    }
-
-    const [appConfig, err2] = await getAppConfigReq();
-    setSubmitting(false);
-    if (err2 != null) {
+      setSubmitting(false);
       setErrMsg(err.message);
       return;
     }
@@ -36,6 +30,13 @@ const Index = ({ email }: { email: string }) => {
     localStorage.setItem('merchantToken', Token);
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
+
+    const [appConfig, err2] = await getAppConfigReq();
+    setSubmitting(false);
+    if (err2 != null) {
+      setErrMsg(err.message);
+      return;
+    }
 
     appConfigStore.setAppConfig(appConfig);
     sessionStore.refresh && sessionStore.refresh();
@@ -72,7 +73,7 @@ const Index = ({ email }: { email: string }) => {
             }),
           ]}
         >
-          <Input disabled />
+          <Input />
         </Form.Item>
 
         <Form.Item
