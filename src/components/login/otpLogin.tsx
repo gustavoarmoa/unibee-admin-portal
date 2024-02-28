@@ -6,11 +6,13 @@ import { emailValidate } from '../../helpers';
 import { useCountdown } from '../../hooks';
 import {
   getAppConfigReq,
+  getMerchantInfoReq,
   loginWithOTPReq,
   loginWithOTPVerifyReq,
 } from '../../requests';
 import {
   useAppConfigStore,
+  useMerchantInfoStore,
   useProfileStore,
   useSessionStore,
 } from '../../stores';
@@ -175,6 +177,7 @@ const OTPForm = ({
   const appConfigStore = useAppConfigStore();
   const profileStore = useProfileStore();
   const sessionStore = useSessionStore();
+  const merchantStore = useMerchantInfoStore();
   const [submitting, setSubmitting] = useState(false);
   const [otp, setOtp] = useState('');
   const [errMsg, setErrMsg] = useState('');
@@ -201,6 +204,13 @@ const OTPForm = ({
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
     sessionStore.setSession({ expired: false, refresh: null });
+
+    const [merchantInfo, err3] = await getMerchantInfoReq();
+    if (err3 != null) {
+      message.error(err.message);
+      return;
+    }
+    merchantStore.setMerchantInfo(merchantInfo);
 
     const [appConfig, err2] = await getAppConfigReq();
     setSubmitting(false);

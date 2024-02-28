@@ -75,10 +75,10 @@ export const useMerchantInfoStore = create<MerchantInfoSlice>()(
 
 // --------------------------------
 const INITIAL_APP_VALUE: IAppConfig = {
+  Env: 'local',
+  IsProd: false,
   SupportCurrency: [],
   SupportTimeZone: [],
-  MerchantId: -1,
-  MerchantInfo: INITIAL_INFO,
   Gateway: [],
 };
 

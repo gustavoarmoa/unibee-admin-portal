@@ -33,25 +33,15 @@ const Index = () => {
 
   const getInfo = async () => {
     setLoading(true);
-    try {
-      const res = await getMerchantInfoReq();
-      setLoading(false);
-      const statusCode = res.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(res.data.message);
-      }
-      setMerchantInfo(res.data.data.MerchantInfo);
-      setLogoUrl(res.data.data.MerchantInfo.companyLogo);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err getting profile: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [merchantInfo, err] = await getMerchantInfoReq();
+    setLoading(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+
+    setMerchantInfo(merchantInfo);
+    setLogoUrl(merchantInfo.companyLogo);
   };
 
   const onFileUplaod = async (event: React.ChangeEvent<HTMLInputElement>) => {

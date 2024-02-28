@@ -6,10 +6,12 @@ import {
   forgetPassReq,
   forgetPassVerifyReq,
   getAppConfigReq,
+  getMerchantInfoReq,
   loginWithPasswordReq,
 } from '../../requests';
 import {
   useAppConfigStore,
+  useMerchantInfoStore,
   useProfileStore,
   useSessionStore,
 } from '../../stores';
@@ -25,6 +27,7 @@ const Index = ({
   const profileStore = useProfileStore();
   const appConfigStore = useAppConfigStore();
   const sessionStore = useSessionStore();
+  const merchantStore = useMerchantInfoStore();
   const [errMsg, setErrMsg] = useState('');
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false); // login submit
@@ -75,6 +78,13 @@ const Index = ({
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
     sessionStore.setSession({ expired: false, refresh: null });
+
+    const [merchantInfo, err3] = await getMerchantInfoReq();
+    if (err3 != null) {
+      message.error(err.message);
+      return;
+    }
+    merchantStore.setMerchantInfo(merchantInfo);
 
     const [appConfig, err2] = await getAppConfigReq();
     setSubmitting(false);

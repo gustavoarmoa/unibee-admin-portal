@@ -81,7 +81,6 @@ const Index = () => {
     setLoading(true);
     const [users, err] = await getUserListReq(
       {
-        merchantId: appConfigStore.MerchantId,
         page,
         count: PAGE_SIZE,
         ...searchTerm,

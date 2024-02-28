@@ -3,7 +3,11 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY } from '../constants';
 import { IBillableMetrics, IProfile, TMerchantInfo } from '../shared.types';
-import { useAppConfigStore, useSessionStore } from '../stores';
+import {
+  useAppConfigStore,
+  useMerchantInfoStore,
+  useSessionStore,
+} from '../stores';
 import { request } from './client';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -122,7 +126,22 @@ export const getAppConfigReq = async () => {
 };
 
 export const getMerchantInfoReq = async () => {
-  return await request.get(`/merchant/merchant_info/info`);
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(`/merchant/merchant_info/info`);
+    console.log('mercinfo res: ', res);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.MerchantInfo, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
@@ -163,7 +182,6 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
 */
 // ---------------
 type TPlanListBody = {
-  merchantId?: number;
   type?: number[] | null;
   status?: number[] | null;
   page: number;
@@ -172,7 +190,6 @@ type TPlanListBody = {
 export const getPlanList = async (body: TPlanListBody) => {
   const session = useSessionStore.getState();
   const appConfig = useAppConfigStore.getState();
-  body.merchantId = appConfig.MerchantId;
   try {
     const res = await request.post(
       '/merchant/plan/subscription_plan_list',
@@ -193,8 +210,6 @@ export const getPlanList = async (body: TPlanListBody) => {
 };
 
 export const getPlanList2 = async (body: TPlanListBody) => {
-  const appConfig = useAppConfigStore.getState();
-  body.merchantId = appConfig.MerchantId;
   return await request.post('/merchant/plan/subscription_plan_list', body);
 };
 
@@ -256,11 +271,10 @@ export const togglePublishReq = async ({
 };
 
 export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
-  const appConfig = useAppConfigStore.getState();
   const session = useSessionStore.getState();
   try {
     const res = await request.get(
-      `/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
+      `/merchant/merchant_metric/merchant_metric_list`,
     );
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
@@ -277,8 +291,6 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
 };
 
 export const createMetricsReq = async (metrics: any) => {
-  const appConfig = useAppConfigStore.getState();
-  metrics.merchantId = appConfig.MerchantId;
   return await request.post(
     `/merchant/merchant_metric/new_merchant_metric`,
     metrics,
@@ -308,14 +320,11 @@ export const getMetricDetailReq = async (metricId: number) => {
 
 // ----------
 type TSubListReq = {
-  merchantId?: number;
   status: number[];
   page: number;
   count: number;
 };
 export const getSublist = async (body: TSubListReq) => {
-  const appConfig = useAppConfigStore.getState();
-  body.merchantId = appConfig.MerchantId;
   return await request.post(`/merchant/subscription/subscription_list`, body);
 };
 // ------------
@@ -408,20 +417,15 @@ type TGetSubTimelineReq = {
   userId: number;
   page: number;
   count: number;
-  merchantId?: number;
 };
 export const getSubTimeline = async (body: TGetSubTimelineReq) => {
-  const appConfig = useAppConfigStore.getState();
-  body.merchantId = appConfig.MerchantId;
   return await request.post(
     `/merchant/subscription/subscription_timeline_list`,
     body,
   );
 };
 export const getSubTimeline2 = async (body: TGetSubTimelineReq) => {
-  const appConfig = useAppConfigStore.getState();
   const session = useSessionStore.getState();
-  body.merchantId = appConfig.MerchantId;
   try {
     const res = await request.post(
       `/merchant/subscription/subscription_timeline_list`,
@@ -443,17 +447,17 @@ export const getSubTimeline2 = async (body: TGetSubTimelineReq) => {
 // -----------
 
 export const getCountryList = async () => {
-  const appConfig = useAppConfigStore.getState();
+  const merchantStore = useMerchantInfoStore.getState();
   return await request.post(`/merchant/vat/vat_country_list`, {
-    merchantId: appConfig.MerchantId,
+    merchantId: merchantStore.id,
   });
 };
 export const getCountryList2 = async () => {
-  const appConfig = useAppConfigStore.getState();
+  const merchantStore = useMerchantInfoStore.getState();
   const session = useSessionStore.getState();
   try {
     const res = await request.post(`/merchant/vat/vat_country_list`, {
-      merchantId: appConfig.MerchantId,
+      merchantId: merchantStore.id,
     });
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
@@ -570,9 +574,7 @@ export const getWebhookListReq = async (refreshCb: () => void) => {
 */
 
 export const appSearchReq = async (searchKey: string) => {
-  const appConfig = useAppConfigStore.getState();
   return await request.post(`/merchant/search/key_search`, {
-    merchantId: appConfig.MerchantId,
     searchKey,
   });
 };
@@ -588,11 +590,8 @@ type TGetInvoicesReq = {
   status?: number[];
   amountStart?: number;
   amountEnd?: number;
-  merchantId?: number;
 };
 export const getInvoiceList = async (body: TGetInvoicesReq) => {
-  const appConfig = useAppConfigStore.getState();
-  body.merchantId = appConfig.MerchantId;
   return await request.post(
     `/merchant/invoice/subscription_invoice_list`,
     body,
@@ -608,7 +607,6 @@ export const getInvoiceDetailReq = async (invoiceId: string) => {
 
 // ------------
 type TCreateInvoiceReq = {
-  merchantId?: number;
   name: string;
   userId: number;
   currency: string;
@@ -626,8 +624,6 @@ type TInvoiceItems = {
 // admin manually create an invoice, still editable until the publishInvoice() is called.
 // before that, customers won't see(or receive) this invoice.
 export const createInvoice = async (body: TCreateInvoiceReq) => {
-  const appConfig = useAppConfigStore.getState();
-  body.merchantId = appConfig.MerchantId;
   body.lines = body.invoiceItems;
   body.gatewayId = 25;
   return await request.post(`/merchant/invoice/new_invoice_create`, body);

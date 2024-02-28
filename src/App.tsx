@@ -169,9 +169,9 @@ const App: React.FC = () => {
             >
               <img
                 src={
-                  appConfigStore.MerchantInfo.companyLogo == ''
+                  merchantInfoStore.companyLogo == ''
                     ? APP_PATH + 'multiloginLogo.png'
-                    : appConfigStore.MerchantInfo.companyLogo
+                    : merchantInfoStore.companyLogo
                 }
                 height={'80px'}
               />

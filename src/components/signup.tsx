@@ -58,9 +58,6 @@ const Index = () => {
   const goLogin = () => navigate(`${APP_PATH}login`);
 
   const onSubmit = () => {
-    if (appConfigStore.MerchantId < 0) {
-      return;
-    }
     if (
       firstName == '' ||
       lastName == '' ||
@@ -85,7 +82,6 @@ const Index = () => {
         phone,
         address,
         user_name,
-        merchantId: appConfigStore.MerchantId,
       })
       .then((res) => {
         setErrMsg(res.data.message);

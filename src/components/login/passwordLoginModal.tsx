@@ -1,9 +1,14 @@
 import { Button, Form, Input, Modal, message } from 'antd';
 import { useEffect, useState } from 'react';
 import { emailValidate } from '../../helpers';
-import { getAppConfigReq, loginWithPasswordReq } from '../../requests';
+import {
+  getAppConfigReq,
+  getMerchantInfoReq,
+  loginWithPasswordReq,
+} from '../../requests';
 import {
   useAppConfigStore,
+  useMerchantInfoStore,
   useProfileStore,
   useSessionStore,
 } from '../../stores';
@@ -12,6 +17,7 @@ const Index = ({ email }: { email: string }) => {
   const profileStore = useProfileStore();
   const sessionStore = useSessionStore();
   const appConfigStore = useAppConfigStore();
+  const merchantStore = useMerchantInfoStore();
   const [errMsg, setErrMsg] = useState('');
   const [submitting, setSubmitting] = useState(false); // login submit
   const [form] = Form.useForm();
@@ -37,6 +43,13 @@ const Index = ({ email }: { email: string }) => {
       setErrMsg(err.message);
       return;
     }
+
+    const [merchantInfo, err3] = await getMerchantInfoReq();
+    if (err3 != null) {
+      message.error(err.message);
+      return;
+    }
+    merchantStore.setMerchantInfo(merchantInfo);
 
     appConfigStore.setAppConfig(appConfig);
     sessionStore.refresh && sessionStore.refresh();
