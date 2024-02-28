@@ -24,7 +24,11 @@ const PLAN_STATUS_FILTER = Object.keys(PLAN_STATUS)
     value: Number(s),
   }))
   .sort((a, b) => (a.value < b.value ? -1 : 1));
-console.log('plan fiiltr: ', PLAN_STATUS_FILTER);
+
+const PLAN_TYPE_FILTER = [
+  { text: 'Main plan', value: 1 },
+  { text: 'Add-on', value: 2 },
+]; // main plan or addon
 
 const columns: ColumnsType<IPlan> = [
   {
@@ -57,6 +61,8 @@ const columns: ColumnsType<IPlan> = [
     render: (_, plan) => {
       return plan.type == 1 ? <span>Main plan</span> : <span>Add-on</span>;
     },
+    filters: PLAN_TYPE_FILTER,
+    // onFilter: (value, record) => record.status == value,
   },
   {
     title: 'Status',
@@ -64,7 +70,7 @@ const columns: ColumnsType<IPlan> = [
     key: 'status',
     render: (_, plan) => <span>{PLAN_STATUS[plan.status]}</span>,
     filters: PLAN_STATUS_FILTER,
-    onFilter: (value, record) => record.status == value,
+    // onFilter: (value, record) => record.status == value,
   },
   {
     title: 'Published',
@@ -88,6 +94,10 @@ const columns: ColumnsType<IPlan> = [
   },
 ];
 
+type TFilters = {
+  type: number[] | null;
+  status: number[] | null;
+};
 const Index = () => {
   const navigate = useNavigate();
   // const appConfigStore = useAppConfigStore();
@@ -95,6 +105,10 @@ const Index = () => {
   const [plan, setPlan] = useState<IPlan[]>([]);
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
+  const [filters, setFilters] = useState<TFilters>({
+    type: null,
+    status: null,
+  });
   const relogin = useRelogin();
 
   const fetchPlan = async () => {
@@ -103,6 +117,7 @@ const Index = () => {
     const [planList, err] = await getPlanList({
       // type: undefined, // get main plan and addon
       // status: undefined, // active, inactive, expired, editing, all of them
+      ...filters,
       page,
       count: PAGE_SIZE,
     });
@@ -126,9 +141,7 @@ const Index = () => {
     extra,
   ) => {
     console.log('params', pagination, filters, sorter, extra);
-    if (filters.status == null) {
-      return;
-    }
+    setFilters(filters as TFilters);
   };
 
   const onNewPlan = () => {
@@ -142,7 +155,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchPlan();
-  }, [page]);
+  }, [filters, page]);
 
   return (
     <>

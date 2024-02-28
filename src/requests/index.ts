@@ -164,8 +164,8 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
 // ---------------
 type TPlanListBody = {
   merchantId?: number;
-  type?: number;
-  status?: number;
+  type?: number[] | null;
+  status?: number[] | null;
   page: number;
   count: number;
 };
