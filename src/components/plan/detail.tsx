@@ -14,7 +14,6 @@ import { ramdonString } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import {
   activatePlan,
-  createPlan,
   getMetricsListReq,
   getPlanDetail,
   getPlanList,
@@ -22,7 +21,6 @@ import {
   togglePublishReq,
 } from '../../requests';
 import { IBillableMetrics, IPlan } from '../../shared.types';
-import { useAppConfigStore } from '../../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
 const getAmount = (amt: number, currency: string) =>
@@ -134,10 +132,10 @@ const Index = () => {
     console.log('saving plan form: ', f);
 
     // return;
-    const actionMethod = isNew ? createPlan : savePlan;
+    // const actionMethod = isNew ? createPlan : savePlan;
     try {
       setLoading(true);
-      const res = await actionMethod(f);
+      const res = await savePlan(f, isNew);
       setLoading(false);
       const statusCode = res.data.code;
       if (statusCode != 0) {

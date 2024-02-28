@@ -1,5 +1,6 @@
 import {
   CheckCircleOutlined,
+  CopyOutlined,
   LoadingOutlined,
   MinusOutlined,
 } from '@ant-design/icons';
@@ -24,9 +25,9 @@ SyntaxHighlighter.registerLanguage('bash', bash);
 
 import { useRelogin } from '../../hooks';
 import {
-  createMetricsReq,
   getMetricDetailReq,
-  updateMetricsReq,
+  // createMetricsReq,
+  saveMetricsReq,
 } from '../../requests';
 // import { useAppConfigStore } from '../../stores';
 
@@ -68,10 +69,10 @@ const Index = () => {
       };
     }
 
-    const actionMethod = isNew ? createMetricsReq : updateMetricsReq;
+    // const actionMethod = isNew ? createMetricsReq : updateMetricsReq;
     setLoading(true);
     try {
-      const res = await actionMethod(m);
+      const res = await saveMetricsReq(m, isNew);
       setLoading(false);
       const statusCode = res.data.code;
       if (statusCode != 0) {
@@ -114,6 +115,16 @@ const Index = () => {
     }
   };
 
+  const copyContent = async () => {
+    try {
+      await navigator.clipboard.writeText(curlCmd);
+      message.success('Copied');
+    } catch (err) {
+      let e = err instanceof Error ? err : new Error('Unknown copy error');
+      message.error(e.message);
+    }
+  };
+
   const getPropsArg = () =>
     watchAggreType == 0
       ? ''
@@ -127,6 +138,15 @@ const Index = () => {
       fetchMetrics();
     }
   }, []);
+
+  const curlCmd = `curl --location --request POST "${location.origin}/merchant/merchant_metric/merchant_metric_event" \\
+  --header "Authorization: Bearer $__YOUR_API_KEY__" \\
+  --header 'Content-Type: application/json' \\
+  --data-raw '{
+    "metricCode": "${watchCode || 'YOUR_CODE'}",
+    "externalUserId": "__EXTERNAL_USER_ID__",
+    "externalEventId": "__EVENT_ID__", ${getPropsArg()}    
+  }'`;
 
   return (
     <div className="h-full">
@@ -279,21 +299,14 @@ const Index = () => {
             </div>
           </Form>
         </div>
-        <div className="metrics-code-wrapper w-3/6">
+        <div className="metrics-code-wrapper relative w-3/6">
           <SyntaxHighlighter
             language="bash"
             style={prism}
             wrapLines={true}
             showLineNumbers={true}
           >
-            {`curl --location --request POST "${location.origin}/merchant/merchant_metric/merchant_metric_event" \\
-  --header "Authorization: Bearer $__YOUR_API_KEY__" \\
-  --header 'Content-Type: application/json' \\
-  --data-raw '{
-    "metricCode": "${watchCode || 'YOUR_CODE'}",
-    "externalUserId": "__EXTERNAL_USER_ID__",
-    "externalEventId": "__EVENT_ID__", ${getPropsArg()}    
-  }'
+            {`${curlCmd}
 
 # To use the snippet, don’t forget to edit your
 # __YOUR_API_KEY__,
@@ -301,6 +314,11 @@ const Index = () => {
 # __EVENT_ID__,
 ${watchAggreType == 0 ? '' : '# __PROPERTY_VALUE__'}`}
           </SyntaxHighlighter>
+          <div className="absolute bottom-6 flex w-full justify-center">
+            <Button type="link" onClick={copyContent} icon={<CopyOutlined />}>
+              Copy to clipboard
+            </Button>
+          </div>
         </div>
       </div>
     </div>

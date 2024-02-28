@@ -140,7 +140,6 @@ const MailForm = ({
       >
         <Button
           type="primary"
-          // htmlType="submit"
           onClick={submit}
           loading={submitting}
           disabled={submitting}
@@ -207,7 +206,8 @@ const OTPForm = ({
 
     const [merchantInfo, err3] = await getMerchantInfoReq();
     if (err3 != null) {
-      message.error(err.message);
+      setSubmitting(false);
+      setErrMsg(err.message);
       return;
     }
     merchantStore.setMerchantInfo(merchantInfo);

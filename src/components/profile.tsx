@@ -61,52 +61,27 @@ const Index = () => {
     const formData = new FormData();
     formData.append('file', file);
     setUploading(true);
-    try {
-      const res = await uploadLogoReq(formData);
-      setUploading(false);
-      console.log('upload res: ', res);
-      const statusCode = res.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(res.data.message);
-      }
-      const logoUrl = res.data.data.url;
-      form.setFieldValue('companyLogo', logoUrl);
-      setLogoUrl(logoUrl);
-    } catch (err) {
-      setUploading(false);
-      if (err instanceof Error) {
-        console.log('err uploading logo: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [logoUrl, err] = await uploadLogoReq(formData);
+    setUploading(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    form.setFieldValue('companyLogo', logoUrl);
+    setLogoUrl(logoUrl);
   };
 
   const onSubmit = async () => {
     const info = form.getFieldsValue();
     setSubmitting(true);
-    try {
-      const res = await updateMerchantInfoReq(info);
-      console.log('update info res: ', res);
-      setSubmitting(false);
-      const statusCode = res.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(res.data.message);
-      }
-      message.success('Info Updated');
-      merchantInfoStore.setMerchantInfo(res.data.data.MerchantInfo);
-    } catch (err) {
-      setSubmitting(false);
-      if (err instanceof Error) {
-        console.log('err getting profile: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [merchantInfo, err] = await updateMerchantInfoReq(info);
+    setSubmitting(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    message.success('Info Updated');
+    merchantInfoStore.setMerchantInfo(merchantInfo);
   };
 
   useEffect(() => {
@@ -298,28 +273,16 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
   const onConfirm = async () => {
     const formValues = form.getFieldsValue();
     setLoading(true);
-    try {
-      const res = await resetPassReq(
-        formValues.oldPassword,
-        formValues.newPassword,
-      );
-      setLoading(false);
-      console.log('reset pass res: ', res);
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      await logout();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('reset password err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [_, err] = await resetPassReq(
+      formValues.oldPassword,
+      formValues.newPassword,
+    );
+    setLoading(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    await logout();
   };
 
   return (
@@ -336,7 +299,6 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
         //name="reset-password"
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
-        // style={{ maxWidth: 640, width: 360 }}
         className="my-6"
         initialValues={{
           email,

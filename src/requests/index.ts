@@ -109,10 +109,24 @@ export const resetPassReq = async (
   oldPassword: string,
   newPassword: string,
 ) => {
-  return await request.post(`/merchant/passwordReset`, {
-    oldPassword,
-    newPassword,
-  });
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.post(`/merchant/passwordReset`, {
+      oldPassword,
+      newPassword,
+    });
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [null, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const logoutReq = async () => {
@@ -150,7 +164,6 @@ export const getMerchantInfoReq = async () => {
   const session = useSessionStore.getState();
   try {
     const res = await request.get(`/merchant/merchant_info/info`);
-    console.log('mercinfo res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -166,41 +179,47 @@ export const getMerchantInfoReq = async () => {
 };
 
 export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
-  return await request.post(`/merchant/merchant_info/update`, body);
-};
-
-export const uploadLogoReq = async (f: FormData) => {
-  const token = localStorage.getItem('merchantToken');
-  return await axios.post(`${API_URL}/merchant/oss/file `, f, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      Authorization: `${token}`, // Bearer: ******
-    },
-  });
-};
-
-/*
-export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
-  const appConfig = useAppConfigStore.getState();
   const session = useSessionStore.getState();
   try {
-    const res = await request.get(
-      `/merchant/merchant_metric/merchant_metric_list?merchantId=${appConfig.MerchantId}`,
-    );
+    const res = await request.post(`/merchant/merchant_info/update`, body);
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
+      session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.merchantMetrics, null];
+    return [res.data.data.MerchantInfo, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
-*/
+
+export const uploadLogoReq = async (f: FormData) => {
+  const token = localStorage.getItem('merchantToken');
+  const session = useSessionStore.getState();
+  try {
+    const res = await axios.post(`${API_URL}/merchant/oss/file `, f, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `${token}`, // Bearer: ******
+      },
+    });
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.url, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+
 // ---------------
 type TPlanListBody = {
   type?: number[] | null;
@@ -210,12 +229,12 @@ type TPlanListBody = {
 };
 export const getPlanList = async (body: TPlanListBody) => {
   const session = useSessionStore.getState();
-  const appConfig = useAppConfigStore.getState();
   try {
     const res = await request.post(
       '/merchant/plan/subscription_plan_list',
       body,
     );
+    console.log('plan list res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -242,6 +261,7 @@ export const getPlanDetail = async (planId: number) => {
     const res = await request.post('/merchant/plan/subscription_plan_detail', {
       planId,
     });
+    console.log('planDetail res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -257,19 +277,21 @@ export const getPlanDetail = async (planId: number) => {
 };
 
 // create a new plan
+/*
 export const createPlan = async (planDetail: any) => {
   return await request.post(
     '/merchant/plan/subscription_plan_create',
     planDetail,
   );
 };
+*/
 
-// save an existing plan
-export const savePlan = async (planDetail: any) => {
-  return await request.post(
-    `/merchant/plan/subscription_plan_edit`,
-    planDetail,
-  );
+// create a new or save an existing plan
+export const savePlan = async (planDetail: any, isNew: boolean) => {
+  const url = isNew
+    ? '/merchant/plan/subscription_plan_create'
+    : `/merchant/plan/subscription_plan_edit`;
+  return await request.post(url, planDetail);
 };
 
 export const activatePlan = async (planId: number) => {
@@ -311,25 +333,45 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
   }
 };
 
-export const createMetricsReq = async (metrics: any) => {
-  return await request.post(
-    `/merchant/merchant_metric/new_merchant_metric`,
-    metrics,
-  );
-};
-
 // --------
 type TMetricsBody = {
+  // for edit
   metricId: number;
   metricName: string;
   metricDescription: string;
 };
+type TMetricsBodyNew = {
+  // for creation
+  code: string;
+  metricName: string;
+  metricDescription: string;
+  aggregationType: number;
+  aggregationProperty: number;
+};
+export const saveMetricsReq = async (
+  body: TMetricsBody | TMetricsBodyNew,
+  isNew: boolean,
+) => {
+  const url = isNew
+    ? `/merchant/merchant_metric/new_merchant_metric`
+    : `/merchant/merchant_metric/edit_merchant_metric`;
+  return await request.post(url, body);
+};
+/*
 export const updateMetricsReq = async (body: TMetricsBody) => {
   return await request.post(
     `/merchant/merchant_metric/edit_merchant_metric`,
     body,
   );
 };
+
+export const createMetricsReq = async (metrics: any) => {
+  return await request.post(
+    `/merchant/merchant_metric/new_merchant_metric`,
+    metrics,
+  );
+};
+*/
 // ---------
 
 export const getMetricDetailReq = async (metricId: number) => {

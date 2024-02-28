@@ -65,6 +65,7 @@ const Index = ({
     setSubmitting(true);
     const [loginRes, err] = await loginWithPasswordReq(form.getFieldsValue());
     if (err != null) {
+      setSubmitting(false);
       setErrMsg(err.message);
       return;
     }
