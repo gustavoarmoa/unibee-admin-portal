@@ -18,7 +18,10 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
+SyntaxHighlighter.registerLanguage('bash', bash);
+
 import { useRelogin } from '../../hooks';
 import {
   createMetricsReq,
