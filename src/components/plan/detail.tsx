@@ -203,8 +203,8 @@ const Index = () => {
       [metricsList, errMetricList],
     ] = await Promise.all([
       getPlanList({
-        type: 2, // addon
-        status: 2, // active
+        type: [2], // addon
+        status: [2], // active
         page: 0,
         count: 100,
       }), // let's assume there are at most 100 addons.
