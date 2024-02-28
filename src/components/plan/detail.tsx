@@ -75,7 +75,9 @@ const Index = () => {
   const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have (addon has the same structure as Plan).
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
   const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]); // all the billable metrics, not used for edit, but used in <Select /> for user to choose.
-  const [selectedMetrics, setSelectedMetrics] = useState<TMetricsItem[]>([]);
+  const [selectedMetrics, setSelectedMetrics] = useState<TMetricsItem[]>([
+    { localId: ramdonString(8) },
+  ]);
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const relogin = useRelogin();
@@ -258,11 +260,15 @@ const Index = () => {
     form.setFieldsValue(planDetail.plan);
 
     if (!isNew) {
-      const metrics = planDetail.metricPlanLimits.map((m: any) => ({
-        localId: ramdonString(8),
-        metricId: m.metricId,
-        metricLimit: m.metricLimit,
-      }));
+      // if empty, insert an placeholder item.
+      const metrics = (planDetail.metricPlanLimits =
+        null || planDetail.metricPlanLimits.length == 0)
+        ? [{ localId: ramdonString(8) }]
+        : planDetail.metricPlanLimits.map((m: any) => ({
+            localId: ramdonString(8),
+            metricId: m.metricId,
+            metricLimit: m.metricLimit,
+          }));
       setSelectedMetrics(metrics);
     }
 
@@ -382,7 +388,16 @@ const Index = () => {
             <Input />
           </Form.Item>
 
-          <Form.Item label="Plan Description" name="description">
+          <Form.Item
+            label="Plan Description"
+            name="description"
+            rules={[
+              {
+                required: true,
+                message: 'Please input your plan description!',
+              },
+            ]}
+          >
             <Input />
           </Form.Item>
 
@@ -513,7 +528,7 @@ const Index = () => {
           <Form.Item label="Billable Metrics">
             <Row
               gutter={[8, 8]}
-              style={{ marginBottom: '0' }}
+              style={{ marginTop: '0px' }}
               className=" font-bold text-gray-500"
             >
               <Col span={5}>Name</Col>

@@ -519,7 +519,11 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         <div>
           <span>current simulation time: &nbsp;</span>
           <span>
-            {activeSub?.testClock}
+            {activeSub?.testClock && activeSub?.testClock > 0
+              ? dayjs(new Date(activeSub?.testClock * 1000)).format(
+                  'YYYY-MMM-DD hh:mm:ss',
+                )
+              : ''}
             {/* activeSub != null && activeSub.testClock! > 0
               ? dayjs(new Date(activeSub.testClock! * 1000)).format(
                   'YYYY-MM-DD HH:mm:ss',
