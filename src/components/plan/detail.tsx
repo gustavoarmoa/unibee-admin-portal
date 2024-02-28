@@ -244,7 +244,7 @@ const Index = () => {
 
     // plan obj and addon obj are at the same level in planDetailRes.data.data obj
     // but I want to put addonIds obj as a props of the local plan obj.
-    planDetail.amount = getAmount(
+    planDetail.plan.amount = getAmount(
       planDetail.plan.amount,
       planDetail.plan.currency,
     ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
