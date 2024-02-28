@@ -17,16 +17,15 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { solarizedlight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { CURRENCY, PLAN_STATUS } from '../../constants';
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
 import { useRelogin } from '../../hooks';
 import {
   createMetricsReq,
   getMetricDetailReq,
   updateMetricsReq,
 } from '../../requests';
-import { useAppConfigStore } from '../../stores';
+// import { useAppConfigStore } from '../../stores';
 
 const { TextArea } = Input;
 
@@ -279,8 +278,8 @@ const Index = () => {
         </div>
         <div className="metrics-code-wrapper w-3/6">
           <SyntaxHighlighter
-            language="javascript"
-            style={solarizedlight}
+            language="bash"
+            style={prism}
             wrapLines={true}
             showLineNumbers={true}
           >
