@@ -91,10 +91,12 @@ export const resetPassReq = async (
 };
 
 export const logoutReq = async () => {
+  const session = useSessionStore.getState();
   try {
     const res = await request.post(`/merchant/user_logout`, {});
     const code = res.data.code;
     // if (code != 0 && code != 61) { }
+    session.setSession({ expired: true, refresh: null });
     return [null, null];
   } catch (err) {
     return [null, null];
