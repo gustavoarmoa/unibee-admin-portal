@@ -69,6 +69,7 @@ const Index = () => {
           >{` (tax: ${showAmount(iv.taxAmount, iv.currency)})`}</span>
         </div>
       ),
+      sorter: (a, b) => a.totalAmount - b.totalAmount,
     },
     {
       title: 'Status',
@@ -84,6 +85,7 @@ const Index = () => {
       key: 'periodStart',
       render: (d, plan) =>
         d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'),
+      sorter: (a, b) => a.periodStart - b.periodStart,
     },
     {
       title: 'End',
@@ -91,6 +93,7 @@ const Index = () => {
       key: 'periodEnd',
       render: (d, plan) =>
         d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'), // new Date(d * 1000).toLocaleDateString(),
+      sorter: (a, b) => a.periodEnd - b.periodEnd,
     },
     {
       title: 'User',
@@ -201,7 +204,7 @@ const DEFAULT_TERM = {
   status: [],
   amountStart: '',
   amountEnd: '',
-  refunded: false,
+  // refunded: false,
 };
 const Search = ({
   form,
@@ -242,9 +245,9 @@ const Search = ({
           </Col>
           <Col span={4}>
             <span></span>
-            <Form.Item name="refunded" noStyle={true} valuePropName="checked">
+            {/* <Form.Item name="refunded" noStyle={true} valuePropName="checked">
               <Checkbox>Refunded</Checkbox>
-            </Form.Item>
+  </Form.Item> */}
           </Col>
           <Col span={8} className="flex justify-end">
             <Button onClick={clear} disabled={searching}>
