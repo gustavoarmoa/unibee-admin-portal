@@ -2,6 +2,7 @@ import { Button, Form, Input, Modal, message } from 'antd';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { emailValidate, passwordRegx } from '../../helpers';
+import { useCountdown } from '../../hooks';
 import {
   forgetPassReq,
   forgetPassVerifyReq,
@@ -15,6 +16,7 @@ import {
   useProfileStore,
   useSessionStore,
 } from '../../stores';
+
 const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = ({
@@ -29,6 +31,7 @@ const Index = ({
   const sessionStore = useSessionStore();
   const merchantStore = useMerchantInfoStore();
   const [errMsg, setErrMsg] = useState('');
+  const [countVal, counting, startCount, stopCounter] = useCountdown(60);
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false); // login submit
   const [submittingForgetPass, setSubmittingForgetPass] = useState(false); // click 'forget password'
@@ -43,25 +46,18 @@ const Index = ({
     if (!isValid) {
       return;
     }
+
+    stopCounter();
+    startCount();
     setSubmittingForgetPass(true);
-    try {
-      const res = await forgetPassReq(form.getFieldValue('email'));
-      setSubmittingForgetPass(false);
-      console.log('forget pass res: ', res);
-      if (res.data.code != 0) {
-        throw new Error(res.data.message);
-      }
-      toggleForgetPassModal();
-      message.success('Code sent, please check your email!');
-    } catch (err) {
-      setSubmittingForgetPass(false);
-      if (err instanceof Error) {
-        console.log('forget pass err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [_, err] = await forgetPassReq(form.getFieldValue('email'));
+    setSubmittingForgetPass(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    setForgetPassModalOpen(true);
+    message.success('Code sent, please check your email!');
   };
 
   const onSubmit = async () => {
@@ -109,6 +105,9 @@ const Index = ({
         <ForgetPasswordModal
           email={form.getFieldValue('email')}
           closeModal={toggleForgetPassModal}
+          resend={onForgetPass}
+          countVal={countVal}
+          counting={counting}
         />
       )}
 
@@ -194,38 +193,33 @@ export default Index;
 const ForgetPasswordModal = ({
   email,
   closeModal,
+  resend,
+  countVal,
+  counting,
 }: {
   email: string;
   closeModal: () => void;
+  resend: () => void;
+  countVal: number;
+  counting: boolean;
 }) => {
   const [form2] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
   const onConfirm = async () => {
     setLoading(true);
-    try {
-      const res = await forgetPassVerifyReq(
-        form2.getFieldValue('email'),
-        form2.getFieldValue('verificationCode'),
-        form2.getFieldValue('newPassword'),
-      );
-      setLoading(false);
-      console.log('forgot pass verify res: ', res);
-      const code = res.data.code;
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      message.success('Password reset succeeded, please relogin');
-      closeModal();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('reset password err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [_, err] = await forgetPassVerifyReq(
+      form2.getFieldValue('email'),
+      form2.getFieldValue('verificationCode'),
+      form2.getFieldValue('newPassword'),
+    );
+    setLoading(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    message.success('Password reset succeeded, please relogin');
+    closeModal();
   };
 
   return (
@@ -324,19 +318,29 @@ const ForgetPasswordModal = ({
         </Form.Item>
       </Form>
 
-      <div className="my-6 flex items-center justify-end">
-        <Button onClick={closeModal} disabled={loading}>
-          Cancel
-        </Button>
-        &nbsp;&nbsp;&nbsp;&nbsp;
-        <Button
-          type="primary"
-          onClick={form2.submit}
-          loading={loading}
-          disabled={loading}
-        >
-          OK
-        </Button>
+      <div className="my-6 flex items-center justify-between">
+        <div className="flex max-w-48 items-center justify-center">
+          <Button onClick={resend} disabled={counting}>
+            Resend
+          </Button>
+          {counting && (
+            <span style={{ marginLeft: '6px' }}>in {countVal} seconds</span>
+          )}
+        </div>
+        <div>
+          <Button onClick={closeModal} disabled={loading}>
+            Cancel
+          </Button>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <Button
+            type="primary"
+            onClick={form2.submit}
+            loading={loading}
+            disabled={loading}
+          >
+            OK
+          </Button>
+        </div>
       </div>
     </Modal>
   );

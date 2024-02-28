@@ -67,9 +67,18 @@ export const loginWithOTPVerifyReq = async (
 };
 
 export const forgetPassReq = async (email: string) => {
-  return await request.post(`/merchant/auth/sso/passwordForgetOTP`, {
-    email,
-  });
+  try {
+    const res = await request.post(`/merchant/auth/sso/passwordForgetOTP`, {
+      email,
+    });
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [null, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const forgetPassVerifyReq = async (
@@ -77,11 +86,23 @@ export const forgetPassVerifyReq = async (
   verificationCode: string,
   newPassword: string,
 ) => {
-  return await request.post(`/merchant/auth/sso/passwordForgetOTPVerify`, {
-    email,
-    verificationCode,
-    newPassword,
-  });
+  try {
+    const res = await request.post(
+      `/merchant/auth/sso/passwordForgetOTPVerify`,
+      {
+        email,
+        verificationCode,
+        newPassword,
+      },
+    );
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [null, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 export const resetPassReq = async (

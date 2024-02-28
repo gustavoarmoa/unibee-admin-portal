@@ -28,7 +28,7 @@ const Index = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0); // 0: input email, 1: input code
   const [errMailMsg, setErrMailMsg] = useState('');
-  const [sendingMailaddr, setSendingMailaddr] = useState(false);
+  const [sendingMailaddr, setSendingMailaddr] = useState(false); // TODO: when submitting email-address, disable its button.
   const [countVal, counting, startCount, stopCounter] = useCountdown(60);
 
   const goBackForward = () => setCurrentStep((currentStep + 1) % 2);
