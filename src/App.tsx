@@ -18,6 +18,7 @@ import {
   useNavigate,
 } from 'react-router-dom';
 import {
+  useAppConfigStore,
   useMerchantInfoStore,
   useProfileStore,
   useSessionStore,
@@ -82,6 +83,7 @@ const App: React.FC = () => {
   const merchantInfoStore = useMerchantInfoStore();
   const profileStore = useProfileStore();
   const sessionStore = useSessionStore();
+  const appConfigStore = useAppConfigStore();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [activeMenuItem, setActiveMenuItem] = useState<string[]>([
@@ -167,9 +169,9 @@ const App: React.FC = () => {
             >
               <img
                 src={
-                  merchantInfoStore.companyLogo == ''
+                  appConfigStore.MerchantInfo.companyLogo == ''
                     ? APP_PATH + 'multiloginLogo.png'
-                    : merchantInfoStore.companyLogo
+                    : appConfigStore.MerchantInfo.companyLogo
                 }
                 height={'80px'}
               />
