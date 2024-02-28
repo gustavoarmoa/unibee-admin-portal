@@ -106,7 +106,6 @@ export const getAppConfigReq = async () => {
   try {
     const res = await request.post(`/system/merchant/merchant_information`, {});
     if (res.data.code == 61) {
-      console.log('gochat');
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }

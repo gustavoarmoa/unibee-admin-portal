@@ -32,7 +32,6 @@ const Index = ({
 
   const onForgetPass = async () => {
     const isValid = form.getFieldError('email').length == 0;
-    console.log("form.getFieldError('email');: ", form.getFieldError('email'));
     if (!isValid) {
       return;
     }

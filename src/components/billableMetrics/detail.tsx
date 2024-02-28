@@ -116,9 +116,9 @@ const Index = () => {
     watchAggreType == 0
       ? ''
       : `
-      "properties":  { 
-          "${watchAggreProps || 'YOUR_AGGREGATION_PROPERTY'}": 12
-      }`;
+    "metricProperties": { 
+      "${watchAggreProps || 'YOUR_AGGREGATION_PROPERTY'}": "__PROPERTY_VALUE__"
+    }`;
 
   useEffect(() => {
     if (!isNew) {
@@ -277,31 +277,27 @@ const Index = () => {
             </div>
           </Form>
         </div>
-        <div className="w-3/6">
+        <div className="metrics-code-wrapper w-3/6">
           <SyntaxHighlighter
             language="javascript"
             style={solarizedlight}
             wrapLines={true}
             showLineNumbers={true}
           >
-            {`curl --location --request POST "${location.origin}/api/v1/events" \\
+            {`curl --location --request POST "${location.origin}/merchant/merchant_metric/merchant_metric_event" \\
   --header "Authorization: Bearer $__YOUR_API_KEY__" \\
   --header 'Content-Type: application/json' \\
   --data-raw '{
-    "event": {
-      "transaction_id": "__UNIQUE_ID__", 
-      "external_subscription_id": "__EXTERNAL_SUBSCRIPTION_ID__",
-      "external_customer_id": "__EXTERNAL_CUSTOMER_ID__", 
-      "code": "${watchCode || 'YOUR_CODE'}",
-      "timestamp": $(date +%s),${getPropsArg()}
-    }
+    "metricCode": "${watchCode || 'YOUR_CODE'}",
+    "externalUserId": "__EXTERNAL_USER_ID__",
+    "externalEventId": "__EVENT_ID__", ${getPropsArg()}    
   }'
 
 # To use the snippet, don’t forget to edit your
 # __YOUR_API_KEY__,
-# __UNIQUE_ID__,
-# __EXTERNAL_SUBSCRIPTION_ID__, and
-# __EXTERNAL_CUSTOMER_ID__`}
+# __EXTERNAL_USER_ID__,
+# __EVENT_ID__,
+${watchAggreType == 0 ? '' : '# __PROPERTY_VALUE__'}`}
           </SyntaxHighlighter>
         </div>
       </div>

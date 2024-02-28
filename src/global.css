@@ -1,6 +1,9 @@
 body {
-    min-width: 320px;
-    min-height: 100vh;
-    overflow-y: hidden;
-  }
-  
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-y: hidden;
+}
+
+.metrics-code-wrapper pre {
+  height: 100%;
+}

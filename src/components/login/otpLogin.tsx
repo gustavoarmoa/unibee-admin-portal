@@ -90,7 +90,6 @@ const MailForm = ({
     try {
       setSubmitting(true);
       const res = await sendMailaddress();
-      console.log('send mail addre res: ', res);
       setSubmitting(false);
       goForward();
     } catch (err) {
@@ -187,22 +186,23 @@ const OTPForm = ({
     setSubmitting(true);
     const [loginRes, err] = await loginWithOTPVerifyReq(email, otp);
     if (err != null) {
+      setSubmitting(false);
       setErrMsg(err.message);
       return;
     }
 
-    const [appConfig, err2] = await getAppConfigReq();
-    setSubmitting(false);
-    if (err2 != 0) {
-      setErrMsg(err2.message);
-      return;
-    }
-
-    appConfigStore.setAppConfig(appConfig);
     const { Token, MerchantUser } = loginRes;
     localStorage.setItem('merchantToken', Token);
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
+
+    const [appConfig, err2] = await getAppConfigReq();
+    setSubmitting(false);
+    if (err2 != null) {
+      setErrMsg(err2.message);
+      return;
+    }
+    appConfigStore.setAppConfig(appConfig);
     navigate(`${APP_PATH}subscription/list`);
   };
 
