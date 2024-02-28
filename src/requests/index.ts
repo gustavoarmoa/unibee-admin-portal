@@ -11,6 +11,7 @@ import {
 import { request } from './client';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const session = useSessionStore.getState();
 
 type TPassLogin = {
   email: string;
@@ -374,11 +375,29 @@ export const createMetricsReq = async (metrics: any) => {
 */
 // ---------
 
-export const getMetricDetailReq = async (metricId: number) => {
-  return await request.post(
-    `/merchant/merchant_metric/merchant_metric_detail`,
-    { metricId },
-  );
+export const getMetricDetailReq = async (
+  metricId: number,
+  refreshCb: () => void,
+) => {
+  try {
+    const res = await request.post(
+      `/merchant/merchant_metric/merchant_metric_detail`,
+      {
+        metricId,
+      },
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.merchantMetric, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 
 // ----------
@@ -387,8 +406,24 @@ type TSubListReq = {
   page: number;
   count: number;
 };
-export const getSublist = async (body: TSubListReq) => {
-  return await request.post(`/merchant/subscription/subscription_list`, body);
+export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
+  try {
+    const res = await request.post(
+      `/merchant/subscription/subscription_list`,
+      body,
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.subscriptions, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
 };
 // ------------
 
@@ -613,28 +648,6 @@ export const saveUserProfile2 = async (newProfile: IProfile) => {
     return [null, e];
   }
 };
-/*
-export const getWebhookListReq = async (refreshCb: () => void) => {
-  const session = useSessionStore.getState();
-  try {
-    const res = await request.get(
-      `/merchant/merchant_webhook/webhook_endpoint_list`,
-    );
-    console.log('get webhook list res: ', res);
-    if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
-    return [res.data.data.endpointList, null];
-  } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
-  }
-};
-*/
 
 export const appSearchReq = async (searchKey: string) => {
   return await request.post(`/merchant/search/key_search`, {

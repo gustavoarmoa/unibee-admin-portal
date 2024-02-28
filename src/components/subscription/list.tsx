@@ -115,34 +115,24 @@ const Index = () => {
 
   const fetchData = async () => {
     setLoading(true);
-    let subListRes;
-    try {
-      subListRes = await getSublist({
+    const [subscriptions, err] = await getSublist(
+      {
         page,
         count: PAGE_SIZE,
         status: statusFilter,
-      });
-      setLoading(false);
-      console.log('sublist res: ', subListRes);
-      const code = subListRes.data.code;
-      code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-      if (code != 0) {
-        throw new Error(subListRes.data.message);
-      }
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err getting sub list: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+      },
+      fetchData,
+    );
+    setLoading(false);
+    if (err != null) {
+      message.error(err.message);
       return;
     }
+
     const list: ISubscriptionType[] =
-      subListRes.data.data.subscriptions == null
+      subscriptions == null
         ? []
-        : subListRes.data.data.subscriptions.map((s: any) => {
+        : subscriptions.map((s: any) => {
             return {
               ...s.subscription,
               plan: s.plan,

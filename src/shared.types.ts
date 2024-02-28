@@ -40,10 +40,10 @@ type Country = {
 };
 
 interface IAppConfig {
-  Env: string;
-  IsProd: boolean;
-  SupportTimeZone: string[];
-  SupportCurrency: { Currency: string; Symbol: string; Scale: number }[];
+  env: string;
+  isProd: boolean;
+  supportTimeZone: string[];
+  supportCurrency: { Currency: string; Symbol: string; Scale: number }[];
   Gateway: { gatewayId: number; gatewayName: string }[];
 }
 

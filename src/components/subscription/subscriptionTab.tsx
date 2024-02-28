@@ -517,18 +517,17 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
       >
         <div>
-          <span>current simulation time: &nbsp;</span>
+          <span>
+            {activeSub?.testClock != null && activeSub?.testClock <= 0
+              ? 'No simulation time running'
+              : 'current simulation time: '}
+          </span>
           <span>
             {activeSub?.testClock && activeSub?.testClock > 0
               ? dayjs(new Date(activeSub?.testClock * 1000)).format(
                   'YYYY-MMM-DD hh:mm:ss',
                 )
               : ''}
-            {/* activeSub != null && activeSub.testClock! > 0
-              ? dayjs(new Date(activeSub.testClock! * 1000)).format(
-                  'YYYY-MM-DD HH:mm:ss',
-                )
-              : '' */}
           </span>
         </div>
         <div ref={simDateContainerRef}>

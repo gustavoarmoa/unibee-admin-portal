@@ -94,25 +94,16 @@ const Index = () => {
 
   const fetchMetrics = async () => {
     setLoading(true);
-    try {
-      const res = await getMetricDetailReq(Number(metricsId));
-      setLoading(false);
-      console.log('fetch metrics detail: ', res);
-      const statusCode = res.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(res.data.message);
-      }
-      form.setFieldsValue(res.data.data.merchantMetric);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err in fetching metrics detail: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [merchantMetric, err] = await getMetricDetailReq(
+      Number(metricsId),
+      fetchMetrics,
+    );
+    setLoading(false);
+    if (err != null) {
+      message.error(err.message);
+      return;
     }
+    form.setFieldsValue(merchantMetric);
   };
 
   const copyContent = async () => {
