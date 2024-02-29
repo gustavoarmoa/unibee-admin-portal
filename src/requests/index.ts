@@ -728,7 +728,6 @@ type TCreateInvoiceReq = {
   invoiceItems: TInvoiceItems[];
   lines?: TInvoiceItems[];
   finish: boolean;
-  gatewayId?: number;
 };
 type TInvoiceItems = {
   unitAmountExcludingTax: number;
@@ -739,7 +738,6 @@ type TInvoiceItems = {
 // before that, customers won't see(or receive) this invoice.
 export const createInvoice = async (body: TCreateInvoiceReq) => {
   body.lines = body.invoiceItems;
-  body.gatewayId = 25;
   return await request.post(`/merchant/invoice/new_invoice_create`, body);
 };
 // -------------
@@ -752,11 +750,9 @@ type TSaveInvoiceReq = {
   name: string;
   invoiceItems: TInvoiceItems[];
   lines?: TInvoiceItems[];
-  gatewayId?: number;
 };
 export const saveInvoice = async (body: TSaveInvoiceReq) => {
   body.lines = body.invoiceItems;
-  body.gatewayId = 25;
   return await request.post(`/merchant/invoice/new_invoice_edit`, body);
 };
 
@@ -864,7 +860,6 @@ export const getEventListReq = async () => {
     const res = await request.get(
       `/merchant/merchant_webhook/webhook_event_list`,
     );
-    console.log('get event list res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -885,7 +880,6 @@ export const getWebhookListReq = async (refreshCb: () => void) => {
     const res = await request.get(
       `/merchant/merchant_webhook/webhook_endpoint_list`,
     );
-    console.log('get webhook list res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
@@ -921,7 +915,6 @@ export const saveWebhookReq = async ({
       body.endpointId = endpointId;
     }
     const res = await request.post(actionUrl, body);
-    console.log('save webhook res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
