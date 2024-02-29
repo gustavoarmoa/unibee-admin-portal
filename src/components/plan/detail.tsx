@@ -16,6 +16,7 @@ import {
   activatePlan,
   getMetricsListReq,
   getPlanDetail,
+  getPlanDetailWithMore,
   getPlanList,
   savePlan,
   togglePublishReq,
@@ -192,6 +193,68 @@ const Index = () => {
 
   const fetchData = async () => {
     const planId = Number(params.planId);
+    setLoading(true);
+    const [detailRes, err] = await getPlanDetailWithMore(
+      isNew ? null : planId,
+      fetchData,
+    );
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
+    }
+
+    const { planDetail, addonList, metricsList } = detailRes;
+    console.log('res: ', planDetail, '//', addonList, '//', metricsList);
+
+    const addons = addonList.map((p: any) => p.plan);
+    setAddons(addons);
+    setMetricsList(metricsList);
+    if (isNew) {
+      return;
+    }
+    // for editing existing plan, we continue with planDetailRes
+
+    // plan obj and addon obj are at the same level in planDetailRes.data.data obj
+    // but I want to put addonIds obj as a props of the local plan obj.
+    planDetail.plan.amount = getAmount(
+      planDetail.plan.amount,
+      planDetail.plan.currency,
+    ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
+
+    planDetail.plan.addonIds =
+      planDetail.addonIds == null ? [] : planDetail.addonIds;
+
+    setPlan(planDetail.plan);
+    form.setFieldsValue(planDetail.plan);
+
+    if (!isNew) {
+      // if empty, insert an placeholder item.
+      const metrics =
+        null == planDetail.metricPlanLimits ||
+        planDetail.metricPlanLimits.length == 0
+          ? [{ localId: ramdonString(8) }]
+          : planDetail.metricPlanLimits.map((m: any) => ({
+              localId: ramdonString(8),
+              metricId: m.metricId,
+              metricLimit: m.metricLimit,
+            }));
+      setSelectedMetrics(metrics);
+    }
+
+    setSelectAddons(
+      addons.filter(
+        (a: any) =>
+          a.intervalCount == planDetail.plan.intervalCount &&
+          a.intervalUnit == planDetail.plan.intervalUnit &&
+          a.currency == planDetail.plan.currency,
+      ),
+    );
+  };
+
+  /*
+  const fetchData = async () => {
+    const planId = Number(params.planId);
     let addonList: any, planDetail: any, metricsList: any;
     let errAddonList: Error, errPlanDetail: Error, errMetricList: Error;
 
@@ -279,6 +342,7 @@ const Index = () => {
       ),
     );
   };
+  */
 
   // used only in editing an existing plan
   const togglePublish = async () => {

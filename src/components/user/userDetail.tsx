@@ -2,7 +2,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Spin, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getUserProfile, getUserProfile2 } from '../../requests';
+import { getUserProfile } from '../../requests';
 import { IProfile } from '../../shared.types';
 import UserAccountTab from '../subscription/userAccountTab';
 
@@ -21,7 +21,7 @@ const Index = () => {
       return;
     }
     setLoading(true);
-    const [user, err] = await getUserProfile2(userId, fetchUserProfile);
+    const [user, err] = await getUserProfile(userId, fetchUserProfile);
     setLoading(false);
     if (err != null) {
       message.error(err.message);

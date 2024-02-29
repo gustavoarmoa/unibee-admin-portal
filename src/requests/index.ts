@@ -2,7 +2,12 @@ import axios from 'axios';
 // import { useProfileStore } from "../stores";
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY } from '../constants';
-import { IBillableMetrics, IProfile, TMerchantInfo } from '../shared.types';
+import {
+  ExpiredError,
+  IBillableMetrics,
+  IProfile,
+  TMerchantInfo,
+} from '../shared.types';
 import {
   useAppConfigStore,
   useMerchantInfoStore,
@@ -206,6 +211,7 @@ export const getMerchantInfoReq = async () => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
+      // throw new ExpiredError('Session expired');
     }
     if (res.data.code != 0) {
       throw new Error(res.data.message);
@@ -276,7 +282,8 @@ export const getPlanList = async (body: TPlanListBody) => {
     console.log('plan list res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      // throw new Error('Session expired');
+      throw new ExpiredError('Session expired');
     }
     if (res.data.code != 0) {
       throw new Error(res.data.message);
@@ -303,7 +310,8 @@ export const getPlanDetail = async (planId: number) => {
     console.log('planDetail res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      // throw new Error('Session expired');
+      throw new ExpiredError('Session expired');
     }
     if (res.data.code != 0) {
       throw new Error(res.data.message);
@@ -313,6 +321,37 @@ export const getPlanDetail = async (planId: number) => {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
+};
+
+// 3 calls to get planDetail(with planId), addonList, and metricsList
+// "planId: null" means caller want to create a new plan, so I pass a resolved promise to meet the caller fn signature.
+export const getPlanDetailWithMore = async (
+  planId: number | null,
+  refreshCb: (() => void) | null,
+) => {
+  const session = useSessionStore.getState();
+  const planDetailRes =
+    planId == null
+      ? Promise.resolve([{ data: { data: null, code: 0 } }, null])
+      : getPlanDetail(planId);
+  const [
+    [planDetail, errDetail],
+    [addonList, addonErr],
+    [metricsList, errMetrics],
+  ] = await Promise.all([
+    planDetailRes,
+    getPlanList({ type: [2], status: [2], page: 0, count: 100 }), // type: 2 -> addon, status: 2 -> active
+    getMetricsListReq(null),
+  ]);
+  let err = errDetail || addonErr || errMetrics;
+  if (null != err) {
+    if (err instanceof ExpiredError) {
+      session.setSession({ expired: true, refresh: refreshCb });
+    }
+    return [null, err];
+  }
+
+  return [{ planDetail, addonList, metricsList }, null];
 };
 
 // create a new plan
@@ -360,7 +399,8 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
     );
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
+      // throw new ExpiredError('Session expired');
+      throw new ExpiredError('Session expired');
     }
     if (res.data.code != 0) {
       throw new Error(res.data.message);
@@ -630,15 +670,7 @@ export const setSimDateReq = async (
 };
 
 // billing admin can also get user profile.
-export const getUserProfile = async (userId: number) => {
-  return await request.get(
-    `/merchant/merchant_user/get_user_profile?userId=${userId}`,
-  );
-};
-export const getUserProfile2 = async (
-  userId: number,
-  refreshCb: () => void,
-) => {
+export const getUserProfile = async (userId: number, refreshCb: () => void) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.get(

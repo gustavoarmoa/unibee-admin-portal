@@ -13,7 +13,7 @@ import type { Dayjs } from 'dayjs';
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
-import { getUserProfile, getUserProfile2 } from '../../requests';
+import { getUserProfile } from '../../requests';
 import { IProfile } from '../../shared.types';
 import UserInfoSection from '../shared/userInfo';
 import AdminNote from './adminNote';
@@ -59,7 +59,7 @@ const Index = () => {
   const onTabChange = (key: string) => {};
 
   const fetchUserProfile = async () => {
-    const [user, err] = await getUserProfile2(
+    const [user, err] = await getUserProfile(
       userId as number,
       fetchUserProfile,
     );

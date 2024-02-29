@@ -239,6 +239,12 @@ type TWebhookLogs = {
   createTime: 0;
 };
 
+export class ExpiredError extends Error {
+  constructor(m: string) {
+    super(m);
+  }
+}
+
 export type {
   Country,
   IAppConfig,
