@@ -111,6 +111,7 @@ const App: React.FC = () => {
     localStorage.removeItem('merchantInfo');
     localStorage.removeItem('session');
     localStorage.removeItem('profile');
+    sessionStore.setSession({ expired: true, refresh: null });
     navigate(`${APP_PATH}login`);
   };
 
@@ -142,16 +143,7 @@ const App: React.FC = () => {
         </Layout>
       ) : (
         <Layout style={{ minHeight: '100vh' }}>
-          {sessionStore.expired && (
-            <Modal
-              title="Session expired"
-              open={true}
-              footer={false}
-              closeIcon={null}
-            >
-              <LoginModal email={profileStore.email} />
-            </Modal>
-          )}
+          {sessionStore.expired && <LoginModal email={profileStore.email} />}
           <Sider
             // theme="light"
             collapsible
@@ -169,9 +161,8 @@ const App: React.FC = () => {
             >
               <img
                 src={
-                  merchantInfoStore.companyLogo == ''
-                    ? APP_PATH + 'multiloginLogo.png'
-                    : merchantInfoStore.companyLogo
+                  merchantInfoStore.companyLogo ||
+                  APP_PATH + 'logoPlaceholder.png'
                 }
                 height={'80px'}
               />

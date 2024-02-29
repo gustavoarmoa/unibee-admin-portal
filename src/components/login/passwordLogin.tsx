@@ -7,6 +7,7 @@ import {
   forgetPassReq,
   forgetPassVerifyReq,
   getAppConfigReq,
+  getGatewayListReq,
   getMerchantInfoReq,
   loginWithPasswordReq,
 } from '../../requests';
@@ -75,6 +76,9 @@ const Index = ({
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
     sessionStore.setSession({ expired: false, refresh: null });
+
+    const [gatewayRes, err4] = await getGatewayListReq();
+    console.log('gatewa res: ', gatewayRes);
 
     const [merchantInfo, err3] = await getMerchantInfoReq();
     if (err3 != null) {

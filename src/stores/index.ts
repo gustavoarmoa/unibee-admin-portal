@@ -4,7 +4,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { IAppConfig, IProfile, TMerchantInfo } from '../shared.types';
 // import { createStore } from "zustand";
 
-// user logged-in user profile
+// logged-in user profile
 const INITIAL_PROFILE: IProfile = {
   address: '',
   companyName: '',

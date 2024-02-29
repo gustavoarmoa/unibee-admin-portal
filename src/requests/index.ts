@@ -13,6 +13,18 @@ import { request } from './client';
 const API_URL = import.meta.env.VITE_API_URL;
 const session = useSessionStore.getState();
 
+// after login, we need merchantInfo, appConfig, payment gatewayInfo, etc.
+// this fn get all these data in one go.
+export const initializeReq = async () => {
+  try {
+    const res = await Promise.all([
+      getAppConfigReq(),
+      getGatewayListReq(),
+      getMerchantInfoReq(),
+    ]);
+  } catch (err) {}
+};
+
 type TPassLogin = {
   email: string;
   password: string;
@@ -155,6 +167,25 @@ export const getAppConfigReq = async () => {
       throw new Error(res.data.message);
     }
     return [res.data.data, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+
+export const getGatewayListReq = async () => {
+  const session = useSessionStore.getState();
+  try {
+    const res = await request.get(`/merchant/gateway/list`);
+    console.log('gateway res: ', res);
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new Error('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data.gateways, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
