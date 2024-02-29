@@ -174,12 +174,15 @@ const App: React.FC = () => {
               items={items}
               onClick={onItemClick}
             />
-            <div
-              className="absolute bottom-24 flex w-full cursor-pointer items-center justify-center text-gray-50"
-              onClick={logout}
-            >
-              <LogoutOutlined />
-              &nbsp;&nbsp;Logout
+            <div className="absolute bottom-20 flex w-full flex-col items-center justify-center text-gray-50">
+              <div className="flex flex-col items-center">
+                <div className="text-xs">{profileStore.email}</div>
+                <div>{`${profileStore.firstName} ${profileStore.lastName}`}</div>
+              </div>
+              <div onClick={logout} className=" my-4 cursor-pointer">
+                <LogoutOutlined />
+                &nbsp;&nbsp;Logout
+              </div>
             </div>
           </Sider>
           <Layout>
