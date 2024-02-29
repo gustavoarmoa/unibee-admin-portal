@@ -22,23 +22,32 @@ const Index = ({
   const [logs, setLogs] = useState<TWebhookLogs[]>([]);
   const [page, setPage] = useState(0);
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
-
-  const [clicked, setClicked] = useState(false);
-  const [hovered, setHovered] = useState(false);
-
-  const hide = () => {
-    setClicked(false);
-    setHovered(false);
-  };
-
-  const handleHoverChange = (open: boolean) => {
-    setHovered(open);
-    setClicked(false);
-  };
-
-  const handleClickChange = (open: boolean) => {
-    setHovered(false);
-    setClicked(open);
+  const renderJson = (text: string) => {
+    if (null == text || '' == text) {
+      return '';
+    }
+    return (
+      <Popover
+        placement="right"
+        content={
+          <div style={{ width: '360px', height: '360px', overflow: 'auto' }}>
+            <SyntaxHighlighter language="json" style={prism}>
+              {JSON.stringify(JSON.parse(text), null, 2)}
+            </SyntaxHighlighter>
+          </div>
+        }
+      >
+        <div
+          style={{
+            width: '80px',
+            height: '60px',
+            overflow: 'hidden',
+          }}
+        >
+          {text}
+        </div>
+      </Popover>
+    );
   };
 
   const columns: ColumnsType<TWebhookLogs> = [
@@ -51,7 +60,7 @@ const Index = ({
         <div
           style={{
             width: '80px',
-            height: '80px',
+            height: '60px',
             overflow: 'hidden',
             // whiteSpace: 'nowrap',
           }}
@@ -69,7 +78,7 @@ const Index = ({
         <div
           style={{
             width: '80px',
-            height: '80px',
+            height: '60px',
             overflow: 'hidden',
             // whiteSpace: 'nowrap',
           }}
@@ -87,7 +96,7 @@ const Index = ({
         <div
           style={{
             width: '80px',
-            height: '80px',
+            height: '60px',
             overflow: 'hidden',
             // whiteSpace: 'nowrap',
           }}
@@ -101,74 +110,21 @@ const Index = ({
       dataIndex: 'body',
       key: 'body',
       width: 80,
-      render: (text) => (
-        <Popover
-          placement="right"
-          content={
-            <div style={{ width: '360px', height: '360px', overflow: 'auto' }}>
-              <SyntaxHighlighter language="json" style={prism}>
-                {JSON.stringify(JSON.parse(text), null, 2)}
-              </SyntaxHighlighter>
-            </div>
-          }
-        >
-          <div
-            style={{
-              width: '80px',
-              height: '80px',
-              overflow: 'hidden',
-            }}
-          >
-            {text}
-          </div>
-        </Popover>
-      ),
+      render: (text) => renderJson(text),
     },
     {
       title: 'Response',
       dataIndex: 'response',
       key: 'response',
       width: 80,
-      render: (text) => (
-        <div
-          style={{
-            width: '80px',
-            height: '80px',
-            overflow: 'hidden',
-            // whiteSpace: 'nowrap',
-          }}
-        >
-          {text}
-        </div>
-      ),
+      render: (text) => renderJson(text),
     },
     {
       title: 'mamo',
       dataIndex: 'mamo',
       key: 'mamo',
       width: 80,
-      render: (text) => (
-        <Popover
-          placement="right"
-          content={
-            <div style={{ width: '360px', height: '360px', overflow: 'auto' }}>
-              <SyntaxHighlighter language="json" style={prism}>
-                {JSON.stringify(JSON.parse(text), null, 2)}
-              </SyntaxHighlighter>
-            </div>
-          }
-        >
-          <div
-            style={{
-              width: '80px',
-              height: '80px',
-              overflow: 'hidden',
-            }}
-          >
-            {text}
-          </div>
-        </Popover>
-      ),
+      render: (text) => renderJson(text),
     },
     {
       title: 'Created at',
