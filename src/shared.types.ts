@@ -44,7 +44,7 @@ interface IAppConfig {
   isProd: boolean;
   supportTimeZone: string[];
   supportCurrency: { Currency: string; Symbol: string; Scale: number }[];
-  Gateway: { gatewayId: number; gatewayName: string }[];
+  gateway: { gatewayId: number; gatewayName: string }[];
 }
 
 interface IAddon extends IPlan {

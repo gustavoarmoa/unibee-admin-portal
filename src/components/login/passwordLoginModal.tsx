@@ -5,6 +5,7 @@ import { emailValidate } from '../../helpers';
 import {
   getAppConfigReq,
   getMerchantInfoReq,
+  initializeReq,
   loginWithPasswordReq,
 } from '../../requests';
 import {
@@ -46,24 +47,20 @@ const Index = ({ email }: { email: string }) => {
     localStorage.setItem('merchantToken', Token);
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
+    sessionStore.setSession({ expired: false, refresh: null });
 
-    const [appConfig, err2] = await getAppConfigReq();
+    const [initRes, errInit] = await initializeReq();
     setSubmitting(false);
-    if (err2 != null) {
-      setErrMsg(err.message);
+    if (null != errInit) {
+      setErrMsg(errInit.message);
       return;
     }
-
-    const [merchantInfo, err3] = await getMerchantInfoReq();
-    if (err3 != null) {
-      message.error(err.message);
-      return;
-    }
+    const { appConfig, gateways, merchantInfo } = initRes;
+    appConfigStore.setAppConfig(appConfig);
+    appConfigStore.setGateway(gateways);
     merchantStore.setMerchantInfo(merchantInfo);
 
-    appConfigStore.setAppConfig(appConfig);
     sessionStore.refresh && sessionStore.refresh();
-    sessionStore.setSession({ expired: false, refresh: null });
     message.success('Login succeeded');
   };
 

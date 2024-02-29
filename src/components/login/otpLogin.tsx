@@ -7,6 +7,7 @@ import { useCountdown } from '../../hooks';
 import {
   getAppConfigReq,
   getMerchantInfoReq,
+  initializeReq,
   loginWithOTPReq,
   loginWithOTPVerifyReq,
 } from '../../requests';
@@ -191,10 +192,10 @@ const OTPForm = ({
       return;
     }
     setSubmitting(true);
-    const [loginRes, err] = await loginWithOTPVerifyReq(email, otp);
-    if (err != null) {
+    const [loginRes, errVerify] = await loginWithOTPVerifyReq(email, otp);
+    if (null != errVerify) {
       setSubmitting(false);
-      setErrMsg(err.message);
+      setErrMsg(errVerify.message);
       return;
     }
 
@@ -204,21 +205,16 @@ const OTPForm = ({
     profileStore.setProfile(MerchantUser);
     sessionStore.setSession({ expired: false, refresh: null });
 
-    const [merchantInfo, err3] = await getMerchantInfoReq();
-    if (err3 != null) {
-      setSubmitting(false);
-      setErrMsg(err.message);
-      return;
-    }
-    merchantStore.setMerchantInfo(merchantInfo);
-
-    const [appConfig, err2] = await getAppConfigReq();
+    const [initRes, errInit] = await initializeReq();
     setSubmitting(false);
-    if (err2 != null) {
-      setErrMsg(err2.message);
+    if (null != errInit) {
+      setErrMsg(errInit.message);
       return;
     }
+    const { appConfig, gateways, merchantInfo } = initRes;
     appConfigStore.setAppConfig(appConfig);
+    appConfigStore.setGateway(gateways);
+    merchantStore.setMerchantInfo(merchantInfo);
     navigate(`${APP_PATH}subscription/list`);
   };
 

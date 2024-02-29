@@ -16,13 +16,20 @@ const session = useSessionStore.getState();
 // after login, we need merchantInfo, appConfig, payment gatewayInfo, etc.
 // this fn get all these data in one go.
 export const initializeReq = async () => {
-  try {
-    const res = await Promise.all([
-      getAppConfigReq(),
-      getGatewayListReq(),
-      getMerchantInfoReq(),
-    ]);
-  } catch (err) {}
+  const [
+    [appConfig, errConfig],
+    [gateways, errGateway],
+    [merchantInfo, errMerchant],
+  ] = await Promise.all([
+    getAppConfigReq(),
+    getGatewayListReq(),
+    getMerchantInfoReq(),
+  ]);
+  let err = errConfig || errGateway || errMerchant;
+  if (null != err) {
+    return [null, err];
+  }
+  return [{ appConfig, gateways, merchantInfo }, null];
 };
 
 type TPassLogin = {

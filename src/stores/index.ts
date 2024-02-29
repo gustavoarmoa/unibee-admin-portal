@@ -79,12 +79,13 @@ const INITIAL_APP_VALUE: IAppConfig = {
   isProd: false,
   supportCurrency: [],
   supportTimeZone: [],
-  Gateway: [],
+  gateway: [],
 };
 
 interface AppConfigSlice extends IAppConfig {
   getAppConfig: () => IAppConfig;
   setAppConfig: (a: IAppConfig) => void;
+  setGateway: (g: any) => void;
 }
 
 export const useAppConfigStore = create<AppConfigSlice>()(
@@ -93,6 +94,9 @@ export const useAppConfigStore = create<AppConfigSlice>()(
       ...INITIAL_APP_VALUE,
       getAppConfig: () => get(),
       setAppConfig: (a) => set({ ...a }),
+      setGateway: (g: any) => {
+        set({ ...get(), gateway: g });
+      },
     }),
     { name: 'appConfig' },
   ),
