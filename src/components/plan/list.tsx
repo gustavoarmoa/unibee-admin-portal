@@ -84,6 +84,11 @@ const columns: ColumnsType<IPlan> = [
       ),
   },
   {
+    title: 'Billable metrics',
+    dataIndex: 'metricPlanLimits',
+    render: (m, plan) => (null == m || 0 == m.length ? 'No' : m.length),
+  },
+  {
     title: 'Action',
     key: 'action',
     render: (_, record) => (
@@ -109,7 +114,6 @@ const Index = () => {
     type: null,
     status: null,
   });
-  const relogin = useRelogin();
 
   const fetchPlan = async () => {
     setLoading(true);
@@ -131,7 +135,12 @@ const Index = () => {
     if (planList == null) {
       return;
     }
-    setPlan(planList.map((p: any) => ({ ...p.plan })));
+    setPlan(
+      planList.map((p: any) => ({
+        ...p.plan,
+        metricPlanLimits: p.metricPlanLimits,
+      })),
+    );
   };
 
   const onTableChange: TableProps<IPlan>['onChange'] = (

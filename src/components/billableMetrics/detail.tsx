@@ -21,19 +21,19 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
-SyntaxHighlighter.registerLanguage('bash', bash);
-
+import { METRICS_AGGREGATE_TYPE } from '../../constants';
 import { useRelogin } from '../../hooks';
-import {
-  getMetricDetailReq,
-  // createMetricsReq,
-  saveMetricsReq,
-} from '../../requests';
-// import { useAppConfigStore } from '../../stores';
-
+import { getMetricDetailReq, saveMetricsReq } from '../../requests';
 const { TextArea } = Input;
-
 const APP_PATH = import.meta.env.BASE_URL;
+
+SyntaxHighlighter.registerLanguage('bash', bash);
+const AGGR_TYPE_SELECT_OPT = Object.keys(METRICS_AGGREGATE_TYPE)
+  .map((s) => ({
+    label: METRICS_AGGREGATE_TYPE[Number(s)],
+    value: Number(s),
+  }))
+  .sort((a, b) => (a.value < b.value ? -1 : 1));
 
 const Index = () => {
   const params = useParams();
@@ -47,7 +47,7 @@ const Index = () => {
   const watchAggreType = Form.useWatch('aggregationType', form);
   const relogin = useRelogin();
   useEffect(() => {
-    setAggrePropDisabled(watchAggreType == 0);
+    setAggrePropDisabled(watchAggreType == 1);
   }, [watchAggreType]);
 
   const watchCode = Form.useWatch('code', form);
@@ -58,7 +58,7 @@ const Index = () => {
     let m;
     if (isNew) {
       m = JSON.parse(JSON.stringify(form.getFieldsValue()));
-      if (m.watchAggreType == 0) {
+      if (m.watchAggreType == 1) {
         delete m.aggregationProperty;
       }
     } else {
@@ -69,7 +69,6 @@ const Index = () => {
       };
     }
 
-    // const actionMethod = isNew ? createMetricsReq : updateMetricsReq;
     setLoading(true);
     try {
       const res = await saveMetricsReq(m, isNew);
@@ -117,7 +116,7 @@ const Index = () => {
   };
 
   const getPropsArg = () =>
-    watchAggreType == 0
+    watchAggreType == 1
       ? ''
       : `
     "metricProperties": { 
@@ -244,13 +243,10 @@ const Index = () => {
                 >
                   <Select
                     style={{ width: 160 }}
-                    options={[
-                      { value: 0, label: 'Count', disabled: !isNew },
-                      { value: 1, label: 'Count unique', disabled: !isNew },
-                      { value: 2, label: 'Latest', disabled: !isNew },
-                      { value: 3, label: 'Max', disabled: !isNew },
-                      { value: 4, label: 'Sum', disabled: !isNew },
-                    ]}
+                    options={AGGR_TYPE_SELECT_OPT.map((o) => ({
+                      ...o,
+                      disabled: !isNew,
+                    }))}
                   />
                 </Form.Item>
               </Col>
@@ -303,7 +299,7 @@ const Index = () => {
 # __YOUR_API_KEY__,
 # __EXTERNAL_USER_ID__,
 # __EVENT_ID__,
-${watchAggreType == 0 ? '' : '# __PROPERTY_VALUE__'}`}
+${watchAggreType == 1 ? '' : '# __PROPERTY_VALUE__'}`}
           </SyntaxHighlighter>
           <div className="absolute bottom-6 flex w-full justify-center">
             <Button type="link" onClick={copyContent} icon={<CopyOutlined />}>

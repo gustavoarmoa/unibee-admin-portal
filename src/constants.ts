@@ -45,9 +45,9 @@ export const METRICS_TYPE: { [key: number]: string } = {
 };
 
 export const METRICS_AGGREGATE_TYPE: { [key: number]: string } = {
-  0: 'count',
-  1: 'count unique',
-  2: 'latest',
-  3: 'max',
-  4: 'sum',
+  1: 'count',
+  2: 'count unique',
+  3: 'latest',
+  4: 'max',
+  5: 'sum',
 };

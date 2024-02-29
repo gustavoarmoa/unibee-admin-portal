@@ -65,7 +65,7 @@ interface IPlan {
   publishStatus: number; // 1: unpublished(not visible to users), 2: published(users could see and choose this plan)
   addons?: IAddon[]; // bad design, make a ISubscriptionPlan interface extending from IPlan with quantity/checked
   addonIds?: number[]; // which addons have been attached to this plan.
-  metricLimits?: { metricId: number; metricLimit: number }[];
+  metricPlanLimits?: { metricId: number; metricLimit: number }[];
   createTime: number;
   companyId: number;
   merchantId: number;

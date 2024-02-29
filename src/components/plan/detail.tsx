@@ -192,7 +192,6 @@ const Index = () => {
 
   const fetchData = async () => {
     const planId = Number(params.planId);
-
     let addonList: any, planDetail: any, metricsList: any;
     let errAddonList: Error, errPlanDetail: Error, errMetricList: Error;
 
@@ -259,14 +258,15 @@ const Index = () => {
 
     if (!isNew) {
       // if empty, insert an placeholder item.
-      const metrics = (planDetail.metricPlanLimits =
-        null || planDetail.metricPlanLimits.length == 0)
-        ? [{ localId: ramdonString(8) }]
-        : planDetail.metricPlanLimits.map((m: any) => ({
-            localId: ramdonString(8),
-            metricId: m.metricId,
-            metricLimit: m.metricLimit,
-          }));
+      const metrics =
+        null == planDetail.metricPlanLimits ||
+        planDetail.metricPlanLimits.length == 0
+          ? [{ localId: ramdonString(8) }]
+          : planDetail.metricPlanLimits.map((m: any) => ({
+              localId: ramdonString(8),
+              metricId: m.metricId,
+              metricLimit: m.metricLimit,
+            }));
       setSelectedMetrics(metrics);
     }
 
