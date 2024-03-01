@@ -132,6 +132,8 @@ const App: React.FC = () => {
     }
   }, [location, location.pathname]);
 
+  // console.log('session store: ', sessionStore);
+
   return (
     <>
       {noSiderRoutes.findIndex((r) => r == location.pathname) != -1 ? (

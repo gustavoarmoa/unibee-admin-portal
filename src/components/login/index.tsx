@@ -4,8 +4,7 @@ import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AppFooter from '../appFooter';
 import AppHeader from '../appHeader';
-import OTPLogin from './otpLogin';
-import PasswordLogin from './passwordLogin';
+import LoginBox from './loginContainer';
 
 const APP_PATH = import.meta.env.BASE_URL;
 
@@ -37,58 +36,7 @@ const Index = () => {
       }}
     >
       <AppHeader />
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: '200px',
-        }}
-      >
-        <h1 style={{ marginBottom: '36px' }}>Customer Login</h1>
-        <Radio.Group
-          options={[
-            { label: 'Password', value: 'password' },
-            { label: 'OTP', value: 'OTP' },
-          ]}
-          onChange={onLoginTypeChange}
-          value={loginType}
-        />
-        <div
-          style={{
-            width: '640px',
-            height: '320px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            border: '1px solid #e0e0e0',
-            borderRadius: '8px',
-            marginTop: '36px',
-            background: '#FFF',
-          }}
-        >
-          {loginType == 'password' ? (
-            <PasswordLogin email={email} onEmailChange={onEmailChange} />
-          ) : (
-            <OTPLogin email={email} onEmailChange={onEmailChange} />
-          )}
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            color: '#757575',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          Don't have an account?
-          <Button type="link" onClick={goSignup}>
-            Free signup
-          </Button>
-        </div>
-      </div>
+      <LoginBox triggeredByExpired={false} initialEmail="" />
       <AppFooter />
     </div>
   );

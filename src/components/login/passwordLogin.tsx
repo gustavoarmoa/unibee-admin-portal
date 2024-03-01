@@ -24,9 +24,11 @@ const APP_PATH = import.meta.env.BASE_URL;
 const Index = ({
   email,
   onEmailChange,
+  triggeredByExpired,
 }: {
   email: string;
   onEmailChange: (value: string) => void;
+  triggeredByExpired: boolean;
 }) => {
   const profileStore = useProfileStore();
   const appConfigStore = useAppConfigStore();
@@ -88,7 +90,12 @@ const Index = ({
     appConfigStore.setAppConfig(appConfig);
     appConfigStore.setGateway(gateways);
     merchantStore.setMerchantInfo(merchantInfo);
-    navigate(`${APP_PATH}subscription/list`);
+    if (triggeredByExpired) {
+      sessionStore.refresh && sessionStore.refresh();
+      message.success('Login succeeded');
+    } else {
+      navigate(`${APP_PATH}subscription/list`);
+    }
   };
 
   useEffect(() => {
