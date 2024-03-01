@@ -84,11 +84,14 @@ const Index = () => {
       key: 'subscriptionStatus',
       render: (status, plan) => SUBSCRIPTION_STATUS[status],
     },
+    /*
     {
       title: 'Sub Amt',
+      dataIndex: 'recurringAmount',
       key: 'recurringAmount',
       // render: (amt, record) => <span>{amt}</span>,
     },
+    */
   ];
 
   const fetchData = async () => {
