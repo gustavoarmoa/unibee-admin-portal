@@ -11,6 +11,7 @@ import {
   Tabs,
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
 import React, { CSSProperties, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -349,9 +350,9 @@ const EmailTemplate = () => {
     },
     {
       title: 'Updated at',
-      dataIndex: 'createTime',
-      key: 'createTime',
-      render: (d, plan) => new Date(d).toLocaleDateString(),
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      render: (d, plan) => dayjs(new Date(d)).format('YYYY-MMM-DD'),
     },
     {
       title: 'Created by',

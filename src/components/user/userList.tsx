@@ -25,47 +25,6 @@ import { useAppConfigStore } from '../../stores';
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
 
-const columns: ColumnsType<IProfile> = [
-  {
-    title: 'First Name',
-    dataIndex: 'firstName',
-    key: 'firstName',
-    // render: (text) => <a>{text}</a>,
-  },
-  {
-    title: 'Last Name',
-    dataIndex: 'lastName',
-    key: 'lastName',
-  },
-  {
-    title: 'Email',
-    dataIndex: 'email',
-    key: 'email',
-  },
-  {
-    title: 'Created at',
-    dataIndex: 'gmtCreate',
-    key: 'gmtCreate',
-    render: (d, plan) => dayjs(d).format('YYYY-MMM-DD'), // new Date(d).toLocaleDateString(),
-  },
-  {
-    title: 'Subscription',
-    dataIndex: 'subscriptionName',
-    key: 'subscriptionName',
-  },
-  {
-    title: 'Sub Status',
-    dataIndex: 'subscriptionStatus',
-    key: 'subscriptionStatus',
-    render: (status, plan) => SUBSCRIPTION_STATUS[status],
-  },
-  {
-    title: 'Sub Amt',
-    key: 'recurringAmount',
-    // render: (amt, record) => <span>{amt}</span>,
-  },
-];
-
 const Index = () => {
   const navigate = useNavigate();
   const appConfigStore = useAppConfigStore();
@@ -75,6 +34,62 @@ const Index = () => {
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
   const [form] = Form.useForm();
   const relogin = useRelogin();
+
+  const columns: ColumnsType<IProfile> = [
+    {
+      title: 'First Name',
+      dataIndex: 'firstName',
+      key: 'firstName',
+      // render: (text) => <a>{text}</a>,
+    },
+    {
+      title: 'Last Name',
+      dataIndex: 'lastName',
+      key: 'lastName',
+    },
+    {
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+    },
+    {
+      title: 'Created at',
+      dataIndex: 'gmtCreate',
+      key: 'gmtCreate',
+      render: (d, plan) => dayjs(d).format('YYYY-MMM-DD'),
+    },
+    {
+      title: 'Subscription',
+      dataIndex: 'subscriptionName',
+      key: 'subscriptionName',
+    },
+    {
+      title: 'Sub Id',
+      dataIndex: 'subscriptionId',
+      key: 'subscriptionId',
+      render: (subId, _) => (
+        <span
+          className="btn-user-with-subid"
+          onClick={(evt) => {
+            navigate(`${APP_PATH}subscription/${subId}`);
+          }}
+        >
+          <a className="btn-user-with-subid">{subId}</a>
+        </span>
+      ),
+    },
+    {
+      title: 'Sub Status',
+      dataIndex: 'subscriptionStatus',
+      key: 'subscriptionStatus',
+      render: (status, plan) => SUBSCRIPTION_STATUS[status],
+    },
+    {
+      title: 'Sub Amt',
+      key: 'recurringAmount',
+      // render: (amt, record) => <span>{amt}</span>,
+    },
+  ];
 
   const fetchData = async () => {
     const searchTerm = form.getFieldsValue();
@@ -92,6 +107,7 @@ const Index = () => {
       message.error(err.message);
       return;
     }
+    console.log('customer list: ', users);
     setUsers(users);
   };
 
@@ -103,7 +119,6 @@ const Index = () => {
     fetchData();
   }, [page]);
 
-  // console.log("users: ", users);
   return (
     <div>
       <Search form={form} goSearch={fetchData} searching={loading} />
@@ -119,8 +134,13 @@ const Index = () => {
         }}
         onRow={(user, rowIndex) => {
           return {
-            onClick: (event) => {
-              console.log('row click: ', user, '///', rowIndex);
+            onClick: (evt) => {
+              if (
+                evt.target instanceof HTMLElement &&
+                evt.target.classList.contains('btn-user-with-subid')
+              ) {
+                return;
+              }
               navigate(`${APP_PATH}customer/${user.id}`);
             },
           };

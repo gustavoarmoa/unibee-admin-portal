@@ -1,5 +1,6 @@
 import { LoadingOutlined, SearchOutlined } from '@ant-design/icons';
 import { Col, Divider, Input, Row, Spin, message } from 'antd';
+import dayjs from 'dayjs';
 import { CSSProperties, ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOnClickOutside } from 'usehooks-ts';
@@ -280,7 +281,7 @@ const InvoiceMatch = ({
                 }}
               >
                 <span>
-                  {new Date(iv.periodStart * 1000).toLocaleDateString()}
+                  {dayjs(new Date(iv.periodStart * 1000)).format('YYYY-MMM-DD')}
                 </span>
               </Col>
               <Col
@@ -292,7 +293,7 @@ const InvoiceMatch = ({
                 }}
               >
                 <span>
-                  {new Date(iv.periodEnd * 1000).toLocaleDateString()}
+                  {dayjs(new Date(iv.periodEnd * 1000)).format('YYYY-MMM-DD')}
                 </span>
               </Col>
             </Row>

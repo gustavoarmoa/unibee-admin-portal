@@ -92,7 +92,7 @@ const Index = () => {
       dataIndex: 'periodEnd',
       key: 'periodEnd',
       render: (d, plan) =>
-        d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'), // new Date(d * 1000).toLocaleDateString(),
+        d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'),
       sorter: (a, b) => a.periodEnd - b.periodEnd,
     },
     {

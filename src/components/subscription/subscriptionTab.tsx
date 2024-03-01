@@ -554,7 +554,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
           <span>
             {activeSub?.testClock && activeSub?.testClock > 0
               ? dayjs(new Date(activeSub?.testClock * 1000)).format(
-                  'YYYY-MMM-DD hh:mm:ss',
+                  'YYYY-MMM-DD HH:mm:ss',
                 )
               : ''}
           </span>
@@ -872,8 +872,9 @@ const SubscriptionInfoSection = ({
               <span>Subscription will end on </span>
               <span style={{ color: 'red', marginRight: '8px' }}>
                 {subInfo &&
-                  // new Date(activeSub!.trialEnd * 1000).toLocaleString()
-                  new Date(subInfo!.currentPeriodEnd * 1000).toLocaleString()}
+                  dayjs(new Date(subInfo!.currentPeriodEnd * 1000)).format(
+                    'YYYY-MMM-DD HH:mm:ss',
+                  )}
               </span>
               <Button onClick={toggleResumeSubModal}>Resume</Button>
             </div>
@@ -1005,7 +1006,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
           Effective Date
         </Col>
         <Col span={6}>
-          {new Date(i!.effectTime * 1000).toLocaleDateString()}
+          {dayjs(new Date(i!.effectTime * 1000)).format('YYYY-MMM-DD HH:mm:ss')}
         </Col>
         <Col span={4} style={colStyle}>
           Note
@@ -1056,13 +1057,13 @@ const SubTimeline = ({
       title: 'Start',
       dataIndex: 'periodStart',
       key: 'periodStart',
-      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD'), // new Date(d * 1000).toLocaleDateString(),
+      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD'),
     },
     {
       title: 'End',
       dataIndex: 'periodEnd',
       key: 'periodEnd',
-      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD'), // new Date(d * 1000).toLocaleDateString(),
+      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD'),
     },
     {
       title: 'Subscription Id',
