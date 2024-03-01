@@ -93,6 +93,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       '///',
       dayjs(new Date(dateString)).unix(),
     );
+    setLoading(true);
     try {
       const res = await setSimDateReq(
         activeSub?.subscriptionId as string,
@@ -108,6 +109,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       fetchData();
       toggleSimDateOpen();
     } catch (err) {
+      setLoading(false);
       if (err instanceof Error) {
         console.log('err creating preview: ', err.message);
         message.error(err.message);
@@ -128,6 +130,33 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     }
     return true;
   };
+
+  /*
+  const disabledSimTime = () => {
+    let anchor = new Date();
+    if (
+      activeSub != null &&
+      activeSub.testClock != null &&
+      activeSub.testClock > 0
+    ) {
+      anchor = new Date(activeSub.testClock * 1000);
+    }
+    return {
+      disabledHours: () => [
+        0,
+        anchor.getHours() - 1 < 0 ? 0 : anchor.getHours() - 1,
+      ],
+      disabledMinutes: () => [
+        0,
+        anchor.getMinutes() - 1 < 0 ? 0 : anchor.getMinutes() - 1,
+      ],
+      disabledSeconds: () => [
+        0,
+        anchor.getSeconds() - 1 < 0 ? 0 : anchor.getSeconds() - 1,
+      ],
+    };
+  };
+  */
 
   const onAddonChange = (
     addonId: number,
@@ -541,6 +570,16 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
             onChange={onSimDateChange}
             open={simDateOpen}
             onBlur={toggleSimDateOpen}
+            disabledDate={(d) =>
+              d.isBefore(
+                null == activeSub ||
+                  null == activeSub.testClock ||
+                  activeSub.testClock <= 0
+                  ? new Date()
+                  : new Date(activeSub!.testClock! * 1000),
+              )
+            }
+            // disabledTime={disabledSimTime}
             showTime
             showNow={false}
             getPopupContainer={(trigger: HTMLElement) =>
@@ -844,7 +883,11 @@ const SubscriptionInfoSection = ({
       {subInfo?.unfinishedSubscriptionPendingUpdate && (
         <PendingUpdateSection subInfo={subInfo} />
       )}
-      <SubTimeline userId={subInfo?.userId} plans={plans} />
+      <SubTimeline
+        userId={subInfo?.userId}
+        plans={plans}
+        testClock={subInfo?.testClock}
+      />
     </>
   );
 };
@@ -988,9 +1031,11 @@ type SubTimeline = {
 const SubTimeline = ({
   userId,
   plans,
+  testClock,
 }: {
   userId: number | undefined;
   plans: IPlan[];
+  testClock: number | undefined;
 }) => {
   const relogin = useRelogin();
   // const appConfigStore = useAppConfigStore();
@@ -1060,6 +1105,14 @@ const SubTimeline = ({
   useEffect(() => {
     fetchTimeline();
   }, [userId]);
+
+  useEffect(() => {
+    if (testClock == null || testClock <= 0) {
+      return;
+    }
+    fetchTimeline();
+  }, [testClock]);
+
   return (
     <>
       <Divider orientation="left" style={{ margin: '32px 0' }}>
