@@ -11,10 +11,9 @@ import { PLAN_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { getPlanList } from '../../requests';
+import '../../shared.css';
 import { IPlan } from '../../shared.types';
 import { useAppConfigStore } from '../../stores';
-
-import '../../shared.css';
 
 const PAGE_SIZE = 10;
 const APP_PATH = import.meta.env.BASE_URL;
@@ -118,13 +117,16 @@ const Index = () => {
   const fetchPlan = async () => {
     setLoading(true);
 
-    const [planList, err] = await getPlanList({
-      // type: undefined, // get main plan and addon
-      // status: undefined, // active, inactive, expired, editing, all of them
-      ...filters,
-      page,
-      count: PAGE_SIZE,
-    });
+    const [planList, err] = await getPlanList(
+      {
+        // type: undefined, // get main plan and addon
+        // status: undefined, // active, inactive, expired, editing, all of them
+        ...filters,
+        page,
+        count: PAGE_SIZE,
+      },
+      fetchPlan,
+    );
     setLoading(false);
 
     if (err != null) {

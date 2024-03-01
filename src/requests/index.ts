@@ -272,7 +272,10 @@ type TPlanListBody = {
   page: number;
   count: number;
 };
-export const getPlanList = async (body: TPlanListBody) => {
+export const getPlanList = async (
+  body: TPlanListBody,
+  refreshCb: (() => void) | null,
+) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.post(
@@ -281,7 +284,7 @@ export const getPlanList = async (body: TPlanListBody) => {
     );
     console.log('plan list res: ', res);
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
+      session.setSession({ expired: true, refresh: refreshCb });
       // throw new Error('Session expired');
       throw new ExpiredError('Session expired');
     }
@@ -340,7 +343,7 @@ export const getPlanDetailWithMore = async (
     [metricsList, errMetrics],
   ] = await Promise.all([
     planDetailRes,
-    getPlanList({ type: [2], status: [2], page: 0, count: 100 }), // type: 2 -> addon, status: 2 -> active
+    getPlanList({ type: [2], status: [2], page: 0, count: 100 }, null), // type: 2 -> addon, status: 2 -> active
     getMetricsListReq(null),
   ]);
   let err = errDetail || addonErr || errMetrics;

@@ -41,7 +41,7 @@ import CustomerList from './components/user/userList';
 // import Users from "./components/userList";
 import AppSearch from './components/appSearch';
 import Login from './components/login';
-import LoginModal from './components/login/passwordLoginModal';
+import LoginModal from './components/login/LoginModal';
 import NotFound from './components/notFound';
 import Profile from './components/profile';
 import Signup from './components/signup';

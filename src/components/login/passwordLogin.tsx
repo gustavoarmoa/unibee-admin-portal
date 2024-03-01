@@ -172,13 +172,7 @@ const Index = ({
         </div>
 
         <div className="mb-4 flex justify-center text-red-500">{errMsg}</div>
-
-        <Form.Item
-          wrapperCol={{
-            offset: 8,
-            span: 16,
-          }}
-        >
+        <div className="flex w-full justify-center">
           <Button
             type="primary"
             onClick={form.submit}
@@ -187,7 +181,7 @@ const Index = ({
           >
             Submit
           </Button>
-        </Form.Item>
+        </div>
       </Form>
     </>
   );

@@ -135,13 +135,7 @@ const MailForm = ({
         <Input value={email} onChange={onEmailChange} onPressEnter={submit} />
       </Form.Item>
       <div className="mb-4 flex justify-center text-red-500">{errMsg}</div>
-
-      <Form.Item
-        wrapperCol={{
-          offset: 8,
-          span: 16,
-        }}
-      >
+      <div className="flex w-full justify-center">
         <Button
           type="primary"
           onClick={submit}
@@ -150,7 +144,7 @@ const MailForm = ({
         >
           Submit
         </Button>
-      </Form.Item>
+      </div>
     </Form>
   );
 };

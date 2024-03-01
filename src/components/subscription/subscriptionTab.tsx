@@ -28,7 +28,6 @@ import { useRelogin } from '../../hooks';
 import {
   createPreviewReq,
   extendDueDate,
-  getPlanList,
   getPlanList2,
   getSubDetail,
   getSubTimeline,

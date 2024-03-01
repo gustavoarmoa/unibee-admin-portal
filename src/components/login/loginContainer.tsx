@@ -55,7 +55,7 @@ const Index = ({
         <div
           style={{
             width: '620px',
-            height: '280px',
+            height: '300px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -86,6 +86,7 @@ const Index = ({
             color: '#757575',
             justifyContent: 'center',
             alignItems: 'center',
+            marginTop: '16px',
           }}
         >
           Don't have an account?
