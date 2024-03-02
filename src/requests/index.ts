@@ -157,7 +157,7 @@ export const resetPassReq = async (
 export const logoutReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/member/user_logout`, {});
+    const res = await request.post(`/merchant/member/logout`, {});
     const code = res.data.code;
     // if (code != 0 && code != 61) { }
     session.setSession({ expired: true, refresh: null });
@@ -170,7 +170,7 @@ export const logoutReq = async () => {
 export const getAppConfigReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/system/information`, {});
+    const res = await request.get(`/system/information/get`, {});
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -490,7 +490,7 @@ type TSubListReq = {
 export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
   try {
     const res = await request.post(
-      `/merchant/subscription/subscription_list`,
+      `/merchant/subscription/list`,
       body,
     );
     if (res.data.code == 61) {
@@ -511,7 +511,7 @@ export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
 export const getSubDetail = async (subscriptionId: string) => {
   try {
     const res = await request.post(
-      `/merchant/subscription/subscription_detail`,
+      `/merchant/subscription/detail`,
       {
         subscriptionId,
       },
@@ -561,7 +561,7 @@ export const getSubDetailWithMore = async (
 // this fn is for this purpose only, this call only work for sub.status == created.
 // it's not the same as terminate an active sub,
 export const cancelSubReq = async (subscriptionId: string) => {
-  return await request.post(`/merchant/subscription/subscription_cancel`, {
+  return await request.post(`/merchant/subscription/cancel`, {
     subscriptionId,
   });
 };
@@ -572,7 +572,7 @@ export const createPreviewReq = async (
   addons: { quantity: number; addonPlanId: number }[],
 ) => {
   return await request.post(
-    `/merchant/subscription/subscription_update_preview`,
+    `/merchant/subscription/update_preview`,
     {
       subscriptionId,
       newPlanId,
@@ -591,7 +591,7 @@ export const updateSubscription = async (
   prorationDate: number,
 ) => {
   return await request.post(
-    `/merchant/subscription/subscription_update_submit`,
+    `/merchant/subscription/update_submit`,
     {
       subscriptionId,
       newPlanId,
@@ -616,11 +616,11 @@ export const terminateSub = async (
   } = {
     SubscriptionId,
   };
-  let url = `/merchant/subscription/subscription_cancel_at_period_end`;
+  let url = `/merchant/subscription/cancel_at_period_end`;
   if (immediate) {
     body.invoiceNow = true;
     body.prorate = true;
-    url = `/merchant/subscription/subscription_cancel`;
+    url = `/merchant/subscription/cancel`;
   }
   return await request.post(url, body);
 };
@@ -628,7 +628,7 @@ export const terminateSub = async (
 // resume subscription for case that it's been terminated at the end of this billing cycle.
 // if it's ended immediately, no resume allowed.
 export const resumeSub = async (subscriptionId: string) => {
-  const url = `/merchant/subscription/subscription_cancel_last_cancel_at_period_end`;
+  const url = `/merchant/subscription/cancel_last_cancel_at_period_end`;
   return await request.post(url, {
     subscriptionId,
   });
@@ -642,7 +642,7 @@ type TGetSubTimelineReq = {
 };
 export const getSubTimeline = async (body: TGetSubTimelineReq) => {
   return await request.post(
-    `/merchant/subscription/subscription_timeline_list`,
+    `/merchant/subscription/timeline_list`,
     body,
   );
 };
@@ -650,7 +650,7 @@ export const getSubTimeline2 = async (body: TGetSubTimelineReq) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.post(
-      `/merchant/subscription/subscription_timeline_list`,
+      `/merchant/subscription/timeline_list`,
       body,
     );
     if (res.data.code == 61) {
@@ -700,7 +700,7 @@ export const extendDueDate = async (
   appendTrialEndHour: number,
 ) => {
   return await request.post(
-    `/merchant/subscription/subscription_add_new_trial_start`,
+    `/merchant/subscription/add_new_trial_start`,
     { subscriptionId, appendTrialEndHour },
   );
 };
@@ -710,7 +710,7 @@ export const setSimDateReq = async (
   newTestClock: number,
 ) => {
   return await request.post(
-    `/system/subscription/subscription_test_clock_walk`,
+    `/system/subscription/test_clock_walk`,
     { subscriptionId, newTestClock },
   );
 };
