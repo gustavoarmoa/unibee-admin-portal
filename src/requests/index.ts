@@ -136,7 +136,7 @@ export const resetPassReq = async (
 ) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/passwordReset`, {
+    const res = await request.post(`/merchant/member/passwordReset`, {
       oldPassword,
       newPassword,
     });
@@ -157,7 +157,7 @@ export const resetPassReq = async (
 export const logoutReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/user_logout`, {});
+    const res = await request.post(`/merchant/member/user_logout`, {});
     const code = res.data.code;
     // if (code != 0 && code != 61) { }
     session.setSession({ expired: true, refresh: null });
@@ -170,7 +170,7 @@ export const logoutReq = async () => {
 export const getAppConfigReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/system/merchant/merchant_information`, {});
+    const res = await request.post(`/system/information`, {});
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -207,7 +207,7 @@ export const getGatewayListReq = async () => {
 export const getMerchantInfoReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.get(`/merchant/merchant_info/info`);
+    const res = await request.get(`/merchant/get`);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -216,7 +216,7 @@ export const getMerchantInfoReq = async () => {
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.MerchantInfo, null];
+    return [res.data.data.merchant, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
@@ -226,7 +226,7 @@ export const getMerchantInfoReq = async () => {
 export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/merchant_info/update`, body);
+    const res = await request.post(`/merchant/update`, body);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -234,7 +234,7 @@ export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.MerchantInfo, null];
+    return [res.data.data.merchant, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
