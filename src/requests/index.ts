@@ -509,9 +509,52 @@ export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
 // ------------
 
 export const getSubDetail = async (subscriptionId: string) => {
-  return await request.post(`/merchant/subscription/subscription_detail`, {
-    subscriptionId,
-  });
+  try {
+    const res = await request.post(
+      `/merchant/subscription/subscription_detail`,
+      {
+        subscriptionId,
+      },
+    );
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null });
+      throw new ExpiredError('Session expired');
+    }
+    if (res.data.code != 0) {
+      throw new Error(res.data.message);
+    }
+    return [res.data.data, null];
+  } catch (err) {
+    let e = err instanceof Error ? err : new Error('Unknown error');
+    return [null, e];
+  }
+};
+
+export const getSubDetailWithMore = async (
+  subscriptionId: string,
+  refreshCb: (() => void) | null,
+) => {
+  const [[subDetail, errSubDetail], [planList, errPlanList]] =
+    await Promise.all([
+      getSubDetail(subscriptionId),
+      getPlanList(
+        {
+          type: [1], // main plan
+          status: [2], // active
+          page: 0,
+          count: 100,
+        },
+        null,
+      ),
+    ]);
+  let err = errSubDetail || errPlanList;
+  if (null != err) {
+    if (err instanceof ExpiredError) {
+      session.setSession({ expired: true, refresh: refreshCb });
+    }
+    return [null, err];
+  }
+  return [{ subDetail, planList }, null];
 };
 
 // new user has choosen a sub plan, but not paid yet, before the payment due date, user and admin can cancel it.

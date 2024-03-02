@@ -28,9 +28,7 @@ import { useRelogin } from '../../hooks';
 import {
   createPreviewReq,
   extendDueDate,
-  getPlanList2,
-  getSubDetail,
-  getSubTimeline,
+  getSubDetailWithMore,
   getSubTimeline2,
   resumeSub,
   setSimDateReq,
@@ -85,20 +83,12 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const toggleCancelSubModal = () => setCancelSubModalOpen(!cancelSubModalOpen);
 
   const onSimDateChange = async (date: any, dateString: string) => {
-    console.log(
-      date,
-      '///',
-      dateString,
-      '///',
-      dayjs(new Date(dateString)).unix(),
-    );
     setLoading(true);
     try {
       const res = await setSimDateReq(
         activeSub?.subscriptionId as string,
         dayjs(new Date(dateString)).unix(),
       );
-      console.log('set sim date res: ', res);
       const code = res.data.code;
       code == 61 && relogin();
       if (code != 0) {
@@ -129,33 +119,6 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     }
     return true;
   };
-
-  /*
-  const disabledSimTime = () => {
-    let anchor = new Date();
-    if (
-      activeSub != null &&
-      activeSub.testClock != null &&
-      activeSub.testClock > 0
-    ) {
-      anchor = new Date(activeSub.testClock * 1000);
-    }
-    return {
-      disabledHours: () => [
-        0,
-        anchor.getHours() - 1 < 0 ? 0 : anchor.getHours() - 1,
-      ],
-      disabledMinutes: () => [
-        0,
-        anchor.getMinutes() - 1 < 0 ? 0 : anchor.getMinutes() - 1,
-      ],
-      disabledSeconds: () => [
-        0,
-        anchor.getSeconds() - 1 < 0 ? 0 : anchor.getSeconds() - 1,
-      ],
-    };
-  };
-  */
 
   const onAddonChange = (
     addonId: number,
@@ -374,57 +337,35 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
 
   // fetch current subscription detail, and all active plans.
   const fetchData = async () => {
-    // const subId = location.state && location.state.subscriptionId;
     const pathName = window.location.pathname.split('/');
     const subId = pathName.pop();
     if (subId == null) {
-      // TODO: show page not exist, OR invalid subscription
+      message.error("Subscription didn't exist");
       return;
     }
 
     setLoading(true);
-    let subDetailRes, planListRes;
-    try {
-      const res = ([subDetailRes, planListRes] = await Promise.all([
-        getSubDetail(subId),
-        getPlanList2({
-          type: [1],
-          status: [2],
-          page: 0,
-          count: 100,
-        }), // type:1 (main plan), status: 2 (active), let's assume there are at most 100 active plan
-      ]));
-      console.log('subDetail/planList: ', subDetailRes, '//', planListRes);
-      res.forEach((r) => {
-        const code = r.data.code;
-        code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-        if (code != 0) {
-          // TODO: save all the code as ENUM in constant,
-          throw new Error(r.data.message);
-        }
-      });
-    } catch (err) {
+    const [detailRes, err] = await getSubDetailWithMore(subId, fetchData);
+    if (err != null) {
       setLoading(false);
-      if (err instanceof Error) {
-        console.log('err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+      message.error(err.message);
       return;
     }
-
+    console.log('detailRes: ', detailRes);
+    const { subDetail, planList } = detailRes;
     setLoading(false);
-    const s = subDetailRes.data.data;
-    const localActiveSub: ISubscriptionType = { ...s.subscription };
-    localActiveSub.addons = s.addons?.map((a: any) => ({
+
+    const { user, addons, unfinishedSubscriptionPendingUpdate, subscription } =
+      subDetail;
+    const localActiveSub: ISubscriptionType = { ...subscription };
+    localActiveSub.addons = addons?.map((a: any) => ({
       ...a.addonPlan,
       quantity: a.quantity,
       addonPlanId: a.addonPlan.id,
     }));
-    localActiveSub.user = s.user;
+    localActiveSub.user = user;
     localActiveSub.unfinishedSubscriptionPendingUpdate =
-      s.unfinishedSubscriptionPendingUpdate;
+      unfinishedSubscriptionPendingUpdate;
     if (localActiveSub.unfinishedSubscriptionPendingUpdate != null) {
       if (
         localActiveSub.unfinishedSubscriptionPendingUpdate.updateAddons != null
@@ -441,36 +382,16 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     }
 
     console.log('active sub: ', localActiveSub);
-    setSelectedPlan(s.plan.id);
-    setUserId(s.user.id);
+    setSelectedPlan(subDetail.plan.id);
+    setUserId(user.id);
 
-    let plans: IPlan[] = planListRes.data.data.Plans.map((p: any) => {
-      const p2 = p.plan;
-      if (p.plan.type == 2) {
-        // 1: main plan, 2: addon
-        // addon plan
-        return null;
-      }
-      if (p.plan.status != 2) {
-        // 1: editing, 2: active, 3: inactive, 4: expired
-        return null;
-      }
+    let plans: IPlan[] = planList.map((p: any) => ({
+      ...p.plan,
+      addons: p.addons,
+    }));
 
-      return {
-        id: p2.id,
-        planName: p2.planName,
-        description: p2.description,
-        type: p2.type,
-        amount: p2.amount,
-        currency: p2.currency,
-        intervalUnit: p2.intervalUnit,
-        intervalCount: p2.intervalCount,
-        status: p2.status,
-        addons: p.addons,
-      };
-    });
     plans = plans.filter((p) => p != null);
-    const planIdx = plans.findIndex((p) => p.id == s.plan.id);
+    const planIdx = plans.findIndex((p) => p.id == subDetail.plan.id);
     // let's say we have planA(which has addonA1, addonA2, addonA3), planB, planC, user has subscribed to planA, and selected addonA1, addonA3
     // I need to find the index of addonA1,3 in planA.addons array,
     // then set their {quantity, checked: true} props on planA.addons, these props value are from subscription.addons array.
