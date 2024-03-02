@@ -398,7 +398,7 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.get(
-      `/merchant/merchant_metric/merchant_metric_list`,
+      `/merchant/metric/list`,
     );
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
@@ -435,21 +435,21 @@ export const saveMetricsReq = async (
   isNew: boolean,
 ) => {
   const url = isNew
-    ? `/merchant/merchant_metric/new_merchant_metric`
-    : `/merchant/merchant_metric/edit_merchant_metric`;
+    ? `/merchant/metric/new`
+    : `/merchant/metric/edit`;
   return await request.post(url, body);
 };
 /*
 export const updateMetricsReq = async (body: TMetricsBody) => {
   return await request.post(
-    `/merchant/merchant_metric/edit_merchant_metric`,
+    `/merchant/metric/edit`,
     body,
   );
 };
 
 export const createMetricsReq = async (metrics: any) => {
   return await request.post(
-    `/merchant/merchant_metric/new_merchant_metric`,
+    `/merchant/metric/new`,
     metrics,
   );
 };
@@ -462,7 +462,7 @@ export const getMetricDetailReq = async (
 ) => {
   try {
     const res = await request.post(
-      `/merchant/merchant_metric/merchant_metric_detail`,
+      `/merchant/metric/detail`,
       {
         metricId,
       },
