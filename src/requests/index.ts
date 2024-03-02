@@ -729,7 +729,7 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.User, null];
+    return [res.data.data.user, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
