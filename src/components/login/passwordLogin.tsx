@@ -74,10 +74,10 @@ const Index = ({
       return;
     }
 
-    const { MerchantUser, Token } = loginRes;
-    localStorage.setItem('merchantToken', Token);
-    MerchantUser.token = Token;
-    profileStore.setProfile(MerchantUser);
+    const { merchantMember, token } = loginRes;
+    localStorage.setItem('merchantToken', token);
+    merchantMember.token = token;
+    profileStore.setProfile(merchantMember);
     sessionStore.setSession({ expired: false, refresh: null });
 
     const [initRes, errInit] = await initializeReq();

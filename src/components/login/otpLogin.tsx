@@ -198,10 +198,10 @@ const OTPForm = ({
       return;
     }
 
-    const { Token, MerchantUser } = loginRes;
-    localStorage.setItem('merchantToken', Token);
-    MerchantUser.token = Token;
-    profileStore.setProfile(MerchantUser);
+    const { token, merchantMember } = loginRes;
+    localStorage.setItem('merchantToken', token);
+    merchantMember.token = token;
+    profileStore.setProfile(merchantMember);
     sessionStore.setSession({ expired: false, refresh: null });
 
     const [initRes, errInit] = await initializeReq();
