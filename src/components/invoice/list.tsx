@@ -144,7 +144,7 @@ const Index = () => {
         code == 61 && relogin();
         throw new Error(res.data.message);
       }
-      setInvoiceList(res.data.data.Invoices);
+      setInvoiceList(res.data.data.invoices);
     } catch (err) {
       setLoading(false);
       if (err instanceof Error) {

@@ -79,8 +79,8 @@ const Index = () => {
       if (code != 0) {
         throw new Error(res.data.message);
       }
-      normalizeAmt([res.data.data.Invoice]);
-      setInvoiceDetail(res.data.data.Invoice);
+      normalizeAmt([res.data.data.invoice]);
+      setInvoiceDetail(res.data.data.invoice);
       setUserProfile(res.data.data.userAccount);
     } catch (err) {
       setLoading(false);
