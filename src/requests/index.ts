@@ -279,7 +279,7 @@ export const getPlanList = async (
   const session = useSessionStore.getState();
   try {
     const res = await request.post(
-      '/merchant/plan/subscription_plan_list',
+      '/merchant/plan/list',
       body,
     );
     console.log('plan list res: ', res);
@@ -291,7 +291,7 @@ export const getPlanList = async (
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.Plans, null];
+    return [res.data.data.plans, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
@@ -299,7 +299,7 @@ export const getPlanList = async (
 };
 
 export const getPlanList2 = async (body: TPlanListBody) => {
-  return await request.post('/merchant/plan/subscription_plan_list', body);
+  return await request.post('/merchant/plan/list', body);
 };
 
 // -----------------
@@ -307,7 +307,7 @@ export const getPlanList2 = async (body: TPlanListBody) => {
 export const getPlanDetail = async (planId: number) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post('/merchant/plan/subscription_plan_detail', {
+    const res = await request.post('/merchant/plan/detail', {
       planId,
     });
     console.log('planDetail res: ', res);
@@ -319,7 +319,7 @@ export const getPlanDetail = async (planId: number) => {
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.Plan, null];
+    return [res.data.data.plan, null];
   } catch (err) {
     let e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
@@ -361,7 +361,7 @@ export const getPlanDetailWithMore = async (
 /*
 export const createPlan = async (planDetail: any) => {
   return await request.post(
-    '/merchant/plan/subscription_plan_create',
+    '/merchant/plan/new',
     planDetail,
   );
 };
@@ -370,13 +370,13 @@ export const createPlan = async (planDetail: any) => {
 // create a new or save an existing plan
 export const savePlan = async (planDetail: any, isNew: boolean) => {
   const url = isNew
-    ? '/merchant/plan/subscription_plan_create'
-    : `/merchant/plan/subscription_plan_edit`;
+    ? '/merchant/plan/new'
+    : `/merchant/plan/edit`;
   return await request.post(url, planDetail);
 };
 
 export const activatePlan = async (planId: number) => {
-  return await request.post(`/merchant/plan/subscription_plan_activate`, {
+  return await request.post(`/merchant/plan/activate`, {
     planId,
   });
 };
@@ -388,7 +388,7 @@ export const togglePublishReq = async ({
   planId: number;
   publishAction: 'PUBLISH' | 'UNPUBLISH';
 }) => {
-  const url = `/merchant/plan/subscription_plan_${
+  const url = `/merchant/plan/${
     publishAction === 'PUBLISH' ? 'publish' : 'unpublished'
   }`;
   return await request.post(url, { planId });
