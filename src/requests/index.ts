@@ -670,7 +670,7 @@ export const getSubTimeline2 = async (body: TGetSubTimelineReq) => {
 
 export const getCountryList = async () => {
   const merchantStore = useMerchantInfoStore.getState();
-  return await request.post(`/merchant/vat/vat_country_list`, {
+  return await request.post(`/merchant/vat/country_list`, {
     merchantId: merchantStore.id,
   });
 };
@@ -678,7 +678,7 @@ export const getCountryList2 = async () => {
   const merchantStore = useMerchantInfoStore.getState();
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/vat/vat_country_list`, {
+    const res = await request.post(`/merchant/vat/country_list`, {
       merchantId: merchantStore.id,
     });
     if (res.data.code == 61) {
@@ -720,7 +720,7 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.get(
-      `/merchant/merchant_user/get_user_profile?userId=${userId}`,
+      `/merchant/user/get?userId=${userId}`,
     );
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
@@ -740,7 +740,7 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
 export const saveUserProfile = async (newProfile: IProfile) => {
   const u = JSON.parse(JSON.stringify(newProfile));
   u.userId = newProfile.id;
-  return await request.post(`/merchant/merchant_user/update_user_profile`, u);
+  return await request.post(`/merchant/user/update`, u);
 };
 export const saveUserProfile2 = async (newProfile: IProfile) => {
   const session = useSessionStore.getState();
@@ -748,7 +748,7 @@ export const saveUserProfile2 = async (newProfile: IProfile) => {
   u.userId = newProfile.id;
   try {
     const res = await request.post(
-      `/merchant/merchant_user/update_user_profile`,
+      `/merchant/user/update`,
       u,
     );
     if (res.data.code == 61) {
@@ -917,7 +917,7 @@ export const getUserListReq = async (
 ) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/merchant_user/user_list`, users);
+    const res = await request.post(`/merchant/user/user_list`, users);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
@@ -936,7 +936,7 @@ export const getEventListReq = async () => {
   const session = useSessionStore.getState();
   try {
     const res = await request.get(
-      `/merchant/merchant_webhook/webhook_event_list`,
+      `/merchant/webhook/event_list`,
     );
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
@@ -956,7 +956,7 @@ export const getWebhookListReq = async (refreshCb: () => void) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.get(
-      `/merchant/merchant_webhook/webhook_endpoint_list`,
+      `/merchant/webhook/endpoint_list`,
     );
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
@@ -986,8 +986,8 @@ export const saveWebhookReq = async ({
   try {
     const actionUrl =
       endpointId == null
-        ? '/merchant/merchant_webhook/new_webhook_endpoint'
-        : '/merchant/merchant_webhook/update_webhook_endpoint';
+        ? '/merchant/webhook/new_endpoint'
+        : '/merchant/webhook/update_endpoint';
     const body: any = { url, events };
     if (endpointId != null) {
       body.endpointId = endpointId;
@@ -1011,7 +1011,7 @@ export const deleteWebhookReq = async (endpointId: number) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.post(
-      '/merchant/merchant_webhook/delete_webhook_endpoint',
+      '/merchant/webhook/delete_endpoint',
       { endpointId },
     );
     console.log('delete webhook res: ', res);
@@ -1040,7 +1040,7 @@ export const getWebhookLogs = async (
   const session = useSessionStore.getState();
   try {
     const res = await request.get(
-      `/merchant/merchant_webhook/webhook_endpoint_log_list?endpointId=${endpointId}&page=${page}&count=${count}`,
+      `/merchant/webhook/endpoint_log_list?endpointId=${endpointId}&page=${page}&count=${count}`,
     );
     console.log('webhook logs: ', res);
     if (res.data.code == 61) {
