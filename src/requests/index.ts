@@ -917,7 +917,7 @@ export const getUserListReq = async (
 ) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/user/user_list`, users);
+    const res = await request.post(`/merchant/user/list`, users);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
