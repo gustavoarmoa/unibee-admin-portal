@@ -87,15 +87,7 @@ const Index = ({ subInfo, closeModal, refresh }: Props) => {
           ).toDateString()}
         </Col>
           </Row> */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'end',
-          alignItems: 'center',
-          gap: '18px',
-          marginTop: '24px',
-        }}
-      >
+      <div className="mt-6 flex items-center justify-end gap-4">
         <Button onClick={closeModal} disabled={loading}>
           No
         </Button>

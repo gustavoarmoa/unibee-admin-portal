@@ -343,15 +343,7 @@ const AccountMatch = ({
         </Col>
       </Row>
       {list == null ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          No Match Found
-        </div>
+        <div className="flex items-center justify-center">No Match Found</div>
       ) : (
         <div
           style={{ maxHeight: '160px', minHeight: '48px', overflowY: 'auto' }}

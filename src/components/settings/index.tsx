@@ -493,15 +493,7 @@ const EmailTemplate = () => {
       >
         <Tabs activeKey={tabKey} items={tabItems} onChange={onTabChange} />
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'end',
-            alignItems: 'center',
-            gap: '18px',
-            marginTop: '24px',
-          }}
-        >
+        <div className="my-5 flex items-center justify-end gap-4">
           <Button onClick={toggleModal}>Close</Button>
           <Button onClick={toggleModal}>Make it Default</Button>
           <Button type="primary" onClick={toggleModal}>
@@ -532,13 +524,7 @@ const PermissionTab = () => (
   <div style={{ width: 'calc(100vw - 300px)', overflowX: 'auto' }}>
     <Row
       // gutter={[32, 32]}
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        textAlign: 'center',
-        margin: '24px 0',
-      }}
+      className="my-6 flex items-center justify-between text-center"
     >
       <Col span={2} style={{ fontWeight: 'bold' }}>
         Roles
@@ -581,12 +567,8 @@ const PermissionTab = () => (
       {roles.map((r) => (
         <div key={r}>
           <Row
+            className="flex content-center justify-between"
             // gutter={[32, 128]}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignContent: 'center',
-            }}
           >
             <Col span={2}>{r}</Col>
             <Col span={2}>
@@ -738,10 +720,10 @@ const PermissionTab = () => (
         </div>
       ))}
     </div>
-    <div style={{ display: 'flex', justifyContent: 'end', gap: '16px' }}>
-      <Button>Add New Role</Button>
+    <div className="my-2 flex justify-end gap-4">
       <Button>Apply Change</Button>
-      <Button>Reset to Default</Button>
+      <Button>Add New Role</Button>
+      <Button type="primary">Apply Change</Button>
     </div>
   </div>
 );

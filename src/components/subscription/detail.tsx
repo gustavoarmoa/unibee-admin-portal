@@ -78,18 +78,11 @@ const Index = () => {
   }, [userId]);
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div className="flex">
       <div style={{ width: '80%' }}>
         <UserInfoSection user={userProfile} />
         <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: '64px',
-          }}
-        >
+        <div className="mt-4 flex items-center justify-center">
           <Button onClick={() => navigate(`${APP_PATH}subscription/list`)}>
             Go Back
           </Button>

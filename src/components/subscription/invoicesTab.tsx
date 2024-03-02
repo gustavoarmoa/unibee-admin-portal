@@ -318,14 +318,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           onClick={fetchData}
         ></span>
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          margin: '18px 0',
-        }}
-      >
+      <div className="my-4 flex items-center justify-between">
         <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
@@ -359,7 +352,7 @@ const Searchbar = ({ refresh }: ISearchBarProp) => {
   // Object.keys(INVOICE_STATUS).map(s => ({value: s, label: INVOICE_STATUS[Number(s)] }))
   return (
     <div>
-      <Row style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Row className="flex justify-between">
         <Col span={6}>Title</Col>
         <Col span={3}>Amt</Col>
         <Col span={4}>Status</Col>
@@ -367,9 +360,8 @@ const Searchbar = ({ refresh }: ISearchBarProp) => {
         <Col span={4}>Action</Col>
       </Row>
       <Row
+        className="flex justify-between"
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
           marginBottom: '12px',
         }}
       >

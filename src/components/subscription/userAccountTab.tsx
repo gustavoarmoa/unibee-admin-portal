@@ -274,14 +274,7 @@ const UserAccountTab = ({
           </Col>
         </Row>
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            margin: '36px',
-            gap: '24px',
-          }}
-        >
+        <div className="mx-9 my-9 flex justify-center gap-6">
           {extraButton}
           <Button danger>Suspend</Button>
           <Button type="primary" onClick={form.submit} disabled={loading}>

@@ -1,6 +1,6 @@
-import { Button, Col, Modal, Row } from "antd";
-import { ISubscriptionType } from "../../../shared.types";
-import { showAmount } from "../../../helpers";
+import { Button, Col, Modal, Row } from 'antd';
+import { showAmount } from '../../../helpers';
+import { ISubscriptionType } from '../../../shared.types';
 
 interface Props {
   isOpen: boolean;
@@ -19,31 +19,31 @@ const ResumeSub = ({
   return (
     <Modal
       title="Resume Subscription"
-      width={"640px"}
+      width={'640px'}
       open={isOpen}
       footer={null}
       closeIcon={null}
     >
-      <div style={{ margin: "16px 0" }}>
+      <div style={{ margin: '16px 0' }}>
         Are you sure you want to resume this subscription?
       </div>
       <Row>
         <Col span={6}>
-          <span style={{ fontWeight: "bold" }}>First name</span>
+          <span style={{ fontWeight: 'bold' }}>First name</span>
         </Col>
         <Col span={6}>{subInfo?.user?.firstName}</Col>
         <Col span={5}>
-          <span style={{ fontWeight: "bold" }}> Lastname</span>
+          <span style={{ fontWeight: 'bold' }}> Lastname</span>
         </Col>
         <Col span={6}>{subInfo?.user?.lastName}</Col>
       </Row>
       <Row>
         <Col span={6}>
-          <span style={{ fontWeight: "bold" }}>Plan</span>
+          <span style={{ fontWeight: 'bold' }}>Plan</span>
         </Col>
         <Col span={6}>{subInfo?.plan?.planName}</Col>
         <Col span={5}>
-          <span style={{ fontWeight: "bold" }}>Amount</span>
+          <span style={{ fontWeight: 'bold' }}>Amount</span>
         </Col>
         <Col span={6}>
           {subInfo?.plan?.amount &&
@@ -52,21 +52,18 @@ const ResumeSub = ({
       </Row>
       <Row>
         <Col span={6}>
-          <span style={{ fontWeight: "bold" }}>Current due date</span>
+          <span style={{ fontWeight: 'bold' }}>Current due date</span>
         </Col>
         <Col span={6}>
           {new Date(
-            (subInfo?.currentPeriodEnd as number) * 1000
+            (subInfo?.currentPeriodEnd as number) * 1000,
           ).toDateString()}
         </Col>
       </Row>
       <div
+        className="flex items-center justify-end gap-4"
         style={{
-          display: "flex",
-          justifyContent: "end",
-          alignItems: "center",
-          gap: "18px",
-          marginTop: "24px",
+          marginTop: '24px',
         }}
       >
         <Button onClick={onCancel} disabled={loading}>

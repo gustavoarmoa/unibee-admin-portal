@@ -149,11 +149,8 @@ const Index = () => {
       {' '}
       <AppHeader />
       <div
+        className="flex flex-col items-center justify-center"
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
           marginTop: '100px',
         }}
       >

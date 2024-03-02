@@ -589,19 +589,12 @@ const Index = ({
         ))}
       <Divider />
 
-      <Row style={{ display: 'flex', alignItems: 'center' }}>
+      <Row className="flex items-center">
         <Col span={20}>
           {refundMode && (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginRight: '16px',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{ marginRight: '6px' }}>Refund Reason:</div>
+            <div className="mr-4 flex items-center justify-between">
+              <div className="flex items-center">
+                <div className="mr-2">Refund Reason:</div>
                 <Input
                   style={{ width: '256px' }}
                   maxLength={64}
@@ -611,8 +604,8 @@ const Index = ({
                 />
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{ marginRight: '6px' }}>Refund Amt:</div>
+              <div className="flex items-center">
+                <div className="mr-4">Refund Amt:</div>
                 <Input
                   style={{ width: '100px' }}
                   prefix={CURRENCY[currency].symbol}
@@ -638,15 +631,7 @@ const Index = ({
         </Col>
       </Row>
 
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '18px',
-          marginTop: '24px',
-        }}
-      >
+      <div className="mt-6 flex items-center justify-between gap-4">
         {permission.deletable ? (
           <Button
             type="primary"

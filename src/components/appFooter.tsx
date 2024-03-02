@@ -31,16 +31,7 @@ const Index = () => (
           <FacebookOutlined style={{ fontSize: '24px' }} />
         </div>
       </Divider>
-      <div
-        style={{
-          color: '#FFF',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '12px',
-        }}
-      >
+      <div className="flex flex-col items-center justify-center gap-3 text-white">
         <span>Copyright © 2024</span>
       </div>
     </div>

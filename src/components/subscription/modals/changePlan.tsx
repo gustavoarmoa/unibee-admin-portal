@@ -47,14 +47,7 @@ const ChangePlan = ({
       closeIcon={null}
     >
       <Divider>Choose a new subscription plan</Divider>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          margin: '12px',
-        }}
-      >
+      <div className="mx-3 my-3 flex items-center justify-center">
         <Select
           style={{ width: 240 }}
           value={selectedPlanId}
@@ -66,14 +59,7 @@ const ChangePlan = ({
         />
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: '48px',
-        }}
-      >
+      <div className="mb-12 flex items-center justify-center">
         <Plan
           plan={selectedPlan}
           selectedPlan={selectedPlanId}
@@ -87,57 +73,3 @@ const ChangePlan = ({
 };
 
 export default ChangePlan;
-
-{
-  /*
-        <Modal
-          title="Change plan"
-          open={changePlanModal}
-          width={"480px"}
-          onOk={() => {
-            // setChangePlanModal(false);
-            openPreviewModal();
-          }}
-          onCancel={() => setChangePlanModal(false)}
-        >
-          <Divider>Choose a new subscription plan</Divider>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              margin: "12px",
-            }}
-          >
-            <Select
-              style={{ width: 120 }}
-              value={selectedPlan}
-              onChange={onSelectPlanChange}
-              options={plans.map((p) => ({
-                label: p.planName,
-                value: p.id,
-              }))}
-            />
-          </div>
-
-          {p != undefined && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginBottom: "48px",
-              }}
-            >
-              <Plan
-                plan={p}
-                selectedPlan={selectedPlan}
-                setSelectedPlan={setSelectedPlan}
-                onAddonChange={onAddonChange}
-                isActive={p.id == activeSub?.planId}
-              />
-            </div>
-          )}
-        </Modal>
-            */
-}

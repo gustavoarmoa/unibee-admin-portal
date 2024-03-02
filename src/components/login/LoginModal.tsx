@@ -7,7 +7,7 @@ import {
   useProfileStore,
   useSessionStore,
 } from '../../stores';
-import LoginBox from './loginContainer';
+import LoginContainer from './loginContainer';
 
 const APP_PATH = import.meta.env.BASE_URL; // import.meta.env.VITE_APP_PATH;
 
@@ -30,7 +30,7 @@ const Index = ({ email }: { email: string }) => {
       footer={false}
       closeIcon={null}
     >
-      <LoginBox triggeredByExpired={true} initialEmail={email} />
+      <LoginContainer triggeredByExpired={true} initialEmail={email} />
     </Modal>
   );
 };

@@ -55,10 +55,9 @@ const Index = ({
       </div>
       <div
         onClick={() => setSelectedPlan(plan.id)}
-        className="flex h-80 w-64 cursor-pointer flex-col items-center justify-center rounded-md px-2 py-2"
+        className="flex h-80 w-64 cursor-pointer flex-col items-center justify-center gap-6 rounded-md px-2 py-2"
         style={{
           border: `1px solid ${isActive ? 'orange' : '#BDBDBD'}`,
-          gap: '24px',
           background: selectedPlan == plan.id ? '#FFF' : '#FBFBFB',
           /*
           boxShadow:
@@ -73,16 +72,11 @@ const Index = ({
         <div>{plan.description}</div>
 
         {plan.addons && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div className="flex flex-col gap-2">
             {plan.addons.map((a) => (
               <div
+                className="flex w-full items-center justify-between"
                 key={a.id}
-                style={{
-                  display: 'flex',
-                  width: '100%',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
               >
                 <Checkbox onChange={addonCheck(a.id)} checked={a.checked}>
                   <div style={{ display: 'flex' }}>

@@ -773,15 +773,7 @@ const SubscriptionInfoSection = ({
       </Row>
 
       {subInfo && subInfo.status == 2 && (
-        <div
-          style={{
-            margin: '24px 0',
-            display: 'flex',
-            justifyContent: 'start',
-            alignItems: 'center',
-            gap: '36px',
-          }}
-        >
+        <div className="mx-0 my-6 flex items-center justify-start gap-9">
           <Button onClick={toggleChangPlanModal}>Change Plan</Button>
           {subInfo.cancelAtPeriodEnd == 0 ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1051,10 +1043,7 @@ const SubTimeline = ({
         }}
         onRow={(record, rowIndex) => {
           return {
-            onClick: (event) => {
-              // console.log("row click: ", record, "///", rowIndex);
-              // navigate(`${APP_PATH}plan/${record.id}`);
-            },
+            onClick: (event) => {},
           };
         }}
       />
