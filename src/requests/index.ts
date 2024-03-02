@@ -785,14 +785,14 @@ type TGetInvoicesReq = {
 };
 export const getInvoiceList = async (body: TGetInvoicesReq) => {
   return await request.post(
-    `/merchant/invoice/subscription_invoice_list`,
+    `/merchant/invoice/list`,
     body,
   );
 };
 // ----------
 
 export const getInvoiceDetailReq = async (invoiceId: string) => {
-  return await request.post(`/merchant/invoice/subscription_invoice_detail`, {
+  return await request.post(`/merchant/invoice/detail`, {
     invoiceId,
   });
 };
@@ -816,7 +816,7 @@ type TInvoiceItems = {
 // before that, customers won't see(or receive) this invoice.
 export const createInvoice = async (body: TCreateInvoiceReq) => {
   body.lines = body.invoiceItems;
-  return await request.post(`/merchant/invoice/new_invoice_create`, body);
+  return await request.post(`/merchant/invoice/new`, body);
 };
 // -------------
 
@@ -831,12 +831,12 @@ type TSaveInvoiceReq = {
 };
 export const saveInvoice = async (body: TSaveInvoiceReq) => {
   body.lines = body.invoiceItems;
-  return await request.post(`/merchant/invoice/new_invoice_edit`, body);
+  return await request.post(`/merchant/invoice/edit`, body);
 };
 
 // admin can delete the invoice, before the following publishInvoice() is called
 export const deleteInvoice = async (invoiceId: string) => {
-  return await request.post(`/merchant/invoice/new_invoice_delete`, {
+  return await request.post(`/merchant/invoice/delete`, {
     invoiceId,
   });
 };
@@ -849,12 +849,12 @@ type TPublishInvoiceReq = {
   daysUtilDue: number;
 };
 export const publishInvoice = async (body: TPublishInvoiceReq) => {
-  return await request.post(`/merchant/invoice/finish_new_invoice`, body);
+  return await request.post(`/merchant/invoice/finish`, body);
 };
 
 // admin can cancel the invoice(make it invalid) before user make the payment.
 export const revokeInvoice = async (invoiceId: string) => {
-  return await request.post(`/merchant/invoice/cancel_processing_invoice`, {
+  return await request.post(`/merchant/invoice/cancel`, {
     invoiceId,
   });
 };
@@ -870,12 +870,12 @@ export const refund = async (
 ) => {
   body.refundAmount *= CURRENCY[currency].stripe_factor;
   body.refundAmount = Math.round(body.refundAmount);
-  return await request.post(`/merchant/invoice/new_invoice_refund`, body);
+  return await request.post(`/merchant/invoice/refund`, body);
 };
 
 export const sendInvoiceInMailReq = async (invoiceId: string) => {
   return await request.post(
-    `/merchant/invoice/subscription_invoice_send_user_email`,
+    `/merchant/invoice/send_email`,
     { invoiceId },
   );
 };
