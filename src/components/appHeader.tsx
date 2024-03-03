@@ -1,7 +1,7 @@
-import { Input } from 'antd';
+import { Input } from 'antd'
 
-const { Search } = Input;
-const APP_PATH = import.meta.env.BASE_URL;
+const { Search } = Input
+const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => (
   <div
@@ -16,7 +16,7 @@ const Index = () => (
       alignItems: 'center',
       width: '100%',
       background: '#334b61',
-      color: '#FFF',
+      color: '#FFF'
     }}
   >
     <div>
@@ -40,5 +40,5 @@ const Index = () => (
       </li>
     </ul>
   </div>
-);
-export default Index;
+)
+export default Index

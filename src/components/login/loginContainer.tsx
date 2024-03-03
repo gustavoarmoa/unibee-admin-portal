@@ -1,37 +1,37 @@
-import type { RadioChangeEvent } from 'antd';
-import { Button, Radio, message } from 'antd';
-import React, { ChangeEvent, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import OTPLogin from './otpLogin';
-import PasswordLogin from './passwordLogin';
+import type { RadioChangeEvent } from 'antd'
+import { Button, Radio, message } from 'antd'
+import React, { ChangeEvent, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import OTPLogin from './otpLogin'
+import PasswordLogin from './passwordLogin'
 
-const APP_PATH = import.meta.env.BASE_URL;
+const APP_PATH = import.meta.env.BASE_URL
 
 const Index = ({
   triggeredByExpired,
-  initialEmail,
+  initialEmail
 }: {
-  triggeredByExpired: boolean;
-  initialEmail: string;
+  triggeredByExpired: boolean
+  initialEmail: string
 }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [email, setEmail] = useState(initialEmail); // email need to be shared on passwordLogin and OtpLogin, so it has to be defined in parent.
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [email, setEmail] = useState(initialEmail) // email need to be shared on passwordLogin and OtpLogin, so it has to be defined in parent.
   const onEmailChange = (evt: ChangeEvent<HTMLInputElement> | string) => {
-    typeof evt == 'string' ? setEmail(evt) : setEmail(evt.target.value);
-  };
+    typeof evt == 'string' ? setEmail(evt) : setEmail(evt.target.value)
+  }
 
-  const [loginType, setLoginType] = useState<'password' | 'OTP'>('password');
+  const [loginType, setLoginType] = useState<'password' | 'OTP'>('password')
 
   const onLoginTypeChange = (e: RadioChangeEvent) =>
-    setLoginType(e.target.value);
-  const goSignup = () => navigate(`${APP_PATH}signup`);
+    setLoginType(e.target.value)
+  const goSignup = () => navigate(`${APP_PATH}signup`)
 
   useEffect(() => {
     if (location.state && location.state.msg) {
-      message.info(location.state.msg);
+      message.info(location.state.msg)
     }
-  }, []);
+  }, [])
 
   return (
     <div className="flex h-full items-center justify-center ">
@@ -40,7 +40,7 @@ const Index = ({
         <Radio.Group
           options={[
             { label: 'Password', value: 'password' },
-            { label: 'OTP', value: 'OTP' },
+            { label: 'OTP', value: 'OTP' }
           ]}
           onChange={onLoginTypeChange}
           value={loginType}
@@ -50,7 +50,7 @@ const Index = ({
           style={{
             width: '620px',
             height: '300px',
-            border: '1px solid #e0e0e0',
+            border: '1px solid #e0e0e0'
           }}
         >
           {loginType == 'password' ? (
@@ -75,7 +75,7 @@ const Index = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

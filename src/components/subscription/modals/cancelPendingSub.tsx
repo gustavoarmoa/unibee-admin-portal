@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../../hooks';
 import { cancelSubReq } from '../../../requests';
-import { ISubscriptionType } from '../../../shared.types';
+import { ISubscriptionType } from '../../../shared.types.d';
 
 const APP_PATH = import.meta.env.BASE_URL;
 

@@ -2,9 +2,9 @@ import {
   CheckCircleOutlined,
   CopyOutlined,
   LoadingOutlined,
-  MinusOutlined,
-} from '@ant-design/icons';
-import type { SelectProps } from 'antd';
+  MinusOutlined
+} from '@ant-design/icons'
+import type { SelectProps } from 'antd'
 import {
   Button,
   Col,
@@ -14,106 +14,106 @@ import {
   Row,
   Select,
   Spin,
-  message,
-} from 'antd';
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
-import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
-import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
-import { METRICS_AGGREGATE_TYPE } from '../../constants';
-import { useRelogin } from '../../hooks';
-import { getMetricDetailReq, saveMetricsReq } from '../../requests';
-const { TextArea } = Input;
-const APP_PATH = import.meta.env.BASE_URL;
+  message
+} from 'antd'
+import React, { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
+import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash'
+import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
+import { METRICS_AGGREGATE_TYPE } from '../../constants'
+import { useRelogin } from '../../hooks'
+import { getMetricDetailReq, saveMetricsReq } from '../../requests'
+const { TextArea } = Input
+const APP_PATH = import.meta.env.BASE_URL
 
-SyntaxHighlighter.registerLanguage('bash', bash);
+SyntaxHighlighter.registerLanguage('bash', bash)
 const AGGR_TYPE_SELECT_OPT = Object.keys(METRICS_AGGREGATE_TYPE)
   .map((s) => ({
     label: METRICS_AGGREGATE_TYPE[Number(s)],
-    value: Number(s),
+    value: Number(s)
   }))
-  .sort((a, b) => (a.value < b.value ? -1 : 1));
+  .sort((a, b) => (a.value < b.value ? -1 : 1))
 
 const Index = () => {
-  const params = useParams();
-  const metricsId = params.metricsId;
-  const isNew = metricsId == null;
+  const params = useParams()
+  const metricsId = params.metricsId
+  const isNew = metricsId == null
 
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
-  const [aggrePropDisabled, setAggrePropDisabled] = useState(true);
-  const watchAggreType = Form.useWatch('aggregationType', form);
-  const relogin = useRelogin();
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const [form] = Form.useForm()
+  const [aggrePropDisabled, setAggrePropDisabled] = useState(true)
+  const watchAggreType = Form.useWatch('aggregationType', form)
+  const relogin = useRelogin()
   useEffect(() => {
-    setAggrePropDisabled(watchAggreType == 1);
-  }, [watchAggreType]);
+    setAggrePropDisabled(watchAggreType == 1)
+  }, [watchAggreType])
 
-  const watchCode = Form.useWatch('code', form);
-  const watchAggreProps = Form.useWatch('aggregationProperty', form);
+  const watchCode = Form.useWatch('code', form)
+  const watchAggreProps = Form.useWatch('aggregationProperty', form)
 
   const onSave = async () => {
-    console.log('form values: ', form.getFieldsValue());
-    let m;
+    console.log('form values: ', form.getFieldsValue())
+    let m
     if (isNew) {
-      m = JSON.parse(JSON.stringify(form.getFieldsValue()));
+      m = JSON.parse(JSON.stringify(form.getFieldsValue()))
       if (m.watchAggreType == 1) {
-        delete m.aggregationProperty;
+        delete m.aggregationProperty
       }
     } else {
       m = {
         metricId: Number(metricsId),
         metricName: form.getFieldValue('metricName'),
-        metricDescription: form.getFieldValue('metricDescription'),
-      };
+        metricDescription: form.getFieldValue('metricDescription')
+      }
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
-      const res = await saveMetricsReq(m, isNew);
-      setLoading(false);
-      const statusCode = res.data.code;
+      const res = await saveMetricsReq(m, isNew)
+      setLoading(false)
+      const statusCode = res.data.code
       if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(res.data.message);
+        statusCode == 61 && relogin()
+        throw new Error(res.data.message)
       }
-      message.success(`Metrics ${isNew ? 'created' : 'updated'}.`);
-      navigate(`${APP_PATH}billable-metrics/list`);
+      message.success(`Metrics ${isNew ? 'created' : 'updated'}.`)
+      navigate(`${APP_PATH}billable-metrics/list`)
     } catch (err) {
-      setLoading(false);
+      setLoading(false)
       if (err instanceof Error) {
-        console.log('err in creatign/updating metrics: ', err.message);
-        message.error(err.message);
+        console.log('err in creatign/updating metrics: ', err.message)
+        message.error(err.message)
       } else {
-        message.error('Unknown error');
+        message.error('Unknown error')
       }
     }
-  };
+  }
 
   const fetchMetrics = async () => {
-    setLoading(true);
+    setLoading(true)
     const [merchantMetric, err] = await getMetricDetailReq(
       Number(metricsId),
-      fetchMetrics,
-    );
-    setLoading(false);
+      fetchMetrics
+    )
+    setLoading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    form.setFieldsValue(merchantMetric);
-  };
+    form.setFieldsValue(merchantMetric)
+  }
 
   const copyContent = async () => {
     try {
-      await navigator.clipboard.writeText(curlCmd);
-      message.success('Copied');
+      await navigator.clipboard.writeText(curlCmd)
+      message.success('Copied')
     } catch (err) {
-      let e = err instanceof Error ? err : new Error('Unknown copy error');
-      message.error(e.message);
+      const e = err instanceof Error ? err : new Error('Unknown copy error')
+      message.error(e.message)
     }
-  };
+  }
 
   const getPropsArg = () =>
     watchAggreType == 1
@@ -121,13 +121,13 @@ const Index = () => {
       : `
     "metricProperties": { 
       "${watchAggreProps || 'YOUR_AGGREGATION_PROPERTY'}": "__PROPERTY_VALUE__"
-    }`;
+    }`
 
   useEffect(() => {
     if (!isNew) {
-      fetchMetrics();
+      fetchMetrics()
     }
-  }, []);
+  }, [])
 
   const curlCmd = `curl --location --request POST "${location.origin}/merchant/merchant_metric/merchant_metric_event" \\
   --header "Authorization: Bearer $__YOUR_API_KEY__" \\
@@ -136,7 +136,7 @@ const Index = () => {
     "metricCode": "${watchCode || 'YOUR_CODE'}",
     "externalUserId": "__EXTERNAL_USER_ID__",
     "externalEventId": "__EVENT_ID__", ${getPropsArg()}    
-  }'`;
+  }'`
 
   return (
     <div className="h-full">
@@ -171,8 +171,8 @@ const Index = () => {
                   rules={[
                     {
                       required: true,
-                      message: 'Please input your metrics name!',
-                    },
+                      message: 'Please input your metrics name!'
+                    }
                   ]}
                 >
                   <Input />
@@ -185,8 +185,8 @@ const Index = () => {
                   rules={[
                     {
                       required: true,
-                      message: 'Please input your metrics code!',
-                    },
+                      message: 'Please input your metrics code!'
+                    }
                   ]}
                 >
                   <Input disabled={!isNew} />
@@ -237,15 +237,15 @@ const Index = () => {
                   rules={[
                     {
                       required: true,
-                      message: 'Please select your aggregation type',
-                    },
+                      message: 'Please select your aggregation type'
+                    }
                   ]}
                 >
                   <Select
                     style={{ width: 160 }}
                     options={AGGR_TYPE_SELECT_OPT.map((o) => ({
                       ...o,
-                      disabled: !isNew,
+                      disabled: !isNew
                     }))}
                   />
                 </Form.Item>
@@ -257,8 +257,8 @@ const Index = () => {
                     rules={[
                       {
                         required: true,
-                        message: 'Please input your property to aggregate !',
-                      },
+                        message: 'Please input your property to aggregate !'
+                      }
                     ]}
                   >
                     <Input disabled={aggrePropDisabled || !isNew} />
@@ -309,7 +309,7 @@ ${watchAggreType == 1 ? '' : '# __PROPERTY_VALUE__'}`}
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

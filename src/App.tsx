@@ -2,11 +2,11 @@ import {
   DesktopOutlined,
   LogoutOutlined,
   // FileOutlined,
-  PieChartOutlined,
-} from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import { Layout, Menu, Modal, message, theme } from 'antd';
-import React, { useEffect, useState } from 'react';
+  PieChartOutlined
+} from '@ant-design/icons'
+import type { MenuProps } from 'antd'
+import { Layout, Menu, Modal, message, theme } from 'antd'
+import React, { useEffect, useState } from 'react'
 import {
   Navigate,
   Route,
@@ -15,54 +15,54 @@ import {
   useLocation,
   // Outlet,
   // Link,
-  useNavigate,
-} from 'react-router-dom';
+  useNavigate
+} from 'react-router-dom'
 import {
   useAppConfigStore,
   useMerchantInfoStore,
   useProfileStore,
-  useSessionStore,
-} from './stores';
+  useSessionStore
+} from './stores'
 
-import Dashboard from './components/dashboard';
-import InvoiceDetail from './components/invoice/detail';
-import InvoiceList from './components/invoice/list';
-import OutletPage from './components/outletPage';
-import PlanDetail from './components/plan/detail';
+import Dashboard from './components/dashboard'
+import InvoiceDetail from './components/invoice/detail'
+import InvoiceList from './components/invoice/list'
+import OutletPage from './components/outletPage'
+import PlanDetail from './components/plan/detail'
 // import PricePlans from './components/pricePlans';
-import BillableMetricsDetail from './components/billableMetrics/detail';
-import BillableMetricsList from './components/billableMetrics/list';
-import PricePlanList from './components/plan/list';
-import Settings from './components/settings';
-import SubscriptionDetail from './components/subscription/detail';
-import SubscriptionList from './components/subscription/list';
-import CustomerDetail from './components/user/userDetail';
-import CustomerList from './components/user/userList';
+import BillableMetricsDetail from './components/billableMetrics/detail'
+import BillableMetricsList from './components/billableMetrics/list'
+import PricePlanList from './components/plan/list'
+import Settings from './components/settings'
+import SubscriptionDetail from './components/subscription/detail'
+import SubscriptionList from './components/subscription/list'
+import CustomerDetail from './components/user/userDetail'
+import CustomerList from './components/user/userList'
 // import Users from "./components/userList";
-import AppSearch from './components/appSearch';
-import Login from './components/login';
-import LoginModal from './components/login/LoginModal';
-import NotFound from './components/notFound';
-import Profile from './components/profile';
-import Signup from './components/signup';
-import { getUserProfile, logoutReq } from './requests';
+import AppSearch from './components/appSearch'
+import Login from './components/login'
+import LoginModal from './components/login/LoginModal'
+import NotFound from './components/notFound'
+import Profile from './components/profile'
+import Signup from './components/signup'
+import { getUserProfile, logoutReq } from './requests'
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Header, Content, Footer, Sider } = Layout
 
-type MenuItem = Required<MenuProps>['items'][number];
+type MenuItem = Required<MenuProps>['items'][number]
 
 function getItem(
   label: React.ReactNode,
   key: React.Key,
   icon?: React.ReactNode,
-  children?: MenuItem[],
+  children?: MenuItem[]
 ): MenuItem {
   return {
     key,
     icon,
     children,
-    label,
-  } as MenuItem;
+    label
+  } as MenuItem
 }
 
 const items: MenuItem[] = [
@@ -73,79 +73,79 @@ const items: MenuItem[] = [
   getItem('Customer', '/customer/list', <PieChartOutlined />),
   getItem('Analytics', '/analytics', <PieChartOutlined />),
   getItem('Profile', '/profile', <PieChartOutlined />),
-  getItem('Settings', '/settings', <PieChartOutlined />),
-];
+  getItem('Settings', '/settings', <PieChartOutlined />)
+]
 
-const APP_PATH = import.meta.env.BASE_URL; // import.meta.env.VITE_APP_PATH;
-const noSiderRoutes = [`${APP_PATH}login`, `${APP_PATH}signup`];
+const APP_PATH = import.meta.env.BASE_URL // import.meta.env.VITE_APP_PATH;
+const noSiderRoutes = [`${APP_PATH}login`, `${APP_PATH}signup`]
 
 const App: React.FC = () => {
-  const merchantInfoStore = useMerchantInfoStore();
-  const profileStore = useProfileStore();
-  const sessionStore = useSessionStore();
-  const [openLoginModal, setOpenLoginModal] = useState(false);
-  const toggleLoginModal = () => setOpenLoginModal(!openLoginModal);
-  const location = useLocation();
-  const [collapsed, setCollapsed] = useState(false);
+  const merchantInfoStore = useMerchantInfoStore()
+  const profileStore = useProfileStore()
+  const sessionStore = useSessionStore()
+  const [openLoginModal, setOpenLoginModal] = useState(false)
+  const toggleLoginModal = () => setOpenLoginModal(!openLoginModal)
+  const location = useLocation()
+  const [collapsed, setCollapsed] = useState(false)
   const [activeMenuItem, setActiveMenuItem] = useState<string[]>([
-    window.location.pathname,
-  ]);
+    window.location.pathname
+  ])
   // const [openKeys, setOpenKeys] = useState<string[]>(["/subscription/list"]);
   // this is the default open keys after successful login.
   // const [openKeys, setOpenKeys] = useState<string[]>(["/subscription"]);
   const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
+    token: { colorBgContainer, borderRadiusLG }
+  } = theme.useToken()
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const onItemClick = ({ key }: { key: string; needNavigate?: boolean }) => {
-    console.log('on item click, key: ', key);
-    navigate(`${APP_PATH}${key.substring(1)}`); // remove the leading '/' character, coz APP_PATH already has it
-    setActiveMenuItem([key]);
-  };
+    console.log('on item click, key: ', key)
+    navigate(`${APP_PATH}${key.substring(1)}`) // remove the leading '/' character, coz APP_PATH already has it
+    setActiveMenuItem([key])
+  }
 
   const logout = async () => {
-    const [_, err] = await logoutReq();
-    localStorage.removeItem('merchantToken');
-    localStorage.removeItem('appConfig');
-    localStorage.removeItem('merchantInfo');
-    localStorage.removeItem('session');
-    localStorage.removeItem('profile');
-    sessionStore.setSession({ expired: true, refresh: null });
-    navigate(`${APP_PATH}login`);
-  };
+    const [_, err] = await logoutReq()
+    localStorage.removeItem('merchantToken')
+    localStorage.removeItem('appConfig')
+    localStorage.removeItem('merchantInfo')
+    localStorage.removeItem('session')
+    localStorage.removeItem('profile')
+    sessionStore.setSession({ expired: true, refresh: null })
+    navigate(`${APP_PATH}login`)
+  }
 
   useEffect(() => {
-    const pathItems = location.pathname.split('/').filter((p) => p != '');
+    const pathItems = location.pathname.split('/').filter((p) => p != '')
     if (pathItems[0] == 'subscription') {
-      setActiveMenuItem(['/subscription/list']);
+      setActiveMenuItem(['/subscription/list'])
     } else if (pathItems[0] == 'plan') {
-      setActiveMenuItem(['/plan/list']);
+      setActiveMenuItem(['/plan/list'])
     } else if (pathItems[0] == 'customer') {
-      setActiveMenuItem(['/customer/list']);
+      setActiveMenuItem(['/customer/list'])
     } else if (pathItems[0] == 'invoice') {
-      setActiveMenuItem(['/invoice/list']);
+      setActiveMenuItem(['/invoice/list'])
     } else if (pathItems[0] == 'billable-metrics') {
-      setActiveMenuItem(['/billable-metrics/list']);
+      setActiveMenuItem(['/billable-metrics/list'])
     } else {
-      setActiveMenuItem(['/' + pathItems[0]]);
+      setActiveMenuItem(['/' + pathItems[0]])
     }
-  }, [location, location.pathname]);
+  }, [location, location.pathname])
 
   // console.log('session store: ', sessionStore);
 
   useEffect(() => {
     if (sessionStore.expired) {
       if (null == profileStore.id) {
-        navigate(`${APP_PATH}login`);
+        navigate(`${APP_PATH}login`)
       } else {
-        setOpenLoginModal(true);
+        setOpenLoginModal(true)
       }
     } else {
-      setOpenLoginModal(false);
+      setOpenLoginModal(false)
     }
-  }, [sessionStore.expired]);
+  }, [sessionStore.expired])
 
   return (
     <>
@@ -171,7 +171,7 @@ const App: React.FC = () => {
                 color: '#FFF',
                 display: 'flex',
                 justifyContent: 'center',
-                margin: '16px 0',
+                margin: '16px 0'
               }}
             >
               <img
@@ -208,7 +208,7 @@ const App: React.FC = () => {
               style={{
                 padding: '16px',
                 height: 'calc(100vh - 180px)',
-                overflowY: 'auto',
+                overflowY: 'auto'
               }}
             >
               <div
@@ -216,7 +216,7 @@ const App: React.FC = () => {
                   padding: 24,
                   minHeight: 360,
                   background: colorBgContainer,
-                  borderRadius: borderRadiusLG,
+                  borderRadius: borderRadiusLG
                   // height: "100%",
                 }}
               >
@@ -278,7 +278,7 @@ const App: React.FC = () => {
         </Layout>
       )}
     </>
-  );
-};
+  )
+}
 
-export default App;
+export default App

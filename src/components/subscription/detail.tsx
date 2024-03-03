@@ -14,7 +14,7 @@ import React, { CSSProperties, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
 import { getUserProfile } from '../../requests';
-import { IProfile } from '../../shared.types';
+import { IProfile } from '../../shared.types.d';
 import UserInfoSection from '../shared/userInfo';
 import AdminNote from './adminNote';
 import InvoiceTab from './invoicesTab';

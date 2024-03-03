@@ -18,7 +18,7 @@ import { INVOICE_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { getInvoiceDetailReq } from '../../requests';
-import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types';
+import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d';
 import { normalizeAmt } from '../helpers';
 import UserInfo from '../shared/userInfo';
 import InvoiceItemsModal from '../subscription/modals/newInvoice';

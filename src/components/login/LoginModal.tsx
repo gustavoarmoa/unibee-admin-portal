@@ -1,13 +1,13 @@
-import { Button, Form, Input, Modal, message } from 'antd';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Button, Form, Input, Modal, message } from 'antd'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   useAppConfigStore,
   useMerchantInfoStore,
   useProfileStore,
-  useSessionStore,
-} from '../../stores';
-import LoginContainer from './loginContainer';
+  useSessionStore
+} from '../../stores'
+import LoginContainer from './loginContainer'
 
 const Index = ({ email }: { email: string }) => {
   return (
@@ -20,7 +20,7 @@ const Index = ({ email }: { email: string }) => {
     >
       <LoginContainer triggeredByExpired={true} initialEmail={email} />
     </Modal>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

@@ -33,7 +33,7 @@ import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { downloadInvoice, getInvoiceList } from '../../requests';
 import '../../shared.css';
-import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types';
+import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
 import { normalizeAmt } from '../helpers';
 import InvoiceModal from './modals/newInvoice';
@@ -244,7 +244,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
         // TODO: save all the code as ENUM in constant,
         throw new Error(invoiceListRes.data.message);
       }
-      let v = invoiceListRes.data.data.Invoices;
+      const v = invoiceListRes.data.data.Invoices;
       console.log('v: ', v);
       if (v != null) {
         normalizeAmt(v);

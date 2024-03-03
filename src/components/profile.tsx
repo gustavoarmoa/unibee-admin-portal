@@ -11,7 +11,7 @@ import {
   updateMerchantInfoReq,
   uploadLogoReq,
 } from '../requests';
-import { IProfile, TMerchantInfo } from '../shared.types';
+import { IProfile, TMerchantInfo } from '../shared.types.d';
 import { useMerchantInfoStore, useProfileStore } from '../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;

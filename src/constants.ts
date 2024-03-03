@@ -2,8 +2,8 @@ export const PLAN_STATUS: { [key: number]: string } = {
   1: 'editing',
   2: 'active',
   3: 'inactive',
-  4: 'expired',
-};
+  4: 'expired'
+}
 
 export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
   0: 'Initiating', // used when creating the sub, it only exist for a very short time, user might not realize it exists
@@ -15,18 +15,18 @@ export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
   4: 'Cancelled', // users(or admin) cancelled the sub(immediately or automatically at the end of billing cycle). It's triggered by human.
   5: 'Expired', // sub ended.
   6: 'Suspended', // suspend for a while, might want to resume later
-  7: 'Incomplete',
-};
+  7: 'Incomplete'
+}
 
 export const CURRENCY: {
-  [key: string]: { symbol: string; stripe_factor: number };
+  [key: string]: { symbol: string; stripe_factor: number }
 } = {
   // what about PayPal
   CNY: { symbol: '¥', stripe_factor: 100 },
   USD: { symbol: '$', stripe_factor: 100 },
   JPY: { symbol: '¥', stripe_factor: 1 },
-  EUR: { symbol: '€', stripe_factor: 100 },
-};
+  EUR: { symbol: '€', stripe_factor: 100 }
+}
 
 export const INVOICE_STATUS: { [key: number]: string } = {
   0: 'Initiating', // this status only exist for a very short period, users/admin won't even know it exist
@@ -35,19 +35,19 @@ export const INVOICE_STATUS: { [key: number]: string } = {
   2: 'Pocessing', // admin has published the invoice, user will receive a mail with payment link. Admin can revoke the invoice if user hasn't made the payment.
   3: 'Paid', // user paid the invoice
   4: 'Failed', // user not pay the invoice before it get expired
-  5: 'Cancelled', // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
-};
+  5: 'Cancelled' // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
+}
 
 export const METRICS_TYPE: { [key: number]: string } = {
   1: 'limit_metered',
   2: 'charge_metered', // not used yet
-  3: 'charge_recurring', // not used yet
-};
+  3: 'charge_recurring' // not used yet
+}
 
 export const METRICS_AGGREGATE_TYPE: { [key: number]: string } = {
   1: 'count',
   2: 'count unique',
   3: 'latest',
   4: 'max',
-  5: 'sum',
-};
+  5: 'sum'
+}

@@ -21,7 +21,7 @@ import {
   InvoiceItem,
   TInvoicePerm,
   UserInvoice,
-} from '../../../shared.types';
+} from '../../../shared.types.d';
 import { useAppConfigStore } from '../../../stores';
 
 // const APP_PATH = import.meta.env.BASE_URL;
@@ -624,6 +624,7 @@ const Index = ({
               href={detail.link}
               target="_blank"
               style={{ fontSize: '11px', marginLeft: '4px', color: '#757575' }}
+              rel="noreferrer"
             >
               Payment Link
             </a>

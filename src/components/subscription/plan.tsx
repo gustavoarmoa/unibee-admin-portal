@@ -2,7 +2,7 @@ import { Checkbox, Input } from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import React, { useEffect, useState } from 'react';
 import { showAmount } from '../../helpers';
-import { IPlan } from '../../shared.types';
+import { IPlan } from '../../shared.types.d';
 
 interface IPLanProps {
   plan: IPlan;

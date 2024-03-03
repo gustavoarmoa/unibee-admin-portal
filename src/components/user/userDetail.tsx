@@ -3,7 +3,7 @@ import { Button, Spin, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getUserProfile } from '../../requests';
-import { IProfile } from '../../shared.types';
+import { IProfile } from '../../shared.types.d';
 import UserAccountTab from '../subscription/userAccountTab';
 
 const APP_PATH = import.meta.env.BASE_URL;

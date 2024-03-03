@@ -7,7 +7,7 @@ import {
   getEventListReq,
   saveWebhookReq,
 } from '../../requests';
-import { TWebhook } from '../../shared.types';
+import { TWebhook } from '../../shared.types.d';
 
 const Index = ({
   closeModal,

@@ -12,7 +12,7 @@ import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { getPlanList } from '../../requests';
 import '../../shared.css';
-import { IPlan } from '../../shared.types';
+import { IPlan } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
 
 const PAGE_SIZE = 10;

@@ -2,10 +2,10 @@ import {
   FacebookOutlined,
   GithubOutlined,
   LinkedinOutlined,
-  TwitterOutlined,
-} from '@ant-design/icons';
-import { Divider } from 'antd';
-const APP_PATH = import.meta.env.BASE_URL;
+  TwitterOutlined
+} from '@ant-design/icons'
+import { Divider } from 'antd'
+const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => (
   <div
@@ -19,7 +19,7 @@ const Index = () => (
       alignItems: 'center',
       width: '100%',
       background: '#334b61',
-      color: '#FFF',
+      color: '#FFF'
     }}
   >
     <div style={{ width: '80%' }}>
@@ -36,5 +36,5 @@ const Index = () => (
       </div>
     </div>
   </div>
-);
-export default Index;
+)
+export default Index

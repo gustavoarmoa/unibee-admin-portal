@@ -1,7 +1,7 @@
 import { StoreApi, UseBoundStore, create } from 'zustand';
 // import { immer } from "zustand/middleware/immer";
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { IAppConfig, IProfile, TMerchantInfo } from '../shared.types';
+import { IAppConfig, IProfile, TMerchantInfo } from '../shared.types.d';
 // import { createStore } from "zustand";
 
 // logged-in user profile

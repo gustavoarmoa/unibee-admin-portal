@@ -7,7 +7,7 @@ import {
   IBillableMetrics,
   IProfile,
   TMerchantInfo,
-} from '../shared.types';
+} from '../shared.types.d';
 import {
   useAppConfigStore,
   useMerchantInfoStore,
@@ -30,7 +30,7 @@ export const initializeReq = async () => {
     getGatewayListReq(),
     getMerchantInfoReq(),
   ]);
-  let err = errConfig || errGateway || errMerchant;
+  const err = errConfig || errGateway || errMerchant;
   if (null != err) {
     return [null, err];
   }
@@ -52,7 +52,7 @@ export const loginWithPasswordReq = async (body: TPassLogin) => {
     return [res.data.data, null];
   } catch (err) {
     session.setSession({ expired: true, refresh: null });
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -65,7 +65,7 @@ export const loginWithOTPReq = async (email: string) => {
     }
     return [null, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -86,7 +86,7 @@ export const loginWithOTPVerifyReq = async (
     session.setSession({ expired: false, refresh: null });
     return [res.data.data, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -101,7 +101,7 @@ export const forgetPassReq = async (email: string) => {
     }
     return [null, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -125,7 +125,7 @@ export const forgetPassVerifyReq = async (
     }
     return [null, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -149,7 +149,7 @@ export const resetPassReq = async (
     }
     return [null, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -180,7 +180,7 @@ export const getAppConfigReq = async () => {
     }
     return [res.data.data, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -199,7 +199,7 @@ export const getGatewayListReq = async () => {
     }
     return [res.data.data.gateways, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -218,7 +218,7 @@ export const getMerchantInfoReq = async () => {
     }
     return [res.data.data.MerchantInfo, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -236,7 +236,7 @@ export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
     }
     return [res.data.data.MerchantInfo, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -260,7 +260,7 @@ export const uploadLogoReq = async (f: FormData) => {
     }
     return [res.data.data.url, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -293,7 +293,7 @@ export const getPlanList = async (
     }
     return [res.data.data.Plans, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -321,7 +321,7 @@ export const getPlanDetail = async (planId: number) => {
     }
     return [res.data.data.Plan, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -346,7 +346,7 @@ export const getPlanDetailWithMore = async (
     getPlanList({ type: [2], status: [2], page: 0, count: 100 }, null), // type: 2 -> addon, status: 2 -> active
     getMetricsListReq(null),
   ]);
-  let err = errDetail || addonErr || errMetrics;
+  const err = errDetail || addonErr || errMetrics;
   if (null != err) {
     if (err instanceof ExpiredError) {
       session.setSession({ expired: true, refresh: refreshCb });
@@ -410,7 +410,7 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
     }
     return [res.data.data.merchantMetrics, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -476,7 +476,7 @@ export const getMetricDetailReq = async (
     }
     return [res.data.data.merchantMetric, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -502,7 +502,7 @@ export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
     }
     return [res.data.data.subscriptions, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -525,7 +525,7 @@ export const getSubDetail = async (subscriptionId: string) => {
     }
     return [res.data.data, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -547,7 +547,7 @@ export const getSubDetailWithMore = async (
         null,
       ),
     ]);
-  let err = errSubDetail || errPlanList;
+  const err = errSubDetail || errPlanList;
   if (null != err) {
     if (err instanceof ExpiredError) {
       session.setSession({ expired: true, refresh: refreshCb });
@@ -662,7 +662,7 @@ export const getSubTimeline2 = async (body: TGetSubTimelineReq) => {
     }
     return [res.data.data.subscriptionTimeLines, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -690,7 +690,7 @@ export const getCountryList2 = async () => {
     }
     return [res.data.data.vatCountryList, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -731,7 +731,7 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
     }
     return [res.data.data.User, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -760,7 +760,7 @@ export const saveUserProfile2 = async (newProfile: IProfile) => {
     }
     return [null, null]; // this call has no meaningful result to return
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -927,7 +927,7 @@ export const getUserListReq = async (
     }
     return [res.data.data.userAccounts, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -947,7 +947,7 @@ export const getEventListReq = async () => {
     }
     return [res.data.data.eventList, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -967,7 +967,7 @@ export const getWebhookListReq = async (refreshCb: () => void) => {
     }
     return [res.data.data.endpointList, null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -1002,7 +1002,7 @@ export const saveWebhookReq = async ({
     }
     return [null, null]; // this call has no meaningful result
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -1024,7 +1024,7 @@ export const deleteWebhookReq = async (endpointId: number) => {
     }
     return [null, null]; // this call has no meaningful result
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };
@@ -1052,7 +1052,7 @@ export const getWebhookLogs = async (
     }
     return [res.data.data.endpointLogList ?? [], null];
   } catch (err) {
-    let e = err instanceof Error ? err : new Error('Unknown error');
+    const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
   }
 };

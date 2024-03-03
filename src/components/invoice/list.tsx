@@ -21,7 +21,7 @@ import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { getInvoiceList } from '../../requests';
 import '../../shared.css';
-import { IProfile, UserInvoice } from '../../shared.types';
+import { IProfile, UserInvoice } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
 
 const PAGE_SIZE = 10;

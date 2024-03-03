@@ -1,6 +1,6 @@
 import { Col, Divider, Row } from 'antd';
 import { CSSProperties } from 'react';
-import { IProfile } from '../../shared.types';
+import { IProfile } from '../../shared.types.d';
 
 const rowStyle: CSSProperties = {
   display: 'flex',

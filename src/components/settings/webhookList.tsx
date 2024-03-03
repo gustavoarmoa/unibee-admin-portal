@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { getWebhookListReq } from '../../requests';
 import '../../shared.css';
-import { IProfile, TWebhook } from '../../shared.types';
+import { IProfile, TWebhook } from '../../shared.types.d';
 // import { useAppConfigStore } from '../../stores';
 import WebhookDetail from './webhookDetail';
 import WebhookLogs from './webhookLogs';

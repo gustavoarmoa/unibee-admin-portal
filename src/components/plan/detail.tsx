@@ -20,7 +20,7 @@ import {
   savePlan,
   togglePublishReq,
 } from '../../requests';
-import { IBillableMetrics, IPlan } from '../../shared.types';
+import { IBillableMetrics, IPlan } from '../../shared.types.d';
 
 const APP_PATH = import.meta.env.BASE_URL;
 const getAmount = (amt: number, currency: string) =>
@@ -307,7 +307,7 @@ const Index = () => {
   const onMetricSelectChange = (localId: string) => (val: number) => {
     const idx = selectedMetrics.findIndex((m) => m.localId == localId);
     if (idx != -1) {
-      let newMetrics = update(selectedMetrics, {
+      const newMetrics = update(selectedMetrics, {
         [idx]: { metricId: { $set: val } },
       });
       setSelectedMetrics(newMetrics);

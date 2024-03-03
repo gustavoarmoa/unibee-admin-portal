@@ -1,6 +1,6 @@
 import { Button, Col, Modal, Radio, RadioChangeEvent, Row } from 'antd';
 import { showAmount } from '../../../helpers';
-import { ISubscriptionType } from '../../../shared.types';
+import { ISubscriptionType } from '../../../shared.types.d';
 
 interface Props {
   isOpen: boolean;

@@ -40,7 +40,7 @@ import {
   IPreview,
   IProfile,
   ISubscriptionType,
-} from '../../shared.types';
+} from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
 import CancelPendingSubModal from './modals/cancelPendingSub';
 import ChangePlanModal from './modals/changePlan';
@@ -890,6 +890,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
               href={i!.link}
               target="_blank"
               style={{ marginLeft: '8px', fontSize: '11px' }}
+              rel="noreferrer"
             >
               Payment Link
             </a>

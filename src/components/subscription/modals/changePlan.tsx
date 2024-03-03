@@ -1,5 +1,5 @@
 import { Divider, Modal, Select } from 'antd';
-import { IPlan, ISubscriptionType } from '../../../shared.types';
+import { IPlan, ISubscriptionType } from '../../../shared.types.d';
 import Plan from '../plan';
 
 interface Props {

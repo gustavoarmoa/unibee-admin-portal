@@ -21,7 +21,7 @@ import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import { getSublist } from '../../requests';
 import '../../shared.css';
-import { ISubscriptionType } from '../../shared.types';
+import { ISubscriptionType } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;

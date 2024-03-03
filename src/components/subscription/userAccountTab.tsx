@@ -18,7 +18,7 @@ import {
   saveUserProfile,
   saveUserProfile2,
 } from '../../requests';
-import { Country, IProfile } from '../../shared.types';
+import { Country, IProfile } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
 
 const UserAccountTab = ({

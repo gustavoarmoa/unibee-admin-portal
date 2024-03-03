@@ -2,18 +2,18 @@ import axios, {
   AxiosError,
   AxiosInstance,
   AxiosRequestConfig,
-  AxiosResponse,
-} from 'axios';
+  AxiosResponse
+} from 'axios'
 
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  timeout: 60000,
-});
+  timeout: 60000
+})
 
 request.interceptors.request.use(
   (requestConfig) => {
-    const token = localStorage.getItem('merchantToken');
-    requestConfig.headers.Authorization = token; // to be declared as:    `Bearer ${token}`;
+    const token = localStorage.getItem('merchantToken')
+    requestConfig.headers.Authorization = token // to be declared as:    `Bearer ${token}`;
 
     /*
     if (requestConfig.url?.includes("/suppliers/upload")) {
@@ -33,11 +33,11 @@ request.interceptors.request.use(
       return requestConfig;
     }
     */
-    return requestConfig;
+    return requestConfig
   },
   (error) => {
-    return Promise.reject(error);
-  },
-);
+    return Promise.reject(error)
+  }
+)
 
-export { request };
+export { request }

@@ -6,7 +6,7 @@ import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
 import { getWebhookLogs } from '../../requests';
-import { TWebhookLogs } from '../../shared.types';
+import { TWebhookLogs } from '../../shared.types.d';
 SyntaxHighlighter.registerLanguage('json', json);
 
 const PAGE_SIZE = 10;

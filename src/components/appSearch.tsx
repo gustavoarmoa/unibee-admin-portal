@@ -8,7 +8,7 @@ import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../constants';
 import { showAmount } from '../helpers';
 import { useRelogin } from '../hooks';
 import { appSearchReq } from '../requests';
-import { IProfile, UserInvoice } from '../shared.types';
+import { IProfile, UserInvoice } from '../shared.types.d';
 import { useAppConfigStore } from '../stores';
 import './appSearch.css';
 

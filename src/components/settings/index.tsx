@@ -17,7 +17,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
 import '../../shared.css';
-import { IProfile } from '../../shared.types';
+import { IProfile } from '../../shared.types.d';
 import WebhookList from './webhookList';
 
 type TPermission = {

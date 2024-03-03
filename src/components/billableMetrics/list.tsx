@@ -15,7 +15,7 @@ import {
 } from '../../constants';
 import { useRelogin } from '../../hooks';
 import { getMetricsListReq } from '../../requests';
-import { IBillableMetrics } from '../../shared.types';
+import { IBillableMetrics } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
 
 import '../../shared.css';

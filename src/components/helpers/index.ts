@@ -1,5 +1,5 @@
 import { CURRENCY } from '../../constants';
-import { UserInvoice } from '../../shared.types';
+import { UserInvoice } from '../../shared.types.d';
 
 export const normalizeAmt = (iv: UserInvoice[]) => {
   iv.forEach((v) => {

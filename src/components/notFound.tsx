@@ -5,5 +5,5 @@ export default function NotFound() {
     <div className="flex justify-center">
       <h1>Oops! This page doesn’t seem to exist.</h1>
     </div>
-  );
+  )
 }
