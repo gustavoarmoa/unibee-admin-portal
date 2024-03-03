@@ -160,14 +160,12 @@ const Index = () => {
         {currentStep == 0 ? (
           <>
             <div
+              className="flex flex-col justify-center"
               style={{
                 width: '640px',
                 border: '1px solid #e0e0e0',
                 borderRadius: '8px',
                 background: '#FFF',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
                 paddingTop: '24px',
               }}
             >

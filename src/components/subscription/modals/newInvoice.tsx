@@ -165,7 +165,7 @@ const Index = ({
       if (detail == null) {
         // creating a new invoice
         saveInvoiceRes = await createInvoice({
-          userId: user!.id,
+          userId: user!.id as number,
           taxScale: Number(taxScale) * 100,
           currency,
           name: invoiceName,

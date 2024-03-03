@@ -1,4 +1,4 @@
-// this is logged-in user profile, not merchant's
+// this is logged-in user' profile
 interface IProfile {
   address: string;
   // country: string;
@@ -9,7 +9,7 @@ interface IProfile {
   facebook: string;
   firstName: string;
   lastName: string;
-  id: number;
+  id: number | null;
   phone: string;
   mobile: string;
   paymentMethod: string;

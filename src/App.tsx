@@ -45,7 +45,7 @@ import LoginModal from './components/login/LoginModal';
 import NotFound from './components/notFound';
 import Profile from './components/profile';
 import Signup from './components/signup';
-import { logoutReq } from './requests';
+import { getUserProfile, logoutReq } from './requests';
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -83,7 +83,8 @@ const App: React.FC = () => {
   const merchantInfoStore = useMerchantInfoStore();
   const profileStore = useProfileStore();
   const sessionStore = useSessionStore();
-  const appConfigStore = useAppConfigStore();
+  const [openLoginModal, setOpenLoginModal] = useState(false);
+  const toggleLoginModal = () => setOpenLoginModal(!openLoginModal);
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [activeMenuItem, setActiveMenuItem] = useState<string[]>([
@@ -134,6 +135,18 @@ const App: React.FC = () => {
 
   // console.log('session store: ', sessionStore);
 
+  useEffect(() => {
+    if (sessionStore.expired) {
+      if (null == profileStore.id) {
+        navigate(`${APP_PATH}login`);
+      } else {
+        setOpenLoginModal(true);
+      }
+    } else {
+      setOpenLoginModal(false);
+    }
+  }, [sessionStore.expired]);
+
   return (
     <>
       {noSiderRoutes.findIndex((r) => r == location.pathname) != -1 ? (
@@ -145,7 +158,7 @@ const App: React.FC = () => {
         </Layout>
       ) : (
         <Layout style={{ minHeight: '100vh' }}>
-          {sessionStore.expired && <LoginModal email={profileStore.email} />}
+          {openLoginModal && <LoginModal email={profileStore.email} />}
           <Sider
             // theme="light"
             collapsible

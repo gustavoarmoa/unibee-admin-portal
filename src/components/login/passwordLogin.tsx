@@ -75,6 +75,7 @@ const Index = ({
     }
 
     const { MerchantUser, Token } = loginRes;
+    console.log('login res: ', loginRes);
     localStorage.setItem('merchantToken', Token);
     MerchantUser.token = Token;
     profileStore.setProfile(MerchantUser);
@@ -90,6 +91,8 @@ const Index = ({
     appConfigStore.setAppConfig(appConfig);
     appConfigStore.setGateway(gateways);
     merchantStore.setMerchantInfo(merchantInfo);
+
+    console.log('triggeredByExpired: ', triggeredByExpired);
     if (triggeredByExpired) {
       sessionStore.refresh && sessionStore.refresh();
       message.success('Login succeeded');

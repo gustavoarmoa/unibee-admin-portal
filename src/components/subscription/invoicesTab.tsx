@@ -235,7 +235,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       invoiceListRes = await getInvoiceList({
         page,
         count: PAGE_SIZE,
-        userId: user!.id,
+        userId: user!.id as number,
       });
       console.log('invoice list res: ', invoiceListRes);
       const code = invoiceListRes.data.code;
