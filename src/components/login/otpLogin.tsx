@@ -5,8 +5,6 @@ import { useNavigate } from 'react-router-dom'
 import { emailValidate } from '../../helpers'
 import { useCountdown } from '../../hooks'
 import {
-  getAppConfigReq,
-  getMerchantInfoReq,
   initializeReq,
   loginWithOTPReq,
   loginWithOTPVerifyReq
@@ -99,7 +97,7 @@ const MailForm = ({
   const submit = async () => {
     try {
       setSubmitting(true)
-      const res = await sendMailaddress()
+      await sendMailaddress()
       setSubmitting(false)
       goForward()
     } catch (err) {

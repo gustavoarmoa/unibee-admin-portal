@@ -1,14 +1,12 @@
+import type { InputRef } from 'antd'
 import { Button, Form, Input, Modal, message } from 'antd'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { emailValidate, passwordRegx } from '../../helpers'
 import { useCountdown } from '../../hooks'
 import {
   forgetPassReq,
   forgetPassVerifyReq,
-  getAppConfigReq,
-  getGatewayListReq,
-  getMerchantInfoReq,
   initializeReq,
   loginWithPasswordReq
 } from '../../requests'
@@ -44,6 +42,8 @@ const Index = ({
     setForgetPassModalOpen(!forgetPassModalOpen)
   const [form] = Form.useForm()
   const watchEmail = Form.useWatch('email', form)
+  const passwordRef = useRef<InputRef>(null)
+  const emailRef = useRef<InputRef>(null)
 
   const onForgetPass = async () => {
     const isValid = form.getFieldError('email').length == 0
@@ -106,6 +106,14 @@ const Index = ({
     }
   }, [watchEmail])
 
+  useEffect(() => {
+    if (triggeredByExpired) {
+      passwordRef.current?.focus()
+    } else {
+      emailRef.current?.focus()
+    }
+  }, [])
+
   return (
     <>
       {forgetPassModalOpen && (
@@ -145,7 +153,7 @@ const Index = ({
             })
           ]}
         >
-          <Input onPressEnter={form.submit} />
+          <Input onPressEnter={form.submit} ref={emailRef} />
         </Form.Item>
 
         <Form.Item
@@ -158,7 +166,7 @@ const Index = ({
             }
           ]}
         >
-          <Input.Password onPressEnter={form.submit} />
+          <Input.Password onPressEnter={form.submit} ref={passwordRef} />
         </Form.Item>
 
         <div style={{ position: 'absolute', right: '-130px', top: '56px' }}>
