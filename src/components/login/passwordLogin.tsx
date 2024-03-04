@@ -75,14 +75,12 @@ const Index = ({
     }
 
     const { merchantMember, token } = loginRes;
-    console.log('login res: ', loginRes);
     localStorage.setItem('merchantToken', token);
     merchantMember.token = token;
     profileStore.setProfile(merchantMember);
     sessionStore.setSession({ expired: false, refresh: null });
 
     const [initRes, errInit] = await initializeReq();
-    console.log('iinitRes: ', initRes);
     setSubmitting(false);
     if (null != errInit) {
       setErrMsg(errInit.message);

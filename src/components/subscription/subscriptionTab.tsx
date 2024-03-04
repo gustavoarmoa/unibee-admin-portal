@@ -136,27 +136,52 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   };
 
   const togglePreviewModal = () => setPreviewModalOpen(!previewModalOpen);
-  const openPreviewModal = () => {
+  const openPreviewModal = async () => {
     const plan = plans.find((p) => p.id == selectedPlan);
-    let valid = true;
+    let isValid = true;
     if (plan?.addons != null && plan.addons.length > 0) {
       for (let i = 0; i < plan.addons.length; i++) {
         if (plan.addons[i].checked) {
           const q = Number(plan.addons[i].quantity);
           console.log('q: ', q);
           if (!Number.isInteger(q) || q <= 0) {
-            valid = false;
+            isValid = false;
             break;
           }
         }
       }
     }
-    if (!valid) {
+
+    {
+      /* 
+    console.log(
+      'check plan changed??? original/new planId ',
+      activeSub?.planId,
+      '//',
+      selectedPlan,
+    );
+    console.log(
+      'selected addons: original/newly selected ',
+      activeSub?.addons,
+      '///',
+      plan?.addons,
+    );
+
+    // return;
+*/
+    }
+
+    if (!isValid) {
       message.error('Addon quantity must be greater than 0.');
       return;
     }
+    setConfirming(true);
+    const err = await createPreview();
+    setConfirming(false);
+    if (err != null) {
+      return;
+    }
     togglePreviewModal();
-    createPreview();
   };
 
   const createPreview = async () => {
@@ -177,10 +202,11 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     );
     if (null != err) {
       message.error(err.message);
-      return;
+      return err;
     }
-    setPreviewModalOpen(false);
+    // setPreviewModalOpen(false);
     setPreview(previewRes);
+    return null;
   };
 
   // confirm the changed plan
@@ -367,6 +393,12 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (!changePlanModal && activeSub != null) {
+      setSelectedPlan(activeSub?.planId);
+    }
+  }, [changePlanModal]);
+
   return (
     <>
       <div
@@ -462,6 +494,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         onAddonChange={onAddonChange}
         onCancel={toggleChangPlanModal}
         onConfirm={openPreviewModal}
+        loading={confirmming}
       />
       <UpdateSubPreviewModal
         isOpen={previewModalOpen}
@@ -910,7 +943,6 @@ const SubTimeline = ({
       page,
       count: PAGE_SIZE,
     });
-    console.log('timeline: ', timeline);
     setLoading(false);
     if (err != null) {
       message.error(err.message);
@@ -946,7 +978,7 @@ const SubTimeline = ({
       <Table
         columns={columns}
         dataSource={timeline}
-        rowKey={'id'}
+        rowKey={'uniqueId'}
         rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{

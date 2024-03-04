@@ -22,7 +22,6 @@ const PLAN_STATUS_FILTER = Object.keys(PLAN_STATUS)
     value: Number(s),
   }))
   .sort((a, b) => (a.value < b.value ? -1 : 1));
-console.log('plan fiiltr: ', PLAN_STATUS_FILTER);
 
 const columns: ColumnsType<IBillableMetrics> = [
   {

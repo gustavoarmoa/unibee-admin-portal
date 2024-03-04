@@ -1,10 +1,10 @@
-import { Divider, Modal, Select } from 'antd';
+import { Button, Divider, Modal, Select, Tag } from 'antd';
 import { IPlan, ISubscriptionType } from '../../../shared.types.d';
 import Plan from '../plan';
 
 interface Props {
   isOpen: boolean;
-  // loading: boolean;
+  loading: boolean;
   subInfo: ISubscriptionType | null;
   selectedPlanId: number | null;
   plans: IPlan[];
@@ -21,6 +21,7 @@ interface Props {
 
 const ChangePlan = ({
   isOpen,
+  loading,
   subInfo,
   selectedPlanId,
   plans,
@@ -42,18 +43,29 @@ const ChangePlan = ({
       title="Change plan"
       open={isOpen}
       width={'480px'}
-      onOk={onConfirm}
-      onCancel={onCancel}
+      // onOk={onConfirm}
+      // onCancel={onCancel}
+      footer={null}
       closeIcon={null}
     >
       <Divider>Choose a new subscription plan</Divider>
-      <div className="mx-3 my-3 flex items-center justify-center">
+      <div className="mx-3 my-6 flex items-center justify-center">
         <Select
           style={{ width: 240 }}
           value={selectedPlanId}
           onChange={setSelectedPlan}
           options={plans.map((p) => ({
-            label: p.planName,
+            label:
+              subInfo?.planId == p.id ? (
+                <div className="flex w-full justify-between">
+                  <div>{p.planName}</div>
+                  <div>
+                    <Tag color="orange">Current Plan</Tag>
+                  </div>
+                </div>
+              ) : (
+                p.planName
+              ),
             value: p.id,
           }))}
         />
@@ -67,6 +79,25 @@ const ChangePlan = ({
           onAddonChange={onAddonChange}
           isActive={selectedPlan.id == subInfo?.planId}
         />
+      </div>
+
+      <div
+        className="flex items-center justify-end gap-4"
+        style={{
+          marginTop: '24px',
+        }}
+      >
+        <Button onClick={onCancel} disabled={loading}>
+          Cancel
+        </Button>
+        <Button
+          type="primary"
+          onClick={onConfirm}
+          loading={loading}
+          disabled={loading}
+        >
+          OK
+        </Button>
       </div>
     </Modal>
   );
