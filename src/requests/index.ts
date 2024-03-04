@@ -44,11 +44,6 @@ export const loginWithPasswordReq = async (body: TPassLogin) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.post('/merchant/auth/sso/login', body);
-    /*
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
-    */
     session.setSession({ expired: false, refresh: null });
     return [res.data.data, null];
   } catch (err) {
@@ -61,9 +56,6 @@ export const loginWithPasswordReq = async (body: TPassLogin) => {
 export const loginWithOTPReq = async (email: string) => {
   try {
     const res = await request.post(`/merchant/auth/sso/loginOTP`, { email });
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -81,9 +73,6 @@ export const loginWithOTPVerifyReq = async (
       email,
       verificationCode,
     });
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     session.setSession({ expired: false, refresh: null });
     return [res.data.data, null];
   } catch (err) {
@@ -97,9 +86,6 @@ export const forgetPassReq = async (email: string) => {
     const res = await request.post(`/merchant/auth/sso/passwordForgetOTP`, {
       email,
     });
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -121,9 +107,6 @@ export const forgetPassVerifyReq = async (
         newPassword,
       },
     );
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -144,9 +127,6 @@ export const resetPassReq = async (
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [null, null];
   } catch (err) {
@@ -175,9 +155,6 @@ export const getAppConfigReq = async () => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [res.data.data, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -192,9 +169,6 @@ export const getGatewayListReq = async () => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.gateways, null];
   } catch (err) {
@@ -212,9 +186,6 @@ export const getMerchantInfoReq = async () => {
       throw new Error('Session expired');
       // throw new ExpiredError('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [res.data.data.merchant, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -229,9 +200,6 @@ export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.merchant, null];
   } catch (err) {
@@ -253,9 +221,6 @@ export const uploadLogoReq = async (f: FormData) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.url, null];
   } catch (err) {
@@ -283,9 +248,6 @@ export const getPlanList = async (
       // throw new Error('Session expired');
       throw new ExpiredError('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [res.data.data.plans, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -304,9 +266,6 @@ export const getPlanDetail = async (planId: number) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new ExpiredError('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.plan, null];
   } catch (err) {
@@ -355,9 +314,6 @@ export const savePlan = async (planDetail: any, isNew: boolean) => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // backend has no meaningful result returned.
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -373,9 +329,6 @@ export const activatePlan = async (planId: number) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [null, null]; // backend has no meaningful result returned.
   } catch (err) {
@@ -400,9 +353,6 @@ export const togglePublishReq = async ({
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // backend has no meaningful result returned.
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -418,9 +368,6 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
       session.setSession({ expired: true, refresh: refreshCb });
       // throw new ExpiredError('Session expired');
       throw new ExpiredError('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.merchantMetrics, null];
   } catch (err) {
@@ -456,9 +403,6 @@ export const saveMetricsReq = async (
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // backend has no meaningful result returned.
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -478,9 +422,6 @@ export const getMetricDetailReq = async (
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.merchantMetric, null];
   } catch (err) {
@@ -502,9 +443,6 @@ export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [res.data.data.subscriptions, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -521,9 +459,6 @@ export const getSubDetail = async (subscriptionId: string) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new ExpiredError('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data, null];
   } catch (err) {
@@ -571,9 +506,6 @@ export const cancelSubReq = async (subscriptionId: string) => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // backend has no meaningful return value
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -596,9 +528,6 @@ export const createPreviewReq = async (
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data, null];
   } catch (err) {
@@ -628,9 +557,6 @@ export const updateSubscription = async (
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data, null];
   } catch (err) {
@@ -663,9 +589,6 @@ export const terminateSubReq = async (
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // backend has no meaningful return value
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -684,9 +607,6 @@ export const resumeSubReq = async (subscriptionId: string) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [null, null]; // backend has no meaningful return value
   } catch (err) {
@@ -712,9 +632,6 @@ export const getSubTimelineReq = async (body: TGetSubTimelineReq) => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [res.data.data.subscriptionTimeLines, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -732,9 +649,6 @@ export const getCountryListReq = async () => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.vatCountryList, null];
   } catch (err) {
@@ -760,9 +674,6 @@ export const extendDueDateReq = async (
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -783,9 +694,6 @@ export const setSimDateReq = async (
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -802,10 +710,6 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
-    console.log('get usr profile: ', res);
     return [res.data.data.user, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -824,9 +728,6 @@ export const saveUserProfileReq = async (newProfile: IProfile) => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // this call has no meaningful result to return
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -842,9 +743,6 @@ export const appSearchReq = async (searchKey: string) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data, null];
   } catch (err) {
@@ -875,9 +773,6 @@ export const getInvoiceListReq = async (
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [res.data.data.invoices, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -895,9 +790,6 @@ export const getInvoiceDetailReq = async (invoiceId: string) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data, null];
   } catch (err) {
@@ -931,9 +823,6 @@ export const createInvoiceReq = async (body: TCreateInvoiceReq) => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // backend has no meaningful return value
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -959,9 +848,6 @@ export const saveInvoiceReq = async (body: TSaveInvoiceReq) => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // no meaningful return value
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -978,9 +864,6 @@ export const deleteInvoiceReq = async (invoiceId: string) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [null, null]; // no meaningful return value
   } catch (err) {
@@ -1003,9 +886,6 @@ export const publishInvoiceReq = async (body: TPublishInvoiceReq) => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // no meaningful return value
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -1022,9 +902,6 @@ export const revokeInvoiceReq = async (invoiceId: string) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [null, null]; // no meaningful return value
   } catch (err) {
@@ -1050,9 +927,6 @@ export const refundReq = async (
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // no meaningful return value
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -1068,9 +942,6 @@ export const sendInvoiceInMailReq = async (invoiceId: string) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [null, null]; // no meaningful return value
   } catch (err) {
@@ -1121,9 +992,6 @@ export const getUserListReq = async (
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [res.data.data.userAccounts, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -1139,9 +1007,6 @@ export const getEventListReq = async () => {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [res.data.data.eventList, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -1156,9 +1021,6 @@ export const getWebhookListReq = async (refreshCb: () => void) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.endpointList, null];
   } catch (err) {
@@ -1192,9 +1054,6 @@ export const saveWebhookReq = async ({
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
     }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
-    }
     return [null, null]; // this call has no meaningful result
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
@@ -1211,9 +1070,6 @@ export const deleteWebhookReq = async (endpointId: number) => {
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [null, null]; // this call has no meaningful result
   } catch (err) {
@@ -1238,9 +1094,6 @@ export const getWebhookLogs = async (
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
-    }
-    if (res.data.code != 0) {
-      throw new Error(res.data.message);
     }
     return [res.data.data.endpointLogList ?? [], null];
   } catch (err) {
