@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-const APP_PATH = import.meta.env.BASE_URL;
+// import { useNavigate } from 'react-router-dom';
+// const APP_PATH = import.meta.env.BASE_URL;
 
 /*
 export const useRelogin = () => {
