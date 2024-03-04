@@ -2,10 +2,10 @@ import {
   FacebookOutlined,
   GithubOutlined,
   LinkedinOutlined,
-  TwitterOutlined
-} from '@ant-design/icons'
-import { Divider } from 'antd'
-const APP_PATH = import.meta.env.BASE_URL
+  TwitterOutlined,
+} from '@ant-design/icons';
+import { Divider } from 'antd';
+const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = () => (
   <div
@@ -19,7 +19,7 @@ const Index = () => (
       alignItems: 'center',
       width: '100%',
       background: '#334b61',
-      color: '#FFF'
+      color: '#FFF',
     }}
   >
     <div style={{ width: '80%' }}>
@@ -28,7 +28,6 @@ const Index = () => (
           <GithubOutlined style={{ fontSize: '24px' }} />
           <TwitterOutlined style={{ fontSize: '24px' }} />
           <LinkedinOutlined style={{ fontSize: '24px' }} />
-          <FacebookOutlined style={{ fontSize: '24px' }} />
         </div>
       </Divider>
       <div className="flex flex-col items-center justify-center gap-3 text-white">
@@ -36,5 +35,5 @@ const Index = () => (
       </div>
     </div>
   </div>
-)
-export default Index
+);
+export default Index;

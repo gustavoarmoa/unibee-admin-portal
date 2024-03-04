@@ -1,7 +1,7 @@
-import { Input } from 'antd'
+import { Input } from 'antd';
 
-const { Search } = Input
-const APP_PATH = import.meta.env.BASE_URL
+const { Search } = Input;
+const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = () => (
   <div
@@ -16,7 +16,7 @@ const Index = () => (
       alignItems: 'center',
       width: '100%',
       background: '#334b61',
-      color: '#FFF'
+      color: '#FFF',
     }}
   >
     <div>
@@ -25,7 +25,7 @@ const Index = () => (
         One-stop Billing for SaaS
       </span>
     </div>
-    <ul style={{ marginBottom: '0', display: 'flex', alignItems: 'center' }}>
+    {/* <ul style={{ marginBottom: '0', display: 'flex', alignItems: 'center' }}>
       <li style={{ display: 'inline', marginRight: '16px' }}>
         <span>Home</span>
       </li>
@@ -38,7 +38,7 @@ const Index = () => (
       <li style={{ display: 'inline', marginRight: '0px' }}>
         <Search style={{ width: 120 }} />
       </li>
-    </ul>
+  </ul>*/}
   </div>
-)
-export default Index
+);
+export default Index;

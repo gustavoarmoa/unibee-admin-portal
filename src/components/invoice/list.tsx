@@ -160,7 +160,7 @@ const Index = () => {
       <Table
         columns={columns}
         dataSource={invoiceList}
-        rowKey={'id'}
+        rowKey={'uniqueId'}
         rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{
