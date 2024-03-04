@@ -381,14 +381,17 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       }
     }
 
-    console.log('active sub: ', localActiveSub);
+    console.log('active sub: ', localActiveSub, '//userid: ', user);
     setSelectedPlan(subDetail.plan.id);
     setUserId(user.id);
 
-    let plans: IPlan[] = planList.map((p: any) => ({
-      ...p.plan,
-      addons: p.addons,
-    }));
+    let plans: IPlan[] =
+      planList == null
+        ? []
+        : planList.map((p: any) => ({
+            ...p.plan,
+            addons: p.addons,
+          }));
 
     plans = plans.filter((p) => p != null);
     const planIdx = plans.findIndex((p) => p.id == subDetail.plan.id);
@@ -934,8 +937,9 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
 type SubTimeline = {
   currency: string;
   id: number;
-  planId: number;
-  planName: string;
+  // planId: number;
+  // planName: string;
+  plan: { id: number; planName: string }; // TODO: use existing IPLan type
   periodStart: number;
   periodEnd: number;
   subscriptionId: string;
@@ -962,9 +966,9 @@ const SubTimeline = ({
   const columns: ColumnsType<SubTimeline> = [
     {
       title: 'Plan',
-      dataIndex: 'planId',
-      key: 'planId',
-      render: (planId) => plans.find((p) => p.id == planId)?.planName,
+      dataIndex: 'id',
+      key: 'id',
+      render: (id, record) => record.plan.planName,
     },
     {
       title: 'Start',

@@ -24,7 +24,7 @@ export const initializeReq = async () => {
   const [
     [appConfig, errConfig],
     [gateways, errGateway],
-    [merchantInfo, errMerchant],
+    [merchant, errMerchant],
   ] = await Promise.all([
     getAppConfigReq(),
     getGatewayListReq(),
@@ -34,7 +34,7 @@ export const initializeReq = async () => {
   if (null != err) {
     return [null, err];
   }
-  return [{ appConfig, gateways, merchantInfo }, null];
+  return [{ appConfig, gateways, merchant }, null];
 };
 
 type TPassLogin = {
@@ -157,7 +157,7 @@ export const resetPassReq = async (
 export const logoutReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/user_logout`, {});
+    const res = await request.post(`/merchant/member/logout`, {});
     const code = res.data.code;
     // if (code != 0 && code != 61) { }
     session.setSession({ expired: true, refresh: null });
@@ -170,7 +170,7 @@ export const logoutReq = async () => {
 export const getAppConfigReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/system/merchant/merchant_information`, {});
+    const res = await request.get(`/system/information/get`, {});
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -207,7 +207,7 @@ export const getGatewayListReq = async () => {
 export const getMerchantInfoReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.get(`/merchant/merchant_info/info`);
+    const res = await request.get(`/merchant/get`);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -216,7 +216,7 @@ export const getMerchantInfoReq = async () => {
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.MerchantInfo, null];
+    return [res.data.data.merchant, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
@@ -226,7 +226,7 @@ export const getMerchantInfoReq = async () => {
 export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/merchant_info/update`, body);
+    const res = await request.post(`/merchant/update`, body);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -278,10 +278,7 @@ export const getPlanList = async (
 ) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(
-      '/merchant/plan/subscription_plan_list',
-      body,
-    );
+    const res = await request.post('/merchant/plan/list', body);
     console.log('plan list res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
@@ -291,7 +288,7 @@ export const getPlanList = async (
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.Plans, null];
+    return [res.data.data.plans, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
@@ -299,7 +296,7 @@ export const getPlanList = async (
 };
 
 export const getPlanList2 = async (body: TPlanListBody) => {
-  return await request.post('/merchant/plan/subscription_plan_list', body);
+  return await request.post('/merchant/plan/list', body);
 };
 
 // -----------------
@@ -489,10 +486,7 @@ type TSubListReq = {
 };
 export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
   try {
-    const res = await request.post(
-      `/merchant/subscription/subscription_list`,
-      body,
-    );
+    const res = await request.post(`/merchant/subscription/list`, body);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
@@ -510,12 +504,9 @@ export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
 
 export const getSubDetail = async (subscriptionId: string) => {
   try {
-    const res = await request.post(
-      `/merchant/subscription/subscription_detail`,
-      {
-        subscriptionId,
-      },
-    );
+    const res = await request.post(`/merchant/subscription/detail`, {
+      subscriptionId,
+    });
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new ExpiredError('Session expired');
@@ -641,16 +632,13 @@ type TGetSubTimelineReq = {
   count: number;
 };
 export const getSubTimeline = async (body: TGetSubTimelineReq) => {
-  return await request.post(
-    `/merchant/subscription/subscription_timeline_list`,
-    body,
-  );
+  return await request.post(`/merchant/subscription/timeline_list`, body);
 };
 export const getSubTimeline2 = async (body: TGetSubTimelineReq) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.post(
-      `/merchant/subscription/subscription_timeline_list`,
+      `/merchant/subscription/timeline_list`,
       body,
     );
     if (res.data.code == 61) {
@@ -670,7 +658,7 @@ export const getSubTimeline2 = async (body: TGetSubTimelineReq) => {
 
 export const getCountryList = async () => {
   const merchantStore = useMerchantInfoStore.getState();
-  return await request.post(`/merchant/vat/vat_country_list`, {
+  return await request.post(`/merchant/vat/country_list`, {
     merchantId: merchantStore.id,
   });
 };
@@ -678,7 +666,7 @@ export const getCountryList2 = async () => {
   const merchantStore = useMerchantInfoStore.getState();
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/vat/vat_country_list`, {
+    const res = await request.post(`/merchant/vat/country_list`, {
       merchantId: merchantStore.id,
     });
     if (res.data.code == 61) {
@@ -720,7 +708,8 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.get(
-      `/merchant/merchant_user/get_user_profile?userId=${userId}`,
+      // `/merchant/merchant_user/get_user_profile?userId=${userId}`,
+      `/merchant/user/get`,
     );
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
@@ -729,7 +718,8 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.User, null];
+    console.log('get usr profile: ', res);
+    return [res.data.data.user, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
