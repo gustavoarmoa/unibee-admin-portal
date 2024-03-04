@@ -44,9 +44,11 @@ export const loginWithPasswordReq = async (body: TPassLogin) => {
   const session = useSessionStore.getState();
   try {
     const res = await request.post('/merchant/auth/sso/login', body);
+    /*
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
+    */
     session.setSession({ expired: false, refresh: null });
     return [res.data.data, null];
   } catch (err) {
