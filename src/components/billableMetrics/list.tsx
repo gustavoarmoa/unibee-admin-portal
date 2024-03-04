@@ -1,8 +1,4 @@
-import {
-  CheckCircleOutlined,
-  LoadingOutlined,
-  MinusOutlined,
-} from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Pagination, Space, Table, Tag, Tooltip, message } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import dayjs from 'dayjs';
@@ -13,10 +9,8 @@ import {
   METRICS_TYPE,
   PLAN_STATUS,
 } from '../../constants';
-import { useRelogin } from '../../hooks';
 import { getMetricsListReq } from '../../requests';
 import { IBillableMetrics } from '../../shared.types.d';
-import { useAppConfigStore } from '../../stores';
 
 import '../../shared.css';
 

@@ -1,8 +1,6 @@
-import { Button, Col, Modal, Row, message } from 'antd';
+import { Button, Modal, message } from 'antd';
 // import { showAmount } from "../helpers";
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useRelogin } from '../../../hooks';
 import { cancelSubReq } from '../../../requests';
 import { ISubscriptionType } from '../../../shared.types.d';
 

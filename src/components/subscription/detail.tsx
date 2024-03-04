@@ -1,18 +1,7 @@
 import type { DatePickerProps, TabsProps } from 'antd';
-import {
-  Button,
-  Col,
-  DatePicker,
-  Divider,
-  Row,
-  Space,
-  Tabs,
-  message,
-} from 'antd';
-import type { Dayjs } from 'dayjs';
-import React, { CSSProperties, useEffect, useState } from 'react';
+import { Button, Tabs, message } from 'antd';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRelogin } from '../../hooks';
 import { getUserProfile } from '../../requests';
 import { IProfile } from '../../shared.types.d';
 import UserInfoSection from '../shared/userInfo';
@@ -29,8 +18,6 @@ const Index = () => {
   const [userId, setUserId] = useState<number | null>(null); // subscription obj has user account data, and admin can update it in AccountTab.
   // so the user data on subscription obj might be obsolete,
   // so I use userId from subscription Obj, use this userId to run getUserProfile(userId), even after admin update the user info in AccontTab, re-call getUserProfile
-
-  const relogin = useRelogin();
 
   const tabItems: TabsProps['items'] = [
     {

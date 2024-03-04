@@ -4,18 +4,14 @@ import {
   MinusOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import type { SelectProps } from 'antd';
 import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd';
 import update from 'immutability-helper';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CURRENCY, PLAN_STATUS } from '../../constants';
 import { ramdonString } from '../../helpers';
-import { useRelogin } from '../../hooks';
 import {
   activatePlan,
-  getMetricsListReq,
-  getPlanDetail,
   getPlanDetailWithMore,
   savePlan,
   togglePublishReq,
@@ -78,7 +74,6 @@ const Index = () => {
   ]);
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const relogin = useRelogin();
 
   const itvCountValue = Form.useWatch('intervalCount', form);
   const itvCountUnit = Form.useWatch('intervalUnit', form);

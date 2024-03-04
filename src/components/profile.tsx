@@ -3,7 +3,6 @@ import { Button, Form, Input, Modal, Skeleton, Spin, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { emailValidate, passwordRegx } from '../helpers';
-import { useRelogin } from '../hooks';
 import {
   getMerchantInfoReq,
   logoutReq,
@@ -18,9 +17,7 @@ const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = () => {
   const merchantInfoStore = useMerchantInfoStore();
-  const [profile, setProfile] = useState<IProfile | null>(null);
   const profileStore = useProfileStore();
-  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false); // page loading
   const [uploading, setUploading] = useState(false); // logo upload
@@ -29,7 +26,6 @@ const Index = () => {
   const togglePasswordModal = () => setResetPasswordModal(!resetPasswordModal);
   const [logoUrl, setLogoUrl] = useState('');
   const [merchantInfo, setMerchantInfo] = useState<TMerchantInfo | null>(null);
-  const relogin = useRelogin();
 
   const getInfo = async () => {
     setLoading(true);
@@ -254,7 +250,6 @@ interface IResetPassProps {
   closeModal: () => void;
 }
 const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
-  const relogin = useRelogin();
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);

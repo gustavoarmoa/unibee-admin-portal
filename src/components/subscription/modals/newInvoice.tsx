@@ -1,11 +1,9 @@
 import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Col, Divider, Input, Modal, Row, Select, message } from 'antd';
 import update from 'immutability-helper';
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { CURRENCY } from '../../../constants';
 import { daysBetweenDate, ramdonString, showAmount } from '../../../helpers';
-import { useRelogin } from '../../../hooks';
 import {
   createInvoiceReq,
   deleteInvoiceReq,
@@ -22,9 +20,6 @@ import {
   TInvoicePerm,
   UserInvoice,
 } from '../../../shared.types.d';
-import { useAppConfigStore } from '../../../stores';
-
-// const APP_PATH = import.meta.env.BASE_URL;
 
 const newPlaceholderItem = (): InvoiceItem => ({
   id: ramdonString(8),
@@ -82,9 +77,7 @@ const Index = ({
   );
   const [refundAmt, setRefundAmt] = useState('');
   const [refundReason, setRefundReason] = useState('');
-  // console.log("invoice detail/perm: ", detail, "//", permission);
 
-  const relogin = useRelogin();
   const onCurrencyChange = (v: string) => setCurrency(v);
   const onTaxScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const t = evt.target.value;

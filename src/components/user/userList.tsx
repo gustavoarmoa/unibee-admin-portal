@@ -13,10 +13,9 @@ import {
 } from 'antd';
 import { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SUBSCRIPTION_STATUS } from '../../constants';
-import { useRelogin } from '../../hooks';
 import { getUserListReq } from '../../requests';
 import '../../shared.css';
 import { IProfile } from '../../shared.types.d';
@@ -33,7 +32,6 @@ const Index = () => {
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
   const [form] = Form.useForm();
-  const relogin = useRelogin();
 
   const columns: ColumnsType<IProfile> = [
     {

@@ -18,25 +18,20 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
-import { useRelogin } from '../../hooks';
 import { getInvoiceListReq } from '../../requests';
 import '../../shared.css';
-import { IProfile, UserInvoice } from '../../shared.types.d';
-import { useAppConfigStore } from '../../stores';
+import { UserInvoice } from '../../shared.types.d';
 
 const PAGE_SIZE = 10;
 const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = () => {
   const navigate = useNavigate();
-  const appConfigStore = useAppConfigStore();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([]);
-
-  const relogin = useRelogin();
 
   const goToDetail = (invoiceId: string) => (evt: any) => {
     console.log('go to detail: ', evt.target);

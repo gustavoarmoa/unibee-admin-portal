@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { useOnClickOutside } from 'usehooks-ts';
 import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../constants';
 import { showAmount } from '../helpers';
-import { useRelogin } from '../hooks';
 import { appSearchReq } from '../requests';
 import { IProfile, UserInvoice } from '../shared.types.d';
 import { useAppConfigStore } from '../stores';
@@ -29,7 +28,6 @@ const Index = () => {
   const resultWrapperRef = useRef(null);
   const [invoiceList, setInvoiceList] = useState<UserInvoice[] | null>(null);
   const [accountList, setAccountList] = useState<IAccountInfo[] | null>(null);
-  const relogin = useRelogin();
 
   const hide = () => setShowResult(false);
   const show = () => setShowResult(true);

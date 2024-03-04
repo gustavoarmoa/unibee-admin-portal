@@ -15,7 +15,6 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 // import { ISubscriptionType } from "../../shared.types";
 import {
   CloseOutlined,
@@ -24,21 +23,15 @@ import {
   LoadingOutlined,
   MailOutlined,
   MoneyCollectOutlined,
-  SearchOutlined,
-  SyncOutlined,
-  UndoOutlined,
 } from '@ant-design/icons';
 import { CURRENCY, INVOICE_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
-import { useRelogin } from '../../hooks';
 import { downloadInvoice, getInvoiceListReq } from '../../requests';
 import '../../shared.css';
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d';
-import { useAppConfigStore } from '../../stores';
 import { normalizeAmt } from '../helpers';
 import InvoiceModal from './modals/newInvoice';
 
-const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
 
 const Index = ({ user }: { user: IProfile | null }) => {
@@ -50,8 +43,6 @@ const Index = ({ user }: { user: IProfile | null }) => {
   const [invoiceIdx, setInvoiceIdx] = useState(-1); // -1: not selected, any action button: (delete, edit,refund) will set this value to the selected invoiceIdx
   const [deleteMode, setDeleteMode] = useState(false); // looks like I am not using it,
   const [refundMode, setRefundMode] = useState(false);
-  // const navigate = useNavigate();
-  const relogin = useRelogin();
 
   /*
   0: "Initiating", // this status only exist for a very short period, users/admin won't even know it exist

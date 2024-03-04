@@ -24,7 +24,6 @@ import { CSSProperties, useEffect, useRef, useState } from 'react';
 import { useOnClickOutside } from 'usehooks-ts';
 import { SUBSCRIPTION_STATUS } from '../../constants';
 import { daysBetweenDate, showAmount } from '../../helpers';
-import { useRelogin } from '../../hooks';
 import {
   createPreviewReq,
   extendDueDateReq,
@@ -41,7 +40,6 @@ import {
   IProfile,
   ISubscriptionType,
 } from '../../shared.types.d';
-import { useAppConfigStore } from '../../stores';
 import CancelPendingSubModal from './modals/cancelPendingSub';
 import ChangePlanModal from './modals/changePlan';
 import ExtendSubModal from './modals/extendSub';
@@ -50,12 +48,8 @@ import TerminateSubModal from './modals/terminateSub';
 import UpdateSubPreviewModal from './modals/updateSubPreview';
 
 import '../../shared.css';
-// const APP_PATH = import.meta.env.BASE_URL;
 
 const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
-  // const navigate = useNavigate();
-  // const appConfigStore = useAppConfigStore();
-  const relogin = useRelogin();
   const [plans, setPlans] = useState<IPlan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
@@ -869,8 +863,6 @@ const SubTimeline = ({
   plans: IPlan[];
   testClock: number | undefined;
 }) => {
-  const relogin = useRelogin();
-  // const appConfigStore = useAppConfigStore();
   // parent updated, how can I knwo that, and update myself
   const [timeline, setTimeline] = useState<SubTimeline[]>([]);
   const [loading, setLoading] = useState(false);

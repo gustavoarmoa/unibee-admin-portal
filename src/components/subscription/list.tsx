@@ -1,28 +1,14 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import {
-  Button,
-  Col,
-  Form,
-  FormInstance,
-  Input,
-  Pagination,
-  Row,
-  Select,
-  Spin,
-  Table,
-  message,
-} from 'antd';
+import { Pagination, Spin, Table, message } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
-import { useRelogin } from '../../hooks';
 import { getSublist } from '../../requests';
 import '../../shared.css';
 import { ISubscriptionType } from '../../shared.types.d';
-import { useAppConfigStore } from '../../stores';
 
 const APP_PATH = import.meta.env.BASE_URL;
 const PAGE_SIZE = 10;
@@ -107,8 +93,6 @@ const Index = () => {
   const [subList, setSubList] = useState<ISubscriptionType[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const relogin = useRelogin();
-  // const appConfigStore = useAppConfigStore();
   const [page, setPage] = useState(0); // pagination props
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
   const [statusFilter, setStatusFilter] = useState<number[]>([]);

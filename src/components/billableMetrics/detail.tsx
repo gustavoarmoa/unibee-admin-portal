@@ -1,10 +1,4 @@
-import {
-  CheckCircleOutlined,
-  CopyOutlined,
-  LoadingOutlined,
-  MinusOutlined,
-} from '@ant-design/icons';
-import type { SelectProps } from 'antd';
+import { CopyOutlined, LoadingOutlined } from '@ant-design/icons';
 import {
   Button,
   Col,
@@ -17,12 +11,12 @@ import {
   message,
 } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
 import { METRICS_AGGREGATE_TYPE } from '../../constants';
-import { useRelogin } from '../../hooks';
+import { useCopyContent } from '../../hooks';
 import { getMetricDetailReq, saveMetricsReq } from '../../requests';
 const { TextArea } = Input;
 const APP_PATH = import.meta.env.BASE_URL;
@@ -45,7 +39,6 @@ const Index = () => {
   const [form] = Form.useForm();
   const [aggrePropDisabled, setAggrePropDisabled] = useState(true);
   const watchAggreType = Form.useWatch('aggregationType', form);
-  const relogin = useRelogin();
   useEffect(() => {
     setAggrePropDisabled(watchAggreType == 1);
   }, [watchAggreType]);
@@ -97,13 +90,12 @@ const Index = () => {
   };
 
   const copyContent = async () => {
-    try {
-      await navigator.clipboard.writeText(curlCmd);
-      message.success('Copied');
-    } catch (err) {
-      const e = err instanceof Error ? err : new Error('Unknown copy error');
-      message.error(e.message);
+    const err = await useCopyContent(curlCmd);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    message.success('Copied');
   };
 
   const getPropsArg = () =>

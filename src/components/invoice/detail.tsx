@@ -1,28 +1,13 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import type { RadioChangeEvent, TabsProps } from 'antd';
-import {
-  Button,
-  Checkbox,
-  Col,
-  Form,
-  Input,
-  Radio,
-  Row,
-  Spin,
-  Tabs,
-  message,
-} from 'antd';
-import React, { CSSProperties, ChangeEvent, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Button, Col, Row, Spin, message } from 'antd';
+import React, { CSSProperties, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { INVOICE_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
-import { useRelogin } from '../../hooks';
 import { getInvoiceDetailReq } from '../../requests';
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d';
 import { normalizeAmt } from '../helpers';
-import UserInfo from '../shared/userInfo';
 import InvoiceItemsModal from '../subscription/modals/newInvoice';
-import UserAccount from '../subscription/userAccountTab';
 
 const invoicePerm: TInvoicePerm = {
   editable: false,

@@ -10,11 +10,8 @@ import {
   message,
 } from 'antd';
 import { ReactElement, useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-import { useRelogin } from '../../hooks';
 import { getCountryListReq, saveUserProfileReq } from '../../requests';
 import { Country, IProfile } from '../../shared.types.d';
-import { useAppConfigStore } from '../../stores';
 
 const UserAccountTab = ({
   user,
