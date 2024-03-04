@@ -244,7 +244,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
         // TODO: save all the code as ENUM in constant,
         throw new Error(invoiceListRes.data.message);
       }
-      const v = invoiceListRes.data.data.Invoices;
+      let v = invoiceListRes.data.data.invoices;
       console.log('v: ', v);
       if (v != null) {
         normalizeAmt(v);

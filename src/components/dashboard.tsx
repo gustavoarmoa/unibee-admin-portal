@@ -190,7 +190,7 @@ const Index = () => {
     const token = localStorage.getItem('merchantToken')
     setErrMsg('')
     axios
-      .get(`${API_URL}/merchant/profile`, {
+      .get(`${API_URL}/merchant/member/profile`, {
         headers: {
           Authorization: `${token}` // Bearer: ******
         }

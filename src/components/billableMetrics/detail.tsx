@@ -129,7 +129,7 @@ const Index = () => {
     }
   }, [])
 
-  const curlCmd = `curl --location --request POST "${location.origin}/merchant/merchant_metric/merchant_metric_event" \\
+  const curlCmd = `curl --location --request POST "${location.origin}/merchant/metric/event/new" \\
   --header "Authorization: Bearer $__YOUR_API_KEY__" \\
   --header 'Content-Type: application/json' \\
   --data-raw '{

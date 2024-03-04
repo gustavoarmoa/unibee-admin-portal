@@ -381,7 +381,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       }
     }
 
-    console.log('active sub: ', localActiveSub, '//userid: ', user);
+    console.log('active sub: ', localActiveSub, '//user: ', user);
     setSelectedPlan(subDetail.plan.id);
     setUserId(user.id);
 

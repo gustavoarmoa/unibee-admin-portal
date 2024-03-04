@@ -136,7 +136,7 @@ export const resetPassReq = async (
 ) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/passwordReset`, {
+    const res = await request.post(`/merchant/member/passwordReset`, {
       oldPassword,
       newPassword,
     });
@@ -234,7 +234,7 @@ export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.MerchantInfo, null];
+    return [res.data.data.merchant, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
@@ -304,7 +304,7 @@ export const getPlanList2 = async (body: TPlanListBody) => {
 export const getPlanDetail = async (planId: number) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post('/merchant/plan/subscription_plan_detail', {
+    const res = await request.post('/merchant/plan/detail', {
       planId,
     });
     console.log('planDetail res: ', res);
@@ -316,7 +316,7 @@ export const getPlanDetail = async (planId: number) => {
     if (res.data.code != 0) {
       throw new Error(res.data.message);
     }
-    return [res.data.data.Plan, null];
+    return [res.data.data.plan, null];
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error');
     return [null, e];
@@ -358,7 +358,7 @@ export const getPlanDetailWithMore = async (
 /*
 export const createPlan = async (planDetail: any) => {
   return await request.post(
-    '/merchant/plan/subscription_plan_create',
+    '/merchant/plan/new',
     planDetail,
   );
 };
@@ -366,14 +366,12 @@ export const createPlan = async (planDetail: any) => {
 
 // create a new or save an existing plan
 export const savePlan = async (planDetail: any, isNew: boolean) => {
-  const url = isNew
-    ? '/merchant/plan/subscription_plan_create'
-    : `/merchant/plan/subscription_plan_edit`;
+  const url = isNew ? '/merchant/plan/new' : `/merchant/plan/edit`;
   return await request.post(url, planDetail);
 };
 
 export const activatePlan = async (planId: number) => {
-  return await request.post(`/merchant/plan/subscription_plan_activate`, {
+  return await request.post(`/merchant/plan/activate`, {
     planId,
   });
 };
@@ -385,7 +383,7 @@ export const togglePublishReq = async ({
   planId: number;
   publishAction: 'PUBLISH' | 'UNPUBLISH';
 }) => {
-  const url = `/merchant/plan/subscription_plan_${
+  const url = `/merchant/plan/${
     publishAction === 'PUBLISH' ? 'publish' : 'unpublished'
   }`;
   return await request.post(url, { planId });
@@ -394,9 +392,7 @@ export const togglePublishReq = async ({
 export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.get(
-      `/merchant/merchant_metric/merchant_metric_list`,
-    );
+    const res = await request.get(`/merchant/metric/list`);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       // throw new ExpiredError('Session expired');
@@ -431,22 +427,20 @@ export const saveMetricsReq = async (
   body: TMetricsBody | TMetricsBodyNew,
   isNew: boolean,
 ) => {
-  const url = isNew
-    ? `/merchant/merchant_metric/new_merchant_metric`
-    : `/merchant/merchant_metric/edit_merchant_metric`;
+  const url = isNew ? `/merchant/metric/new` : `/merchant/metric/edit`;
   return await request.post(url, body);
 };
 /*
 export const updateMetricsReq = async (body: TMetricsBody) => {
   return await request.post(
-    `/merchant/merchant_metric/edit_merchant_metric`,
+    `/merchant/metric/edit`,
     body,
   );
 };
 
 export const createMetricsReq = async (metrics: any) => {
   return await request.post(
-    `/merchant/merchant_metric/new_merchant_metric`,
+    `/merchant/metric/new`,
     metrics,
   );
 };
@@ -458,12 +452,9 @@ export const getMetricDetailReq = async (
   refreshCb: () => void,
 ) => {
   try {
-    const res = await request.post(
-      `/merchant/merchant_metric/merchant_metric_detail`,
-      {
-        metricId,
-      },
-    );
+    const res = await request.post(`/merchant/metric/detail`, {
+      metricId,
+    });
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
@@ -552,7 +543,7 @@ export const getSubDetailWithMore = async (
 // this fn is for this purpose only, this call only work for sub.status == created.
 // it's not the same as terminate an active sub,
 export const cancelSubReq = async (subscriptionId: string) => {
-  return await request.post(`/merchant/subscription/subscription_cancel`, {
+  return await request.post(`/merchant/subscription/cancel`, {
     subscriptionId,
   });
 };
@@ -562,15 +553,12 @@ export const createPreviewReq = async (
   newPlanId: number,
   addons: { quantity: number; addonPlanId: number }[],
 ) => {
-  return await request.post(
-    `/merchant/subscription/subscription_update_preview`,
-    {
-      subscriptionId,
-      newPlanId,
-      quantity: 1,
-      addonParams: addons,
-    },
-  );
+  return await request.post(`/merchant/subscription/update_preview`, {
+    subscriptionId,
+    newPlanId,
+    quantity: 1,
+    addonParams: addons,
+  });
 };
 
 export const updateSubscription = async (
@@ -581,18 +569,15 @@ export const updateSubscription = async (
   confirmCurrency: string,
   prorationDate: number,
 ) => {
-  return await request.post(
-    `/merchant/subscription/subscription_update_submit`,
-    {
-      subscriptionId,
-      newPlanId,
-      quantity: 1,
-      addonParams: addons,
-      confirmTotalAmount,
-      confirmCurrency,
-      prorationDate,
-    },
-  );
+  return await request.post(`/merchant/subscription/update_submit`, {
+    subscriptionId,
+    newPlanId,
+    quantity: 1,
+    addonParams: addons,
+    confirmTotalAmount,
+    confirmCurrency,
+    prorationDate,
+  });
 };
 
 // terminate the subscription, immediate: true -> now, immediate: false -> at the end of this billing cycle
@@ -607,11 +592,11 @@ export const terminateSub = async (
   } = {
     SubscriptionId,
   };
-  let url = `/merchant/subscription/subscription_cancel_at_period_end`;
+  let url = `/merchant/subscription/cancel_at_period_end`;
   if (immediate) {
     body.invoiceNow = true;
     body.prorate = true;
-    url = `/merchant/subscription/subscription_cancel`;
+    url = `/merchant/subscription/cancel`;
   }
   return await request.post(url, body);
 };
@@ -619,7 +604,7 @@ export const terminateSub = async (
 // resume subscription for case that it's been terminated at the end of this billing cycle.
 // if it's ended immediately, no resume allowed.
 export const resumeSub = async (subscriptionId: string) => {
-  const url = `/merchant/subscription/subscription_cancel_last_cancel_at_period_end`;
+  const url = `/merchant/subscription/cancel_last_cancel_at_period_end`;
   return await request.post(url, {
     subscriptionId,
   });
@@ -687,30 +672,27 @@ export const extendDueDate = async (
   subscriptionId: string,
   appendTrialEndHour: number,
 ) => {
-  return await request.post(
-    `/merchant/subscription/subscription_add_new_trial_start`,
-    { subscriptionId, appendTrialEndHour },
-  );
+  return await request.post(`/merchant/subscription/add_new_trial_start`, {
+    subscriptionId,
+    appendTrialEndHour,
+  });
 };
 
 export const setSimDateReq = async (
   subscriptionId: string,
   newTestClock: number,
 ) => {
-  return await request.post(
-    `/system/subscription/subscription_test_clock_walk`,
-    { subscriptionId, newTestClock },
-  );
+  return await request.post(`/system/subscription/test_clock_walk`, {
+    subscriptionId,
+    newTestClock,
+  });
 };
 
 // billing admin can also get user profile.
 export const getUserProfile = async (userId: number, refreshCb: () => void) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.get(
-      // `/merchant/merchant_user/get_user_profile?userId=${userId}`,
-      `/merchant/user/get`,
-    );
+    const res = await request.get(`/merchant/user/get?userId=${userId}`);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
@@ -730,17 +712,14 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
 export const saveUserProfile = async (newProfile: IProfile) => {
   const u = JSON.parse(JSON.stringify(newProfile));
   u.userId = newProfile.id;
-  return await request.post(`/merchant/merchant_user/update_user_profile`, u);
+  return await request.post(`/merchant/user/update`, u);
 };
 export const saveUserProfile2 = async (newProfile: IProfile) => {
   const session = useSessionStore.getState();
   const u = JSON.parse(JSON.stringify(newProfile));
   u.userId = newProfile.id;
   try {
-    const res = await request.post(
-      `/merchant/merchant_user/update_user_profile`,
-      u,
-    );
+    const res = await request.post(`/merchant/user/update`, u);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -774,15 +753,12 @@ type TGetInvoicesReq = {
   amountEnd?: number;
 };
 export const getInvoiceList = async (body: TGetInvoicesReq) => {
-  return await request.post(
-    `/merchant/invoice/subscription_invoice_list`,
-    body,
-  );
+  return await request.post(`/merchant/invoice/list`, body);
 };
 // ----------
 
 export const getInvoiceDetailReq = async (invoiceId: string) => {
-  return await request.post(`/merchant/invoice/subscription_invoice_detail`, {
+  return await request.post(`/merchant/invoice/detail`, {
     invoiceId,
   });
 };
@@ -806,7 +782,7 @@ type TInvoiceItems = {
 // before that, customers won't see(or receive) this invoice.
 export const createInvoice = async (body: TCreateInvoiceReq) => {
   body.lines = body.invoiceItems;
-  return await request.post(`/merchant/invoice/new_invoice_create`, body);
+  return await request.post(`/merchant/invoice/new`, body);
 };
 // -------------
 
@@ -821,12 +797,12 @@ type TSaveInvoiceReq = {
 };
 export const saveInvoice = async (body: TSaveInvoiceReq) => {
   body.lines = body.invoiceItems;
-  return await request.post(`/merchant/invoice/new_invoice_edit`, body);
+  return await request.post(`/merchant/invoice/edit`, body);
 };
 
 // admin can delete the invoice, before the following publishInvoice() is called
 export const deleteInvoice = async (invoiceId: string) => {
-  return await request.post(`/merchant/invoice/new_invoice_delete`, {
+  return await request.post(`/merchant/invoice/delete`, {
     invoiceId,
   });
 };
@@ -839,12 +815,12 @@ type TPublishInvoiceReq = {
   daysUtilDue: number;
 };
 export const publishInvoice = async (body: TPublishInvoiceReq) => {
-  return await request.post(`/merchant/invoice/finish_new_invoice`, body);
+  return await request.post(`/merchant/invoice/finish`, body);
 };
 
 // admin can cancel the invoice(make it invalid) before user make the payment.
 export const revokeInvoice = async (invoiceId: string) => {
-  return await request.post(`/merchant/invoice/cancel_processing_invoice`, {
+  return await request.post(`/merchant/invoice/cancel`, {
     invoiceId,
   });
 };
@@ -860,14 +836,11 @@ export const refund = async (
 ) => {
   body.refundAmount *= CURRENCY[currency].stripe_factor;
   body.refundAmount = Math.round(body.refundAmount);
-  return await request.post(`/merchant/invoice/new_invoice_refund`, body);
+  return await request.post(`/merchant/invoice/refund`, body);
 };
 
 export const sendInvoiceInMailReq = async (invoiceId: string) => {
-  return await request.post(
-    `/merchant/invoice/subscription_invoice_send_user_email`,
-    { invoiceId },
-  );
+  return await request.post(`/merchant/invoice/send_email`, { invoiceId });
 };
 
 export const downloadInvoice = (url: string) => {
@@ -907,7 +880,7 @@ export const getUserListReq = async (
 ) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(`/merchant/merchant_user/user_list`, users);
+    const res = await request.post(`/merchant/user/list`, users);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
@@ -925,9 +898,7 @@ export const getUserListReq = async (
 export const getEventListReq = async () => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.get(
-      `/merchant/merchant_webhook/webhook_event_list`,
-    );
+    const res = await request.get(`/merchant/webhook/event_list`);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
       throw new Error('Session expired');
@@ -945,9 +916,7 @@ export const getEventListReq = async () => {
 export const getWebhookListReq = async (refreshCb: () => void) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.get(
-      `/merchant/merchant_webhook/webhook_endpoint_list`,
-    );
+    const res = await request.get(`/merchant/webhook/endpoint_list`);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb });
       throw new Error('Session expired');
@@ -976,8 +945,8 @@ export const saveWebhookReq = async ({
   try {
     const actionUrl =
       endpointId == null
-        ? '/merchant/merchant_webhook/new_webhook_endpoint'
-        : '/merchant/merchant_webhook/update_webhook_endpoint';
+        ? '/merchant/webhook/new_endpoint'
+        : '/merchant/webhook/update_endpoint';
     const body: any = { url, events };
     if (endpointId != null) {
       body.endpointId = endpointId;
@@ -1000,10 +969,9 @@ export const saveWebhookReq = async ({
 export const deleteWebhookReq = async (endpointId: number) => {
   const session = useSessionStore.getState();
   try {
-    const res = await request.post(
-      '/merchant/merchant_webhook/delete_webhook_endpoint',
-      { endpointId },
-    );
+    const res = await request.post('/merchant/webhook/delete_endpoint', {
+      endpointId,
+    });
     console.log('delete webhook res: ', res);
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null });
@@ -1030,7 +998,7 @@ export const getWebhookLogs = async (
   const session = useSessionStore.getState();
   try {
     const res = await request.get(
-      `/merchant/merchant_webhook/webhook_endpoint_log_list?endpointId=${endpointId}&page=${page}&count=${count}`,
+      `/merchant/webhook/endpoint_log_list?endpointId=${endpointId}&page=${page}&count=${count}`,
     );
     console.log('webhook logs: ', res);
     if (res.data.code == 61) {
