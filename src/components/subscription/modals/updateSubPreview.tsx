@@ -1,14 +1,14 @@
-import { LoadingOutlined } from '@ant-design/icons';
-import { Button, Col, Divider, Modal, Row, Spin } from 'antd';
-import { showAmount } from '../../../helpers';
-import { IPreview } from '../../../shared.types.d';
+import { LoadingOutlined } from '@ant-design/icons'
+import { Button, Col, Divider, Modal, Row, Spin } from 'antd'
+import { showAmount } from '../../../helpers'
+import { IPreview } from '../../../shared.types.d'
 
 interface Props {
-  isOpen: boolean;
-  loading: boolean;
-  previewInfo: IPreview | null;
-  onCancel: () => void;
-  onConfirm: () => void;
+  isOpen: boolean
+  loading: boolean
+  previewInfo: IPreview | null
+  onCancel: () => void
+  onConfirm: () => void
 }
 
 const updateSubPreview = ({
@@ -16,7 +16,7 @@ const updateSubPreview = ({
   loading,
   previewInfo,
   onCancel,
-  onConfirm,
+  onConfirm
 }: Props) => {
   return (
     <Modal
@@ -74,7 +74,7 @@ const updateSubPreview = ({
             <Col span={2} style={{ fontWeight: 'bold' }}>
               {showAmount(
                 previewInfo.nextPeriodInvoice.totalAmount,
-                previewInfo.nextPeriodInvoice.currency,
+                previewInfo.nextPeriodInvoice.currency
               )}
             </Col>
           </Row>
@@ -99,7 +99,7 @@ const updateSubPreview = ({
             <Col span={2} style={{ fontWeight: 'bold' }}>
               {showAmount(
                 previewInfo.invoice.totalAmount,
-                previewInfo.invoice.currency,
+                previewInfo.invoice.currency
               )}
             </Col>
           </Row>
@@ -119,7 +119,7 @@ const updateSubPreview = ({
         </>
       )}
     </Modal>
-  );
-};
+  )
+}
 
-export default updateSubPreview;
+export default updateSubPreview

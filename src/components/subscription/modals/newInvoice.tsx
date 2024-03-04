@@ -1,9 +1,9 @@
-import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Col, Divider, Input, Modal, Row, Select, message } from 'antd';
-import update from 'immutability-helper';
-import { useState } from 'react';
-import { CURRENCY } from '../../../constants';
-import { daysBetweenDate, ramdonString, showAmount } from '../../../helpers';
+import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Col, Divider, Input, Modal, Row, Select, message } from 'antd'
+import update from 'immutability-helper'
+import { useState } from 'react'
+import { CURRENCY } from '../../../constants'
+import { daysBetweenDate, ramdonString, showAmount } from '../../../helpers'
 import {
   createInvoiceReq,
   deleteInvoiceReq,
@@ -11,15 +11,15 @@ import {
   refundReq,
   revokeInvoiceReq,
   saveInvoiceReq,
-  sendInvoiceInMailReq,
-} from '../../../requests';
+  sendInvoiceInMailReq
+} from '../../../requests'
 import {
   IProfile,
   ISubscriptionType,
   InvoiceItem,
   TInvoicePerm,
-  UserInvoice,
-} from '../../../shared.types.d';
+  UserInvoice
+} from '../../../shared.types.d'
 
 const newPlaceholderItem = (): InvoiceItem => ({
   id: ramdonString(8),
@@ -30,18 +30,18 @@ const newPlaceholderItem = (): InvoiceItem => ({
   quantity: '1',
   currency: 'EUR',
   tax: 0,
-  taxScale: 0,
-});
+  taxScale: 0
+})
 
 interface Props {
-  user: IProfile | null;
-  isOpen: boolean;
-  detail: UserInvoice | null; // null means new user, no data available
-  permission: TInvoicePerm;
-  refundMode: boolean;
+  user: IProfile | null
+  isOpen: boolean
+  detail: UserInvoice | null // null means new user, no data available
+  permission: TInvoicePerm
+  refundMode: boolean
   // items: InvoiceItem[] | null;
-  closeModal: () => void;
-  refresh: () => void;
+  closeModal: () => void
+  refresh: () => void
 }
 
 const Index = ({
@@ -51,68 +51,68 @@ const Index = ({
   permission,
   refundMode,
   closeModal,
-  refresh,
+  refresh
 }: Props) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
   // const appConfigStore = useAppConfigStore();
   if (detail != null) {
     detail.lines &&
       detail.lines.forEach((item) => {
-        item.id = ramdonString(8);
-      });
+        item.id = ramdonString(8)
+      })
   }
 
   const [invoiceList, setInvoiceList] = useState<InvoiceItem[]>(
-    detail == null ? [newPlaceholderItem()] : detail.lines,
-  );
+    detail == null ? [newPlaceholderItem()] : detail.lines
+  )
   const defaultCurrency =
     detail == null || detail.lines == null || detail.lines.length == 0
       ? 'EUR'
-      : detail.lines[0].currency; // assume all invoice items have the same currencies.
-  const [currency, setCurrency] = useState(defaultCurrency);
-  const taxScaleTmp = detail == null ? '' : detail.taxScale / 100;
-  const [taxScale, setTaxScale] = useState<string>(taxScaleTmp + '');
+      : detail.lines[0].currency // assume all invoice items have the same currencies.
+  const [currency, setCurrency] = useState(defaultCurrency)
+  const taxScaleTmp = detail == null ? '' : detail.taxScale / 100
+  const [taxScale, setTaxScale] = useState<string>(taxScaleTmp + '')
   const [invoiceName, setInvoiceName] = useState(
-    detail == null ? '' : detail.invoiceName,
-  );
-  const [refundAmt, setRefundAmt] = useState('');
-  const [refundReason, setRefundReason] = useState('');
+    detail == null ? '' : detail.invoiceName
+  )
+  const [refundAmt, setRefundAmt] = useState('')
+  const [refundReason, setRefundReason] = useState('')
 
-  const onCurrencyChange = (v: string) => setCurrency(v);
+  const onCurrencyChange = (v: string) => setCurrency(v)
   const onTaxScaleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    const t = evt.target.value;
-    setTaxScale(t);
+    const t = evt.target.value
+    setTaxScale(t)
     const newList = invoiceList.map((iv) => ({
       ...iv,
       tax:
         (Number(iv.quantity) * Number(iv.unitAmountExcludingTax) * Number(t)) /
-        100,
-    }));
-    setInvoiceList(newList);
-  };
+        100
+    }))
+    setInvoiceList(newList)
+  }
   const onInvoiceNameChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setInvoiceName(evt.target.value);
+    setInvoiceName(evt.target.value)
 
   const onRefundAmtChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setRefundAmt(evt.target.value);
+    setRefundAmt(evt.target.value)
 
   const onRefundReasonChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setRefundReason(evt.target.value);
+    setRefundReason(evt.target.value)
 
   const addInvoiceItem = () => {
     setInvoiceList(
       update(invoiceList, {
-        $push: [newPlaceholderItem()],
-      }),
-    );
-  };
+        $push: [newPlaceholderItem()]
+      })
+    )
+  }
 
   const removeInvoiceItem = (invoiceId: string) => () => {
-    const idx = invoiceList.findIndex((v) => v.id == invoiceId);
+    const idx = invoiceList.findIndex((v) => v.id == invoiceId)
     if (idx != -1) {
-      setInvoiceList(update(invoiceList, { $splice: [[idx, 1]] }));
+      setInvoiceList(update(invoiceList, { $splice: [[idx, 1]] }))
     }
-  };
+  }
 
   const validateFields = () => {
     if (
@@ -120,186 +120,186 @@ const Index = ({
       isNaN(Number(taxScale)) ||
       Number(taxScale) < 0
     ) {
-      message.error('Please input valid tax rate(in percentage)');
-      return false;
+      message.error('Please input valid tax rate(in percentage)')
+      return false
     }
     for (let i = 0; i < invoiceList.length; i++) {
       if (invoiceList[i].description == '') {
-        message.error('Description is required');
-        return false;
+        message.error('Description is required')
+        return false
       }
-      let q = Number(invoiceList[i].quantity);
+      let q = Number(invoiceList[i].quantity)
       if (!Number.isInteger(q) || q <= 0) {
-        message.error('Please input valid quantity');
-        return false;
+        message.error('Please input valid quantity')
+        return false
       }
-      q = Number(invoiceList[i].unitAmountExcludingTax); // TODO: JPY has no decimal point, take that into account.
+      q = Number(invoiceList[i].unitAmountExcludingTax) // TODO: JPY has no decimal point, take that into account.
       if (isNaN(q) || q <= 0) {
-        message.error('Please input valid amount');
-        return false;
+        message.error('Please input valid amount')
+        return false
       }
     }
-    return true;
-  };
+    return true
+  }
 
   const onSave = (isFinished: boolean) => async () => {
     if (!validateFields()) {
-      return;
+      return
     }
     const invoiceItems = invoiceList.map((v) => ({
       description: v.description,
       unitAmountExcludingTax:
         Number(v.unitAmountExcludingTax) * CURRENCY[currency].stripe_factor,
-      quantity: Number(v.quantity),
-    }));
-    setLoading(true);
-    let saveInvoiceRes, err;
+      quantity: Number(v.quantity)
+    }))
+    setLoading(true)
+    let saveInvoiceRes, err
     if (detail == null) {
       // creating a new invoice
-      [saveInvoiceRes, err] = await createInvoiceReq({
+      ;[saveInvoiceRes, err] = await createInvoiceReq({
         userId: user!.id as number,
         taxScale: Number(taxScale) * 100,
         currency,
         name: invoiceName,
         invoiceItems,
-        finish: isFinished,
-      });
+        finish: isFinished
+      })
     } else {
       // saving an invoice
-      [saveInvoiceRes, err] = await saveInvoiceReq({
+      ;[saveInvoiceRes, err] = await saveInvoiceReq({
         invoiceId: detail.invoiceId,
         taxScale: Number(taxScale) / 100,
         currency: detail.currency,
         name: invoiceName,
-        invoiceItems,
-      });
+        invoiceItems
+      })
     }
-    setLoading(false);
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    closeModal();
-    message.success('Invoice saved.');
-    refresh();
-  };
+    closeModal()
+    message.success('Invoice saved.')
+    refresh()
+  }
 
   // ----------------
   // what if user made some changes, then click 'create' to publish, backend still uses the old data before the local change.
   const onPublish = async () => {
     if (detail == null) {
-      console.log('publis new invoice, detail is null? ', detail);
-      await onSave(true)();
-      return;
+      console.log('publis new invoice, detail is null? ', detail)
+      await onSave(true)()
+      return
     }
     // Do validation check first.
-    setLoading(true);
+    setLoading(true)
     const [_, err] = await publishInvoiceReq({
       invoiceId: detail.invoiceId,
       payMethod: 1,
-      daysUtilDue: 1,
-    });
-    setLoading(false);
+      daysUtilDue: 1
+    })
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    closeModal();
-    message.success('Invoice generated and sent.');
-    refresh();
-  };
+    closeModal()
+    message.success('Invoice generated and sent.')
+    refresh()
+  }
 
   // revoke: just the opposite of publish (back to unpublished state)
   // delete. They have the same structure, and I'm too lazy to duplicate it.
   const onDeleteOrRevoke = async (action: 'delete' | 'revoke') => {
     if (detail == null) {
-      return;
+      return
     }
 
-    const callMethod = action == 'delete' ? deleteInvoiceReq : revokeInvoiceReq;
-    setLoading(true);
-    const [_, err] = await callMethod(detail.invoiceId);
-    setLoading(false);
+    const callMethod = action == 'delete' ? deleteInvoiceReq : revokeInvoiceReq
+    setLoading(true)
+    const [_, err] = await callMethod(detail.invoiceId)
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success(`Invoice ${action}d.`);
-    closeModal();
-    refresh();
-  };
+    message.success(`Invoice ${action}d.`)
+    closeModal()
+    refresh()
+  }
 
-  const onDelete = () => onDeleteOrRevoke('delete');
-  const onRevoke = () => onDeleteOrRevoke('revoke');
+  const onDelete = () => onDeleteOrRevoke('delete')
+  const onRevoke = () => onDeleteOrRevoke('revoke')
 
   const onRefund = async () => {
     if (detail == null) {
-      return;
+      return
     }
     if (refundReason == '') {
-      message.error('Please input refund reason with less than 64 characters');
-      return;
+      message.error('Please input refund reason with less than 64 characters')
+      return
     }
 
-    const amt = Number(refundAmt);
-    const total = getTotal(invoiceList, true);
+    const amt = Number(refundAmt)
+    const total = getTotal(invoiceList, true)
     if (isNaN(amt) || amt > (total as number)) {
       message.error(
-        'Refund amount must be less than or equal to invoice amount',
-      );
-      return;
+        'Refund amount must be less than or equal to invoice amount'
+      )
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     const [_, err] = await refundReq(
       {
         invoiceId: detail?.invoiceId,
         refundAmount: Number(refundAmt),
-        reason: refundReason,
+        reason: refundReason
       },
-      currency,
-    );
-    setLoading(false);
+      currency
+    )
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success('Refunded.'); // does user get refund immeidately? or there is a pending process
-    closeModal();
-    refresh();
-  };
+    message.success('Refunded.') // does user get refund immeidately? or there is a pending process
+    closeModal()
+    refresh()
+  }
 
   const onSendInvoice = async () => {
     if (detail == null || detail.invoiceId == '' || detail.invoiceId == null) {
-      return;
+      return
     }
-    setLoading(true);
-    const [_, err] = await sendInvoiceInMailReq(detail.invoiceId);
-    setLoading(false);
+    setLoading(true)
+    const [_, err] = await sendInvoiceInMailReq(detail.invoiceId)
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success('Invoice sent.');
-    closeModal();
-  };
+    message.success('Invoice sent.')
+    closeModal()
+  }
 
   const onFieldChange =
     (invoiceId: string, fieldName: string) =>
     (evt: React.ChangeEvent<HTMLInputElement>) => {
-      const idx = invoiceList.findIndex((v) => v.id == invoiceId);
+      const idx = invoiceList.findIndex((v) => v.id == invoiceId)
       if (idx == -1) {
-        return;
+        return
       }
       let newList = update(invoiceList, {
-        [idx]: { [fieldName]: { $set: evt.target.value } },
-      });
+        [idx]: { [fieldName]: { $set: evt.target.value } }
+      })
       newList = update(newList, {
         [idx]: {
           amount: {
             $set:
               Number(newList[idx].quantity) *
-              Number(newList[idx].unitAmountExcludingTax),
+              Number(newList[idx].unitAmountExcludingTax)
           },
           tax: {
             $set:
@@ -307,14 +307,14 @@ const Index = ({
                 Number(newList[idx].quantity) *
                   Number(newList[idx].unitAmountExcludingTax) *
                   (Number(taxScale) / 100) *
-                  100,
-              ) / 100,
-          },
-        },
-      });
-      setInvoiceList(newList);
-      console.log('after field change, new invoiceList: ', newList);
-    };
+                  100
+              ) / 100
+          }
+        }
+      })
+      setInvoiceList(newList)
+      console.log('after field change, new invoiceList: ', newList)
+    }
 
   // to get a numerical value with 2 decimal points, but still not right
   // https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
@@ -324,13 +324,13 @@ const Index = ({
   // we get: 1421.3999999999
   const getTotal = (
     invoices: InvoiceItem[],
-    asNumber?: boolean,
+    asNumber?: boolean
   ): string | number => {
     // if (asNumber == null) {
     // asNumber = false;
     // }
     if (invoices == null) {
-      invoices = [];
+      invoices = []
     }
     let total = invoices.reduce(
       (accu, curr) =>
@@ -339,23 +339,23 @@ const Index = ({
           (Number(curr.unitAmountExcludingTax) * (curr.quantity as number) +
             Number(curr.tax) +
             Number.EPSILON) *
-            100,
+            100
         ) /
           100,
-      0,
-    );
+      0
+    )
     if (isNaN(total)) {
       if (asNumber) {
-        return 0;
-      } else return '';
+        return 0
+      } else return ''
       // return "";
     }
 
-    total = Math.round((total + Number.EPSILON) * 100) / 100;
+    total = Math.round((total + Number.EPSILON) * 100) / 100
     // 3rd argument is 'whether ignoreFactor',
     // readonly: false, is used when admin need to create a new invoice, $100 need to be shown as $100, no factor considered
-    return asNumber ? total : showAmount(total, currency, true);
-  };
+    return asNumber ? total : showAmount(total, currency, true)
+  }
 
   return (
     <Modal
@@ -390,7 +390,7 @@ const Index = ({
               options={[
                 { value: 'EUR', label: 'EUR' },
                 { value: 'USD', label: 'USD' },
-                { value: 'JPY', label: 'JPY' },
+                { value: 'JPY', label: 'JPY' }
               ]}
             />
           )}
@@ -469,7 +469,7 @@ const Index = ({
                   {showAmount(
                     v.unitAmountExcludingTax as number,
                     v.currency,
-                    true,
+                    true
                   )}
                 </span>
               ) : (
@@ -509,7 +509,7 @@ const Index = ({
                   style={{
                     fontWeight: 'bold',
                     width: '64px',
-                    cursor: 'pointer',
+                    cursor: 'pointer'
                   }}
                 >
                   <MinusOutlined />
@@ -637,7 +637,7 @@ const Index = ({
         </div>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

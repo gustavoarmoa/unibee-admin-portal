@@ -1,13 +1,13 @@
-import { LoadingOutlined } from '@ant-design/icons';
-import { Button, Col, Row, Spin, message } from 'antd';
-import React, { CSSProperties, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { INVOICE_STATUS } from '../../constants';
-import { showAmount } from '../../helpers';
-import { getInvoiceDetailReq } from '../../requests';
-import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d';
-import { normalizeAmt } from '../helpers';
-import InvoiceItemsModal from '../subscription/modals/newInvoice';
+import { LoadingOutlined } from '@ant-design/icons'
+import { Button, Col, Row, Spin, message } from 'antd'
+import React, { CSSProperties, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { INVOICE_STATUS } from '../../constants'
+import { showAmount } from '../../helpers'
+import { getInvoiceDetailReq } from '../../requests'
+import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
+import { normalizeAmt } from '../helpers'
+import InvoiceItemsModal from '../subscription/modals/newInvoice'
 
 const invoicePerm: TInvoicePerm = {
   editable: false,
@@ -18,56 +18,56 @@ const invoicePerm: TInvoicePerm = {
   deletable: false,
   refundable: false,
   downloadable: true,
-  sendable: false,
-};
+  sendable: false
+}
 
-const APP_PATH = import.meta.env.BASE_URL; // if not specified in build command, default is /
-const API_URL = import.meta.env.VITE_API_URL;
+const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
+const API_URL = import.meta.env.VITE_API_URL
 const rowStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  height: '32px',
-};
-const colStyle: CSSProperties = { fontWeight: 'bold' };
+  height: '32px'
+}
+const colStyle: CSSProperties = { fontWeight: 'bold' }
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [invoiceDetail, setInvoiceDetail] = useState<UserInvoice | null>(null);
-  const [userProfile, setUserProfile] = useState<IProfile | null>(null);
-  const [showInvoiceItems, setShowInvoiceItems] = useState(false);
-  const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems);
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
+  const [invoiceDetail, setInvoiceDetail] = useState<UserInvoice | null>(null)
+  const [userProfile, setUserProfile] = useState<IProfile | null>(null)
+  const [showInvoiceItems, setShowInvoiceItems] = useState(false)
+  const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems)
 
-  const goBack = () => navigate(`${APP_PATH}invoice/list`);
+  const goBack = () => navigate(`${APP_PATH}invoice/list`)
   const goToUser = (userId: number) => () =>
-    navigate(`${APP_PATH}customer/${userId}`);
+    navigate(`${APP_PATH}customer/${userId}`)
   const goToSub = (subId: string) => () =>
-    navigate(`${APP_PATH}subscription/${subId}`);
+    navigate(`${APP_PATH}subscription/${subId}`)
 
   const fetchData = async () => {
-    const pathName = window.location.pathname.split('/');
-    console.log('path name: ', pathName);
-    const ivId = pathName.pop();
+    const pathName = window.location.pathname.split('/')
+    console.log('path name: ', pathName)
+    const ivId = pathName.pop()
     if (ivId == null) {
-      message.error('Invalid invoice');
-      return;
+      message.error('Invalid invoice')
+      return
     }
-    setLoading(true);
-    const [res, err] = await getInvoiceDetailReq(ivId);
-    setLoading(false);
+    setLoading(true)
+    const [res, err] = await getInvoiceDetailReq(ivId)
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    const [invoice, userAccount] = res;
-    normalizeAmt([invoice]);
-    setInvoiceDetail(invoice);
-    setUserProfile(userAccount);
-  };
+    const [invoice, userAccount] = res
+    normalizeAmt([invoice])
+    setInvoiceDetail(invoice)
+    setUserProfile(userAccount)
+  }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   return (
     <div>
@@ -110,7 +110,7 @@ const Index = () => {
             : showAmount(
                 invoiceDetail?.totalAmount,
                 invoiceDetail?.currency,
-                true,
+                true
               )}
           <span className="text-xs text-gray-500">
             {invoiceDetail == null
@@ -191,7 +191,7 @@ const Index = () => {
         <Button onClick={goBack}>Go Back</Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

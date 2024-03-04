@@ -1,7 +1,7 @@
-import { StoreApi, UseBoundStore, create } from 'zustand';
+import { StoreApi, UseBoundStore, create } from 'zustand'
 // import { immer } from "zustand/middleware/immer";
-import { createJSONStorage, persist } from 'zustand/middleware';
-import { IAppConfig, IProfile, TMerchantInfo } from '../shared.types.d';
+import { createJSONStorage, persist } from 'zustand/middleware'
+import { IAppConfig, IProfile, TMerchantInfo } from '../shared.types.d'
 // import { createStore } from "zustand";
 
 // logged-in user profile
@@ -25,12 +25,12 @@ const INITIAL_PROFILE: IProfile = {
   weChat: '',
   whatsAPP: '',
   otherSocialInfo: '',
-  token: '',
-};
+  token: ''
+}
 
 interface ProfileSlice extends IProfile {
-  getProfile: () => IProfile;
-  setProfile: (p: IProfile) => void;
+  getProfile: () => IProfile
+  setProfile: (p: IProfile) => void
   // setProfileField: (field: string, value: any) => void;
 }
 
@@ -39,11 +39,11 @@ export const useProfileStore = create<ProfileSlice>()(
     (set, get) => ({
       ...INITIAL_PROFILE,
       getProfile: () => get(),
-      setProfile: (p) => set({ ...p }),
+      setProfile: (p) => set({ ...p })
     }),
-    { name: 'profile' },
-  ),
-);
+    { name: 'profile' }
+  )
+)
 
 // the merchant which the current logged-in user is working for
 const INITIAL_INFO: TMerchantInfo = {
@@ -54,12 +54,12 @@ const INITIAL_INFO: TMerchantInfo = {
   companyName: '',
   email: '',
   location: '',
-  phone: '',
-};
+  phone: ''
+}
 
 interface MerchantInfoSlice extends TMerchantInfo {
-  getMerchantInfo: () => TMerchantInfo;
-  setMerchantInfo: (p: TMerchantInfo) => void;
+  getMerchantInfo: () => TMerchantInfo
+  setMerchantInfo: (p: TMerchantInfo) => void
 }
 
 export const useMerchantInfoStore = create<MerchantInfoSlice>()(
@@ -67,11 +67,11 @@ export const useMerchantInfoStore = create<MerchantInfoSlice>()(
     (set, get) => ({
       ...INITIAL_INFO,
       getMerchantInfo: () => get(),
-      setMerchantInfo: (p) => set({ ...p }),
+      setMerchantInfo: (p) => set({ ...p })
     }),
-    { name: 'merchantInfo' },
-  ),
-);
+    { name: 'merchantInfo' }
+  )
+)
 
 // --------------------------------
 const INITIAL_APP_VALUE: IAppConfig = {
@@ -79,13 +79,13 @@ const INITIAL_APP_VALUE: IAppConfig = {
   isProd: false,
   supportCurrency: [],
   supportTimeZone: [],
-  gateway: [],
-};
+  gateway: []
+}
 
 interface AppConfigSlice extends IAppConfig {
-  getAppConfig: () => IAppConfig;
-  setAppConfig: (a: IAppConfig) => void;
-  setGateway: (g: any) => void;
+  getAppConfig: () => IAppConfig
+  setAppConfig: (a: IAppConfig) => void
+  setGateway: (g: any) => void
 }
 
 export const useAppConfigStore = create<AppConfigSlice>()(
@@ -95,25 +95,25 @@ export const useAppConfigStore = create<AppConfigSlice>()(
       getAppConfig: () => get(),
       setAppConfig: (a) => set({ ...a }),
       setGateway: (g: any) => {
-        set({ ...get(), gateway: g });
-      },
+        set({ ...get(), gateway: g })
+      }
     }),
-    { name: 'appConfig' },
-  ),
-);
+    { name: 'appConfig' }
+  )
+)
 
 // ---------------
 interface ISession {
-  expired: boolean;
-  refresh: null | (() => void); // if session is expired when making an async fn call, save this fn here, so after re-login, re-run this fn
+  expired: boolean
+  refresh: null | (() => void) // if session is expired when making an async fn call, save this fn here, so after re-login, re-run this fn
 }
 const INITIAL_SESSION: ISession = {
   expired: true,
-  refresh: null,
-};
+  refresh: null
+}
 interface SessionStoreSlice extends ISession {
-  getSession: () => ISession;
-  setSession: (s: ISession) => void;
+  getSession: () => ISession
+  setSession: (s: ISession) => void
 }
 
 export const useSessionStore = create<SessionStoreSlice>()(
@@ -121,8 +121,8 @@ export const useSessionStore = create<SessionStoreSlice>()(
     (set, get) => ({
       ...INITIAL_SESSION,
       getSession: () => get(),
-      setSession: (a) => set({ ...a }),
+      setSession: (a) => set({ ...a })
     }),
-    { name: 'session' },
-  ),
-);
+    { name: 'session' }
+  )
+)

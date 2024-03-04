@@ -7,72 +7,72 @@ import {
   Radio,
   Row,
   Select,
-  message,
-} from 'antd';
-import { ReactElement, useEffect, useState } from 'react';
-import { getCountryListReq, saveUserProfileReq } from '../../requests';
-import { Country, IProfile } from '../../shared.types.d';
+  message
+} from 'antd'
+import { ReactElement, useEffect, useState } from 'react'
+import { getCountryListReq, saveUserProfileReq } from '../../requests'
+import { Country, IProfile } from '../../shared.types.d'
 
 const UserAccountTab = ({
   user,
   setUserProfile,
-  extraButton,
+  extraButton
 }: {
-  user: IProfile | null;
-  setUserProfile: (u: IProfile) => void;
-  extraButton?: ReactElement;
+  user: IProfile | null
+  setUserProfile: (u: IProfile) => void
+  extraButton?: ReactElement
 }) => {
-  const [form] = Form.useForm();
-  const [countryList, setCountryList] = useState<Country[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm()
+  const [countryList, setCountryList] = useState<Country[]>([])
+  const [loading, setLoading] = useState(false)
 
   const filterOption = (
     input: string,
-    option?: { label: string; value: string },
-  ) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase());
+    option?: { label: string; value: string }
+  ) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
 
   const onSave = async () => {
-    const userProfile = form.getFieldsValue();
-    setLoading(true);
-    const [_, err] = await saveUserProfileReq(userProfile);
-    setLoading(false);
+    const userProfile = form.getFieldsValue()
+    setLoading(true)
+    const [_, err] = await saveUserProfileReq(userProfile)
+    setLoading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success('User Info Saved');
-    setUserProfile(userProfile);
-  };
+    message.success('User Info Saved')
+    setUserProfile(userProfile)
+  }
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      const [list, err] = await getCountryListReq();
-      setLoading(false);
+      setLoading(true)
+      const [list, err] = await getCountryListReq()
+      setLoading(false)
       if (err != null) {
-        message.error(err.message);
-        return;
+        message.error(err.message)
+        return
       }
       setCountryList(
         list.map((c: any) => ({
           code: c.countryCode,
-          name: c.countryName,
-        })),
-      );
-    };
+          name: c.countryName
+        }))
+      )
+    }
 
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
-  const countryCode = Form.useWatch('countryCode', form);
+  const countryCode = Form.useWatch('countryCode', form)
   useEffect(() => {
     countryCode &&
       countryList.length > 0 &&
       form.setFieldValue(
         'countryName',
-        countryList.find((c) => c.code == countryCode)!.name,
-      );
-  }, [countryCode]);
+        countryList.find((c) => c.code == countryCode)!.name
+      )
+  }, [countryCode])
 
   return (
     user != null && (
@@ -103,8 +103,8 @@ const UserAccountTab = ({
               rules={[
                 {
                   required: true,
-                  message: 'Please input your first name!',
-                },
+                  message: 'Please input your first name!'
+                }
               ]}
             >
               <Input style={{ width: '240px' }} />
@@ -117,8 +117,8 @@ const UserAccountTab = ({
               rules={[
                 {
                   required: true,
-                  message: 'Please input your last name!',
-                },
+                  message: 'Please input your last name!'
+                }
               ]}
             >
               <Input style={{ width: '240px' }} />
@@ -169,8 +169,8 @@ const UserAccountTab = ({
               rules={[
                 {
                   required: true,
-                  message: 'Please select your first country!',
-                },
+                  message: 'Please select your first country!'
+                }
               ]}
             >
               <Select
@@ -183,7 +183,7 @@ const UserAccountTab = ({
                 filterOption={filterOption}
                 options={countryList.map((c) => ({
                   label: c.name,
-                  value: c.code,
+                  value: c.code
                 }))}
               />
             </Form.Item>
@@ -195,8 +195,8 @@ const UserAccountTab = ({
               rules={[
                 {
                   required: true,
-                  message: 'Please input your billing address!',
-                },
+                  message: 'Please input your billing address!'
+                }
               ]}
             >
               <Input />
@@ -272,7 +272,7 @@ const UserAccountTab = ({
         </div>
       </Form>
     )
-  );
-};
+  )
+}
 
-export default UserAccountTab;
+export default UserAccountTab

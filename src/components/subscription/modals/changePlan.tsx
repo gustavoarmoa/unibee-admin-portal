@@ -1,22 +1,22 @@
-import { Button, Divider, Modal, Select, Tag } from 'antd';
-import { IPlan, ISubscriptionType } from '../../../shared.types.d';
-import Plan from '../plan';
+import { Button, Divider, Modal, Select, Tag } from 'antd'
+import { IPlan, ISubscriptionType } from '../../../shared.types.d'
+import Plan from '../plan'
 
 interface Props {
-  isOpen: boolean;
-  loading: boolean;
-  subInfo: ISubscriptionType | null;
-  selectedPlanId: number | null;
-  plans: IPlan[];
+  isOpen: boolean
+  loading: boolean
+  subInfo: ISubscriptionType | null
+  selectedPlanId: number | null
+  plans: IPlan[]
   // onSelectPlanChange: (planId: number) => void;
-  setSelectedPlan: (planId: number) => void;
+  setSelectedPlan: (planId: number) => void
   onAddonChange: (
     addonId: number,
     quantity: number | null,
-    checked: boolean | null,
-  ) => void;
-  onCancel: () => void;
-  onConfirm: () => void;
+    checked: boolean | null
+  ) => void
+  onCancel: () => void
+  onConfirm: () => void
 }
 
 const ChangePlan = ({
@@ -29,14 +29,14 @@ const ChangePlan = ({
   setSelectedPlan,
   onAddonChange,
   onCancel,
-  onConfirm,
+  onConfirm
 }: Props) => {
   if (selectedPlanId == null) {
-    return null;
+    return null
   }
-  const selectedPlan = plans.find((p) => p.id == selectedPlanId);
+  const selectedPlan = plans.find((p) => p.id == selectedPlanId)
   if (selectedPlan == null) {
-    return null;
+    return null
   }
   return (
     <Modal
@@ -66,7 +66,7 @@ const ChangePlan = ({
               ) : (
                 p.planName
               ),
-            value: p.id,
+            value: p.id
           }))}
         />
       </div>
@@ -84,7 +84,7 @@ const ChangePlan = ({
       <div
         className="flex items-center justify-end gap-4"
         style={{
-          marginTop: '24px',
+          marginTop: '24px'
         }}
       >
         <Button onClick={onCancel} disabled={loading}>
@@ -100,7 +100,7 @@ const ChangePlan = ({
         </Button>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default ChangePlan;
+export default ChangePlan

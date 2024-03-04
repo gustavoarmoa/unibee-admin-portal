@@ -1,89 +1,89 @@
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Form, Input, Modal, Skeleton, Spin, message } from 'antd';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { emailValidate, passwordRegx } from '../helpers';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Form, Input, Modal, Skeleton, Spin, message } from 'antd'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { emailValidate, passwordRegx } from '../helpers'
 import {
   getMerchantInfoReq,
   logoutReq,
   resetPassReq,
   updateMerchantInfoReq,
-  uploadLogoReq,
-} from '../requests';
-import { IProfile, TMerchantInfo } from '../shared.types.d';
-import { useMerchantInfoStore, useProfileStore } from '../stores';
+  uploadLogoReq
+} from '../requests'
+import { IProfile, TMerchantInfo } from '../shared.types.d'
+import { useMerchantInfoStore, useProfileStore } from '../stores'
 
-const APP_PATH = import.meta.env.BASE_URL;
+const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
-  const merchantInfoStore = useMerchantInfoStore();
-  const profileStore = useProfileStore();
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false); // page loading
-  const [uploading, setUploading] = useState(false); // logo upload
-  const [submitting, setSubmitting] = useState(false);
-  const [resetPasswordModal, setResetPasswordModal] = useState(false);
-  const togglePasswordModal = () => setResetPasswordModal(!resetPasswordModal);
-  const [logoUrl, setLogoUrl] = useState('');
-  const [merchantInfo, setMerchantInfo] = useState<TMerchantInfo | null>(null);
+  const merchantInfoStore = useMerchantInfoStore()
+  const profileStore = useProfileStore()
+  const [form] = Form.useForm()
+  const [loading, setLoading] = useState(false) // page loading
+  const [uploading, setUploading] = useState(false) // logo upload
+  const [submitting, setSubmitting] = useState(false)
+  const [resetPasswordModal, setResetPasswordModal] = useState(false)
+  const togglePasswordModal = () => setResetPasswordModal(!resetPasswordModal)
+  const [logoUrl, setLogoUrl] = useState('')
+  const [merchantInfo, setMerchantInfo] = useState<TMerchantInfo | null>(null)
 
   const getInfo = async () => {
-    setLoading(true);
-    const [merchantInfo, err] = await getMerchantInfoReq();
-    setLoading(false);
+    setLoading(true)
+    const [merchantInfo, err] = await getMerchantInfoReq()
+    setLoading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
 
-    setMerchantInfo(merchantInfo);
-    setLogoUrl(merchantInfo.companyLogo);
-  };
+    setMerchantInfo(merchantInfo)
+    setLogoUrl(merchantInfo.companyLogo)
+  }
 
   const onFileUplaod = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    let file;
+    let file
     if (event.target.files && event.target.files.length > 0) {
-      file = event.target.files[0];
+      file = event.target.files[0]
     }
     if (file == null) {
-      return;
+      return
     }
 
     if (file.size > 4 * 1024 * 1024) {
-      message.error('Max logo file size: 4M.');
-      return;
+      message.error('Max logo file size: 4M.')
+      return
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-    setUploading(true);
-    const [logoUrl, err] = await uploadLogoReq(formData);
-    console.log('logo urll: ', logoUrl, '//', err);
-    setUploading(false);
+    const formData = new FormData()
+    formData.append('file', file)
+    setUploading(true)
+    const [logoUrl, err] = await uploadLogoReq(formData)
+    console.log('logo urll: ', logoUrl, '//', err)
+    setUploading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    form.setFieldValue('companyLogo', logoUrl);
-    setLogoUrl(logoUrl);
-  };
+    form.setFieldValue('companyLogo', logoUrl)
+    setLogoUrl(logoUrl)
+  }
 
   const onSubmit = async () => {
-    const info = form.getFieldsValue();
-    setSubmitting(true);
-    const [merchantInfo, err] = await updateMerchantInfoReq(info);
-    setSubmitting(false);
+    const info = form.getFieldsValue()
+    setSubmitting(true)
+    const [merchantInfo, err] = await updateMerchantInfoReq(info)
+    setSubmitting(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success('Info Updated');
-    merchantInfoStore.setMerchantInfo(merchantInfo);
-  };
+    message.success('Info Updated')
+    merchantInfoStore.setMerchantInfo(merchantInfo)
+  }
 
   useEffect(() => {
-    getInfo();
-  }, []);
+    getInfo()
+  }, [])
 
   return (
     <div>
@@ -108,13 +108,13 @@ const Index = () => {
             onFinish={onSubmit}
             name="basic"
             labelCol={{
-              span: 10,
+              span: 10
             }}
             wrapperCol={{
-              span: 16,
+              span: 16
             }}
             style={{
-              maxWidth: 600,
+              maxWidth: 600
             }}
             initialValues={merchantInfo}
             autoComplete="off"
@@ -125,8 +125,8 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: 'Please input your company name!',
-                },
+                  message: 'Please input your company name!'
+                }
               ]}
             >
               <Input />
@@ -138,16 +138,16 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: 'Please upload your company logo! (Max size: 4M)',
+                  message: 'Please upload your company logo! (Max size: 4M)'
                 },
                 ({ getFieldValue }) => ({
                   validator(rule, value) {
                     if (value != '') {
-                      return Promise.resolve();
+                      return Promise.resolve()
                     }
-                    return Promise.reject();
-                  },
-                }),
+                    return Promise.reject()
+                  }
+                })
               ]}
             >
               <label htmlFor="comapnyLogoURL" style={{ cursor: 'pointer' }}>
@@ -178,8 +178,8 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: 'Please input your company address!',
-                },
+                  message: 'Please input your company address!'
+                }
               ]}
             >
               <Input />
@@ -191,16 +191,16 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: 'Please input your Email!',
+                  message: 'Please input your Email!'
                 },
                 ({ getFieldValue }) => ({
                   validator(rule, value) {
                     if (emailValidate(value)) {
-                      return Promise.resolve();
+                      return Promise.resolve()
                     }
-                    return Promise.reject('Invalid email address');
-                  },
-                }),
+                    return Promise.reject('Invalid email address')
+                  }
+                })
               ]}
             >
               <Input />
@@ -212,8 +212,8 @@ const Index = () => {
               rules={[
                 {
                   required: true,
-                  message: 'Please input company phone!',
-                },
+                  message: 'Please input company phone!'
+                }
               ]}
             >
               <Input />
@@ -240,46 +240,46 @@ const Index = () => {
         )
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
 
 interface IResetPassProps {
-  email: string;
-  closeModal: () => void;
+  email: string
+  closeModal: () => void
 }
 const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate()
+  const [form] = Form.useForm()
+  const [loading, setLoading] = useState(false)
 
   const logout = async () => {
-    const [_, err] = await logoutReq();
-    localStorage.removeItem('merchantToken');
-    localStorage.removeItem('appConfig');
-    localStorage.removeItem('merchantInfo');
-    localStorage.removeItem('session');
-    localStorage.removeItem('profile');
+    const [_, err] = await logoutReq()
+    localStorage.removeItem('merchantToken')
+    localStorage.removeItem('appConfig')
+    localStorage.removeItem('merchantInfo')
+    localStorage.removeItem('session')
+    localStorage.removeItem('profile')
     navigate(`${APP_PATH}login`, {
-      state: { msg: 'Password reset succeeded, please relogin.' },
-    });
-  };
+      state: { msg: 'Password reset succeeded, please relogin.' }
+    })
+  }
 
   const onConfirm = async () => {
-    const formValues = form.getFieldsValue();
-    setLoading(true);
+    const formValues = form.getFieldsValue()
+    setLoading(true)
     const [_, err] = await resetPassReq(
       formValues.oldPassword,
-      formValues.newPassword,
-    );
-    setLoading(false);
+      formValues.newPassword
+    )
+    setLoading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    await logout();
-  };
+    await logout()
+  }
 
   return (
     <Modal
@@ -300,7 +300,7 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
           email,
           oldPassword: '',
           newPassword: '',
-          newPassword2: '',
+          newPassword2: ''
         }}
       >
         <Form.Item
@@ -309,8 +309,8 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
           rules={[
             {
               required: true,
-              message: 'Please input your old password!',
-            },
+              message: 'Please input your old password!'
+            }
           ]}
         >
           <Input.Password />
@@ -324,23 +324,23 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
           rules={[
             {
               required: true,
-              message: 'Please input your new password!',
+              message: 'Please input your new password!'
             },
             ({ getFieldValue }) => ({
               validator(rule, value) {
                 if (getFieldValue('oldPassword') == value) {
                   return Promise.reject(
-                    'New password should not be the same as old password.',
-                  );
+                    'New password should not be the same as old password.'
+                  )
                 }
                 if (passwordRegx.test(value)) {
-                  return Promise.resolve();
+                  return Promise.resolve()
                 }
                 return Promise.reject(
-                  '8-15 characters with lowercase, uppercase, numeric and special character(@ $ # ! % ? * &  ^)',
-                );
-              },
-            }),
+                  '8-15 characters with lowercase, uppercase, numeric and special character(@ $ # ! % ? * &  ^)'
+                )
+              }
+            })
           ]}
         >
           <Input.Password />
@@ -352,16 +352,16 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
           rules={[
             {
               required: true,
-              message: 'Please retype your new password!',
+              message: 'Please retype your new password!'
             },
             ({ getFieldValue }) => ({
               validator(rule, value) {
                 if (value == getFieldValue('newPassword')) {
-                  return Promise.resolve();
+                  return Promise.resolve()
                 }
-                return Promise.reject('please retype the same password');
-              },
-            }),
+                return Promise.reject('please retype the same password')
+              }
+            })
           ]}
         >
           <Input.Password onPressEnter={onConfirm} />
@@ -383,5 +383,5 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
         </Button>
       </div>
     </Modal>
-  );
-};
+  )
+}

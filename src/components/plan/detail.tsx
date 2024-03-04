@@ -2,43 +2,43 @@ import {
   CheckCircleOutlined,
   LoadingOutlined,
   MinusOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
-import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd';
-import update from 'immutability-helper';
-import React, { ReactElement, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { CURRENCY, PLAN_STATUS } from '../../constants';
-import { ramdonString } from '../../helpers';
+  PlusOutlined
+} from '@ant-design/icons'
+import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd'
+import update from 'immutability-helper'
+import React, { ReactElement, useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { CURRENCY, PLAN_STATUS } from '../../constants'
+import { ramdonString } from '../../helpers'
 import {
   activatePlan,
   getPlanDetailWithMore,
   savePlan,
-  togglePublishReq,
-} from '../../requests';
-import { IBillableMetrics, IPlan } from '../../shared.types.d';
+  togglePublishReq
+} from '../../requests'
+import { IBillableMetrics, IPlan } from '../../shared.types.d'
 
-const APP_PATH = import.meta.env.BASE_URL;
+const APP_PATH = import.meta.env.BASE_URL
 const getAmount = (amt: number, currency: string) =>
-  amt / CURRENCY[currency].stripe_factor;
+  amt / CURRENCY[currency].stripe_factor
 
 type TMetricsItem = {
-  localId: string;
-  metricId?: number;
-  metricLimit?: number | string;
-};
+  localId: string
+  metricId?: number
+  metricLimit?: number | string
+}
 type TNewPlan = {
-  currency: string;
-  intervalUnit: string;
-  intervalCount: number;
-  status: number;
-  publishStatus: number;
-  type: number; // 1: main, 2: add-on
-  imageUrl: string;
-  homeUrl: string;
-  addonIds: number[];
-  metricLimits: TMetricsItem[];
-};
+  currency: string
+  intervalUnit: string
+  intervalCount: number
+  status: number
+  publishStatus: number
+  type: number // 1: main, 2: add-on
+  imageUrl: string
+  homeUrl: string
+  addonIds: number[]
+  metricLimits: TMetricsItem[]
+}
 const NEW_PLAN: TNewPlan = {
   currency: 'EUR',
   intervalUnit: 'month',
@@ -49,134 +49,134 @@ const NEW_PLAN: TNewPlan = {
   imageUrl: 'http://www.google.com',
   homeUrl: 'http://www.google.com',
   addonIds: [],
-  metricLimits: [],
-};
+  metricLimits: []
+}
 
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
-  const params = useParams();
-  const planId = params.planId;
-  const isNew = planId == null;
-  console.log('planId , isNew: ', planId, '//', isNew);
+  const params = useParams()
+  const planId = params.planId
+  const isNew = planId == null
+  console.log('planId , isNew: ', planId, '//', isNew)
 
   // const appConfigStore = useAppConfigStore();
-  const [loading, setLoading] = useState(false);
-  const [activating, setActivating] = useState(false);
-  const [publishing, setPublishing] = useState(false); // when toggling publish/unpublish
+  const [loading, setLoading] = useState(false)
+  const [activating, setActivating] = useState(false)
+  const [publishing, setPublishing] = useState(false) // when toggling publish/unpublish
   const [plan, setPlan] = useState<IPlan | TNewPlan | null>(
-    isNew ? NEW_PLAN : null,
-  ); // plan obj is used for Form's initialValue, any changes is handled by Form itself, not updated here.
-  const [addons, setAddons] = useState<IPlan[]>([]); // all the active addons we have (addon has the same structure as Plan).
-  const [selectAddons, setSelectAddons] = useState<IPlan[]>([]); // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
-  const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]); // all the billable metrics, not used for edit, but used in <Select /> for user to choose.
+    isNew ? NEW_PLAN : null
+  ) // plan obj is used for Form's initialValue, any changes is handled by Form itself, not updated here.
+  const [addons, setAddons] = useState<IPlan[]>([]) // all the active addons we have (addon has the same structure as Plan).
+  const [selectAddons, setSelectAddons] = useState<IPlan[]>([]) // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
+  const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]) // all the billable metrics, not used for edit, but used in <Select /> for user to choose.
   const [selectedMetrics, setSelectedMetrics] = useState<TMetricsItem[]>([
-    { localId: ramdonString(8) },
-  ]);
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
+    { localId: ramdonString(8) }
+  ])
+  const navigate = useNavigate()
+  const [form] = Form.useForm()
 
-  const itvCountValue = Form.useWatch('intervalCount', form);
-  const itvCountUnit = Form.useWatch('intervalUnit', form);
-  const addonCurrency = Form.useWatch('currency', form);
-  const planTypeWatch = Form.useWatch('type', form);
+  const itvCountValue = Form.useWatch('intervalCount', form)
+  const itvCountUnit = Form.useWatch('intervalUnit', form)
+  const addonCurrency = Form.useWatch('currency', form)
+  const planTypeWatch = Form.useWatch('type', form)
   // The selector is static and does not support closures.
   // const customValue = Form.useWatch((values) => `name: ${values.itvCountValue || ''}`, form);
 
   useEffect(() => {
     if (!isNew && plan?.status != 1) {
       // 1: editing, 2: active
-      return;
+      return
     }
     if (!isNew && plan?.type == 2) {
       // 1: main plan, 2: addon
-      return;
+      return
     }
     // main plan's currency/intervalUnit-Count must match its addons currency/*** */
     const newAddons = addons.filter(
       (a) =>
         a.intervalCount == itvCountValue &&
         a.intervalUnit == itvCountUnit &&
-        a.currency == addonCurrency,
-    );
-    setSelectAddons(newAddons);
+        a.currency == addonCurrency
+    )
+    setSelectAddons(newAddons)
     // when editing addon, don't do anything in this effect.
     // once changed, I'm gonna clear the selected addons,
-  }, [itvCountUnit, itvCountValue, addonCurrency]);
+  }, [itvCountUnit, itvCountValue, addonCurrency])
 
   const onSave = async (values: any) => {
-    const f = JSON.parse(JSON.stringify(values));
-    f.amount = Number(f.amount);
-    f.amount *= CURRENCY[f.currency].stripe_factor;
-    f.intervalCount = Number(f.intervalCount);
+    const f = JSON.parse(JSON.stringify(values))
+    f.amount = Number(f.amount)
+    f.amount *= CURRENCY[f.currency].stripe_factor
+    f.intervalCount = Number(f.intervalCount)
 
     if (!isNew) {
-      f.planId = f.id;
-      delete f.id;
-      delete f.status;
-      delete f.publishStatus;
-      delete f.type; // once plan created, you cannot change its type(main plan, addon)
+      f.planId = f.id
+      delete f.id
+      delete f.status
+      delete f.publishStatus
+      delete f.type // once plan created, you cannot change its type(main plan, addon)
     }
-    let m = JSON.parse(JSON.stringify(selectedMetrics)); // selectedMetrics.map(metric => ({metricLimit: Number(metric.metricLimit)}))
+    let m = JSON.parse(JSON.stringify(selectedMetrics)) // selectedMetrics.map(metric => ({metricLimit: Number(metric.metricLimit)}))
     m = m.map((metrics: any) => ({
       metricId: metrics.metricId,
-      metricLimit: Number(metrics.metricLimit),
-    }));
-    m = m.filter((metric: any) => !isNaN(metric.metricLimit));
-    f.metricLimits = m;
+      metricLimit: Number(metrics.metricLimit)
+    }))
+    m = m.filter((metric: any) => !isNaN(metric.metricLimit))
+    f.metricLimits = m
 
-    setLoading(true);
-    const [_, err] = await savePlan(f, isNew);
-    setLoading(false);
+    setLoading(true)
+    const [_, err] = await savePlan(f, isNew)
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success(`Plan ${isNew ? 'created' : 'saved'}`);
+    message.success(`Plan ${isNew ? 'created' : 'saved'}`)
     setTimeout(() => {
-      navigate(`${APP_PATH}plan/list`);
-    }, 1500);
-  };
+      navigate(`${APP_PATH}plan/list`)
+    }, 1500)
+  }
 
   const onActivate = async () => {
-    const planId = Number(params.planId);
+    const planId = Number(params.planId)
     if (isNaN(planId)) {
-      message.error('Invalid planId');
-      return;
+      message.error('Invalid planId')
+      return
     }
-    setActivating(true);
-    const [_, err] = await activatePlan(planId);
-    setActivating(false);
+    setActivating(true)
+    const [_, err] = await activatePlan(planId)
+    setActivating(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success('Plan activated');
+    message.success('Plan activated')
     setTimeout(() => {
-      navigate(`${APP_PATH}plan/list`);
-    }, 2000);
-  };
+      navigate(`${APP_PATH}plan/list`)
+    }, 2000)
+  }
 
   const fetchData = async () => {
-    const planId = Number(params.planId);
-    setLoading(true);
+    const planId = Number(params.planId)
+    setLoading(true)
     const [detailRes, err] = await getPlanDetailWithMore(
       isNew ? null : planId,
-      fetchData,
-    );
-    setLoading(false);
+      fetchData
+    )
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
 
-    const { planDetail, addonList, metricsList } = detailRes;
-    console.log('res: ', planDetail, '//', addonList, '//', metricsList);
+    const { planDetail, addonList, metricsList } = detailRes
+    console.log('res: ', planDetail, '//', addonList, '//', metricsList)
 
-    const addons = addonList.map((p: any) => p.plan);
-    setAddons(addons);
-    setMetricsList(metricsList);
+    const addons = addonList.map((p: any) => p.plan)
+    setAddons(addons)
+    setMetricsList(metricsList)
     if (isNew) {
-      return;
+      return
     }
     // for editing existing plan, we continue with planDetailRes
 
@@ -184,14 +184,14 @@ const Index = () => {
     // but I want to put addonIds obj as a props of the local plan obj.
     planDetail.plan.amount = getAmount(
       planDetail.plan.amount,
-      planDetail.plan.currency,
-    ); // /= 100; // TODO: addon also need to do the same, use a fn to do this
+      planDetail.plan.currency
+    ) // /= 100; // TODO: addon also need to do the same, use a fn to do this
 
     planDetail.plan.addonIds =
-      planDetail.addonIds == null ? [] : planDetail.addonIds;
+      planDetail.addonIds == null ? [] : planDetail.addonIds
 
-    setPlan(planDetail.plan);
-    form.setFieldsValue(planDetail.plan);
+    setPlan(planDetail.plan)
+    form.setFieldsValue(planDetail.plan)
 
     if (!isNew) {
       // if empty, insert an placeholder item.
@@ -202,9 +202,9 @@ const Index = () => {
           : planDetail.metricPlanLimits.map((m: any) => ({
               localId: ramdonString(8),
               metricId: m.metricId,
-              metricLimit: m.metricLimit,
-            }));
-      setSelectedMetrics(metrics);
+              metricLimit: m.metricLimit
+            }))
+      setSelectedMetrics(metrics)
     }
 
     setSelectAddons(
@@ -212,65 +212,65 @@ const Index = () => {
         (a: any) =>
           a.intervalCount == planDetail.plan.intervalCount &&
           a.intervalUnit == planDetail.plan.intervalUnit &&
-          a.currency == planDetail.plan.currency,
-      ),
-    );
-  };
+          a.currency == planDetail.plan.currency
+      )
+    )
+  }
 
   // used only when editing an existing plan
   const togglePublish = async () => {
-    setPublishing(true);
+    setPublishing(true)
     const [_, err] = await togglePublishReq({
       planId: (plan as IPlan).id,
-      publishAction: plan!.publishStatus == 1 ? 'PUBLISH' : 'UNPUBLISH',
-    });
+      publishAction: plan!.publishStatus == 1 ? 'PUBLISH' : 'UNPUBLISH'
+    })
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    await fetchData();
-    setPublishing(false);
-  };
+    await fetchData()
+    setPublishing(false)
+  }
 
   // it just adds an empty metrics item
   const addMetrics = () => {
-    const m: TMetricsItem = { localId: ramdonString(8) };
-    setSelectedMetrics(update(selectedMetrics, { $push: [m] }));
-  };
+    const m: TMetricsItem = { localId: ramdonString(8) }
+    setSelectedMetrics(update(selectedMetrics, { $push: [m] }))
+  }
 
   const removeMetrics = (localId: string) => {
-    const idx = selectedMetrics.findIndex((m) => m.localId == localId);
+    const idx = selectedMetrics.findIndex((m) => m.localId == localId)
     if (idx != -1) {
-      setSelectedMetrics(update(selectedMetrics, { $splice: [[idx, 1]] }));
+      setSelectedMetrics(update(selectedMetrics, { $splice: [[idx, 1]] }))
     }
-  };
+  }
 
   const updateMetrics =
     (localId: string) => (evt: React.ChangeEvent<HTMLInputElement>) => {
-      const idx = selectedMetrics.findIndex((m) => m.localId == localId);
-      console.log('localId: ', localId);
+      const idx = selectedMetrics.findIndex((m) => m.localId == localId)
+      console.log('localId: ', localId)
       if (idx != -1) {
         setSelectedMetrics(
           update(selectedMetrics, {
-            [idx]: { metricLimit: { $set: evt.target.value } },
-          }),
-        );
+            [idx]: { metricLimit: { $set: evt.target.value } }
+          })
+        )
       }
-    };
+    }
 
   const onMetricSelectChange = (localId: string) => (val: number) => {
-    const idx = selectedMetrics.findIndex((m) => m.localId == localId);
+    const idx = selectedMetrics.findIndex((m) => m.localId == localId)
     if (idx != -1) {
       const newMetrics = update(selectedMetrics, {
-        [idx]: { metricId: { $set: val } },
-      });
-      setSelectedMetrics(newMetrics);
+        [idx]: { metricId: { $set: val } }
+      })
+      setSelectedMetrics(newMetrics)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   return (
     <div>
@@ -304,8 +304,8 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: 'Please input your plan name!',
-              },
+                message: 'Please input your plan name!'
+              }
             ]}
           >
             <Input />
@@ -317,8 +317,8 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: 'Please input your plan description!',
-              },
+                message: 'Please input your plan description!'
+              }
             ]}
           >
             <Input />
@@ -357,8 +357,8 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: 'Please select your plan currency!',
-              },
+                message: 'Please select your plan currency!'
+              }
             ]}
           >
             <Select
@@ -366,7 +366,7 @@ const Index = () => {
               options={[
                 { value: 'EUR', label: 'EUR' },
                 { value: 'USD', label: 'USD' },
-                { value: 'JPY', label: 'JPY' },
+                { value: 'JPY', label: 'JPY' }
               ]}
             />
           </Form.Item>
@@ -377,8 +377,8 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: 'Please input your plan price!',
-              },
+                message: 'Please input your plan price!'
+              }
             ]}
           >
             <Input
@@ -394,8 +394,8 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: 'Please select interval unit!',
-              },
+                message: 'Please select interval unit!'
+              }
             ]}
           >
             <Select
@@ -404,7 +404,7 @@ const Index = () => {
                 { value: 'day', label: 'day' },
                 { value: 'week', label: 'week' },
                 { value: 'month', label: 'month' },
-                { value: 'year', label: 'year' },
+                { value: 'year', label: 'year' }
               ]}
             />
           </Form.Item>
@@ -415,8 +415,8 @@ const Index = () => {
             rules={[
               {
                 required: true,
-                message: 'Please input interval count!',
-              },
+                message: 'Please input interval count!'
+              }
             ]}
           >
             <Input />
@@ -428,7 +428,7 @@ const Index = () => {
               disabled={!isNew || plan.status != 1}
               options={[
                 { value: 1, label: 'Main plan' },
-                { value: 2, label: 'Addon' },
+                { value: 2, label: 'Addon' }
               ]}
             />
           </Form.Item>
@@ -442,7 +442,7 @@ const Index = () => {
                 style={{ width: '100%' }}
                 options={selectAddons.map((a) => ({
                   label: a.planName,
-                  value: a.id,
+                  value: a.id
                 }))}
               />
             </Form.Item>
@@ -477,7 +477,7 @@ const Index = () => {
                     style={{ width: 180 }}
                     options={metricsList.map((m) => ({
                       label: m.metricName,
-                      value: m.id,
+                      value: m.id
                     }))}
                   />
                 </Col>
@@ -564,7 +564,7 @@ const Index = () => {
         </Form>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

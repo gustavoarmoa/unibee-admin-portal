@@ -1,19 +1,19 @@
-import { Checkbox, Input } from 'antd';
-import type { CheckboxChangeEvent } from 'antd/es/checkbox';
-import React, { useEffect, useState } from 'react';
-import { showAmount } from '../../helpers';
-import { IPlan } from '../../shared.types.d';
+import { Checkbox, Input } from 'antd'
+import type { CheckboxChangeEvent } from 'antd/es/checkbox'
+import React, { useEffect, useState } from 'react'
+import { showAmount } from '../../helpers'
+import { IPlan } from '../../shared.types.d'
 
 interface IPLanProps {
-  plan: IPlan;
-  selectedPlan: number | null;
-  isActive: boolean; // whether current plan is the one user has subscribed(Y: highlight it)
-  setSelectedPlan: (p: number) => void;
+  plan: IPlan
+  selectedPlan: number | null
+  isActive: boolean // whether current plan is the one user has subscribed(Y: highlight it)
+  setSelectedPlan: (p: number) => void
   onAddonChange: (
     addonId: number,
     quantity: number | null,
-    checked: boolean | null,
-  ) => void;
+    checked: boolean | null
+  ) => void
 }
 
 const Index = ({
@@ -21,30 +21,30 @@ const Index = ({
   selectedPlan,
   isActive,
   setSelectedPlan,
-  onAddonChange,
+  onAddonChange
 }: IPLanProps) => {
-  const [totalAmount, setTotalAmount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0)
   const addonCheck = (addonId: number) => (e: CheckboxChangeEvent) => {
-    onAddonChange(addonId, null, e.target.checked);
-  };
+    onAddonChange(addonId, null, e.target.checked)
+  }
   const addonQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onAddonChange(Number(e.target.id), Number(e.target.value), null);
-  };
+    onAddonChange(Number(e.target.id), Number(e.target.value), null)
+  }
 
   useEffect(() => {
-    let amount = plan.amount;
+    let amount = plan.amount
     if (plan.addons != null && plan.addons.length > 0) {
       plan.addons.forEach((a) => {
         if (a.checked && Number.isInteger(Number(a.quantity))) {
-          amount += Number(a.amount) * Number(a.quantity);
+          amount += Number(a.amount) * Number(a.quantity)
         }
-      });
+      })
       if (isNaN(amount)) {
-        amount = plan.amount;
+        amount = plan.amount
       }
     }
-    setTotalAmount(amount);
-  }, [plan]);
+    setTotalAmount(amount)
+  }, [plan])
 
   return (
     <div>
@@ -65,7 +65,7 @@ const Index = ({
               ? "rgba(0, 0, 0, 0.35) 0px 5px 15px"
               : "unset",
           */
-          cursor: 'pointer',
+          cursor: 'pointer'
         }}
       >
         <div style={{ fontSize: '28px' }}>{plan.planName}</div>
@@ -86,14 +86,14 @@ const Index = ({
                           width: '120px',
                           textOverflow: 'ellipsis',
                           overflow: 'hidden',
-                          whiteSpace: 'nowrap',
+                          whiteSpace: 'nowrap'
                         }}
                       >
                         {a.planName}
                       </div>
                       <div style={{ fontSize: '11px' }}>{` ${showAmount(
                         a.amount,
-                        a.currency,
+                        a.currency
                       )}/${a.intervalCount == 1 ? '' : a.intervalCount}${
                         a.intervalUnit
                       }`}</div>
@@ -116,7 +116,7 @@ const Index = ({
         )}
         <div style={{ fontSize: '14px' }}>{`${showAmount(
           plan.amount,
-          plan.currency,
+          plan.currency
         )}/${plan.intervalCount == 1 ? '' : plan.intervalCount}${
           plan.intervalUnit
         }`}</div>
@@ -128,7 +128,7 @@ const Index = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

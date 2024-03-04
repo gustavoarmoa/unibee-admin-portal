@@ -1,20 +1,20 @@
-import { Button, Col, Modal, Row } from 'antd';
-import { showAmount } from '../../../helpers';
-import { ISubscriptionType } from '../../../shared.types.d';
+import { Button, Col, Modal, Row } from 'antd'
+import { showAmount } from '../../../helpers'
+import { ISubscriptionType } from '../../../shared.types.d'
 
 interface Props {
-  isOpen: boolean;
-  loading: boolean;
-  subInfo: ISubscriptionType | null;
-  onCancel: () => void;
-  onConfirm: () => void;
+  isOpen: boolean
+  loading: boolean
+  subInfo: ISubscriptionType | null
+  onCancel: () => void
+  onConfirm: () => void
 }
 const ResumeSub = ({
   isOpen,
   loading,
   subInfo,
   onCancel,
-  onConfirm,
+  onConfirm
 }: Props) => {
   return (
     <Modal
@@ -56,14 +56,14 @@ const ResumeSub = ({
         </Col>
         <Col span={6}>
           {new Date(
-            (subInfo?.currentPeriodEnd as number) * 1000,
+            (subInfo?.currentPeriodEnd as number) * 1000
           ).toDateString()}
         </Col>
       </Row>
       <div
         className="flex items-center justify-end gap-4"
         style={{
-          marginTop: '24px',
+          marginTop: '24px'
         }}
       >
         <Button onClick={onCancel} disabled={loading}>
@@ -79,7 +79,7 @@ const ResumeSub = ({
         </Button>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default ResumeSub;
+export default ResumeSub

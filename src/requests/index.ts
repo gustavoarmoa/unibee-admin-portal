@@ -1,21 +1,21 @@
-import axios from 'axios';
+import axios from 'axios'
 // import { useProfileStore } from "../stores";
-import { CURRENCY } from '../constants';
+import { CURRENCY } from '../constants'
 import {
   ExpiredError,
   IBillableMetrics,
   IProfile,
-  TMerchantInfo,
-} from '../shared.types.d';
+  TMerchantInfo
+} from '../shared.types.d'
 import {
   useAppConfigStore,
   useMerchantInfoStore,
-  useSessionStore,
-} from '../stores';
-import { request } from './client';
+  useSessionStore
+} from '../stores'
+import { request } from './client'
 
-const API_URL = import.meta.env.VITE_API_URL;
-const session = useSessionStore.getState();
+const API_URL = import.meta.env.VITE_API_URL
+const session = useSessionStore.getState()
 
 // after login, we need merchantInfo, appConfig, payment gatewayInfo, etc.
 // this fn get all these data in one go.
@@ -23,80 +23,80 @@ export const initializeReq = async () => {
   const [
     [appConfig, errConfig],
     [gateways, errGateway],
-    [merchant, errMerchant],
+    [merchant, errMerchant]
   ] = await Promise.all([
     getAppConfigReq(),
     getGatewayListReq(),
-    getMerchantInfoReq(),
-  ]);
-  const err = errConfig || errGateway || errMerchant;
+    getMerchantInfoReq()
+  ])
+  const err = errConfig || errGateway || errMerchant
   if (null != err) {
-    return [null, err];
+    return [null, err]
   }
-  return [{ appConfig, gateways, merchant }, null];
-};
+  return [{ appConfig, gateways, merchant }, null]
+}
 
 type TPassLogin = {
-  email: string;
-  password: string;
-};
+  email: string
+  password: string
+}
 export const loginWithPasswordReq = async (body: TPassLogin) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.post('/merchant/auth/sso/login', body);
-    session.setSession({ expired: false, refresh: null });
-    return [res.data.data, null];
+    const res = await request.post('/merchant/auth/sso/login', body)
+    session.setSession({ expired: false, refresh: null })
+    return [res.data.data, null]
   } catch (err) {
-    session.setSession({ expired: true, refresh: null });
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    session.setSession({ expired: true, refresh: null })
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const loginWithOTPReq = async (email: string) => {
   try {
-    const res = await request.post(`/merchant/auth/sso/loginOTP`, { email });
-    return [null, null];
+    const res = await request.post(`/merchant/auth/sso/loginOTP`, { email })
+    return [null, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const loginWithOTPVerifyReq = async (
   email: string,
-  verificationCode: string,
+  verificationCode: string
 ) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
     const res = await request.post(`/merchant/auth/sso/loginOTPVerify`, {
       email,
-      verificationCode,
-    });
-    session.setSession({ expired: false, refresh: null });
-    return [res.data.data, null];
+      verificationCode
+    })
+    session.setSession({ expired: false, refresh: null })
+    return [res.data.data, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const forgetPassReq = async (email: string) => {
   try {
     const res = await request.post(`/merchant/auth/sso/passwordForgetOTP`, {
-      email,
-    });
-    return [null, null];
+      email
+    })
+    return [null, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const forgetPassVerifyReq = async (
   email: string,
   verificationCode: string,
-  newPassword: string,
+  newPassword: string
 ) => {
   try {
     const res = await request.post(
@@ -104,372 +104,372 @@ export const forgetPassVerifyReq = async (
       {
         email,
         verificationCode,
-        newPassword,
-      },
-    );
-    return [null, null];
+        newPassword
+      }
+    )
+    return [null, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const resetPassReq = async (
   oldPassword: string,
-  newPassword: string,
+  newPassword: string
 ) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
     const res = await request.post(`/merchant/member/passwordReset`, {
       oldPassword,
-      newPassword,
-    });
+      newPassword
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null];
+    return [null, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const logoutReq = async () => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.post(`/merchant/member/logout`, {});
-    const code = res.data.code;
-    session.setSession({ expired: true, refresh: null });
-    return [null, null];
+    const res = await request.post(`/merchant/member/logout`, {})
+    const code = res.data.code
+    session.setSession({ expired: true, refresh: null })
+    return [null, null]
   } catch (err) {
-    return [null, null];
+    return [null, null]
   }
-};
+}
 
 export const getAppConfigReq = async () => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.get(`/system/information/get`, {});
+    const res = await request.get(`/system/information/get`, {})
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data, null];
+    return [res.data.data, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const getGatewayListReq = async () => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.get(`/merchant/gateway/list`);
+    const res = await request.get(`/merchant/gateway/list`)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data.gateways, null];
+    return [res.data.data.gateways, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const getMerchantInfoReq = async () => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.get(`/merchant/get`);
+    const res = await request.get(`/merchant/get`)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
       // throw new ExpiredError('Session expired');
     }
-    return [res.data.data.merchant, null];
+    return [res.data.data.merchant, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.post(`/merchant/update`, body);
+    const res = await request.post(`/merchant/update`, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data.merchant, null];
+    return [res.data.data.merchant, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const uploadLogoReq = async (f: FormData) => {
-  const token = localStorage.getItem('merchantToken');
-  const session = useSessionStore.getState();
+  const token = localStorage.getItem('merchantToken')
+  const session = useSessionStore.getState()
   try {
     const res = await axios.post(`${API_URL}/merchant/oss/file `, f, {
       headers: {
         'Content-Type': 'multipart/form-data',
-        Authorization: `${token}`, // Bearer: ******
-      },
-    });
+        Authorization: `${token}` // Bearer: ******
+      }
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data.url, null];
+    return [res.data.data.url, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // ---------------
 type TPlanListBody = {
-  type?: number[] | null;
-  status?: number[] | null;
-  page: number;
-  count: number;
-};
+  type?: number[] | null
+  status?: number[] | null
+  page: number
+  count: number
+}
 export const getPlanList = async (
   body: TPlanListBody,
-  refreshCb: (() => void) | null,
+  refreshCb: (() => void) | null
 ) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.post('/merchant/plan/list', body);
+    const res = await request.post('/merchant/plan/list', body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
+      session.setSession({ expired: true, refresh: refreshCb })
       // throw new Error('Session expired');
-      throw new ExpiredError('Session expired');
+      throw new ExpiredError('Session expired')
     }
-    return [res.data.data.plans, null];
+    return [res.data.data.plans, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // -----------------
 
 export const getPlanDetail = async (planId: number) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
     const res = await request.post('/merchant/plan/detail', {
-      planId,
-    });
+      planId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new ExpiredError('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
     }
-    return [res.data.data.plan, null];
+    return [res.data.data.plan, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // 3 calls to get planDetail(with planId), addonList, and metricsList
 // "planId: null" means caller want to create a new plan, so I pass a resolved promise to meet the caller signature.
 export const getPlanDetailWithMore = async (
   planId: number | null,
-  refreshCb: (() => void) | null,
+  refreshCb: (() => void) | null
 ) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   const planDetailRes =
     planId == null
       ? Promise.resolve([{ data: { data: null, code: 0 } }, null])
-      : getPlanDetail(planId);
+      : getPlanDetail(planId)
   const [
     [planDetail, errDetail],
     [addonList, addonErr],
-    [metricsList, errMetrics],
+    [metricsList, errMetrics]
   ] = await Promise.all([
     planDetailRes,
     getPlanList({ type: [2], status: [2], page: 0, count: 100 }, null), // type: 2 -> addon, status: 2 -> active
-    getMetricsListReq(null),
-  ]);
-  const err = errDetail || addonErr || errMetrics;
+    getMetricsListReq(null)
+  ])
+  const err = errDetail || addonErr || errMetrics
   if (null != err) {
     if (err instanceof ExpiredError) {
-      session.setSession({ expired: true, refresh: refreshCb });
+      session.setSession({ expired: true, refresh: refreshCb })
     }
-    return [null, err];
+    return [null, err]
   }
 
-  return [{ planDetail, addonList, metricsList }, null];
-};
+  return [{ planDetail, addonList, metricsList }, null]
+}
 
 // create a new or save an existing plan
 export const savePlan = async (planDetail: any, isNew: boolean) => {
-  const url = isNew ? '/merchant/plan/new' : `/merchant/plan/edit`;
+  const url = isNew ? '/merchant/plan/new' : `/merchant/plan/edit`
   try {
-    const res = await request.post(url, planDetail);
+    const res = await request.post(url, planDetail)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // backend has no meaningful result returned.
+    return [null, null] // backend has no meaningful result returned.
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const activatePlan = async (planId: number) => {
   try {
     const res = await request.post(`/merchant/plan/activate`, {
-      planId,
-    });
+      planId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // backend has no meaningful result returned.
+    return [null, null] // backend has no meaningful result returned.
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const togglePublishReq = async ({
   planId,
-  publishAction,
+  publishAction
 }: {
-  planId: number;
-  publishAction: 'PUBLISH' | 'UNPUBLISH';
+  planId: number
+  publishAction: 'PUBLISH' | 'UNPUBLISH'
 }) => {
   const url = `/merchant/plan/${
     publishAction === 'PUBLISH' ? 'publish' : 'unpublished'
-  }`;
+  }`
   try {
-    const res = await request.post(url, { planId });
+    const res = await request.post(url, { planId })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // backend has no meaningful result returned.
+    return [null, null] // backend has no meaningful result returned.
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.get(`/merchant/metric/list`);
+    const res = await request.get(`/merchant/metric/list`)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
+      session.setSession({ expired: true, refresh: refreshCb })
       // throw new ExpiredError('Session expired');
-      throw new ExpiredError('Session expired');
+      throw new ExpiredError('Session expired')
     }
-    return [res.data.data.merchantMetrics, null];
+    return [res.data.data.merchantMetrics, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // --------
 type TMetricsBody = {
   // for edit
-  metricId: number;
-  metricName: string;
-  metricDescription: string;
-};
+  metricId: number
+  metricName: string
+  metricDescription: string
+}
 type TMetricsBodyNew = {
   // for creation
-  code: string;
-  metricName: string;
-  metricDescription: string;
-  aggregationType: number;
-  aggregationProperty: number;
-};
+  code: string
+  metricName: string
+  metricDescription: string
+  aggregationType: number
+  aggregationProperty: number
+}
 // create a new or save an existing metrics
 export const saveMetricsReq = async (
   body: TMetricsBody | TMetricsBodyNew,
-  isNew: boolean,
+  isNew: boolean
 ) => {
-  const url = isNew ? `/merchant/metric/new` : `/merchant/metric/edit`;
+  const url = isNew ? `/merchant/metric/new` : `/merchant/metric/edit`
   try {
-    const res = await request.post(url, body);
+    const res = await request.post(url, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // backend has no meaningful result returned.
+    return [null, null] // backend has no meaningful result returned.
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 // ---------
 
 export const getMetricDetailReq = async (
   metricId: number,
-  refreshCb: () => void,
+  refreshCb: () => void
 ) => {
   try {
     const res = await request.post(`/merchant/metric/detail`, {
-      metricId,
-    });
+      metricId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
     }
-    return [res.data.data.merchantMetric, null];
+    return [res.data.data.merchantMetric, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // ----------
 type TSubListReq = {
-  status: number[];
-  page: number;
-  count: number;
-};
+  status: number[]
+  page: number
+  count: number
+}
 export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
   try {
-    const res = await request.post(`/merchant/subscription/list`, body);
+    const res = await request.post(`/merchant/subscription/list`, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
     }
-    return [res.data.data.subscriptions, null];
+    return [res.data.data.subscriptions, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 // ------------
 
 export const getSubDetail = async (subscriptionId: string) => {
   try {
     const res = await request.post(`/merchant/subscription/detail`, {
-      subscriptionId,
-    });
+      subscriptionId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new ExpiredError('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
     }
-    return [res.data.data, null];
+    return [res.data.data, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const getSubDetailWithMore = async (
   subscriptionId: string,
-  refreshCb: (() => void) | null,
+  refreshCb: (() => void) | null
 ) => {
   const [[subDetail, errSubDetail], [planList, errPlanList]] =
     await Promise.all([
@@ -479,20 +479,20 @@ export const getSubDetailWithMore = async (
           type: [1], // main plan
           status: [2], // active
           page: 0,
-          count: 100,
+          count: 100
         },
-        null,
-      ),
-    ]);
-  const err = errSubDetail || errPlanList;
+        null
+      )
+    ])
+  const err = errSubDetail || errPlanList
   if (null != err) {
     if (err instanceof ExpiredError) {
-      session.setSession({ expired: true, refresh: refreshCb });
+      session.setSession({ expired: true, refresh: refreshCb })
     }
-    return [null, err];
+    return [null, err]
   }
-  return [{ subDetail, planList }, null];
-};
+  return [{ subDetail, planList }, null]
+}
 
 // new user has choosen a sub plan, but not paid yet, before the payment due date, user and admin can cancel it.
 // this fn is for this purpose only, this call only work for sub.status == created.
@@ -500,41 +500,41 @@ export const getSubDetailWithMore = async (
 export const cancelSubReq = async (subscriptionId: string) => {
   try {
     const res = await request.post(`/merchant/subscription/cancel`, {
-      subscriptionId,
-    });
+      subscriptionId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // backend has no meaningful return value
+    return [null, null] // backend has no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const createPreviewReq = async (
   subscriptionId: string,
   newPlanId: number,
-  addons: { quantity: number; addonPlanId: number }[],
+  addons: { quantity: number; addonPlanId: number }[]
 ) => {
   try {
     const res = await request.post(`/merchant/subscription/update_preview`, {
       subscriptionId,
       newPlanId,
       quantity: 1,
-      addonParams: addons,
-    });
+      addonParams: addons
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data, null];
+    return [res.data.data, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const updateSubscription = async (
   subscriptionId: string,
@@ -542,7 +542,7 @@ export const updateSubscription = async (
   addons: { quantity: number; addonPlanId: number }[],
   confirmTotalAmount: number,
   confirmCurrency: string,
-  prorationDate: number,
+  prorationDate: number
 ) => {
   try {
     const res = await request.post(`/merchant/subscription/update_submit`, {
@@ -552,552 +552,549 @@ export const updateSubscription = async (
       addonParams: addons,
       confirmTotalAmount,
       confirmCurrency,
-      prorationDate,
-    });
+      prorationDate
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data, null];
+    return [res.data.data, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // terminate the subscription, immediate: true -> now, immediate: false -> at the end of this billing cycle
 export const terminateSubReq = async (
   SubscriptionId: string,
-  immediate: boolean,
+  immediate: boolean
 ) => {
   const body: {
-    SubscriptionId: string;
-    invoiceNow?: boolean;
-    prorate?: boolean;
+    SubscriptionId: string
+    invoiceNow?: boolean
+    prorate?: boolean
   } = {
-    SubscriptionId,
-  };
-  let url = `/merchant/subscription/cancel_at_period_end`;
+    SubscriptionId
+  }
+  let url = `/merchant/subscription/cancel_at_period_end`
   if (immediate) {
-    body.invoiceNow = true;
-    body.prorate = true;
-    url = `/merchant/subscription/cancel`;
+    body.invoiceNow = true
+    body.prorate = true
+    url = `/merchant/subscription/cancel`
   }
   try {
-    const res = await request.post(url, body);
+    const res = await request.post(url, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // backend has no meaningful return value
+    return [null, null] // backend has no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // resume subscription is for case that it'll get terminated at the end of this billing cycle automatically.
 // if it's ended immediately, no resume allowed.
 export const resumeSubReq = async (subscriptionId: string) => {
-  const url = `/merchant/subscription/cancel_last_cancel_at_period_end`;
+  const url = `/merchant/subscription/cancel_last_cancel_at_period_end`
   try {
     const res = await request.post(url, {
-      subscriptionId,
-    });
+      subscriptionId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // backend has no meaningful return value
+    return [null, null] // backend has no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // -------------
 type TGetSubTimelineReq = {
-  userId: number;
-  page: number;
-  count: number;
-};
+  userId: number
+  page: number
+  count: number
+}
 export const getSubTimelineReq = async (body: TGetSubTimelineReq) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.post(
-      `/merchant/subscription/timeline_list`,
-      body,
-    );
+    const res = await request.post(`/merchant/subscription/timeline_list`, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data.subscriptionTimeLines, null];
+    return [res.data.data.subscriptionTimeLines, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 // -----------
 export const getCountryListReq = async () => {
-  const merchantStore = useMerchantInfoStore.getState();
-  const session = useSessionStore.getState();
+  const merchantStore = useMerchantInfoStore.getState()
+  const session = useSessionStore.getState()
   try {
     const res = await request.post(`/merchant/vat/country_list`, {
-      merchantId: merchantStore.id,
-    });
+      merchantId: merchantStore.id
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data.vatCountryList, null];
+    return [res.data.data.vatCountryList, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const extendDueDateReq = async (
   subscriptionId: string,
-  appendTrialEndHour: number,
+  appendTrialEndHour: number
 ) => {
   try {
     const res = await request.post(
       `/merchant/subscription/add_new_trial_start`,
       {
         subscriptionId,
-        appendTrialEndHour,
-      },
-    );
+        appendTrialEndHour
+      }
+    )
 
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null];
+    return [null, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const setSimDateReq = async (
   subscriptionId: string,
-  newTestClock: number,
+  newTestClock: number
 ) => {
   try {
     const res = await request.post(`/system/subscription/test_clock_walk`, {
       subscriptionId,
-      newTestClock,
-    });
+      newTestClock
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null];
+    return [null, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // billing admin can also get user profile.
 export const getUserProfile = async (userId: number, refreshCb: () => void) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.get(`/merchant/user/get?userId=${userId}`);
+    const res = await request.get(`/merchant/user/get?userId=${userId}`)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
     }
-    return [res.data.data.user, null];
+    return [res.data.data.user, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // billing admin can also update user profile.
 export const saveUserProfileReq = async (newProfile: IProfile) => {
-  const session = useSessionStore.getState();
-  const u = JSON.parse(JSON.stringify(newProfile));
-  u.userId = newProfile.id;
+  const session = useSessionStore.getState()
+  const u = JSON.parse(JSON.stringify(newProfile))
+  u.userId = newProfile.id
   try {
-    const res = await request.post(`/merchant/user/update`, u);
+    const res = await request.post(`/merchant/user/update`, u)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // this call has no meaningful result to return
+    return [null, null] // this call has no meaningful result to return
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const appSearchReq = async (searchKey: string) => {
   try {
     const res = await request.post(`/merchant/search/key_search`, {
-      searchKey,
-    });
+      searchKey
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data, null];
+    return [res.data.data, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // ----------
 type TGetInvoicesReq = {
-  userId?: number;
-  page: number;
-  count: number;
-  firstName?: string;
-  lastName?: string;
-  currency?: string;
-  status?: number[];
-  amountStart?: number;
-  amountEnd?: number;
-};
+  userId?: number
+  page: number
+  count: number
+  firstName?: string
+  lastName?: string
+  currency?: string
+  status?: number[]
+  amountStart?: number
+  amountEnd?: number
+}
 export const getInvoiceListReq = async (
   body: TGetInvoicesReq,
-  refreshCb: (() => void) | null,
+  refreshCb: (() => void) | null
 ) => {
   try {
-    const res = await request.post(`/merchant/invoice/list`, body);
+    const res = await request.post(`/merchant/invoice/list`, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
     }
-    return [res.data.data.invoices, null];
+    return [res.data.data.invoices, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 // ----------
 
 export const getInvoiceDetailReq = async (invoiceId: string) => {
   try {
     const res = await request.post(`/merchant/invoice/detail`, {
-      invoiceId,
-    });
+      invoiceId
+    })
 
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data, null];
+    return [res.data.data, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // ------------
 type TCreateInvoiceReq = {
-  name: string;
-  userId: number;
-  currency: string;
-  taxScale: number;
-  invoiceItems: TInvoiceItems[];
-  lines?: TInvoiceItems[];
-  finish: boolean;
-};
+  name: string
+  userId: number
+  currency: string
+  taxScale: number
+  invoiceItems: TInvoiceItems[]
+  lines?: TInvoiceItems[]
+  finish: boolean
+}
 type TInvoiceItems = {
-  unitAmountExcludingTax: number;
-  description: string;
-  quantity: number;
-};
+  unitAmountExcludingTax: number
+  description: string
+  quantity: number
+}
 // admin manually create an invoice, still editable until the publishInvoice() is called.
 // before that, customers won't see(or receive) this invoice.
 export const createInvoiceReq = async (body: TCreateInvoiceReq) => {
-  body.lines = body.invoiceItems;
+  body.lines = body.invoiceItems
   try {
-    const res = await request.post(`/merchant/invoice/new`, body);
+    const res = await request.post(`/merchant/invoice/new`, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // backend has no meaningful return value
+    return [null, null] // backend has no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 // -------------
 
 // before publish, admin can still edit and save.
 type TSaveInvoiceReq = {
-  invoiceId: string;
-  taxScale: number;
-  currency: string;
-  name: string;
-  invoiceItems: TInvoiceItems[];
-  lines?: TInvoiceItems[];
-};
+  invoiceId: string
+  taxScale: number
+  currency: string
+  name: string
+  invoiceItems: TInvoiceItems[]
+  lines?: TInvoiceItems[]
+}
 export const saveInvoiceReq = async (body: TSaveInvoiceReq) => {
-  body.lines = body.invoiceItems;
+  body.lines = body.invoiceItems
   try {
-    const res = await request.post(`/merchant/invoice/edit`, body);
+    const res = await request.post(`/merchant/invoice/edit`, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // no meaningful return value
+    return [null, null] // no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // admin can delete the invoice, before the following publishInvoice() is called
 export const deleteInvoiceReq = async (invoiceId: string) => {
   try {
     const res = await request.post(`/merchant/invoice/delete`, {
-      invoiceId,
-    });
+      invoiceId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // no meaningful return value
+    return [null, null] // no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // after publish, user will receive an email informing him/her to finish the payment.
 // admin cannot edit it anymore, but can cancel it by calling the following revokeInvoice() before user finish the payment
 type TPublishInvoiceReq = {
-  invoiceId: string;
-  payMethod: number;
-  daysUtilDue: number;
-};
+  invoiceId: string
+  payMethod: number
+  daysUtilDue: number
+}
 export const publishInvoiceReq = async (body: TPublishInvoiceReq) => {
   try {
-    const res = await request.post(`/merchant/invoice/finish`, body);
+    const res = await request.post(`/merchant/invoice/finish`, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // no meaningful return value
+    return [null, null] // no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // admin can cancel the invoice(make it invalid) before user make the payment.
 export const revokeInvoiceReq = async (invoiceId: string) => {
   try {
     const res = await request.post(`/merchant/invoice/cancel`, {
-      invoiceId,
-    });
+      invoiceId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // no meaningful return value
+    return [null, null] // no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // TODO: let caller do the amt convert.
 export const refundReq = async (
   body: {
-    invoiceId: string;
-    refundAmount: number;
-    reason: string;
+    invoiceId: string
+    refundAmount: number
+    reason: string
   },
-  currency: string,
+  currency: string
 ) => {
-  body.refundAmount *= CURRENCY[currency].stripe_factor;
-  body.refundAmount = Math.round(body.refundAmount);
+  body.refundAmount *= CURRENCY[currency].stripe_factor
+  body.refundAmount = Math.round(body.refundAmount)
   try {
-    const res = await request.post(`/merchant/invoice/refund`, body);
+    const res = await request.post(`/merchant/invoice/refund`, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // no meaningful return value
+    return [null, null] // no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const sendInvoiceInMailReq = async (invoiceId: string) => {
   try {
     const res = await request.post(`/merchant/invoice/send_email`, {
-      invoiceId,
-    });
+      invoiceId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // no meaningful return value
+    return [null, null] // no meaningful return value
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const downloadInvoice = (url: string) => {
   if (url == null || url == '') {
-    return;
+    return
   }
   axios({
     url,
     method: 'GET',
-    responseType: 'blob',
+    responseType: 'blob'
   }).then((response) => {
-    const href = URL.createObjectURL(response.data);
-    const link = document.createElement('a');
-    link.href = href;
-    link.setAttribute('download', 'invoice.pdf');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(href);
-  });
-};
+    const href = URL.createObjectURL(response.data)
+    const link = document.createElement('a')
+    link.href = href
+    link.setAttribute('download', 'invoice.pdf')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(href)
+  })
+}
 
 // ------------------
 type TUserList = {
-  merchantId: number;
-  userId?: number;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  status?: number[];
-  page: number;
-  count: number;
-};
+  merchantId: number
+  userId?: number
+  firstName?: string
+  lastName?: string
+  email?: string
+  status?: number[]
+  page: number
+  count: number
+}
 export const getUserListReq = async (
   users: TUserList,
-  refreshCb: () => void,
+  refreshCb: () => void
 ) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.post(`/merchant/user/list`, users);
+    const res = await request.post(`/merchant/user/list`, users)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
     }
-    return [res.data.data.userAccounts, null];
+    return [res.data.data.userAccounts, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const getEventListReq = async () => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.get(`/merchant/webhook/event_list`);
+    const res = await request.get(`/merchant/webhook/event_list`)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [res.data.data.eventList, null];
+    return [res.data.data.eventList, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const getWebhookListReq = async (refreshCb: () => void) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
-    const res = await request.get(`/merchant/webhook/endpoint_list`);
+    const res = await request.get(`/merchant/webhook/endpoint_list`)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
     }
-    return [res.data.data.endpointList, null];
+    return [res.data.data.endpointList, null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 // used for both creation and update
 export const saveWebhookReq = async ({
   url,
   events,
-  endpointId,
+  endpointId
 }: {
-  url: string;
-  events: string[];
-  endpointId?: number;
+  url: string
+  events: string[]
+  endpointId?: number
 }) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
     const actionUrl =
       endpointId == null
         ? '/merchant/webhook/new_endpoint'
-        : '/merchant/webhook/update_endpoint';
-    const body: any = { url, events };
+        : '/merchant/webhook/update_endpoint'
+    const body: any = { url, events }
     if (endpointId != null) {
-      body.endpointId = endpointId;
+      body.endpointId = endpointId
     }
-    const res = await request.post(actionUrl, body);
+    const res = await request.post(actionUrl, body)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // this call has no meaningful result
+    return [null, null] // this call has no meaningful result
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const deleteWebhookReq = async (endpointId: number) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
     const res = await request.post('/merchant/webhook/delete_endpoint', {
-      endpointId,
-    });
+      endpointId
+    })
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
     }
-    return [null, null]; // this call has no meaningful result
+    return [null, null] // this call has no meaningful result
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}
 
 export const getWebhookLogs = async (
   {
     endpointId,
     page,
-    count,
+    count
   }: { endpointId: number; page: number; count: number },
-  refreshCb: null | (() => void),
+  refreshCb: null | (() => void)
 ) => {
-  const session = useSessionStore.getState();
+  const session = useSessionStore.getState()
   try {
     const res = await request.get(
-      `/merchant/webhook/endpoint_log_list?endpointId=${endpointId}&page=${page}&count=${count}`,
-    );
+      `/merchant/webhook/endpoint_log_list?endpointId=${endpointId}&page=${page}&count=${count}`
+    )
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb });
-      throw new Error('Session expired');
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
     }
-    return [res.data.data.endpointLogList ?? [], null];
+    return [res.data.data.endpointLogList ?? [], null]
   } catch (err) {
-    const e = err instanceof Error ? err : new Error('Unknown error');
-    return [null, e];
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
-};
+}

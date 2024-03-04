@@ -1,21 +1,21 @@
-import { CURRENCY } from '../../constants';
-import { UserInvoice } from '../../shared.types.d';
+import { CURRENCY } from '../../constants'
+import { UserInvoice } from '../../shared.types.d'
 
 export const normalizeAmt = (iv: UserInvoice[]) => {
   iv.forEach((v) => {
-    const c = v.currency;
-    const f = CURRENCY[c].stripe_factor;
-    v.subscriptionAmount /= f;
-    v.subscriptionAmountExcludingTax /= f;
-    v.taxAmount /= f;
-    v.totalAmount /= f;
-    v.totalAmountExcludingTax /= f;
+    const c = v.currency
+    const f = CURRENCY[c].stripe_factor
+    v.subscriptionAmount /= f
+    v.subscriptionAmountExcludingTax /= f
+    v.taxAmount /= f
+    v.totalAmount /= f
+    v.totalAmountExcludingTax /= f
     v.lines &&
       v.lines.forEach((l) => {
-        (l.amount as number) /= f;
-        (l.amountExcludingTax as number) /= f;
-        (l.tax as number) /= f;
-        (l.unitAmountExcludingTax as number) /= f;
-      });
-  });
-};
+        ;(l.amount as number) /= f
+        ;(l.amountExcludingTax as number) /= f
+        ;(l.tax as number) /= f
+        ;(l.unitAmountExcludingTax as number) /= f
+      })
+  })
+}

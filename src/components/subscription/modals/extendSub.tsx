@@ -1,14 +1,14 @@
-import { Button, Col, Modal, Row } from 'antd';
-import { daysBetweenDate, showAmount } from '../../../helpers';
-import { ISubscriptionType } from '../../../shared.types.d';
+import { Button, Col, Modal, Row } from 'antd'
+import { daysBetweenDate, showAmount } from '../../../helpers'
+import { ISubscriptionType } from '../../../shared.types.d'
 
 interface Props {
-  isOpen: boolean;
-  loading: boolean;
-  subInfo: ISubscriptionType | null;
-  newDueDate: string;
-  onCancel: () => void;
-  onConfirm: () => void;
+  isOpen: boolean
+  loading: boolean
+  subInfo: ISubscriptionType | null
+  newDueDate: string
+  onCancel: () => void
+  onConfirm: () => void
 }
 
 const ExtendSub = ({
@@ -17,7 +17,7 @@ const ExtendSub = ({
   subInfo,
   newDueDate,
   onCancel,
-  onConfirm,
+  onConfirm
 }: Props) => {
   return (
     <Modal
@@ -59,7 +59,7 @@ const ExtendSub = ({
         </Col>
         <Col span={6}>
           {new Date(
-            (subInfo?.currentPeriodEnd as number) * 1000,
+            (subInfo?.currentPeriodEnd as number) * 1000
           ).toDateString()}
         </Col>
         <Col span={5}>
@@ -70,7 +70,7 @@ const ExtendSub = ({
           <span style={{ color: 'red' }}>
             {` (+ ${daysBetweenDate(
               newDueDate,
-              (subInfo?.currentPeriodEnd as number) * 1000,
+              (subInfo?.currentPeriodEnd as number) * 1000
             )} days)`}
           </span>
         </Col>
@@ -78,7 +78,7 @@ const ExtendSub = ({
       <div
         className="flex items-center justify-end gap-4"
         style={{
-          marginTop: '24px',
+          marginTop: '24px'
         }}
       >
         <Button onClick={onCancel} disabled={loading}>
@@ -94,7 +94,7 @@ const ExtendSub = ({
         </Button>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default ExtendSub;
+export default ExtendSub

@@ -1,4 +1,4 @@
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons'
 import {
   Button,
   Checkbox,
@@ -10,46 +10,46 @@ import {
   Row,
   Select,
   Table,
-  message,
-} from 'antd';
-import { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants';
-import { showAmount } from '../../helpers';
-import { getInvoiceListReq } from '../../requests';
-import '../../shared.css';
-import { UserInvoice } from '../../shared.types.d';
+  message
+} from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import dayjs from 'dayjs'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants'
+import { showAmount } from '../../helpers'
+import { getInvoiceListReq } from '../../requests'
+import '../../shared.css'
+import { UserInvoice } from '../../shared.types.d'
 
-const PAGE_SIZE = 10;
-const APP_PATH = import.meta.env.BASE_URL;
+const PAGE_SIZE = 10
+const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
-  const navigate = useNavigate();
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0); // pagination props
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
-  const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([]);
+  const navigate = useNavigate()
+  const [form] = Form.useForm()
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(0) // pagination props
+  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
+  const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
 
   const goToDetail = (invoiceId: string) => (evt: any) => {
-    console.log('go to detail: ', evt.target);
+    console.log('go to detail: ', evt.target)
     if (evt.target.closest('.unibee-user-id-wrapper')) {
-      return;
+      return
     }
-    navigate(`${APP_PATH}invoice/${invoiceId}`);
-  };
+    navigate(`${APP_PATH}invoice/${invoiceId}`)
+  }
 
   const goToUser = () => {
-    console.log('got to user');
-  };
+    console.log('got to user')
+  }
 
   const columns: ColumnsType<UserInvoice> = [
     {
       title: 'Invoice Name',
       dataIndex: 'invoiceName',
-      key: 'invoiceName',
+      key: 'invoiceName'
       // render: (text) => <a>{text}</a>,
     },
     {
@@ -64,7 +64,7 @@ const Index = () => {
           >{` (tax: ${showAmount(iv.taxAmount, iv.currency)})`}</span>
         </div>
       ),
-      sorter: (a, b) => a.totalAmount - b.totalAmount,
+      sorter: (a, b) => a.totalAmount - b.totalAmount
     },
     {
       title: 'Status',
@@ -72,7 +72,7 @@ const Index = () => {
       key: 'status',
       render: (s, iv) => (
         <span>{INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]}</span>
-      ),
+      )
     },
     {
       title: 'Start',
@@ -80,7 +80,7 @@ const Index = () => {
       key: 'periodStart',
       render: (d, plan) =>
         d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'),
-      sorter: (a, b) => a.periodStart - b.periodStart,
+      sorter: (a, b) => a.periodStart - b.periodStart
     },
     {
       title: 'End',
@@ -88,7 +88,7 @@ const Index = () => {
       key: 'periodEnd',
       render: (d, plan) =>
         d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'),
-      sorter: (a, b) => a.periodEnd - b.periodEnd,
+      sorter: (a, b) => a.periodEnd - b.periodEnd
     },
     {
       title: 'User',
@@ -96,58 +96,58 @@ const Index = () => {
       key: 'userAccount',
       render: (u, plan) => (
         <span>{`${plan.userAccount.firstName} ${plan.userAccount.lastName}`}</span>
-      ),
-    },
-  ];
+      )
+    }
+  ]
 
   const fetchData = async () => {
-    const searchTerm = form.getFieldsValue();
+    const searchTerm = form.getFieldsValue()
     let amtFrom = searchTerm.amountStart,
-      amtTo = searchTerm.amountEnd;
+      amtTo = searchTerm.amountEnd
     if (amtFrom != '' && amtFrom != null) {
-      amtFrom = Number(amtFrom) * CURRENCY[searchTerm.currency].stripe_factor;
+      amtFrom = Number(amtFrom) * CURRENCY[searchTerm.currency].stripe_factor
     }
     if (amtTo != '' && amtTo != null) {
-      amtTo = Number(amtTo) * CURRENCY[searchTerm.currency].stripe_factor;
+      amtTo = Number(amtTo) * CURRENCY[searchTerm.currency].stripe_factor
     }
     if (isNaN(amtFrom) || amtFrom < 0) {
-      message.error('Invalid amount-from value.');
-      return;
+      message.error('Invalid amount-from value.')
+      return
     }
     if (isNaN(amtTo) || amtTo < 0) {
-      message.error('Invalid amount-to value');
-      return;
+      message.error('Invalid amount-to value')
+      return
     }
     if (amtFrom > amtTo) {
-      message.error('Amount-from must be less than or equal to amount-to');
-      return;
+      message.error('Amount-from must be less than or equal to amount-to')
+      return
     }
-    searchTerm.amountStart = amtFrom;
-    searchTerm.amountEnd = amtTo;
+    searchTerm.amountStart = amtFrom
+    searchTerm.amountEnd = amtTo
 
-    setLoading(true);
+    setLoading(true)
     const [res, err] = await getInvoiceListReq(
       {
         page,
         count: PAGE_SIZE,
-        ...searchTerm,
+        ...searchTerm
       },
-      fetchData,
-    );
-    setLoading(false);
+      fetchData
+    )
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    setInvoiceList(res.invoices);
-  };
+    setInvoiceList(res.invoices)
+  }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
   useEffect(() => {
-    fetchData();
-  }, [page]);
+    fetchData()
+  }, [page])
 
   return (
     <div>
@@ -160,12 +160,12 @@ const Index = () => {
         pagination={false}
         loading={{
           spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
         onRow={(iv, rowIndex) => {
           return {
-            onClick: goToDetail(iv.invoiceId),
-          };
+            onClick: goToDetail(iv.invoiceId)
+          }
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
@@ -180,39 +180,39 @@ const Index = () => {
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
 
 const DEFAULT_TERM = {
   currency: 'EUR',
   status: [],
   amountStart: '',
-  amountEnd: '',
+  amountEnd: ''
   // refunded: false,
-};
+}
 const Search = ({
   form,
   searching,
-  goSearch,
+  goSearch
 }: {
-  form: FormInstance<any>;
-  searching: boolean;
-  goSearch: () => void;
+  form: FormInstance<any>
+  searching: boolean
+  goSearch: () => void
 }) => {
   const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
     value: Number(s),
-    label: INVOICE_STATUS[Number(s)],
-  }));
-  const clear = () => form.resetFields();
-  const watchCurrency = Form.useWatch('currency', form);
+    label: INVOICE_STATUS[Number(s)]
+  }))
+  const clear = () => form.resetFields()
+  const watchCurrency = Form.useWatch('currency', form)
   useEffect(() => {
     // just to trigger rerender when currency changed
-  }, [watchCurrency]);
+  }, [watchCurrency])
 
   const currencySymbol =
-    CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol;
+    CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol
 
   return (
     <div>
@@ -261,7 +261,7 @@ const Search = ({
                   options={[
                     { value: 'EUR', label: 'EUR' },
                     { value: 'USD', label: 'USD' },
-                    { value: 'JPY', label: 'JPY' },
+                    { value: 'JPY', label: 'JPY' }
                   ]}
                 />
               </Form.Item>
@@ -294,5 +294,5 @@ const Search = ({
         </Row>
       </Form>
     </div>
-  );
-};
+  )
+}

@@ -1,36 +1,36 @@
-import { LoadingOutlined } from '@ant-design/icons';
-import { Pagination, Spin, Table, message } from 'antd';
-import type { ColumnsType, TableProps } from 'antd/es/table';
-import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants';
-import { showAmount } from '../../helpers';
-import { getSublist } from '../../requests';
-import '../../shared.css';
-import { ISubscriptionType } from '../../shared.types.d';
+import { LoadingOutlined } from '@ant-design/icons'
+import { Pagination, Spin, Table, message } from 'antd'
+import type { ColumnsType, TableProps } from 'antd/es/table'
+import dayjs from 'dayjs'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants'
+import { showAmount } from '../../helpers'
+import { getSublist } from '../../requests'
+import '../../shared.css'
+import { ISubscriptionType } from '../../shared.types.d'
 
-const APP_PATH = import.meta.env.BASE_URL;
-const PAGE_SIZE = 10;
+const APP_PATH = import.meta.env.BASE_URL
+const PAGE_SIZE = 10
 const SUB_STATUS_FILTER = Object.keys(SUBSCRIPTION_STATUS)
   .map((s) => ({
     text: SUBSCRIPTION_STATUS[Number(s)],
-    value: Number(s),
+    value: Number(s)
   }))
-  .sort((a, b) => (a.value < b.value ? -1 : 1));
+  .sort((a, b) => (a.value < b.value ? -1 : 1))
 
 const columns: ColumnsType<ISubscriptionType> = [
   {
     title: 'Plan Name',
     dataIndex: 'planName',
     key: 'planName',
-    render: (_, sub) => <span>{sub.plan?.planName}</span>,
+    render: (_, sub) => <span>{sub.plan?.planName}</span>
   },
   {
     title: 'Description',
     dataIndex: 'description',
     key: 'description',
-    render: (_, sub) => <span>{sub.plan?.description}</span>,
+    render: (_, sub) => <span>{sub.plan?.description}</span>
   },
   {
     title: 'Amount',
@@ -47,22 +47,22 @@ const columns: ColumnsType<ISubscriptionType> = [
                 // because, users might downgrade their plan.
                 (
                   sum,
-                  { quantity, amount }: { quantity: number; amount: number }, // destructure the quantity and amount from addon obj
+                  { quantity, amount }: { quantity: number; amount: number } // destructure the quantity and amount from addon obj
                 ) => sum + quantity * amount,
-                0,
+                0
               )),
-        s.plan!.currency,
+        s.plan!.currency
       )} /${s.plan!.intervalCount == 1 ? '' : s.plan!.intervalCount}${
         s.plan!.intervalUnit
       } `}</span>
-    ),
+    )
   },
   {
     title: 'Status',
     dataIndex: 'status',
     key: 'status',
     render: (_, sub) => <span>{SUBSCRIPTION_STATUS[sub.status]}</span>,
-    filters: SUB_STATUS_FILTER,
+    filters: SUB_STATUS_FILTER
     // onFilter: (value, record) => record.status == value,
   },
   {
@@ -70,14 +70,14 @@ const columns: ColumnsType<ISubscriptionType> = [
     dataIndex: 'currentPeriodStart',
     key: 'currentPeriodStart',
     render: (_, sub) =>
-      dayjs(sub.currentPeriodStart * 1000).format('YYYY-MMM-DD HH:MM'),
+      dayjs(sub.currentPeriodStart * 1000).format('YYYY-MMM-DD HH:MM')
   },
   {
     title: 'End',
     dataIndex: 'currentPeriodEnd',
     key: 'currentPeriodEnd',
     render: (_, sub) =>
-      dayjs(sub.currentPeriodEnd * 1000).format('YYYY-MMM-DD HH:MM'),
+      dayjs(sub.currentPeriodEnd * 1000).format('YYYY-MMM-DD HH:MM')
   },
   {
     title: 'User',
@@ -85,32 +85,32 @@ const columns: ColumnsType<ISubscriptionType> = [
     key: 'userId',
     render: (_, sub) => (
       <span>{`${sub.user != null ? sub.user.firstName + ' ' + sub.user.lastName : ''}`}</span>
-    ),
-  },
-];
+    )
+  }
+]
 
 const Index = () => {
-  const [subList, setSubList] = useState<ISubscriptionType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const [page, setPage] = useState(0); // pagination props
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
-  const [statusFilter, setStatusFilter] = useState<number[]>([]);
+  const [subList, setSubList] = useState<ISubscriptionType[]>([])
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const [page, setPage] = useState(0) // pagination props
+  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
+  const [statusFilter, setStatusFilter] = useState<number[]>([])
 
   const fetchData = async () => {
-    setLoading(true);
+    setLoading(true)
     const [subscriptions, err] = await getSublist(
       {
         page,
         count: PAGE_SIZE,
-        status: statusFilter,
+        status: statusFilter
       },
-      fetchData,
-    );
-    setLoading(false);
+      fetchData
+    )
+    setLoading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
 
     const list: ISubscriptionType[] =
@@ -125,36 +125,36 @@ const Index = () => {
                   ? []
                   : s.addons.map((a: any) => ({
                       ...a.addonPlan,
-                      quantity: a.quantity,
+                      quantity: a.quantity
                     })),
-              user: s.user,
-            };
-          });
-    setSubList(list);
-  };
+              user: s.user
+            }
+          })
+    setSubList(list)
+  }
 
   const onTableChange: TableProps<ISubscriptionType>['onChange'] = (
     pagination,
     filters,
     sorter,
-    extra,
+    extra
   ) => {
     // console.log('params', pagination, filters, sorter, extra);
     if (filters.status == null) {
-      setStatusFilter([]);
-      return;
+      setStatusFilter([])
+      return
     }
-    setStatusFilter(filters.status as number[]);
-  };
+    setStatusFilter(filters.status as number[])
+  }
 
   useEffect(() => {
     // console.log('page/statusFilter chnaged: ', page, '//', statusFilter);
-    fetchData();
-  }, [page, statusFilter]);
+    fetchData()
+  }, [page, statusFilter])
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   return (
     <div>
@@ -176,10 +176,10 @@ const Index = () => {
           return {
             onClick: (event) => {
               navigate(`${APP_PATH}subscription/${record.subscriptionId}`, {
-                state: { subscriptionId: record.subscriptionId },
-              });
-            },
-          };
+                state: { subscriptionId: record.subscriptionId }
+              })
+            }
+          }
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
@@ -194,7 +194,7 @@ const Index = () => {
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

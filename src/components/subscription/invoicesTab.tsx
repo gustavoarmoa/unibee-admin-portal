@@ -10,11 +10,11 @@ import {
   Spin,
   Table,
   Tooltip,
-  message,
-} from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+  message
+} from 'antd'
+import type { ColumnsType } from 'antd/es/table'
+import dayjs from 'dayjs'
+import React, { useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
 import {
   CloseOutlined,
@@ -22,27 +22,27 @@ import {
   EditOutlined,
   LoadingOutlined,
   MailOutlined,
-  MoneyCollectOutlined,
-} from '@ant-design/icons';
-import { CURRENCY, INVOICE_STATUS } from '../../constants';
-import { showAmount } from '../../helpers';
-import { downloadInvoice, getInvoiceListReq } from '../../requests';
-import '../../shared.css';
-import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d';
-import { normalizeAmt } from '../helpers';
-import InvoiceModal from './modals/newInvoice';
+  MoneyCollectOutlined
+} from '@ant-design/icons'
+import { CURRENCY, INVOICE_STATUS } from '../../constants'
+import { showAmount } from '../../helpers'
+import { downloadInvoice, getInvoiceListReq } from '../../requests'
+import '../../shared.css'
+import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
+import { normalizeAmt } from '../helpers'
+import InvoiceModal from './modals/newInvoice'
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10
 
 const Index = ({ user }: { user: IProfile | null }) => {
   // const appConfigStore = useAppConfigStore();
-  const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0); // pagination props
-  const [newInvoiceModal, setNewInvoiceModal] = useState(false);
-  const [invoiceIdx, setInvoiceIdx] = useState(-1); // -1: not selected, any action button: (delete, edit,refund) will set this value to the selected invoiceIdx
-  const [deleteMode, setDeleteMode] = useState(false); // looks like I am not using it,
-  const [refundMode, setRefundMode] = useState(false);
+  const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(0) // pagination props
+  const [newInvoiceModal, setNewInvoiceModal] = useState(false)
+  const [invoiceIdx, setInvoiceIdx] = useState(-1) // -1: not selected, any action button: (delete, edit,refund) will set this value to the selected invoiceIdx
+  const [deleteMode, setDeleteMode] = useState(false) // looks like I am not using it,
+  const [refundMode, setRefundMode] = useState(false)
 
   /*
   0: "Initiating", // this status only exist for a very short period, users/admin won't even know it exist
@@ -64,91 +64,91 @@ const Index = ({ user }: { user: IProfile | null }) => {
       revokable: false,
       refundable: false,
       downloadable: false,
-      sendable: false,
-    };
+      sendable: false
+    }
     if (iv == null) {
       // creating a new invoice
-      console.log('create a new invoice...');
-      p.creatable = true;
-      p.editable = true;
-      p.savable = true;
-      p.publishable = true;
-      return p;
+      console.log('create a new invoice...')
+      p.creatable = true
+      p.editable = true
+      p.savable = true
+      p.publishable = true
+      return p
     }
     if (iv.subscriptionId == null || iv.subscriptionId == '') {
       // manually created invoice
       switch (iv.status) {
         case 1: // pending, aka edit mode
-          p.editable = true;
-          p.creatable = true;
-          p.deletable = true;
-          p.publishable = true;
-          break;
+          p.editable = true
+          p.creatable = true
+          p.deletable = true
+          p.publishable = true
+          break
         case 2: // processing mode, user has received the invoice mail with payment link, but hasn't paid yet.
-          p.revokable = true;
-          break;
+          p.revokable = true
+          break
         case 3: // user has paid
-          p.downloadable = true;
-          p.sendable = true;
-          p.refundable = true;
-          break;
+          p.downloadable = true
+          p.sendable = true
+          p.refundable = true
+          break
       }
-      return p;
+      return p
     }
 
     if (iv.subscriptionId != '') {
       // system generated invoice, not admin manually generated
-      p.sendable = true;
-      p.downloadable = true;
-      p.refundable = true;
+      p.sendable = true
+      p.downloadable = true
+      p.refundable = true
     }
-    return p;
-  };
+    return p
+  }
 
   const columns: ColumnsType<UserInvoice> = [
     {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
-      key: 'invoiceId',
+      key: 'invoiceId'
     },
     {
       title: 'Title',
       dataIndex: 'invoiceName',
       key: 'invoiceName',
-      render: (title, invoice) => <a>{title}</a>,
+      render: (title, invoice) => <a>{title}</a>
       // render: (_, sub) => <a>{sub.plan?.planName}</a>,
     },
     {
       title: 'Total Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
-      render: (amt, invoice) => showAmount(amt, invoice.currency, true),
+      render: (amt, invoice) => showAmount(amt, invoice.currency, true)
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS],
+      render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
     },
     {
       title: 'Created by',
       dataIndex: 'subscriptionId',
       key: 'subscriptionId',
       render: (subscriptionId, invoice) =>
-        subscriptionId == '' ? 'Admin' : 'System',
+        subscriptionId == '' ? 'Admin' : 'System'
     },
     {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, invoice) => dayjs(d).format('YYYY-MMM-DD'),
+      render: (d, invoice) => dayjs(d).format('YYYY-MMM-DD')
     },
     {
       title: 'Action',
       key: 'action',
       render: (
         _,
-        invoice, // use fn to generate these icons, only show available ones.
+        invoice // use fn to generate these icons, only show available ones.
       ) => (
         <Space size="middle">
           <Tooltip title="Edit">
@@ -194,60 +194,60 @@ const Index = ({ user }: { user: IProfile | null }) => {
             />
           </Tooltip>
         </Space>
-      ),
-    },
-  ];
+      )
+    }
+  ]
 
   const refund = () => {
-    setRefundMode(true);
-    toggleNewInvoiceModal();
-  };
+    setRefundMode(true)
+    toggleNewInvoiceModal()
+  }
 
   const toggleNewInvoiceModal = () => {
     if (newInvoiceModal) {
-      setInvoiceIdx(-1);
-      setDeleteMode(false);
-      setRefundMode(false);
+      setInvoiceIdx(-1)
+      setDeleteMode(false)
+      setRefundMode(false)
     }
-    setNewInvoiceModal(!newInvoiceModal);
-  };
+    setNewInvoiceModal(!newInvoiceModal)
+  }
 
   const onPageChange = (page: number, pageSize: number) => {
-    setPage(page - 1);
-  };
+    setPage(page - 1)
+  }
 
   const fetchData = async () => {
     if (user == null) {
-      return;
+      return
     }
-    setLoading(true);
+    setLoading(true)
     const [invoices, err] = await getInvoiceListReq(
       {
         page,
         count: PAGE_SIZE,
-        userId: user!.id as number,
+        userId: user!.id as number
       },
-      fetchData,
-    );
-    setLoading(false);
+      fetchData
+    )
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
 
     if (invoices != null) {
-      normalizeAmt(invoices);
-      setInvoiceList(invoices);
+      normalizeAmt(invoices)
+      setInvoiceList(invoices)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   useEffect(() => {
-    fetchData();
-  }, [page]);
+    fetchData()
+  }, [page])
 
   return (
     <div>
@@ -257,7 +257,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           refundMode={refundMode}
           detail={invoiceIdx == -1 ? null : invoiceList[invoiceIdx]}
           permission={getPermission(
-            invoiceIdx == -1 ? null : invoiceList[invoiceIdx],
+            invoiceIdx == -1 ? null : invoiceList[invoiceIdx]
           )}
           user={user}
           closeModal={toggleNewInvoiceModal}
@@ -275,20 +275,20 @@ const Index = ({ user }: { user: IProfile | null }) => {
           onRow={(record, rowIndex) => {
             return {
               onClick: (event) => {
-                setInvoiceIdx(rowIndex as number);
-                toggleNewInvoiceModal();
+                setInvoiceIdx(rowIndex as number)
+                toggleNewInvoiceModal()
               },
               // onDoubleClick: (event) => {}, // double click row
               onContextMenu: (event) => {
-                console.log('r click evt: ', event);
-              }, // right button click row
+                console.log('r click evt: ', event)
+              } // right button click row
               // onMouseEnter: (event) => {}, // mouse enter row
               // onMouseLeave: (event) => {}, // mouse leave row
-            };
+            }
           }}
           loading={{
             spinning: loading,
-            indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
+            indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
           }}
         />
         <span
@@ -309,8 +309,8 @@ const Index = ({ user }: { user: IProfile | null }) => {
         <Button
           type="primary"
           onClick={() => {
-            setInvoiceIdx(-1);
-            toggleNewInvoiceModal();
+            setInvoiceIdx(-1)
+            toggleNewInvoiceModal()
           }}
           disabled={user == null}
         >
@@ -318,13 +318,13 @@ const Index = ({ user }: { user: IProfile | null }) => {
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
 
 interface ISearchBarProp {
-  refresh: () => void;
+  refresh: () => void
 }
 const Searchbar = ({ refresh }: ISearchBarProp) => {
   // Object.keys(INVOICE_STATUS).map(s => ({value: s, label: INVOICE_STATUS[Number(s)] }))
@@ -340,7 +340,7 @@ const Searchbar = ({ refresh }: ISearchBarProp) => {
       <Row
         className="flex justify-between"
         style={{
-          marginBottom: '12px',
+          marginBottom: '12px'
         }}
       >
         <Col span={6}>
@@ -359,7 +359,7 @@ const Searchbar = ({ refresh }: ISearchBarProp) => {
               { label: INVOICE_STATUS[2], value: 2 },
               { label: INVOICE_STATUS[3], value: 3 },
               { label: INVOICE_STATUS[4], value: 4 },
-              { label: INVOICE_STATUS[5], value: 5 },
+              { label: INVOICE_STATUS[5], value: 5 }
             ]}
           />
         </Col>
@@ -379,5 +379,5 @@ const Searchbar = ({ refresh }: ISearchBarProp) => {
         </Col>
       </Row>
     </div>
-  );
-};
+  )
+}

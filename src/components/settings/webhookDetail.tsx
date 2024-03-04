@@ -1,78 +1,78 @@
-import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Col, Form, Input, Modal, Row, Select, message } from 'antd';
-import { useEffect, useState } from 'react';
-import { ramdonString, urlRegx } from '../../helpers';
+import { MinusOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Col, Form, Input, Modal, Row, Select, message } from 'antd'
+import { useEffect, useState } from 'react'
+import { ramdonString, urlRegx } from '../../helpers'
 import {
   deleteWebhookReq,
   getEventListReq,
-  saveWebhookReq,
-} from '../../requests';
-import { TWebhook } from '../../shared.types.d';
+  saveWebhookReq
+} from '../../requests'
+import { TWebhook } from '../../shared.types.d'
 
 const Index = ({
   closeModal,
   detail,
-  refresh,
+  refresh
 }: {
-  closeModal: () => void;
-  detail: TWebhook | null;
-  refresh: () => void;
+  closeModal: () => void
+  detail: TWebhook | null
+  refresh: () => void
 }) => {
-  const [form] = Form.useForm();
-  const [submitting, setSubmitting] = useState(false);
-  const [eventList, setEventList] = useState<string[]>([]); // this is to populate the event <Select />, not used for update.
+  const [form] = Form.useForm()
+  const [submitting, setSubmitting] = useState(false)
+  const [eventList, setEventList] = useState<string[]>([]) // this is to populate the event <Select />, not used for update.
 
   const onConfirm = async () => {
-    console.log('form v: ', form.getFieldsValue());
-    setSubmitting(true);
-    const [res, err] = await saveWebhookReq(form.getFieldsValue());
-    console.log('save webhook res: ', res, '//', err);
+    console.log('form v: ', form.getFieldsValue())
+    setSubmitting(true)
+    const [res, err] = await saveWebhookReq(form.getFieldsValue())
+    console.log('save webhook res: ', res, '//', err)
     if (err != null) {
-      setSubmitting(false);
-      message.error(err.message);
-      return;
+      setSubmitting(false)
+      message.error(err.message)
+      return
     }
-    message.success('Webhook saved');
-    refresh();
-    setTimeout(closeModal, 1500);
-  };
+    message.success('Webhook saved')
+    refresh()
+    setTimeout(closeModal, 1500)
+  }
 
   const onDelete = async () => {
     if (detail == null) {
-      return;
+      return
     }
-    setSubmitting(true);
-    const [res, err] = await deleteWebhookReq(detail?.id);
-    console.log('delete webhook res: ', res, '//', err);
+    setSubmitting(true)
+    const [res, err] = await deleteWebhookReq(detail?.id)
+    console.log('delete webhook res: ', res, '//', err)
     if (err != null) {
-      setSubmitting(false);
-      message.error(err.message);
-      return;
+      setSubmitting(false)
+      message.error(err.message)
+      return
     }
-    message.success('Webhook deleted');
-    refresh();
-    setTimeout(closeModal, 1500);
-  };
+    message.success('Webhook deleted')
+    refresh()
+    setTimeout(closeModal, 1500)
+  }
 
   const fetchEventList = async () => {
-    setSubmitting(true);
-    const [eventList, err] = await getEventListReq();
-    setSubmitting(false);
+    setSubmitting(true)
+    const [eventList, err] = await getEventListReq()
+    setSubmitting(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    setEventList(eventList);
-  };
+    setEventList(eventList)
+  }
 
   const isEvtSelected = (evt: string) =>
-    form.getFieldValue('events').findIndex((e: string) => e == evt) != -1;
+    form.getFieldValue('events').findIndex((e: string) => e == evt) != -1
 
   useEffect(() => {
-    fetchEventList();
-  }, []);
+    fetchEventList()
+  }, [])
 
-  console.log('webhook detail: ', detail);
+  console.log('webhook detail: ', detail)
 
   return (
     <Modal open={true} footer={null} title="Webhook Detail" closeIcon={null}>
@@ -82,7 +82,7 @@ const Index = ({
         initialValues={{
           endpointId: detail == null ? null : detail.id,
           url: detail == null ? '' : detail.webhookUrl,
-          events: detail == null ? [''] : detail.webhookEvents,
+          events: detail == null ? [''] : detail.webhookEvents
         }}
         name="web-hook-detail"
         style={{ maxWidth: 640, width: 480 }}
@@ -101,16 +101,16 @@ const Index = ({
               rules={[
                 {
                   required: true,
-                  message: 'Please input your endpoint URL!',
+                  message: 'Please input your endpoint URL!'
                 },
                 ({ getFieldValue }) => ({
                   validator(rule, value) {
                     if (urlRegx.test(value)) {
-                      return Promise.resolve();
+                      return Promise.resolve()
                     }
-                    return Promise.reject('Please input a valid URL');
-                  },
-                }),
+                    return Promise.reject('Please input a valid URL')
+                  }
+                })
               ]}
             >
               <Input placeholder="Starts with http:// or https://" />
@@ -145,7 +145,7 @@ const Index = ({
                                 options={eventList.map((e) => ({
                                   label: e,
                                   value: e,
-                                  disabled: isEvtSelected(e),
+                                  disabled: isEvtSelected(e)
                                 }))}
                               />
                             </Form.Item>
@@ -153,20 +153,20 @@ const Index = ({
                             <div
                               onClick={() => {
                                 if (fields.length == 1) {
-                                  return;
+                                  return
                                 }
-                                remove(field.name);
+                                remove(field.name)
                               }}
                               style={{
                                 fontWeight: 'bold',
                                 width: '32px',
-                                cursor: `${fields.length == 1 ? 'not-allowed' : 'pointer'}`,
+                                cursor: `${fields.length == 1 ? 'not-allowed' : 'pointer'}`
                               }}
                             >
                               <MinusOutlined />
                             </div>
                           </div>
-                        );
+                        )
                       })}
                     <Form.Item>
                       <Button
@@ -180,7 +180,7 @@ const Index = ({
                       </Button>
                     </Form.Item>
                   </>
-                );
+                )
               }}
             </Form.List>
           </Col>
@@ -210,7 +210,7 @@ const Index = ({
         </div>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

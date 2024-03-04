@@ -1,15 +1,15 @@
-import { Button, Col, Modal, Radio, RadioChangeEvent, Row } from 'antd';
-import { showAmount } from '../../../helpers';
-import { ISubscriptionType } from '../../../shared.types.d';
+import { Button, Col, Modal, Radio, RadioChangeEvent, Row } from 'antd'
+import { showAmount } from '../../../helpers'
+import { ISubscriptionType } from '../../../shared.types.d'
 
 interface Props {
-  isOpen: boolean;
-  loading: boolean;
-  terminateMode: 1 | 2 | null; // 1: immediat, 2: end of this billing cycle, null: not selected
-  setTerminateMode: (mode: 1 | 2 | null) => void;
-  subInfo: ISubscriptionType | null;
-  onCancel: () => void;
-  onConfirm: () => void;
+  isOpen: boolean
+  loading: boolean
+  terminateMode: 1 | 2 | null // 1: immediat, 2: end of this billing cycle, null: not selected
+  setTerminateMode: (mode: 1 | 2 | null) => void
+  subInfo: ISubscriptionType | null
+  onCancel: () => void
+  onConfirm: () => void
 }
 
 const TerminateSub = ({
@@ -19,13 +19,13 @@ const TerminateSub = ({
   setTerminateMode,
   subInfo,
   onCancel,
-  onConfirm,
+  onConfirm
 }: Props) => {
   // select immediate or end of this billing cycle
   const onEndSubModeChange = (e: RadioChangeEvent) => {
-    console.log('radio checked', e.target.value);
-    setTerminateMode(e.target.value);
-  };
+    console.log('radio checked', e.target.value)
+    setTerminateMode(e.target.value)
+  }
   return (
     <Modal
       title="Terminate Subscription"
@@ -74,7 +74,7 @@ const TerminateSub = ({
         </Col>
         <Col span={7}>
           {new Date(
-            (subInfo?.currentPeriodEnd as number) * 1000,
+            (subInfo?.currentPeriodEnd as number) * 1000
           ).toDateString()}
         </Col>
       </Row>
@@ -100,7 +100,7 @@ const TerminateSub = ({
         </Button>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default TerminateSub;
+export default TerminateSub

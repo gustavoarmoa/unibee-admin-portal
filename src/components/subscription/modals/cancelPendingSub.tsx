@@ -1,29 +1,29 @@
-import { Button, Modal, message } from 'antd';
+import { Button, Modal, message } from 'antd'
 // import { showAmount } from "../helpers";
-import { useState } from 'react';
-import { cancelSubReq } from '../../../requests';
-import { ISubscriptionType } from '../../../shared.types.d';
+import { useState } from 'react'
+import { cancelSubReq } from '../../../requests'
+import { ISubscriptionType } from '../../../shared.types.d'
 
 interface Props {
-  subInfo: ISubscriptionType | null;
-  closeModal: () => void;
-  refresh: () => void;
+  subInfo: ISubscriptionType | null
+  closeModal: () => void
+  refresh: () => void
 }
 const Index = ({ subInfo, closeModal, refresh }: Props) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false)
   const onConfirm = async () => {
-    console.log('cancelling ....', subInfo?.subscriptionId);
-    setLoading(true);
-    const [_, err] = await cancelSubReq(subInfo?.subscriptionId as string);
-    setLoading(false);
+    console.log('cancelling ....', subInfo?.subscriptionId)
+    setLoading(true)
+    const [_, err] = await cancelSubReq(subInfo?.subscriptionId as string)
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success(`Subscription cancelled`);
-    closeModal();
-    refresh();
-  };
+    message.success(`Subscription cancelled`)
+    closeModal()
+    refresh()
+  }
 
   return (
     <Modal
@@ -83,7 +83,7 @@ const Index = ({ subInfo, closeModal, refresh }: Props) => {
         </Button>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

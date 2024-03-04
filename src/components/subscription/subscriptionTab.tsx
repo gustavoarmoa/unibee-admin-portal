@@ -3,8 +3,8 @@ import {
   InfoCircleOutlined,
   LoadingOutlined,
   MinusOutlined,
-  SyncOutlined,
-} from '@ant-design/icons';
+  SyncOutlined
+} from '@ant-design/icons'
 import {
   Button,
   Col,
@@ -15,15 +15,15 @@ import {
   Row,
   Spin,
   Table,
-  message,
-} from 'antd';
-import { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
-import update from 'immutability-helper';
-import { CSSProperties, useEffect, useRef, useState } from 'react';
-import { useOnClickOutside } from 'usehooks-ts';
-import { SUBSCRIPTION_STATUS } from '../../constants';
-import { daysBetweenDate, showAmount } from '../../helpers';
+  message
+} from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import dayjs from 'dayjs'
+import update from 'immutability-helper'
+import { CSSProperties, useEffect, useRef, useState } from 'react'
+import { useOnClickOutside } from 'usehooks-ts'
+import { SUBSCRIPTION_STATUS } from '../../constants'
+import { daysBetweenDate, showAmount } from '../../helpers'
 import {
   createPreviewReq,
   extendDueDateReq,
@@ -32,66 +32,66 @@ import {
   resumeSubReq,
   setSimDateReq,
   terminateSubReq,
-  updateSubscription,
-} from '../../requests';
+  updateSubscription
+} from '../../requests'
 import {
   IPlan,
   IPreview,
   IProfile,
-  ISubscriptionType,
-} from '../../shared.types.d';
-import CancelPendingSubModal from './modals/cancelPendingSub';
-import ChangePlanModal from './modals/changePlan';
-import ExtendSubModal from './modals/extendSub';
-import ResumeSubModal from './modals/resumeSub';
-import TerminateSubModal from './modals/terminateSub';
-import UpdateSubPreviewModal from './modals/updateSubPreview';
+  ISubscriptionType
+} from '../../shared.types.d'
+import CancelPendingSubModal from './modals/cancelPendingSub'
+import ChangePlanModal from './modals/changePlan'
+import ExtendSubModal from './modals/extendSub'
+import ResumeSubModal from './modals/resumeSub'
+import TerminateSubModal from './modals/terminateSub'
+import UpdateSubPreviewModal from './modals/updateSubPreview'
 
-import '../../shared.css';
+import '../../shared.css'
 
 const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
-  const [plans, setPlans] = useState<IPlan[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<null | number>(null); // null: not selected
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
-  const [confirmming, setConfirming] = useState(false);
-  const [dueDateModal, setDueDateModal] = useState(false);
-  const [newDueDate, setNewDueDate] = useState('');
-  const [changePlanModal, setChangePlanModal] = useState(false);
-  const [cancelSubModalOpen, setCancelSubModalOpen] = useState(false); // newly created sub has status == created if user hasn't paid yet, user(or admin) can cancel this sub.
-  const [preview, setPreview] = useState<IPreview | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [terminateModal, setTerminateModal] = useState(false);
-  const [resumeModal, setResumeModal] = useState(false);
-  const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null); // null: when page is loading, no data is ready yet.
-  const [endSubMode, setEndSubMode] = useState<1 | 2 | null>(null); // 1: immediate, 2: end of this billing cycole, null: not selected
+  const [plans, setPlans] = useState<IPlan[]>([])
+  const [selectedPlan, setSelectedPlan] = useState<null | number>(null) // null: not selected
+  const [previewModalOpen, setPreviewModalOpen] = useState(false)
+  const [confirmming, setConfirming] = useState(false)
+  const [dueDateModal, setDueDateModal] = useState(false)
+  const [newDueDate, setNewDueDate] = useState('')
+  const [changePlanModal, setChangePlanModal] = useState(false)
+  const [cancelSubModalOpen, setCancelSubModalOpen] = useState(false) // newly created sub has status == created if user hasn't paid yet, user(or admin) can cancel this sub.
+  const [preview, setPreview] = useState<IPreview | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [terminateModal, setTerminateModal] = useState(false)
+  const [resumeModal, setResumeModal] = useState(false)
+  const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null) // null: when page is loading, no data is ready yet.
+  const [endSubMode, setEndSubMode] = useState<1 | 2 | null>(null) // 1: immediate, 2: end of this billing cycole, null: not selected
   // const [simDate, setSimDate] = useState('');
-  const [simDateOpen, setSimDateOpen] = useState(false);
-  const simDateContainerRef = useRef(null);
-  const hideSimDate = () => setSimDateOpen(false);
-  useOnClickOutside(simDateContainerRef, hideSimDate);
+  const [simDateOpen, setSimDateOpen] = useState(false)
+  const simDateContainerRef = useRef(null)
+  const hideSimDate = () => setSimDateOpen(false)
+  useOnClickOutside(simDateContainerRef, hideSimDate)
 
-  const toggleTerminateModal = () => setTerminateModal(!terminateModal);
-  const toggleResumeSubModal = () => setResumeModal(!resumeModal);
-  const toggleSetDueDateModal = () => setDueDateModal(!dueDateModal);
-  const toggleChangPlanModal = () => setChangePlanModal(!changePlanModal);
-  const toggleCancelSubModal = () => setCancelSubModalOpen(!cancelSubModalOpen);
+  const toggleTerminateModal = () => setTerminateModal(!terminateModal)
+  const toggleResumeSubModal = () => setResumeModal(!resumeModal)
+  const toggleSetDueDateModal = () => setDueDateModal(!dueDateModal)
+  const toggleChangPlanModal = () => setChangePlanModal(!changePlanModal)
+  const toggleCancelSubModal = () => setCancelSubModalOpen(!cancelSubModalOpen)
 
   const onSimDateChange = async (date: any, dateString: string) => {
-    setLoading(true);
+    setLoading(true)
     const [_, err] = await setSimDateReq(
       activeSub?.subscriptionId as string,
-      dayjs(new Date(dateString)).unix(),
-    );
-    setLoading(false);
+      dayjs(new Date(dateString)).unix()
+    )
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    message.success('New simulation date set.');
-    toggleSimDateOpen();
-    fetchData();
-  };
-  const toggleSimDateOpen = () => setSimDateOpen(!simDateOpen);
+    message.success('New simulation date set.')
+    toggleSimDateOpen()
+    fetchData()
+  }
+  const toggleSimDateOpen = () => setSimDateOpen(!simDateOpen)
 
   const showSimDatePicker = () => {
     if (
@@ -99,54 +99,54 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       activeSub.testClock == null ||
       activeSub.testClock < 0
     ) {
-      return false;
+      return false
     }
-    return true;
-  };
+    return true
+  }
 
   const onAddonChange = (
     addonId: number,
     quantity: number | null, // null means: don't update this field, keep its original value. I don't want to define 2 fn to do similar jobs.
-    checked: boolean | null, // ditto
+    checked: boolean | null // ditto
   ) => {
-    const planIdx = plans.findIndex((p) => p.id == selectedPlan);
+    const planIdx = plans.findIndex((p) => p.id == selectedPlan)
     if (planIdx == -1) {
-      return;
+      return
     }
-    const addonIdx = plans[planIdx].addons!.findIndex((a) => a.id == addonId);
+    const addonIdx = plans[planIdx].addons!.findIndex((a) => a.id == addonId)
     if (addonIdx == -1) {
-      return;
+      return
     }
 
-    let newPlans = plans;
+    let newPlans = plans
     if (quantity == null) {
       newPlans = update(plans, {
         [planIdx]: {
-          addons: { [addonIdx]: { checked: { $set: checked as boolean } } },
-        },
-      });
+          addons: { [addonIdx]: { checked: { $set: checked as boolean } } }
+        }
+      })
     } else if (checked == null) {
       newPlans = update(plans, {
         [planIdx]: {
-          addons: { [addonIdx]: { quantity: { $set: quantity as number } } },
-        },
-      });
+          addons: { [addonIdx]: { quantity: { $set: quantity as number } } }
+        }
+      })
     }
-    setPlans(newPlans);
-  };
+    setPlans(newPlans)
+  }
 
-  const togglePreviewModal = () => setPreviewModalOpen(!previewModalOpen);
+  const togglePreviewModal = () => setPreviewModalOpen(!previewModalOpen)
   const openPreviewModal = async () => {
-    const plan = plans.find((p) => p.id == selectedPlan);
-    let isValid = true;
+    const plan = plans.find((p) => p.id == selectedPlan)
+    let isValid = true
     if (plan?.addons != null && plan.addons.length > 0) {
       for (let i = 0; i < plan.addons.length; i++) {
         if (plan.addons[i].checked) {
-          const q = Number(plan.addons[i].quantity);
-          console.log('q: ', q);
+          const q = Number(plan.addons[i].quantity)
+          console.log('q: ', q)
           if (!Number.isInteger(q) || q <= 0) {
-            isValid = false;
-            break;
+            isValid = false
+            break
           }
         }
       }
@@ -172,149 +172,149 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     }
 
     if (!isValid) {
-      message.error('Addon quantity must be greater than 0.');
-      return;
+      message.error('Addon quantity must be greater than 0.')
+      return
     }
-    setConfirming(true);
-    const err = await createPreview();
-    setConfirming(false);
+    setConfirming(true)
+    const err = await createPreview()
+    setConfirming(false)
     if (err != null) {
-      return;
+      return
     }
-    togglePreviewModal();
-  };
+    togglePreviewModal()
+  }
 
   const createPreview = async () => {
-    setPreview(null); // clear the last preview, otherwise, users might see the old value before the new value return
-    const plan = plans.find((p) => p.id == selectedPlan);
+    setPreview(null) // clear the last preview, otherwise, users might see the old value before the new value return
+    const plan = plans.find((p) => p.id == selectedPlan)
     const addons =
       plan != null && plan.addons != null
         ? plan.addons.filter((a) => a.checked)
-        : [];
-    console.log('active sub addon bfr preview: ', addons);
+        : []
+    console.log('active sub addon bfr preview: ', addons)
     const [previewRes, err] = await createPreviewReq(
       activeSub!.subscriptionId,
       selectedPlan as number,
       addons.map((a) => ({
         quantity: a.quantity as number,
-        addonPlanId: a.id,
-      })),
-    );
+        addonPlanId: a.id
+      }))
+    )
     if (null != err) {
-      message.error(err.message);
-      return err;
+      message.error(err.message)
+      return err
     }
     // setPreviewModalOpen(false);
-    setPreview(previewRes);
-    return null;
-  };
+    setPreview(previewRes)
+    return null
+  }
 
   // confirm the changed plan
   const onConfirm = async () => {
-    const plan = plans.find((p) => p.id == selectedPlan);
+    const plan = plans.find((p) => p.id == selectedPlan)
     const addons =
       plan != null && plan.addons != null
         ? plan.addons.filter((a) => a.checked)
-        : [];
+        : []
 
-    setConfirming(true);
+    setConfirming(true)
     const [updateSubRes, err] = await updateSubscription(
       activeSub?.subscriptionId as string,
       selectedPlan as number,
       addons.map((a) => ({
         quantity: a.quantity as number,
-        addonPlanId: a.id,
+        addonPlanId: a.id
       })),
       preview?.totalAmount as number,
       preview?.currency as string,
-      preview?.prorationDate as number,
-    );
-    setConfirming(false);
+      preview?.prorationDate as number
+    )
+    setConfirming(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
 
     if (updateSubRes.paid) {
-      message.success('Plan updated');
+      message.success('Plan updated')
     } else {
-      message.success('Plan updated, but not paid');
+      message.success('Plan updated, but not paid')
     }
-    togglePreviewModal();
-    toggleChangPlanModal();
-    fetchData();
-  };
+    togglePreviewModal()
+    toggleChangPlanModal()
+    fetchData()
+  }
 
   const onTerminateSub = async () => {
     if (endSubMode == null) {
-      message.error('Please choose when to end this subscription');
-      return;
+      message.error('Please choose when to end this subscription')
+      return
     }
-    setLoading(true);
+    setLoading(true)
     const [_, err] = await terminateSubReq(
       activeSub?.subscriptionId as string,
-      endSubMode == 1,
-    );
-    setLoading(false);
+      endSubMode == 1
+    )
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
 
-    toggleTerminateModal();
+    toggleTerminateModal()
     message.success(
       endSubMode == 1
         ? 'Subscription ended'
-        : 'Subscription will end on the end of this billing cycle',
-    );
-    setEndSubMode(null); // force users to choose a endMode before submitting.
-    fetchData();
-  };
+        : 'Subscription will end on the end of this billing cycle'
+    )
+    setEndSubMode(null) // force users to choose a endMode before submitting.
+    fetchData()
+  }
 
   const onResumeSub = async () => {
-    setLoading(true);
-    const [_, err] = await resumeSubReq(activeSub?.subscriptionId as string);
-    setLoading(false);
+    setLoading(true)
+    const [_, err] = await resumeSubReq(activeSub?.subscriptionId as string)
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    toggleResumeSubModal();
-    message.success('Subscription resumed.');
-    fetchData();
-  };
+    toggleResumeSubModal()
+    message.success('Subscription resumed.')
+    fetchData()
+  }
 
   // fetch current subscription detail, and all active plans.
   const fetchData = async () => {
-    const pathName = window.location.pathname.split('/');
-    const subId = pathName.pop();
+    const pathName = window.location.pathname.split('/')
+    const subId = pathName.pop()
     if (subId == null) {
-      message.error("Subscription didn't exist");
-      return;
+      message.error("Subscription didn't exist")
+      return
     }
 
-    setLoading(true);
-    const [detailRes, err] = await getSubDetailWithMore(subId, fetchData);
+    setLoading(true)
+    const [detailRes, err] = await getSubDetailWithMore(subId, fetchData)
     if (err != null) {
-      setLoading(false);
-      message.error(err.message);
-      return;
+      setLoading(false)
+      message.error(err.message)
+      return
     }
-    console.log('detailRes: ', detailRes);
-    const { subDetail, planList } = detailRes;
-    setLoading(false);
+    console.log('detailRes: ', detailRes)
+    const { subDetail, planList } = detailRes
+    setLoading(false)
 
     const { user, addons, unfinishedSubscriptionPendingUpdate, subscription } =
-      subDetail;
-    const localActiveSub: ISubscriptionType = { ...subscription };
+      subDetail
+    const localActiveSub: ISubscriptionType = { ...subscription }
     localActiveSub.addons = addons?.map((a: any) => ({
       ...a.addonPlan,
       quantity: a.quantity,
-      addonPlanId: a.addonPlan.id,
-    }));
-    localActiveSub.user = user;
+      addonPlanId: a.addonPlan.id
+    }))
+    localActiveSub.user = user
     localActiveSub.unfinishedSubscriptionPendingUpdate =
-      unfinishedSubscriptionPendingUpdate;
+      unfinishedSubscriptionPendingUpdate
     if (localActiveSub.unfinishedSubscriptionPendingUpdate != null) {
       if (
         localActiveSub.unfinishedSubscriptionPendingUpdate.updateAddons != null
@@ -324,26 +324,26 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
             (a: any) => ({
               ...a.addonPlan,
               quantity: a.quantity,
-              addonPlanId: a.addonPlan.id,
-            }),
-          );
+              addonPlanId: a.addonPlan.id
+            })
+          )
       }
     }
 
-    console.log('active sub: ', localActiveSub, '//user: ', user);
-    setSelectedPlan(subDetail.plan.id);
-    setUserId(user.id);
+    console.log('active sub: ', localActiveSub, '//user: ', user)
+    setSelectedPlan(subDetail.plan.id)
+    setUserId(user.id)
 
     let plans: IPlan[] =
       planList == null
         ? []
         : planList.map((p: any) => ({
             ...p.plan,
-            addons: p.addons,
-          }));
+            addons: p.addons
+          }))
 
-    plans = plans.filter((p) => p != null);
-    const planIdx = plans.findIndex((p) => p.id == subDetail.plan.id);
+    plans = plans.filter((p) => p != null)
+    const planIdx = plans.findIndex((p) => p.id == subDetail.plan.id)
     // let's say we have planA(which has addonA1, addonA2, addonA3), planB, planC, user has subscribed to planA, and selected addonA1, addonA3
     // I need to find the index of addonA1,3 in planA.addons array,
     // then set their {quantity, checked: true} props on planA.addons, these props value are from subscription.addons array.
@@ -354,57 +354,57 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
             ? -1
             : localActiveSub.addons.findIndex(
                 (subAddon) =>
-                  subAddon.addonPlanId == plans[planIdx].addons![i].id,
-              );
+                  subAddon.addonPlanId == plans[planIdx].addons![i].id
+              )
         if (addonIdx != -1) {
-          plans[planIdx].addons![i].checked = true;
+          plans[planIdx].addons![i].checked = true
           plans[planIdx].addons![i].quantity =
-            localActiveSub.addons[addonIdx].quantity;
+            localActiveSub.addons[addonIdx].quantity
         }
       }
     }
-    setPlans(plans);
-    localActiveSub.plan = plans.find((p) => p.id == localActiveSub.planId);
-    setActiveSub(localActiveSub);
-  };
+    setPlans(plans)
+    localActiveSub.plan = plans.find((p) => p.id == localActiveSub.planId)
+    setActiveSub(localActiveSub)
+  }
 
   const onDueDateChange = (date: any, dateStr: string) => {
-    console.log(date, '//', dateStr, '///', activeSub?.currentPeriodEnd);
-    setNewDueDate(dateStr);
-    toggleSetDueDateModal();
-  };
+    console.log(date, '//', dateStr, '///', activeSub?.currentPeriodEnd)
+    setNewDueDate(dateStr)
+    toggleSetDueDateModal()
+  }
 
   const onExtendDueDate = async () => {
-    setLoading(true);
+    setLoading(true)
     const hours =
-      daysBetweenDate(activeSub!.currentPeriodEnd * 1000, newDueDate) * 24;
-    const [_, err] = await extendDueDateReq(activeSub!.subscriptionId, hours);
-    setLoading(false);
+      daysBetweenDate(activeSub!.currentPeriodEnd * 1000, newDueDate) * 24
+    const [_, err] = await extendDueDateReq(activeSub!.subscriptionId, hours)
+    setLoading(false)
     if (null != err) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    toggleSetDueDateModal();
-    message.success('Due date extended');
-    fetchData(); // better to call message.success in fetchData cb(add a cb parameter to fetchData)
-  };
+    toggleSetDueDateModal()
+    message.success('Due date extended')
+    fetchData() // better to call message.success in fetchData cb(add a cb parameter to fetchData)
+  }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   useEffect(() => {
     if (!changePlanModal && activeSub != null) {
-      setSelectedPlan(activeSub?.planId);
+      setSelectedPlan(activeSub?.planId)
     }
-  }, [changePlanModal]);
+  }, [changePlanModal])
 
   return (
     <>
       <div
         style={{
           display: showSimDatePicker() ? 'flex' : 'none',
-          width: '540px',
+          width: '540px'
         }}
         className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
       >
@@ -417,7 +417,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
           <span>
             {activeSub?.testClock && activeSub?.testClock > 0
               ? dayjs(new Date(activeSub?.testClock * 1000)).format(
-                  'YYYY-MMM-DD HH:mm:ss',
+                  'YYYY-MMM-DD HH:mm:ss'
                 )
               : ''}
           </span>
@@ -428,7 +428,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
             value={dayjs(
               activeSub == null || activeSub.testClock === 0
                 ? new Date()
-                : new Date(activeSub!.testClock! * 1000),
+                : new Date(activeSub!.testClock! * 1000)
             )}
             onChange={onSimDateChange}
             open={simDateOpen}
@@ -439,7 +439,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
                   null == activeSub.testClock ||
                   activeSub.testClock <= 0
                   ? new Date()
-                  : new Date(activeSub!.testClock! * 1000),
+                  : new Date(activeSub!.testClock! * 1000)
               )
             }
             // disabledTime={disabledSimTime}
@@ -522,27 +522,27 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         toggleCancelSubModal={toggleCancelSubModal}
       />
     </>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
 
 const rowStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  height: '32px',
-};
-const colStyle: CSSProperties = { fontWeight: 'bold' };
+  height: '32px'
+}
+const colStyle: CSSProperties = { fontWeight: 'bold' }
 
 interface ISubSectionProps {
-  subInfo: ISubscriptionType | null;
-  plans: IPlan[];
-  onDueDateChange: (date: any, dateStr: string) => void;
-  refresh: () => void;
-  toggleTerminateModal: () => void;
-  toggleResumeSubModal: () => void;
-  toggleChangPlanModal: () => void;
-  toggleCancelSubModal: () => void;
+  subInfo: ISubscriptionType | null
+  plans: IPlan[]
+  onDueDateChange: (date: any, dateStr: string) => void
+  refresh: () => void
+  toggleTerminateModal: () => void
+  toggleResumeSubModal: () => void
+  toggleChangPlanModal: () => void
+  toggleCancelSubModal: () => void
 }
 const SubscriptionInfoSection = ({
   subInfo,
@@ -552,7 +552,7 @@ const SubscriptionInfoSection = ({
   toggleTerminateModal,
   toggleResumeSubModal,
   toggleChangPlanModal,
-  toggleCancelSubModal,
+  toggleCancelSubModal
 }: ISubSectionProps) => {
   return (
     <>
@@ -607,11 +607,11 @@ const SubscriptionInfoSection = ({
               subInfo!.addons!.reduce(
                 (
                   sum,
-                  { quantity, amount }: { quantity: number; amount: number },
+                  { quantity, amount }: { quantity: number; amount: number }
                 ) => sum + quantity * amount,
-                0,
+                0
               ),
-              subInfo!.currency,
+              subInfo!.currency
             )}
 
           {subInfo && subInfo.addons && subInfo.addons.length > 0 && (
@@ -670,7 +670,7 @@ const SubscriptionInfoSection = ({
             <span>
               {' '}
               {dayjs(new Date(subInfo.firstPaidTime * 1000)).format(
-                'YYYY-MMM-DD',
+                'YYYY-MMM-DD'
               )}
             </span>
           )}
@@ -688,8 +688,8 @@ const SubscriptionInfoSection = ({
               disabledDate={(d) =>
                 d.isBefore(
                   new Date(
-                    subInfo?.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24,
-                  ),
+                    subInfo?.currentPeriodEnd * 1000 + 1000 * 60 * 60 * 24
+                  )
                 )
               }
             />
@@ -701,13 +701,13 @@ const SubscriptionInfoSection = ({
                 style={{
                   fontSize: '11px',
                   color: '#f44336',
-                  marginLeft: '6px',
+                  marginLeft: '6px'
                 }}
               >
                 +
                 {daysBetweenDate(
                   subInfo.currentPeriodEnd * 1000,
-                  subInfo.trialEnd * 1000,
+                  subInfo.trialEnd * 1000
                 )}{' '}
                 days →{' '}
                 {dayjs(new Date(subInfo.trialEnd * 1000)).format('YYYY-MMM-DD')}
@@ -729,7 +729,7 @@ const SubscriptionInfoSection = ({
               <span style={{ color: 'red', marginRight: '8px' }}>
                 {subInfo &&
                   dayjs(new Date(subInfo!.currentPeriodEnd * 1000)).format(
-                    'YYYY-MMM-DD HH:mm:ss',
+                    'YYYY-MMM-DD HH:mm:ss'
                   )}
               </span>
               <Button onClick={toggleResumeSubModal}>Resume</Button>
@@ -746,11 +746,11 @@ const SubscriptionInfoSection = ({
         testClock={subInfo?.testClock}
       />
     </>
-  );
-};
+  )
+}
 
 const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
-  const i = subInfo.unfinishedSubscriptionPendingUpdate;
+  const i = subInfo.unfinishedSubscriptionPendingUpdate
   return (
     <>
       <Divider orientation="left" style={{ margin: '32px 0' }}>
@@ -783,11 +783,11 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
               i.updateAddons!.reduce(
                 (
                   sum,
-                  { quantity, amount }: { quantity: number; amount: number },
+                  { quantity, amount }: { quantity: number; amount: number }
                 ) => sum + quantity * amount,
-                0,
+                0
               ),
-              i.updateCurrency,
+              i.updateCurrency
             )}
 
           {i?.updateAddons && i.updateAddons.length > 0 && (
@@ -871,104 +871,104 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
         <Col span={6}>{i?.note}</Col>
       </Row>
     </>
-  );
-};
+  )
+}
 
 // -------------
 type SubTimeline = {
-  currency: string;
-  id: number;
+  currency: string
+  id: number
   // planId: number;
   // planName: string;
-  plan: { id: number; planName: string }; // TODO: use existing IPLan type
-  periodStart: number;
-  periodEnd: number;
-  subscriptionId: string;
-  invoiceId: string;
-};
+  plan: { id: number; planName: string } // TODO: use existing IPLan type
+  periodStart: number
+  periodEnd: number
+  subscriptionId: string
+  invoiceId: string
+}
 
 const SubTimeline = ({
   userId,
   plans,
-  testClock,
+  testClock
 }: {
-  userId: number | undefined;
-  plans: IPlan[];
-  testClock: number | undefined;
+  userId: number | undefined
+  plans: IPlan[]
+  testClock: number | undefined
 }) => {
   // parent updated, how can I knwo that, and update myself
-  const [timeline, setTimeline] = useState<SubTimeline[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0);
-  const PAGE_SIZE = 10;
+  const [timeline, setTimeline] = useState<SubTimeline[]>([])
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(0)
+  const PAGE_SIZE = 10
 
   const columns: ColumnsType<SubTimeline> = [
     {
       title: 'Plan',
       dataIndex: 'id',
       key: 'id',
-      render: (id, record) => record.plan.planName,
+      render: (id, record) => record.plan.planName
     },
     {
       title: 'Start',
       dataIndex: 'periodStart',
       key: 'periodStart',
-      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD'),
+      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD')
     },
     {
       title: 'End',
       dataIndex: 'periodEnd',
       key: 'periodEnd',
-      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD'),
+      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD')
     },
     {
       title: 'Subscription Id',
       dataIndex: 'subscriptionId',
-      key: 'subscriptionId',
+      key: 'subscriptionId'
     },
     {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
-      key: 'invoiceId',
-    },
-  ];
+      key: 'invoiceId'
+    }
+  ]
 
   const fetchTimeline = async () => {
     if (userId == null) {
-      return;
+      return
     }
-    setLoading(true);
+    setLoading(true)
     const [timeline, err] = await getSubTimelineReq({
       userId,
       page,
-      count: PAGE_SIZE,
-    });
-    setLoading(false);
+      count: PAGE_SIZE
+    })
+    setLoading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    setTimeline(timeline);
-  };
+    setTimeline(timeline)
+  }
 
   const onPageChange = (page: number, pageSize: number) => {
-    setPage(page - 1);
-  };
+    setPage(page - 1)
+  }
 
   useEffect(() => {
-    fetchTimeline();
-  }, [page]);
+    fetchTimeline()
+  }, [page])
 
   useEffect(() => {
-    fetchTimeline();
-  }, [userId]);
+    fetchTimeline()
+  }, [userId])
 
   useEffect(() => {
     if (testClock == null || testClock <= 0) {
-      return;
+      return
     }
-    fetchTimeline();
-  }, [testClock]);
+    fetchTimeline()
+  }, [testClock])
 
   return (
     <>
@@ -983,12 +983,12 @@ const SubTimeline = ({
         pagination={false}
         loading={{
           spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
         onRow={(record, rowIndex) => {
           return {
-            onClick: (event) => {},
-          };
+            onClick: (event) => {}
+          }
         }}
       />
       <div className="my-5 flex justify-end">
@@ -1003,5 +1003,5 @@ const SubTimeline = ({
         />
       </div>
     </>
-  );
-};
+  )
+}

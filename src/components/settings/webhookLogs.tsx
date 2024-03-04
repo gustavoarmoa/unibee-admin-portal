@@ -1,30 +1,30 @@
-import { LoadingOutlined } from '@ant-design/icons';
-import { Button, Modal, Pagination, Popover, Table, message } from 'antd';
-import { ColumnsType } from 'antd/es/table';
-import { useEffect, useState } from 'react';
-import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
-import json from 'react-syntax-highlighter/dist/esm/languages/prism/json';
-import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism';
-import { getWebhookLogs } from '../../requests';
-import { TWebhookLogs } from '../../shared.types.d';
-SyntaxHighlighter.registerLanguage('json', json);
+import { LoadingOutlined } from '@ant-design/icons'
+import { Button, Modal, Pagination, Popover, Table, message } from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import { useEffect, useState } from 'react'
+import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
+import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
+import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
+import { getWebhookLogs } from '../../requests'
+import { TWebhookLogs } from '../../shared.types.d'
+SyntaxHighlighter.registerLanguage('json', json)
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10
 
 const Index = ({
   closeModal,
-  endpointId,
+  endpointId
 }: {
-  closeModal: () => void;
-  endpointId: number;
+  closeModal: () => void
+  endpointId: number
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [logs, setLogs] = useState<TWebhookLogs[]>([]);
-  const [page, setPage] = useState(0);
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
+  const [loading, setLoading] = useState(false)
+  const [logs, setLogs] = useState<TWebhookLogs[]>([])
+  const [page, setPage] = useState(0)
+  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
   const renderJson = (text: string) => {
     if (null == text || '' == text) {
-      return '';
+      return ''
     }
     return (
       <Popover
@@ -41,14 +41,14 @@ const Index = ({
           style={{
             width: '80px',
             height: '60px',
-            overflow: 'hidden',
+            overflow: 'hidden'
           }}
         >
           {text}
         </div>
       </Popover>
-    );
-  };
+    )
+  }
 
   const columns: ColumnsType<TWebhookLogs> = [
     {
@@ -61,13 +61,13 @@ const Index = ({
           style={{
             width: '80px',
             height: '60px',
-            overflow: 'hidden',
+            overflow: 'hidden'
             // whiteSpace: 'nowrap',
           }}
         >
           {text}
         </div>
-      ),
+      )
     },
     {
       title: 'Event',
@@ -79,13 +79,13 @@ const Index = ({
           style={{
             width: '80px',
             height: '60px',
-            overflow: 'hidden',
+            overflow: 'hidden'
             // whiteSpace: 'nowrap',
           }}
         >
           {text}
         </div>
-      ),
+      )
     },
     {
       title: 'Request Id',
@@ -97,65 +97,65 @@ const Index = ({
           style={{
             width: '80px',
             height: '60px',
-            overflow: 'hidden',
+            overflow: 'hidden'
             // whiteSpace: 'nowrap',
           }}
         >
           {text}
         </div>
-      ),
+      )
     },
     {
       title: 'Request Body',
       dataIndex: 'body',
       key: 'body',
       width: 80,
-      render: (text) => renderJson(text),
+      render: (text) => renderJson(text)
     },
     {
       title: 'Response',
       dataIndex: 'response',
       key: 'response',
       width: 80,
-      render: (text) => renderJson(text),
+      render: (text) => renderJson(text)
     },
     {
       title: 'mamo',
       dataIndex: 'mamo',
       key: 'mamo',
       width: 80,
-      render: (text) => renderJson(text),
+      render: (text) => renderJson(text)
     },
     {
       title: 'Created at',
       dataIndex: 'gmtCreate',
       key: 'gmtCreate',
       width: 80,
-      render: (text) => <span>{text}</span>,
-    },
-  ];
+      render: (text) => <span>{text}</span>
+    }
+  ]
 
   const fetchData = async () => {
-    setLoading(true);
+    setLoading(true)
     const [endpointLogList, err] = await getWebhookLogs(
       { endpointId, page, count: PAGE_SIZE },
-      fetchData,
-    );
-    setLoading(false);
+      fetchData
+    )
+    setLoading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    setLogs(endpointLogList);
-  };
+    setLogs(endpointLogList)
+  }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   useEffect(() => {
-    fetchData();
-  }, [page]);
+    fetchData()
+  }, [page])
 
   return (
     <Modal
@@ -173,7 +173,7 @@ const Index = ({
         pagination={false}
         loading={{
           spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
@@ -195,7 +195,7 @@ const Index = ({
         </div>
       </div>
     </Modal>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

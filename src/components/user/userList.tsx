@@ -1,4 +1,4 @@
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined } from '@ant-design/icons'
 import {
   Button,
   Col,
@@ -9,57 +9,57 @@ import {
   Row,
   Select,
   Table,
-  message,
-} from 'antd';
-import { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { SUBSCRIPTION_STATUS } from '../../constants';
-import { getUserListReq } from '../../requests';
-import '../../shared.css';
-import { IProfile } from '../../shared.types.d';
-import { useAppConfigStore } from '../../stores';
+  message
+} from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { SUBSCRIPTION_STATUS } from '../../constants'
+import { getUserListReq } from '../../requests'
+import '../../shared.css'
+import { IProfile } from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
 
-const APP_PATH = import.meta.env.BASE_URL;
-const PAGE_SIZE = 10;
+const APP_PATH = import.meta.env.BASE_URL
+const PAGE_SIZE = 10
 
 const Index = () => {
-  const navigate = useNavigate();
-  const appConfigStore = useAppConfigStore();
-  const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<IProfile[]>([]);
-  const [page, setPage] = useState(0); // pagination props
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1);
-  const [form] = Form.useForm();
+  const navigate = useNavigate()
+  const appConfigStore = useAppConfigStore()
+  const [loading, setLoading] = useState(false)
+  const [users, setUsers] = useState<IProfile[]>([])
+  const [page, setPage] = useState(0) // pagination props
+  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
+  const [form] = Form.useForm()
 
   const columns: ColumnsType<IProfile> = [
     {
       title: 'First Name',
       dataIndex: 'firstName',
-      key: 'firstName',
+      key: 'firstName'
       // render: (text) => <a>{text}</a>,
     },
     {
       title: 'Last Name',
       dataIndex: 'lastName',
-      key: 'lastName',
+      key: 'lastName'
     },
     {
       title: 'Email',
       dataIndex: 'email',
-      key: 'email',
+      key: 'email'
     },
     {
       title: 'Created at',
       dataIndex: 'gmtCreate',
       key: 'gmtCreate',
-      render: (d, plan) => dayjs(d).format('YYYY-MMM-DD'),
+      render: (d, plan) => dayjs(d).format('YYYY-MMM-DD')
     },
     {
       title: 'Subscription',
       dataIndex: 'subscriptionName',
-      key: 'subscriptionName',
+      key: 'subscriptionName'
     },
     {
       title: 'Sub Id',
@@ -69,19 +69,19 @@ const Index = () => {
         <span
           className="btn-user-with-subid"
           onClick={(evt) => {
-            navigate(`${APP_PATH}subscription/${subId}`);
+            navigate(`${APP_PATH}subscription/${subId}`)
           }}
         >
           <a className="btn-user-with-subid">{subId}</a>
         </span>
-      ),
+      )
     },
     {
       title: 'Sub Status',
       dataIndex: 'subscriptionStatus',
       key: 'subscriptionStatus',
-      render: (status, plan) => SUBSCRIPTION_STATUS[status],
-    },
+      render: (status, plan) => SUBSCRIPTION_STATUS[status]
+    }
     /*
     {
       title: 'Sub Amt',
@@ -90,35 +90,35 @@ const Index = () => {
       // render: (amt, record) => <span>{amt}</span>,
     },
     */
-  ];
+  ]
 
   const fetchData = async () => {
-    const searchTerm = form.getFieldsValue();
-    setLoading(true);
+    const searchTerm = form.getFieldsValue()
+    setLoading(true)
     const [users, err] = await getUserListReq(
       {
         page,
         count: PAGE_SIZE,
-        ...searchTerm,
+        ...searchTerm
       },
-      fetchData,
-    );
-    setLoading(false);
+      fetchData
+    )
+    setLoading(false)
     if (err != null) {
-      message.error(err.message);
-      return;
+      message.error(err.message)
+      return
     }
-    console.log('customer list: ', users);
-    setUsers(users);
-  };
+    console.log('customer list: ', users)
+    setUsers(users)
+  }
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   useEffect(() => {
-    fetchData();
-  }, [page]);
+    fetchData()
+  }, [page])
 
   return (
     <div>
@@ -131,7 +131,7 @@ const Index = () => {
         pagination={false}
         loading={{
           spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
         onRow={(user, rowIndex) => {
           return {
@@ -140,11 +140,11 @@ const Index = () => {
                 evt.target instanceof HTMLElement &&
                 evt.target.classList.contains('btn-user-with-subid')
               ) {
-                return;
+                return
               }
-              navigate(`${APP_PATH}customer/${user.id}`);
-            },
-          };
+              navigate(`${APP_PATH}customer/${user.id}`)
+            }
+          }
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
@@ -159,25 +159,25 @@ const Index = () => {
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
 const DEFAULT_SEARCH_TERM = {
   firstName: '',
   lastName: '',
-  email: '',
-};
+  email: ''
+}
 const Search = ({
   form,
   searching,
-  goSearch,
+  goSearch
 }: {
-  form: FormInstance<any>;
-  searching: boolean;
-  goSearch: () => void;
+  form: FormInstance<any>
+  searching: boolean
+  goSearch: () => void
 }) => {
-  const clear = () => form.resetFields();
+  const clear = () => form.resetFields()
 
   return (
     <div>
@@ -220,5 +220,5 @@ const Search = ({
         </Row>
       </Form>
     </div>
-  );
-};
+  )
+}

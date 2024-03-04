@@ -1,4 +1,4 @@
-import type { CheckboxProps, TabsProps } from 'antd';
+import type { CheckboxProps, TabsProps } from 'antd'
 import {
   Button,
   Checkbox,
@@ -8,43 +8,43 @@ import {
   Modal,
   Row,
   Table,
-  Tabs,
-} from 'antd';
-import { ColumnsType } from 'antd/es/table';
-import dayjs from 'dayjs';
-import React, { CSSProperties, useState } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import { useNavigate } from 'react-router-dom';
-import '../../shared.css';
-import { IProfile } from '../../shared.types.d';
-import WebhookList from './webhookList';
+  Tabs
+} from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import dayjs from 'dayjs'
+import React, { CSSProperties, useState } from 'react'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
+import { useNavigate } from 'react-router-dom'
+import '../../shared.css'
+import { IProfile } from '../../shared.types.d'
+import WebhookList from './webhookList'
 
 type TPermission = {
-  appConfig: { read: boolean; write: boolean };
-  emailTemplate: { read: boolean; write: boolean };
-  invoiceTemplate: { read: boolean; write: boolean };
-  plan: { read: boolean; write: boolean };
-  subscription: { read: boolean; write: boolean };
-  invoice: { read: boolean; write: boolean; generate: boolean };
+  appConfig: { read: boolean; write: boolean }
+  emailTemplate: { read: boolean; write: boolean }
+  invoiceTemplate: { read: boolean; write: boolean }
+  plan: { read: boolean; write: boolean }
+  subscription: { read: boolean; write: boolean }
+  invoice: { read: boolean; write: boolean; generate: boolean }
   accountData: {
-    read: boolean;
-    write: boolean;
-    invite: boolean;
-    permissionSetting: boolean;
-  };
-  customerData: { read: boolean; write: boolean };
-  analytic: { read: boolean; export: boolean };
-};
+    read: boolean
+    write: boolean
+    invite: boolean
+    permissionSetting: boolean
+  }
+  customerData: { read: boolean; write: boolean }
+  analytic: { read: boolean; export: boolean }
+}
 
 const roles = [
   'Owner',
   'Admin',
   'Power User',
   'Finance',
-  'Customer Support',
-] as const; // to mark it readonly
-type TRoles = (typeof roles)[number]; // APP Owner | Admin | *** |
+  'Customer Support'
+] as const // to mark it readonly
+type TRoles = (typeof roles)[number] // APP Owner | Admin | *** |
 
 const role: Record<TRoles, TPermission> = {
   Owner: {
@@ -58,10 +58,10 @@ const role: Record<TRoles, TPermission> = {
       read: true,
       write: true,
       invite: true,
-      permissionSetting: true,
+      permissionSetting: true
     },
     customerData: { read: true, write: true },
-    analytic: { read: true, export: true },
+    analytic: { read: true, export: true }
   },
   Admin: {
     appConfig: { read: true, write: true },
@@ -74,10 +74,10 @@ const role: Record<TRoles, TPermission> = {
       read: true,
       write: true,
       invite: false,
-      permissionSetting: true,
+      permissionSetting: true
     },
     customerData: { read: true, write: true },
-    analytic: { read: true, export: true },
+    analytic: { read: true, export: true }
   },
   'Power User': {
     appConfig: { read: false, write: false },
@@ -90,10 +90,10 @@ const role: Record<TRoles, TPermission> = {
       read: true,
       write: true,
       invite: true,
-      permissionSetting: true,
+      permissionSetting: true
     },
     customerData: { read: true, write: true },
-    analytic: { read: true, export: false },
+    analytic: { read: true, export: false }
   },
   Finance: {
     appConfig: { read: false, write: false },
@@ -106,10 +106,10 @@ const role: Record<TRoles, TPermission> = {
       read: false,
       write: false,
       invite: false,
-      permissionSetting: false,
+      permissionSetting: false
     },
     customerData: { read: true, write: false },
-    analytic: { read: true, export: true },
+    analytic: { read: true, export: true }
   },
   'Customer Support': {
     appConfig: { read: false, write: false },
@@ -122,12 +122,12 @@ const role: Record<TRoles, TPermission> = {
       read: false,
       write: false,
       invite: false,
-      permissionSetting: false,
+      permissionSetting: false
     },
     customerData: { read: true, write: false },
-    analytic: { read: false, export: false },
-  },
-};
+    analytic: { read: false, export: false }
+  }
+}
 
 // role: App Owner, Admin, Power User, Customer Support, Finance,
 
@@ -136,32 +136,32 @@ const Index = () => {
     {
       key: 'AppConfig',
       label: 'App Config',
-      children: <AppConfig />,
+      children: <AppConfig />
     },
     {
       key: 'emailTemplate',
       label: 'Email Template',
-      children: <EmailTemplate />,
+      children: <EmailTemplate />
     },
     {
       key: 'invoiceTemplate',
       label: 'Invoice Template',
-      children: 'invoice template',
+      children: 'invoice template'
     },
     {
       key: 'permission',
       label: 'Permission and Roles',
-      children: <PermissionTab />,
+      children: <PermissionTab />
     },
     {
       key: 'webhook',
       label: 'Webhook',
-      children: <WebhookList />,
-    },
-  ];
+      children: <WebhookList />
+    }
+  ]
   const onTabChange = (key: string) => {
     // console.log(key);
-  };
+  }
 
   // const x: keyof TPermission = "appConfig";
   // const allPerm = Object.keys()
@@ -176,10 +176,10 @@ const Index = () => {
         onChange={onTabChange}
       />
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
 
 const AppConfig = () => {
   return (
@@ -221,19 +221,19 @@ const AppConfig = () => {
         </Col>
       </Row>
     </div>
-  );
-};
+  )
+}
 
 type TEmailTmpl = {
-  id: number;
-  name: string;
-  description: string;
-  status: string;
-  createdBy: string;
-  updatedAt: string;
-};
+  id: number
+  name: string
+  description: string
+  status: string
+  createdBy: string
+  updatedAt: string
+}
 
-const RAW_TEXT2 = ' <ol><li>a</li><li>b</li><li>c</li></ol>';
+const RAW_TEXT2 = ' <ol><li>a</li><li>b</li><li>c</li></ol>'
 const RAW_TEXT = `
 <p>
 Dear [customer.name]:
@@ -258,7 +258,7 @@ Congratulation on your successful subscription on our Premium plan. Your benefit
 <p><br></p>
 <p>Your subscription fee will be charged on every [intervalCount] [intervalUnit] with [subscription.currency] [subscription.amount].</p>
 <p><br></p>
-`;
+`
 const PreviewText = () => (
   <>
     <p>Dear [customer.name]:</p>
@@ -292,74 +292,74 @@ const PreviewText = () => (
       <br />
     </p>
   </>
-);
+)
 const EditTemplate = () => {
-  const [value, setValue] = useState(RAW_TEXT);
+  const [value, setValue] = useState(RAW_TEXT)
   const onTextChange = (content: string) => {
-    setValue(content);
-  };
+    setValue(content)
+  }
   // console.log("txt: ", value);
   return (
     <div>
       <ReactQuill theme="snow" value={value} onChange={onTextChange} />
     </div>
-  );
-};
+  )
+}
 
 const PreviewTemplate = () => {
-  return <PreviewText />;
-};
+  return <PreviewText />
+}
 
 const EmailTemplate = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [tabKey, setTabKey] = useState('Edit');
-  const toggleModal = () => setModalOpen(!modalOpen);
+  const [modalOpen, setModalOpen] = useState(false)
+  const [tabKey, setTabKey] = useState('Edit')
+  const toggleModal = () => setModalOpen(!modalOpen)
 
   const tabItems: TabsProps['items'] = [
     {
       key: 'Edit',
       label: 'Edit',
-      children: <EditTemplate />,
+      children: <EditTemplate />
     },
     {
       key: 'Preview',
       label: 'Preview',
-      children: <PreviewTemplate />,
-    },
-  ];
+      children: <PreviewTemplate />
+    }
+  ]
   const onTabChange = (key: string) => {
-    setTabKey(key);
-  };
+    setTabKey(key)
+  }
 
   const columns: ColumnsType<TEmailTmpl> = [
     {
       title: 'Name',
       dataIndex: 'name',
-      key: 'name',
+      key: 'name'
       // render: (text) => <a>{text}</a>,
     },
     {
       title: 'Description',
       dataIndex: 'description',
-      key: 'description',
+      key: 'description'
     },
     {
       title: 'Status',
       dataIndex: 'status',
-      key: 'status',
+      key: 'status'
     },
     {
       title: 'Updated at',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
-      render: (d, plan) => dayjs(new Date(d)).format('YYYY-MMM-DD'),
+      render: (d, plan) => dayjs(new Date(d)).format('YYYY-MMM-DD')
     },
     {
       title: 'Created by',
       dataIndex: 'createdBy',
-      key: 'createdBy',
-    },
-  ];
+      key: 'createdBy'
+    }
+  ]
   const data: TEmailTmpl[] = [
     {
       id: 1,
@@ -367,7 +367,7 @@ const EmailTemplate = () => {
       description: 'send OTP in email',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 2,
@@ -375,7 +375,7 @@ const EmailTemplate = () => {
       description: 'signup email confirm',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 3,
@@ -383,7 +383,7 @@ const EmailTemplate = () => {
       description: 'reset password',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 4,
@@ -391,7 +391,7 @@ const EmailTemplate = () => {
       description: 'Subscription with successful payment',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 5,
@@ -399,7 +399,7 @@ const EmailTemplate = () => {
       description: 'Reminder to charge subscription fee',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 6,
@@ -407,7 +407,7 @@ const EmailTemplate = () => {
       description: 'Subscription with pending payment',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 7,
@@ -415,7 +415,7 @@ const EmailTemplate = () => {
       description: 'Subscription with failed payment',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 8,
@@ -423,7 +423,7 @@ const EmailTemplate = () => {
       description: 'Subscription fee charged successfully',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 9,
@@ -431,7 +431,7 @@ const EmailTemplate = () => {
       description: 'Fail to charge subscription fee',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 10,
@@ -439,7 +439,7 @@ const EmailTemplate = () => {
       description: 'Invoice delivered',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 11,
@@ -447,7 +447,7 @@ const EmailTemplate = () => {
       description: 'Subscription plan upgraded',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 12,
@@ -455,7 +455,7 @@ const EmailTemplate = () => {
       description: 'Subscription plan downgraded',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 13,
@@ -463,7 +463,7 @@ const EmailTemplate = () => {
       description: 'Subscription due date extended by *** days to ****-**-**',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 14,
@@ -471,7 +471,7 @@ const EmailTemplate = () => {
       description: 'Subscription cancelled',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
+      createdBy: 'Admin'
     },
     {
       id: 15,
@@ -479,9 +479,9 @@ const EmailTemplate = () => {
       description: 'Subscription resumed',
       status: 'Active',
       updatedAt: '2024-02-01',
-      createdBy: 'Admin',
-    },
-  ];
+      createdBy: 'Admin'
+    }
+  ]
   return (
     <div>
       <Modal
@@ -511,14 +511,14 @@ const EmailTemplate = () => {
           return {
             onClick: (event) => {
               // console.log("row click: ", user, "///", rowIndex);
-              toggleModal();
-            },
-          };
+              toggleModal()
+            }
+          }
         }}
       />
     </div>
-  );
-};
+  )
+}
 
 const PermissionTab = () => (
   <div style={{ width: 'calc(100vw - 300px)', overflowX: 'auto' }}>
@@ -561,7 +561,7 @@ const PermissionTab = () => (
       style={{
         height: 'calc(100vh - 410px)',
         overflowY: 'auto',
-        marginBottom: '16px',
+        marginBottom: '16px'
       }}
     >
       {roles.map((r) => (
@@ -726,4 +726,4 @@ const PermissionTab = () => (
       <Button type="primary">Apply Change</Button>
     </div>
   </div>
-);
+)

@@ -1,68 +1,68 @@
-import { LoadingOutlined, SearchOutlined } from '@ant-design/icons';
-import { Col, Divider, Input, Row, Spin, message } from 'antd';
-import dayjs from 'dayjs';
-import { CSSProperties, ChangeEvent, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useOnClickOutside } from 'usehooks-ts';
-import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../constants';
-import { showAmount } from '../helpers';
-import { appSearchReq } from '../requests';
-import { IProfile, UserInvoice } from '../shared.types.d';
-import { useAppConfigStore } from '../stores';
-import './appSearch.css';
+import { LoadingOutlined, SearchOutlined } from '@ant-design/icons'
+import { Col, Divider, Input, Row, Spin, message } from 'antd'
+import dayjs from 'dayjs'
+import { CSSProperties, ChangeEvent, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useOnClickOutside } from 'usehooks-ts'
+import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../constants'
+import { showAmount } from '../helpers'
+import { appSearchReq } from '../requests'
+import { IProfile, UserInvoice } from '../shared.types.d'
+import { useAppConfigStore } from '../stores'
+import './appSearch.css'
 
-const { Search } = Input;
-const APP_PATH = import.meta.env.BASE_URL;
+const { Search } = Input
+const APP_PATH = import.meta.env.BASE_URL
 
 interface IAccountInfo extends IProfile {
-  subscriptionId: string;
-  subscriptionStatus: number;
+  subscriptionId: string
+  subscriptionStatus: number
 }
 
 const Index = () => {
-  const navigate = useNavigate();
-  const appConfigStore = useAppConfigStore();
-  const [term, setTerm] = useState('');
-  const [searching, setSearching] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const resultWrapperRef = useRef(null);
-  const [invoiceList, setInvoiceList] = useState<UserInvoice[] | null>(null);
-  const [accountList, setAccountList] = useState<IAccountInfo[] | null>(null);
+  const navigate = useNavigate()
+  const appConfigStore = useAppConfigStore()
+  const [term, setTerm] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [showResult, setShowResult] = useState(false)
+  const resultWrapperRef = useRef(null)
+  const [invoiceList, setInvoiceList] = useState<UserInvoice[] | null>(null)
+  const [accountList, setAccountList] = useState<IAccountInfo[] | null>(null)
 
-  const hide = () => setShowResult(false);
-  const show = () => setShowResult(true);
-  useOnClickOutside(resultWrapperRef, hide);
+  const hide = () => setShowResult(false)
+  const show = () => setShowResult(true)
+  useOnClickOutside(resultWrapperRef, hide)
 
   const goToDetail = (pageId: string) => {
-    hide();
-    navigate(`${APP_PATH}${pageId}`);
-  };
+    hide()
+    navigate(`${APP_PATH}${pageId}`)
+  }
 
   const onEnter = async () => {
     if (term.trim() == '') {
-      return;
+      return
     }
 
-    setSearching(true);
-    setShowResult(true);
-    const [res, err] = await appSearchReq(term);
-    setSearching(false);
+    setSearching(true)
+    setShowResult(true)
+    const [res, err] = await appSearchReq(term)
+    setSearching(false)
     if (null != err) {
-      setShowResult(false);
-      message.error(err.message);
-      return;
+      setShowResult(false)
+      message.error(err.message)
+      return
     }
-    setShowResult(false);
+    setShowResult(false)
 
-    const { matchInvoice, matchUserAccounts } = res;
-    setInvoiceList(matchInvoice);
-    setAccountList(matchUserAccounts);
+    const { matchInvoice, matchUserAccounts } = res
+    setInvoiceList(matchInvoice)
+    setAccountList(matchUserAccounts)
     // d.precisionMatchObject != null &&
-  };
+  }
 
   const onTermChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    setTerm(evt.target.value);
-  };
+    setTerm(evt.target.value)
+  }
 
   return (
     <div
@@ -70,7 +70,7 @@ const Index = () => {
         display: 'flex',
         alignItems: 'center',
         height: '100%',
-        position: 'relative',
+        position: 'relative'
       }}
     >
       <Search
@@ -95,7 +95,7 @@ const Index = () => {
           zIndex: '800',
           border: '1px solid #E0E0E0',
           borderRadius: '6px',
-          boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
+          boxShadow: 'rgba(0, 0, 0, 0.1) 0px 4px 12px'
         }}
       >
         {searching ? (
@@ -105,7 +105,7 @@ const Index = () => {
               height: '100%',
               display: 'flex',
               justifyContent: 'center',
-              alignItems: 'center',
+              alignItems: 'center'
             }}
           >
             {' '}
@@ -135,24 +135,24 @@ const Index = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
 
 const colStyle: CSSProperties = {
   fontWeight: 'bold',
   height: '32px',
   display: 'flex',
-  alignItems: 'center',
-};
+  alignItems: 'center'
+}
 
 const InvoiceMatch = ({
   list,
-  goToDetail,
+  goToDetail
 }: {
-  list: UserInvoice[] | null;
-  goToDetail: (url: string) => void;
+  list: UserInvoice[] | null
+  goToDetail: (url: string) => void
 }) => {
   // console.log("inv list: ", list);
   return (
@@ -166,7 +166,7 @@ const InvoiceMatch = ({
           height: '32px',
           padding: '0 6px',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'center'
         }}
       >
         <Col span={7} style={colStyle}>
@@ -190,7 +190,7 @@ const InvoiceMatch = ({
           style={{
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'center'
           }}
         >
           No Match Found
@@ -208,7 +208,7 @@ const InvoiceMatch = ({
                 padding: '0 6px',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                color: '#757575',
+                color: '#757575'
               }}
               align={'middle'}
               // style={{ height: "32px", margin: "6px 0" }}
@@ -222,7 +222,7 @@ const InvoiceMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <span>{iv.invoiceName}</span>
@@ -232,7 +232,7 @@ const InvoiceMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <div
@@ -240,7 +240,7 @@ const InvoiceMatch = ({
                     width: '68px',
                     textOverflow: 'ellipsis',
                     overflow: 'hidden',
-                    whiteSpace: 'nowrap',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {INVOICE_STATUS[iv.status as keyof typeof INVOICE_STATUS]}
@@ -251,7 +251,7 @@ const InvoiceMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <span>{showAmount(iv.totalAmount, iv.currency)}</span>
@@ -261,7 +261,7 @@ const InvoiceMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <span>
@@ -273,7 +273,7 @@ const InvoiceMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <span>
@@ -285,15 +285,15 @@ const InvoiceMatch = ({
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
 const AccountMatch = ({
   list,
-  goToDetail,
+  goToDetail
 }: {
-  list: IAccountInfo[] | null;
-  goToDetail: (url: string) => void;
+  list: IAccountInfo[] | null
+  goToDetail: (url: string) => void
 }) => {
   // console.log("acc matched: ", list);
   return (
@@ -307,7 +307,7 @@ const AccountMatch = ({
           height: '32px',
           padding: '0 6px',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'center'
         }}
       >
         <Col span={5} style={colStyle}>
@@ -341,7 +341,7 @@ const AccountMatch = ({
                 padding: '0 6px',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                color: '#757575',
+                color: '#757575'
               }}
               align={'middle'}
               // style={{ height: "32px", margin: "6px 0" }}
@@ -357,7 +357,7 @@ const AccountMatch = ({
                   alignItems: 'center',
                   textOverflow: 'ellipsis',
                   overflow: 'hidden',
-                  whiteSpace: 'nowrap',
+                  whiteSpace: 'nowrap'
                 }}
               >
                 <span>{u.firstName}</span>
@@ -367,7 +367,7 @@ const AccountMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <div
@@ -375,7 +375,7 @@ const AccountMatch = ({
                     width: '64px',
                     textOverflow: 'ellipsis',
                     overflow: 'hidden',
-                    whiteSpace: 'nowrap',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {u.email}
@@ -386,7 +386,7 @@ const AccountMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <div
@@ -394,7 +394,7 @@ const AccountMatch = ({
                     width: '68px',
                     textOverflow: 'ellipsis',
                     overflow: 'hidden',
-                    whiteSpace: 'nowrap',
+                    whiteSpace: 'nowrap'
                   }}
                 >
                   {u.countryName}
@@ -405,7 +405,7 @@ const AccountMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <span>{u.subscriptionId}</span>
@@ -415,7 +415,7 @@ const AccountMatch = ({
                 style={{
                   height: '32px',
                   display: 'flex',
-                  alignItems: 'center',
+                  alignItems: 'center'
                 }}
               >
                 <span> {SUBSCRIPTION_STATUS[u.subscriptionStatus]}</span>
@@ -425,9 +425,9 @@ const AccountMatch = ({
         </div>
       )}
     </>
-  );
-};
+  )
+}
 
 const PrecisionMatch = () => {
-  return <div>d</div>;
-};
+  return <div>d</div>
+}

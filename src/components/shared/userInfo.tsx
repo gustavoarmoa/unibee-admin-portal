@@ -1,13 +1,13 @@
-import { Col, Divider, Row } from 'antd';
-import { CSSProperties } from 'react';
-import { IProfile } from '../../shared.types.d';
+import { Col, Divider, Row } from 'antd'
+import { CSSProperties } from 'react'
+import { IProfile } from '../../shared.types.d'
 
 const rowStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   height: '24px',
-  color: '#757575',
-};
+  color: '#757575'
+}
 const Index = ({ user }: { user: IProfile | null }) => {
   // useEffect(() => {}, []);
 
@@ -59,7 +59,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
         <Col span={6}>{user?.vATNumber}</Col>
       </Row>
     </div>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index
