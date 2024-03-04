@@ -46,33 +46,19 @@ const Index = () => {
     }
 
     setSearching(true);
-    let res;
-    try {
-      setSearching(true);
-      setShowResult(true);
-      res = await appSearchReq(term);
-      setSearching(false);
-      console.log('app search res: ', res);
-      const code = res.data.code;
-      if (code != 0) {
-        code == 61 && relogin();
-        throw new Error(res.data.message);
-      }
-    } catch (err) {
-      setSearching(false);
+    setShowResult(true);
+    const [res, err] = await appSearchReq(term);
+    setSearching(false);
+    if (null != err) {
       setShowResult(false);
-      if (err instanceof Error) {
-        console.log('profile update err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
-      console.log('app search err: ', err);
+      message.error(err.message);
       return;
     }
-    const d = res.data.data;
-    setInvoiceList(d.matchInvoice);
-    setAccountList(d.matchUserAccounts);
+    setShowResult(false);
+
+    const { matchInvoice, matchUserAccounts } = res;
+    setInvoiceList(matchInvoice);
+    setAccountList(matchUserAccounts);
     // d.precisionMatchObject != null &&
   };
 

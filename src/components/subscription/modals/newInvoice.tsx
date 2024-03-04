@@ -7,12 +7,12 @@ import { CURRENCY } from '../../../constants';
 import { daysBetweenDate, ramdonString, showAmount } from '../../../helpers';
 import { useRelogin } from '../../../hooks';
 import {
-  createInvoice,
-  deleteInvoice,
-  publishInvoice,
-  refund,
-  revokeInvoice,
-  saveInvoice,
+  createInvoiceReq,
+  deleteInvoiceReq,
+  publishInvoiceReq,
+  refundReq,
+  revokeInvoiceReq,
+  saveInvoiceReq,
   sendInvoiceInMailReq,
 } from '../../../requests';
 import {
@@ -159,49 +159,36 @@ const Index = ({
         Number(v.unitAmountExcludingTax) * CURRENCY[currency].stripe_factor,
       quantity: Number(v.quantity),
     }));
-    try {
-      setLoading(true);
-      let saveInvoiceRes;
-      if (detail == null) {
-        // creating a new invoice
-        saveInvoiceRes = await createInvoice({
-          userId: user!.id as number,
-          taxScale: Number(taxScale) * 100,
-          currency,
-          name: invoiceName,
-          invoiceItems,
-          finish: isFinished,
-        });
-      } else {
-        // saving an invoice
-        saveInvoiceRes = await saveInvoice({
-          invoiceId: detail.invoiceId,
-          taxScale: Number(taxScale) / 100,
-          currency: detail.currency,
-          name: invoiceName,
-          invoiceItems,
-        });
-      }
-
-      console.log('save invoice res: ', saveInvoiceRes);
-      const code = saveInvoiceRes.data.code;
-      code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-      if (code != 0) {
-        throw new Error(saveInvoiceRes.data.message);
-      }
-      closeModal();
-      message.success('Invoice saved.');
-      refresh();
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err saving invoice: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    setLoading(true);
+    let saveInvoiceRes, err;
+    if (detail == null) {
+      // creating a new invoice
+      [saveInvoiceRes, err] = await createInvoiceReq({
+        userId: user!.id as number,
+        taxScale: Number(taxScale) * 100,
+        currency,
+        name: invoiceName,
+        invoiceItems,
+        finish: isFinished,
+      });
+    } else {
+      // saving an invoice
+      [saveInvoiceRes, err] = await saveInvoiceReq({
+        invoiceId: detail.invoiceId,
+        taxScale: Number(taxScale) / 100,
+        currency: detail.currency,
+        name: invoiceName,
+        invoiceItems,
+      });
     }
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
+    }
+    closeModal();
+    message.success('Invoice saved.');
+    refresh();
   };
 
   // ----------------
@@ -209,69 +196,44 @@ const Index = ({
   const onPublish = async () => {
     if (detail == null) {
       console.log('publis new invoice, detail is null? ', detail);
-      onSave(true)();
+      await onSave(true)();
       return;
     }
     // Do validation check first.
-    try {
-      setLoading(true);
-      const res = await publishInvoice({
-        invoiceId: detail.invoiceId,
-        payMethod: 1,
-        daysUtilDue: 1,
-      });
-      setLoading(false);
-      console.log('publishing invoice res: ', res);
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      closeModal();
-      message.success('Invoice generated and sent.');
-      refresh();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err saving invoice: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    setLoading(true);
+    const [_, err] = await publishInvoiceReq({
+      invoiceId: detail.invoiceId,
+      payMethod: 1,
+      daysUtilDue: 1,
+    });
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    closeModal();
+    message.success('Invoice generated and sent.');
+    refresh();
   };
 
-  // revoke: just the opposite of publish (back to unpublish state)
+  // revoke: just the opposite of publish (back to unpublished state)
   // delete. They have the same structure, and I'm too lazy to duplicate it.
   const onDeleteOrRevoke = async (action: 'delete' | 'revoke') => {
     if (detail == null) {
       return;
     }
-    console.log('delete: ', action);
 
-    const callMethod = action == 'delete' ? deleteInvoice : revokeInvoice;
-    try {
-      setLoading(true);
-      const res = await callMethod(detail.invoiceId);
-      setLoading(false);
-      console.log(`${action} invoice res: `, res);
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      closeModal();
-      message.success(`Invoice ${action}d.`);
-      refresh();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log(`err ${action}ing invoice: `, err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const callMethod = action == 'delete' ? deleteInvoiceReq : revokeInvoiceReq;
+    setLoading(true);
+    const [_, err] = await callMethod(detail.invoiceId);
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    message.success(`Invoice ${action}d.`);
+    closeModal();
+    refresh();
   };
 
   const onDelete = () => onDeleteOrRevoke('delete');
@@ -295,35 +257,23 @@ const Index = ({
       return;
     }
 
-    try {
-      setLoading(true);
-      const res = await refund(
-        {
-          invoiceId: detail?.invoiceId,
-          refundAmount: Number(refundAmt),
-          reason: refundReason,
-        },
-        currency,
-      );
-      setLoading(false);
-      console.log('refund res: ', res);
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      message.success('Refunded.'); // does user get refund immeidately? or there is a pending process
-      closeModal();
-      refresh();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log(`err refunding: `, err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    setLoading(true);
+    const [_, err] = await refundReq(
+      {
+        invoiceId: detail?.invoiceId,
+        refundAmount: Number(refundAmt),
+        reason: refundReason,
+      },
+      currency,
+    );
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    message.success('Refunded.'); // does user get refund immeidately? or there is a pending process
+    closeModal();
+    refresh();
   };
 
   const onSendInvoice = async () => {
@@ -331,26 +281,14 @@ const Index = ({
       return;
     }
     setLoading(true);
-    try {
-      const res = await sendInvoiceInMailReq(detail.invoiceId);
-      console.log('send invoice in mail res: ', res);
-      setLoading(false);
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      message.success('Invoice sent.');
-      closeModal();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log(`err sending invoice: `, err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [_, err] = await sendInvoiceInMailReq(detail.invoiceId);
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    message.success('Invoice sent.');
+    closeModal();
   };
 
   const onFieldChange =

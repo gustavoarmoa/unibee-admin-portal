@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
 import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
-import { getInvoiceList } from '../../requests';
+import { getInvoiceListReq } from '../../requests';
 import '../../shared.css';
 import { IProfile, UserInvoice } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
@@ -130,30 +130,21 @@ const Index = () => {
     searchTerm.amountStart = amtFrom;
     searchTerm.amountEnd = amtTo;
 
-    try {
-      setLoading(true);
-      const res = await getInvoiceList({
+    setLoading(true);
+    const [res, err] = await getInvoiceListReq(
+      {
         page,
         count: PAGE_SIZE,
         ...searchTerm,
-      });
-      setLoading(false);
-      console.log('res getting invoice list: ', res);
-      const code = res.data.code;
-      if (code != 0) {
-        code == 61 && relogin();
-        throw new Error(res.data.message);
-      }
-      setInvoiceList(res.data.data.invoices);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log(`err getting invoice: `, err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+      },
+      fetchData,
+    );
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    setInvoiceList(res.invoices);
   };
 
   useEffect(() => {

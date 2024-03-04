@@ -6,41 +6,25 @@ import { useRelogin } from '../../../hooks';
 import { cancelSubReq } from '../../../requests';
 import { ISubscriptionType } from '../../../shared.types.d';
 
-const APP_PATH = import.meta.env.BASE_URL;
-
 interface Props {
   subInfo: ISubscriptionType | null;
   closeModal: () => void;
   refresh: () => void;
 }
 const Index = ({ subInfo, closeModal, refresh }: Props) => {
-  // const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const relogin = useRelogin();
-
   const onConfirm = async () => {
-    try {
-      console.log('cancelling ....', subInfo?.subscriptionId);
-      setLoading(true);
-      const res = await cancelSubReq(subInfo?.subscriptionId as string);
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      message.success(`Subscription cancelled`);
-      setLoading(false);
-      closeModal();
-      refresh();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log(`err cancelling sub: `, err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    console.log('cancelling ....', subInfo?.subscriptionId);
+    setLoading(true);
+    const [_, err] = await cancelSubReq(subInfo?.subscriptionId as string);
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    message.success(`Subscription cancelled`);
+    closeModal();
+    refresh();
   };
 
   return (

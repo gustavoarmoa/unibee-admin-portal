@@ -12,12 +12,7 @@ import {
 import { ReactElement, useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 import { useRelogin } from '../../hooks';
-import {
-  getCountryList,
-  getCountryList2,
-  saveUserProfile,
-  saveUserProfile2,
-} from '../../requests';
+import { getCountryListReq, saveUserProfileReq } from '../../requests';
 import { Country, IProfile } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
 
@@ -31,11 +26,8 @@ const UserAccountTab = ({
   extraButton?: ReactElement;
 }) => {
   const [form] = Form.useForm();
-  const appConfigStore = useAppConfigStore();
-  //   const navigate = useNavigate();
   const [countryList, setCountryList] = useState<Country[]>([]);
   const [loading, setLoading] = useState(false);
-  const relogin = useRelogin();
 
   const filterOption = (
     input: string,
@@ -45,7 +37,7 @@ const UserAccountTab = ({
   const onSave = async () => {
     const userProfile = form.getFieldsValue();
     setLoading(true);
-    const [_, err] = await saveUserProfile2(userProfile);
+    const [_, err] = await saveUserProfileReq(userProfile);
     setLoading(false);
     if (err != null) {
       message.error(err.message);
@@ -58,7 +50,7 @@ const UserAccountTab = ({
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const [list, err] = await getCountryList2();
+      const [list, err] = await getCountryListReq();
       setLoading(false);
       if (err != null) {
         message.error(err.message);

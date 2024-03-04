@@ -27,12 +27,12 @@ import { daysBetweenDate, showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
 import {
   createPreviewReq,
-  extendDueDate,
+  extendDueDateReq,
   getSubDetailWithMore,
-  getSubTimeline2,
-  resumeSub,
+  getSubTimelineReq,
+  resumeSubReq,
   setSimDateReq,
-  terminateSub,
+  terminateSubReq,
   updateSubscription,
 } from '../../requests';
 import {
@@ -84,28 +84,18 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
 
   const onSimDateChange = async (date: any, dateString: string) => {
     setLoading(true);
-    try {
-      const res = await setSimDateReq(
-        activeSub?.subscriptionId as string,
-        dayjs(new Date(dateString)).unix(),
-      );
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      message.success('New simulation date set.');
-      fetchData();
-      toggleSimDateOpen();
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err creating preview: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [_, err] = await setSimDateReq(
+      activeSub?.subscriptionId as string,
+      dayjs(new Date(dateString)).unix(),
+    );
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    message.success('New simulation date set.');
+    toggleSimDateOpen();
+    fetchData();
   };
   const toggleSimDateOpen = () => setSimDateOpen(!simDateOpen);
 
@@ -183,38 +173,20 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         ? plan.addons.filter((a) => a.checked)
         : [];
     console.log('active sub addon bfr preview: ', addons);
-    let previewRes;
-    try {
-      previewRes = await createPreviewReq(
-        activeSub!.subscriptionId,
-        selectedPlan as number,
-        addons.map((a) => ({
-          quantity: a.quantity as number,
-          addonPlanId: a.id,
-        })),
-      );
-      console.log('subscription update preview res: ', previewRes);
-      const code = previewRes.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(previewRes.data.message);
-      }
-      // setPreviewModalOpen(false);
-      // togglePreviewModal();
-    } catch (err) {
-      // togglePreviewModal();
-      setPreviewModalOpen(false);
-      if (err instanceof Error) {
-        console.log('err creating preview: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [previewRes, err] = await createPreviewReq(
+      activeSub!.subscriptionId,
+      selectedPlan as number,
+      addons.map((a) => ({
+        quantity: a.quantity as number,
+        addonPlanId: a.id,
+      })),
+    );
+    if (null != err) {
+      message.error(err.message);
       return;
     }
-
-    const p: IPreview = previewRes.data.data;
-    setPreview(p);
+    setPreviewModalOpen(false);
+    setPreview(previewRes);
   };
 
   // confirm the changed plan
@@ -224,40 +196,26 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       plan != null && plan.addons != null
         ? plan.addons.filter((a) => a.checked)
         : [];
-    let updateSubRes;
-    try {
-      setConfirming(true);
-      updateSubRes = await updateSubscription(
-        activeSub?.subscriptionId as string,
-        selectedPlan as number,
-        addons.map((a) => ({
-          quantity: a.quantity as number,
-          addonPlanId: a.id,
-        })),
-        preview?.totalAmount as number,
-        preview?.currency as string,
-        preview?.prorationDate as number,
-      );
-      setConfirming(false);
-      console.log('update subscription submit res: ', updateSubRes);
-      const code = updateSubRes.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(updateSubRes.data.message);
-      }
-    } catch (err) {
-      setConfirming(false);
-      setPreviewModalOpen(false);
-      if (err instanceof Error) {
-        console.log('err submitting plan update: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+
+    setConfirming(true);
+    const [updateSubRes, err] = await updateSubscription(
+      activeSub?.subscriptionId as string,
+      selectedPlan as number,
+      addons.map((a) => ({
+        quantity: a.quantity as number,
+        addonPlanId: a.id,
+      })),
+      preview?.totalAmount as number,
+      preview?.currency as string,
+      preview?.prorationDate as number,
+    );
+    setConfirming(false);
+    if (null != err) {
+      message.error(err.message);
       return;
     }
 
-    if (updateSubRes.data.data.paid) {
+    if (updateSubRes.paid) {
       message.success('Plan updated');
     } else {
       message.success('Plan updated, but not paid');
@@ -272,67 +230,38 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       message.error('Please choose when to end this subscription');
       return;
     }
-    try {
-      setLoading(true);
-      const terminateRes = await terminateSub(
-        activeSub?.subscriptionId as string,
-        endSubMode == 1,
-      );
-      console.log('terminate sub res: ', terminateRes);
-      const code = terminateRes.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(terminateRes.data.message);
-      }
-      setLoading(false);
-      // setTerminateModal(false);
-      toggleTerminateModal();
-      message.success(
-        endSubMode == 1
-          ? 'Subscription ended'
-          : 'Subscription will end on the end of this billing cycle',
-      );
-      setEndSubMode(null); // force users to choose a endMode before submitting.
-      fetchData();
-    } catch (err) {
-      setLoading(false);
-      // setTerminateModal(false);
-      toggleTerminateModal();
-      if (err instanceof Error) {
-        console.log('err terminating sub: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    setLoading(true);
+    const [_, err] = await terminateSubReq(
+      activeSub?.subscriptionId as string,
+      endSubMode == 1,
+    );
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+
+    toggleTerminateModal();
+    message.success(
+      endSubMode == 1
+        ? 'Subscription ended'
+        : 'Subscription will end on the end of this billing cycle',
+    );
+    setEndSubMode(null); // force users to choose a endMode before submitting.
+    fetchData();
   };
 
   const onResumeSub = async () => {
-    try {
-      setLoading(true);
-      const resumeRes = await resumeSub(activeSub?.subscriptionId as string);
-      console.log('resume sub res: ', resumeRes);
-      const code = resumeRes.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(resumeRes.data.message);
-      }
-      setLoading(false);
-      // setResumeModal(false);
-      toggleResumeSubModal();
-      message.success('Subscription resumed.');
-      fetchData();
-    } catch (err) {
-      setLoading(false);
-      // setResumeModal(false);
-      toggleResumeSubModal();
-      if (err instanceof Error) {
-        console.log('err resuming sub: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    setLoading(true);
+    const [_, err] = await resumeSubReq(activeSub?.subscriptionId as string);
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    toggleResumeSubModal();
+    message.success('Subscription resumed.');
+    fetchData();
   };
 
   // fetch current subscription detail, and all active plans.
@@ -427,31 +356,16 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
 
   const onExtendDueDate = async () => {
     setLoading(true);
-    let extendRes;
-    try {
-      const hours =
-        daysBetweenDate(activeSub!.currentPeriodEnd * 1000, newDueDate) * 24;
-      extendRes = await extendDueDate(activeSub!.subscriptionId, hours);
-      console.log('extend due date res: ', extendRes);
-      const code = extendRes.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(extendRes.data.message);
-      }
-    } catch (err) {
-      setLoading(false);
-      toggleSetDueDateModal();
-      if (err instanceof Error) {
-        console.log('err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const hours =
+      daysBetweenDate(activeSub!.currentPeriodEnd * 1000, newDueDate) * 24;
+    const [_, err] = await extendDueDateReq(activeSub!.subscriptionId, hours);
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
       return;
     }
-    setLoading(false);
-    message.success('Due date extended');
     toggleSetDueDateModal();
+    message.success('Due date extended');
     fetchData(); // better to call message.success in fetchData cb(add a cb parameter to fetchData)
   };
 
@@ -999,7 +913,7 @@ const SubTimeline = ({
       return;
     }
     setLoading(true);
-    const [timeline, err] = await getSubTimeline2({
+    const [timeline, err] = await getSubTimelineReq({
       userId,
       page,
       count: PAGE_SIZE,

@@ -31,7 +31,7 @@ import {
 import { CURRENCY, INVOICE_STATUS } from '../../constants';
 import { showAmount } from '../../helpers';
 import { useRelogin } from '../../hooks';
-import { downloadInvoice, getInvoiceList } from '../../requests';
+import { downloadInvoice, getInvoiceListReq } from '../../requests';
 import '../../shared.css';
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d';
 import { useAppConfigStore } from '../../stores';
@@ -230,37 +230,24 @@ const Index = ({ user }: { user: IProfile | null }) => {
       return;
     }
     setLoading(true);
-    let invoiceListRes;
-    try {
-      invoiceListRes = await getInvoiceList({
+    const [invoices, err] = await getInvoiceListReq(
+      {
         page,
         count: PAGE_SIZE,
         userId: user!.id as number,
-      });
-      console.log('invoice list res: ', invoiceListRes);
-      const code = invoiceListRes.data.code;
-      code == 61 && relogin(); // TODO: redesign the relogin component(popped in current page), so users don't have to be taken to /login
-      if (code != 0) {
-        // TODO: save all the code as ENUM in constant,
-        throw new Error(invoiceListRes.data.message);
-      }
-      let v = invoiceListRes.data.data.invoices;
-      console.log('v: ', v);
-      if (v != null) {
-        normalizeAmt(v);
-        setInvoiceList(v);
-      }
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('err getting invoice list: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+      },
+      fetchData,
+    );
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
       return;
     }
-    setLoading(false);
+
+    if (invoices != null) {
+      normalizeAmt(invoices);
+      setInvoiceList(invoices);
+    }
   };
 
   useEffect(() => {

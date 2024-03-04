@@ -129,33 +129,17 @@ const Index = () => {
     m = m.filter((metric: any) => !isNaN(metric.metricLimit));
     f.metricLimits = m;
 
-    console.log('saving plan form: ', f);
-
-    // return;
-    // const actionMethod = isNew ? createPlan : savePlan;
-    try {
-      setLoading(true);
-      const res = await savePlan(f, isNew);
-      setLoading(false);
-      const statusCode = res.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(res.data.message);
-      }
-      message.success(`Plan ${isNew ? 'created' : 'saved'}`);
-      setTimeout(() => {
-        navigate(`${APP_PATH}plan/list`);
-      }, 1500);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('plan saving err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    setLoading(true);
+    const [_, err] = await savePlan(f, isNew);
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
       return;
     }
+    message.success(`Plan ${isNew ? 'created' : 'saved'}`);
+    setTimeout(() => {
+      navigate(`${APP_PATH}plan/list`);
+    }, 1500);
   };
 
   const onActivate = async () => {
@@ -164,30 +148,17 @@ const Index = () => {
       message.error('Invalid planId');
       return;
     }
-    try {
-      setActivating(true);
-      const activateRes = await activatePlan(planId);
-      setActivating(false);
-      console.log('activate plan res: ', activateRes);
-      const statuCode = activateRes.data.code;
-      if (statuCode != 0) {
-        statuCode == 61 && relogin();
-        throw new Error(activateRes.data.message);
-      }
-      message.success('Plan activated');
-      setTimeout(() => {
-        navigate(`${APP_PATH}plan/list`);
-      }, 2000);
-    } catch (err) {
-      setActivating(false);
-      if (err instanceof Error) {
-        console.log('plan activate err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    setActivating(true);
+    const [_, err] = await activatePlan(planId);
+    setActivating(false);
+    if (null != err) {
+      message.error(err.message);
       return;
     }
+    message.success('Plan activated');
+    setTimeout(() => {
+      navigate(`${APP_PATH}plan/list`);
+    }, 2000);
   };
 
   const fetchData = async () => {
@@ -251,31 +222,19 @@ const Index = () => {
     );
   };
 
-  // used only in editing an existing plan
+  // used only when editing an existing plan
   const togglePublish = async () => {
     setPublishing(true);
-    try {
-      const publishRes = await togglePublishReq({
-        planId: (plan as IPlan).id,
-        publishAction: plan!.publishStatus == 1 ? 'PUBLISH' : 'UNPUBLISH',
-      });
-      setPublishing(false);
-      console.log('toggle publish res: ', publishRes);
-      const statusCode = publishRes.data.code;
-      if (statusCode != 0) {
-        statusCode == 61 && relogin();
-        throw new Error(publishRes.data.message);
-      }
-      fetchData();
-    } catch (err) {
-      setPublishing(false);
-      if (err instanceof Error) {
-        console.log('err toggleing publish status: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [_, err] = await togglePublishReq({
+      planId: (plan as IPlan).id,
+      publishAction: plan!.publishStatus == 1 ? 'PUBLISH' : 'UNPUBLISH',
+    });
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    await fetchData();
+    setPublishing(false);
   };
 
   // it just adds an empty metrics item

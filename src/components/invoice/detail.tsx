@@ -58,39 +58,26 @@ const Index = () => {
     navigate(`${APP_PATH}customer/${userId}`);
   const goToSub = (subId: string) => () =>
     navigate(`${APP_PATH}subscription/${subId}`);
-  const relogin = useRelogin();
 
   const fetchData = async () => {
-    // const subId = location.state && location.state.subscriptionId;
     const pathName = window.location.pathname.split('/');
     console.log('path name: ', pathName);
     const ivId = pathName.pop();
     if (ivId == null) {
-      // TODO: show page not exist, OR invalid subscription
+      message.error('Invalid invoice');
       return;
     }
     setLoading(true);
-    try {
-      const res = await getInvoiceDetailReq(ivId);
-      setLoading(false);
-      console.log('iv detail of ', ivId, ': ', res);
-      const code = res.data.code;
-      code == 61 && relogin();
-      if (code != 0) {
-        throw new Error(res.data.message);
-      }
-      normalizeAmt([res.data.data.invoice]);
-      setInvoiceDetail(res.data.data.invoice);
-      setUserProfile(res.data.data.userAccount);
-    } catch (err) {
-      setLoading(false);
-      if (err instanceof Error) {
-        console.log('get invoice detail err: ', err.message);
-        message.error(err.message);
-      } else {
-        message.error('Unknown error');
-      }
+    const [res, err] = await getInvoiceDetailReq(ivId);
+    setLoading(false);
+    if (null != err) {
+      message.error(err.message);
+      return;
     }
+    const [invoice, userAccount] = res;
+    normalizeAmt([invoice]);
+    setInvoiceDetail(invoice);
+    setUserProfile(userAccount);
   };
 
   useEffect(() => {
