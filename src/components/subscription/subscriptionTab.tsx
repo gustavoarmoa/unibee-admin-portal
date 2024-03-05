@@ -411,11 +411,16 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
       >
         <div>
-          <span>
-            {activeSub?.testClock != null && activeSub?.testClock <= 0
-              ? 'No simulation time running'
-              : 'current simulation time: '}
-          </span>
+          <div className="flex flex-col" style={{ fontSize: '11px' }}>
+            {activeSub?.testClock != null && activeSub?.testClock <= 0 ? (
+              <>
+                <div>No simulation time running</div>
+                <div>Only works on active or incomplete subscription</div>
+              </>
+            ) : (
+              'current simulation time: '
+            )}
+          </div>
           <span>
             {activeSub?.testClock && activeSub?.testClock > 0
               ? dayjs(new Date(activeSub?.testClock * 1000)).format(
