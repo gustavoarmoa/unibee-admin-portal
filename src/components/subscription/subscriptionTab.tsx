@@ -372,7 +372,6 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   }
 
   const onDueDateChange = (date: Dayjs, dateStr: string | string[]) => {
-    console.log(date, '//', dateStr, '///', activeSub?.currentPeriodEnd)
     setNewDueDate(dateStr as string)
     toggleSetDueDateModal()
   }

@@ -172,9 +172,9 @@ const Index = () => {
     const { planDetail, addonList, metricsList } = detailRes
     console.log('res: ', planDetail, '//', addonList, '//', metricsList)
 
-    const addons = addonList.map((p: any) => p.plan)
+    const addons = addonList == null ? [] : addonList.map((p: any) => p.plan)
     setAddons(addons)
-    setMetricsList(metricsList)
+    setMetricsList(metricsList == null ? [] : metricsList)
     if (isNew) {
       return
     }

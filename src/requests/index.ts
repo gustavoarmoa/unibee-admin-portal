@@ -267,6 +267,7 @@ export const getPlanDetail = async (planId: number) => {
       session.setSession({ expired: true, refresh: null })
       throw new ExpiredError('Session expired')
     }
+    console.log('get plan detail: ', res.data.data)
     return [res.data.data.plan, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
