@@ -667,7 +667,59 @@ export const extendDueDateReq = async (
         appendTrialEndHour
       }
     )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [null, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
 
+export const getAdminNoteReq = async ({
+  subscriptionId,
+  page,
+  count,
+  refreshCb
+}: {
+  subscriptionId: string
+  page: number
+  count: number
+  refreshCb: (() => void) | null
+}) => {
+  try {
+    const res = await request.post('/merchant/subscription/admin_note_list', {
+      subscriptionId,
+      page,
+      count
+    })
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const createAdminNoteReq = async ({
+  subscriptionId,
+  note
+}: {
+  subscriptionId: string
+  note: string
+}) => {
+  const merchantStore = useMerchantInfoStore.getState()
+  try {
+    const res = await request.post('/merchant/subscription/new_admin_note', {
+      subscriptionId,
+      merchantMemberId: merchantStore.id,
+      note
+    })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
       throw new Error('Session expired')

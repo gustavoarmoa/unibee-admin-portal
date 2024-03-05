@@ -238,6 +238,8 @@ const Index = ({ user }: { user: IProfile | null }) => {
     if (invoices != null) {
       normalizeAmt(invoices)
       setInvoiceList(invoices)
+    } else {
+      setInvoiceList([])
     }
   }
 

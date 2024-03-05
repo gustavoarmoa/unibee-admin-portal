@@ -6,6 +6,7 @@ import { getUserProfile } from '../../requests'
 import { IProfile } from '../../shared.types.d'
 import UserInfoSection from '../shared/userInfo'
 import AdminNote from './adminNote'
+import './detail.css'
 import InvoiceTab from './invoicesTab'
 import SubscriptionTab from './subscriptionTab'
 import UserAccount from './userAccountTab'
@@ -18,6 +19,8 @@ const Index = () => {
   const [userId, setUserId] = useState<number | null>(null) // subscription obj has user account data, and admin can update it in AccountTab.
   // so the user data on subscription obj might be obsolete,
   // so I use userId from subscription Obj, use this userId to run getUserProfile(userId), even after admin update the user info in AccontTab, re-call getUserProfile
+
+  const [adminNotePushed, setAdminNotePushed] = useState(false)
 
   const tabItems: TabsProps['items'] = [
     {
@@ -61,9 +64,14 @@ const Index = () => {
     fetchUserProfile()
   }, [userId])
 
+  const togglePush = () => setAdminNotePushed(!adminNotePushed)
+
   return (
-    <div className="flex">
-      <div style={{ width: '80%' }}>
+    <div className="flex" style={{ position: 'relative', overflowX: 'hidden' }}>
+      <div
+        style={{ width: adminNotePushed ? '100%' : '79%' }}
+        id="subscription-main-content"
+      >
         <UserInfoSection user={userProfile} />
         <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
         <div className="mt-4 flex items-center justify-center">
@@ -72,7 +80,7 @@ const Index = () => {
           </Button>
         </div>
       </div>
-      <AdminNote />
+      <AdminNote pushed={adminNotePushed} togglePush={togglePush} />
     </div>
   )
 }
