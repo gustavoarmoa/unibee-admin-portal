@@ -33,16 +33,6 @@ const Index = () => {
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
 
-  /*
-  const goToDetail = (invoiceId: string) => (evt: any) => {
-    console.log('tada')
-    if (evt.target.closest('.unibee-user-id-wrapper')) {
-      return
-    }
-    navigate(`${APP_PATH}invoice/${invoiceId}`)
-  }
-  */
-
   const columns: ColumnsType<UserInvoice> = [
     {
       title: 'Invoice Name',

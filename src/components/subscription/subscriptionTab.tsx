@@ -660,10 +660,11 @@ const SubscriptionInfoSection = ({
         <Col span={6}>
           {subInfo && subInfo.firstPaidTime && (
             <span>
-              {' '}
-              {dayjs(new Date(subInfo.firstPaidTime * 1000)).format(
-                'YYYY-MMM-DD'
-              )}
+              {subInfo.firstPaidTime == 0 || subInfo.firstPaidTime == null
+                ? 'N/A'
+                : dayjs(new Date(subInfo.firstPaidTime * 1000)).format(
+                    'YYYY-MMM-DD'
+                  )}
             </span>
           )}
         </Col>
