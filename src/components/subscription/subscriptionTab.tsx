@@ -76,10 +76,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const toggleChangPlanModal = () => setChangePlanModal(!changePlanModal)
   const toggleCancelSubModal = () => setCancelSubModalOpen(!cancelSubModalOpen)
 
-  const onSimDateChange = async (
-    date: Dayjs,
-    dateString: string | string[]
-  ) => {
+  const onSimDateChange = async (date: Dayjs | null, dateString: string) => {
     setLoading(true)
     const [_, err] = await setSimDateReq(
       activeSub?.subscriptionId as string,
@@ -153,25 +150,6 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
           }
         }
       }
-    }
-
-    {
-      /* 
-    console.log(
-      'check plan changed??? original/new planId ',
-      activeSub?.planId,
-      '//',
-      selectedPlan,
-    );
-    console.log(
-      'selected addons: original/newly selected ',
-      activeSub?.addons,
-      '///',
-      plan?.addons,
-    );
-
-    // return;
-*/
     }
 
     if (!isValid) {
@@ -371,7 +349,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     setActiveSub(localActiveSub)
   }
 
-  const onDueDateChange = (date: Dayjs, dateStr: string | string[]) => {
+  const onDueDateChange = (date: Dayjs | null, dateStr: string) => {
     setNewDueDate(dateStr as string)
     toggleSetDueDateModal()
   }
@@ -551,7 +529,7 @@ const colStyle: CSSProperties = { fontWeight: 'bold' }
 interface ISubSectionProps {
   subInfo: ISubscriptionType | null
   plans: IPlan[]
-  onDueDateChange: (date: Dayjs, dateStr: string | string[]) => void
+  onDueDateChange: (date: Dayjs | null, dateStr: string) => void
   refresh: () => void
   toggleTerminateModal: () => void
   toggleResumeSubModal: () => void
