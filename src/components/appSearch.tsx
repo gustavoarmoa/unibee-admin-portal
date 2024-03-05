@@ -21,7 +21,6 @@ interface IAccountInfo extends IProfile {
 
 const Index = () => {
   const navigate = useNavigate()
-  const appConfigStore = useAppConfigStore()
   const [term, setTerm] = useState('')
   const [searching, setSearching] = useState(false)
   const [showResult, setShowResult] = useState(false)
@@ -52,7 +51,7 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    setShowResult(false)
+    // setShowResult(false)
 
     const { matchInvoice, matchUserAccounts } = res
     setInvoiceList(matchInvoice)
@@ -76,6 +75,7 @@ const Index = () => {
       <Search
         value={term}
         onChange={onTermChange}
+        onSearch={onEnter}
         onClick={show}
         onPressEnter={onEnter}
         allowClear={true}
@@ -89,7 +89,7 @@ const Index = () => {
           position: 'absolute',
           top: '52px',
           width: '640px',
-          height: '640px',
+          height: '500px',
           visibility: `${showResult ? 'visible' : 'hidden'}`,
           background: '#FAFAFA',
           zIndex: '800',
@@ -116,17 +116,17 @@ const Index = () => {
           </div>
         ) : (
           <div style={{ position: 'relative' }}>
-            <div>precision match</div>
+            {/* <div>precision match</div> */}
             <Divider
               orientation="left"
-              style={{ margin: '2px 0', color: '#757575' }}
+              style={{ margin: '8px 0', color: '#757575' }}
             >
               Invoices
             </Divider>
             <InvoiceMatch list={invoiceList} goToDetail={goToDetail} />
             <Divider
               orientation="left"
-              style={{ margin: '2px 0', color: '#757575' }}
+              style={{ margin: '8px 0', color: '#757575' }}
             >
               Customers
             </Divider>
@@ -408,7 +408,15 @@ const AccountMatch = ({
                   alignItems: 'center'
                 }}
               >
-                <span>{u.subscriptionId}</span>
+                <span
+                  style={{
+                    width: '128px',
+                    overflowX: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {u.subscriptionId}
+                </span>
               </Col>
               <Col
                 span={5}
@@ -418,7 +426,7 @@ const AccountMatch = ({
                   alignItems: 'center'
                 }}
               >
-                <span> {SUBSCRIPTION_STATUS[u.subscriptionStatus]}</span>
+                <span>{SUBSCRIPTION_STATUS[u.subscriptionStatus]}</span>
               </Col>
             </Row>
           ))}
