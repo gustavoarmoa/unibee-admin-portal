@@ -425,7 +425,14 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
           </span>
         </div>
         <div ref={simDateContainerRef}>
-          <Button onClick={toggleSimDateOpen}>Advance Time</Button>
+          <Button
+            onClick={toggleSimDateOpen}
+            disabled={
+              ![2, 7].includes(null != activeSub ? activeSub.status : -1)
+            }
+          >
+            Advance Time
+          </Button>
           <DatePicker
             value={dayjs(
               activeSub == null || activeSub.testClock === 0
