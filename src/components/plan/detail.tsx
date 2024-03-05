@@ -57,7 +57,6 @@ const Index = () => {
   const params = useParams()
   const planId = params.planId
   const isNew = planId == null
-  console.log('planId , isNew: ', planId, '//', isNew)
 
   // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false)

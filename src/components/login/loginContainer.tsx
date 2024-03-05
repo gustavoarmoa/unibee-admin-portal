@@ -68,7 +68,7 @@ const Index = ({
           )}
         </div>
         <div className="flex flex-col items-center justify-center text-gray-500">
-          <div>Don't have an account?</div>
+          <div>Don&apos;t have an account?</div>
           <div className="flex items-center">
             <div>
               <Button type="link" onClick={goSignup}>

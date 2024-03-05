@@ -33,17 +33,15 @@ const Index = () => {
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
 
+  /*
   const goToDetail = (invoiceId: string) => (evt: any) => {
-    console.log('go to detail: ', evt.target)
+    console.log('tada')
     if (evt.target.closest('.unibee-user-id-wrapper')) {
       return
     }
     navigate(`${APP_PATH}invoice/${invoiceId}`)
   }
-
-  const goToUser = () => {
-    console.log('got to user')
-  }
+  */
 
   const columns: ColumnsType<UserInvoice> = [
     {
@@ -126,7 +124,7 @@ const Index = () => {
     searchTerm.amountEnd = amtTo
 
     setLoading(true)
-    const [res, err] = await getInvoiceListReq(
+    const [invoices, err] = await getInvoiceListReq(
       {
         page,
         count: PAGE_SIZE,
@@ -139,7 +137,7 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    setInvoiceList(res.invoices)
+    setInvoiceList(invoices || [])
   }
 
   useEffect(() => {
@@ -155,7 +153,7 @@ const Index = () => {
       <Table
         columns={columns}
         dataSource={invoiceList}
-        rowKey={'uniqueId'}
+        rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{
@@ -164,7 +162,9 @@ const Index = () => {
         }}
         onRow={(iv, rowIndex) => {
           return {
-            onClick: goToDetail(iv.invoiceId)
+            onClick: (evt) => {
+              navigate(`${APP_PATH}invoice/${iv.invoiceId}`)
+            }
           }
         }}
       />
