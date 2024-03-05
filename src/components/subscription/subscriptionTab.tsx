@@ -414,8 +414,8 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
           <div className="flex flex-col" style={{ fontSize: '11px' }}>
             {activeSub?.testClock != null && activeSub?.testClock <= 0 ? (
               <>
-                <div>No simulation time running</div>
-                <div>Only works on active or incomplete subscription</div>
+                <div>No simulation time running.</div>
+                <div>Only works on active or incomplete subscription.</div>
               </>
             ) : (
               'current simulation time: '
