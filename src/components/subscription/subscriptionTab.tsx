@@ -18,7 +18,7 @@ import {
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import update from 'immutability-helper'
 import { CSSProperties, useEffect, useRef, useState } from 'react'
 import { useOnClickOutside } from 'usehooks-ts'
@@ -76,11 +76,14 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const toggleChangPlanModal = () => setChangePlanModal(!changePlanModal)
   const toggleCancelSubModal = () => setCancelSubModalOpen(!cancelSubModalOpen)
 
-  const onSimDateChange = async (date: any, dateString: string) => {
+  const onSimDateChange = async (
+    date: Dayjs,
+    dateString: string | string[]
+  ) => {
     setLoading(true)
     const [_, err] = await setSimDateReq(
       activeSub?.subscriptionId as string,
-      dayjs(new Date(dateString)).unix()
+      dayjs(new Date(dateString as string)).unix()
     )
     setLoading(false)
     if (null != err) {
@@ -368,9 +371,9 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     setActiveSub(localActiveSub)
   }
 
-  const onDueDateChange = (date: any, dateStr: string) => {
+  const onDueDateChange = (date: Dayjs, dateStr: string | string[]) => {
     console.log(date, '//', dateStr, '///', activeSub?.currentPeriodEnd)
-    setNewDueDate(dateStr)
+    setNewDueDate(dateStr as string)
     toggleSetDueDateModal()
   }
 
@@ -537,7 +540,7 @@ const colStyle: CSSProperties = { fontWeight: 'bold' }
 interface ISubSectionProps {
   subInfo: ISubscriptionType | null
   plans: IPlan[]
-  onDueDateChange: (date: any, dateStr: string) => void
+  onDueDateChange: (date: Dayjs, dateStr: string | string[]) => void
   refresh: () => void
   toggleTerminateModal: () => void
   toggleResumeSubModal: () => void
