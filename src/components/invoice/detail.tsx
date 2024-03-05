@@ -54,15 +54,15 @@ const Index = () => {
     }
     setLoading(true)
     const [res, err] = await getInvoiceDetailReq(ivId)
+    console.log('get invoicde detail res: ', res)
     setLoading(false)
     if (null != err) {
       message.error(err.message)
       return
     }
-    const [invoice, userAccount] = res
+    const { invoice } = res
     normalizeAmt([invoice])
     setInvoiceDetail(invoice)
-    setUserProfile(userAccount)
   }
 
   useEffect(() => {
