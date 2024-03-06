@@ -1,5 +1,5 @@
 import { DoubleRightOutlined } from '@ant-design/icons'
-import { Button, message } from 'antd'
+import { Button, Divider, message } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -20,6 +20,7 @@ const Index = ({
   const [submitting, setSubmitting] = useState(false)
   const [noteList, setNoteList] = useState<TAdminNote[]>([])
   const [note, setNote] = useState('')
+  const [page, setPage] = useState(0)
 
   const createNote = async () => {
     if (subscriptionId == null) {
@@ -96,8 +97,13 @@ const Index = ({
           overflowY: 'auto'
         }}
       >
-        {noteList.map((n) => (
-          <Note key={n.id} content={n} />
+        {noteList.map((n, idx) => (
+          <div key={n.id}>
+            <Note content={n} />
+            {idx < noteList.length - 1 && (
+              <Divider style={{ margin: '12px 0' }} />
+            )}
+          </div>
         ))}
       </div>
 
