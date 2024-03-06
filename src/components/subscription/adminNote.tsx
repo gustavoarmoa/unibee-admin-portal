@@ -61,6 +61,9 @@ const Index = ({
       message.error(err.message)
       return
     }
+    if (null == list) {
+      return
+    }
     setNoteList(list)
   }
   useEffect(() => {
