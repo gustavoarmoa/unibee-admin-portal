@@ -93,8 +93,9 @@ const Index = ({
       <div
         className="mb-4 flex flex-col  px-2 text-gray-500"
         style={{
-          height: '70%',
-          overflowY: 'auto'
+          height: 'calc(100% - 200px)',
+          overflowY: 'auto',
+          borderBottom: '1px solid lightgray'
         }}
       >
         {noteList.map((n, idx) => (
@@ -152,9 +153,11 @@ const Note = ({ content }: { content: TAdminNote }) => {
   return (
     <div className="my-2">
       <div className="mb-1 whitespace-pre-wrap">{content.note}</div>
-      <div className="mb-2" style={{ fontSize: '11px' }}>
-        <span>{content.firstName}</span>&nbsp;&nbsp;
-        {dayjs(new Date(content.gmtModify)).format('YYYY-MMM-DD HH:MM:ss')}
+      <div className="my-2" style={{ fontSize: '11px' }}>
+        <span>{content.firstName}</span>:&nbsp;&nbsp;
+        {dayjs(new Date(content.createTime * 1000)).format(
+          'YYYY-MMM-DD HH:MM:ss'
+        )}
       </div>
     </div>
   )

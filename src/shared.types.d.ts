@@ -219,7 +219,7 @@ type TAdminNote = {
   id: number
   firstName: string
   lastName: string
-  gmtModify: string
+  createTime: number
   note: string
 }
 
