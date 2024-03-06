@@ -699,7 +699,7 @@ export const getAdminNoteReq = async ({
       session.setSession({ expired: true, refresh: refreshCb })
       throw new Error('Session expired')
     }
-    return [res.data.data, null]
+    return [res.data.data.noteLists, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]

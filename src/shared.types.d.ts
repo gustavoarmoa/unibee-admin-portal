@@ -215,6 +215,14 @@ type TInvoicePerm = {
   sendable: boolean // send invoice via email, ditto
 }
 
+type TAdminNote = {
+  id: number
+  firstName: string
+  lastName: string
+  gmtModify: string
+  note: string
+}
+
 type TWebhook = {
   id: number
   merchantId: number
@@ -254,6 +262,7 @@ export type {
   IProfile,
   ISubscriptionType,
   InvoiceItem,
+  TAdminNote,
   TInvoicePerm,
   TMerchantInfo,
   TWebhook,

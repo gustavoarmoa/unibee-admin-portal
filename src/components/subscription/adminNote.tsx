@@ -1,8 +1,10 @@
 import { DoubleRightOutlined } from '@ant-design/icons'
 import { Button, message } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
+import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { createAdminNoteReq, getAdminNoteReq } from '../../requests'
+import { TAdminNote } from '../../shared.types'
 import './adminNote.css'
 
 const Index = ({
@@ -15,18 +17,26 @@ const Index = ({
   const pathName = window.location.pathname.split('/')
   const subscriptionId = pathName.pop()
   const [loading, setLoading] = useState(false)
-  const [noteList, setNoteList] = useState([])
+  const [submitting, setSubmitting] = useState(false)
+  const [noteList, setNoteList] = useState<TAdminNote[]>([])
   const [note, setNote] = useState('')
 
   const createNote = async () => {
     if (subscriptionId == null) {
       return
     }
+    if (note.trim() == '') {
+      return
+    }
+
+    setSubmitting(true)
     const [res, err] = await createAdminNoteReq({ subscriptionId, note })
+    setSubmitting(false)
     if (null != err) {
       message.error(err.message)
       return
     }
+    setNote('')
     fetchData()
   }
 
@@ -40,7 +50,7 @@ const Index = ({
     }
 
     setLoading(true)
-    const [noteList, err] = await getAdminNoteReq({
+    const [list, err] = await getAdminNoteReq({
       subscriptionId,
       page: 0,
       count: 100,
@@ -51,15 +61,15 @@ const Index = ({
       message.error(err.message)
       return
     }
-    console.log('noets list res: ', noteList)
+    setNoteList(list)
   }
   useEffect(() => {
     fetchData()
   }, [])
   return (
     <div
-      id="admin-not-wrapper"
-      className="absolute h-full rounded-sm px-2 py-2"
+      id="admin-note-wrapper"
+      className="absolute h-full rounded "
       style={{
         width: '20%',
         right: pushed ? '-20%' : 0,
@@ -73,30 +83,31 @@ const Index = ({
       >
         <DoubleRightOutlined rotate={pushed ? 180 : 0} />
       </div>
-      <div className="flex items-center justify-center text-gray-500">
-        admin side note
+      <div className="flex h-8 items-center justify-center bg-gray-200 text-gray-500">
+        Admin side note
       </div>
       <div
-        className="mb-4 flex flex-col items-center justify-center text-gray-500"
+        className="mb-4 flex flex-col  px-2 text-gray-500"
         style={{
-          height: '70%'
+          height: '70%',
+          overflowY: 'auto'
         }}
       >
-        <div>main content</div>
-        <div>side note1</div>
-        <div>side note2</div>
+        {noteList.map((n) => (
+          <Note key={n.id} content={n} />
+        ))}
       </div>
 
       <div
+        className="absolute bottom-0 flex w-full flex-col items-center justify-center"
         style={{
-          height: '150px',
-          position: 'absolute',
-          bottom: 0,
-          width: '100%'
+          height: '150px'
         }}
       >
         <TextArea
           rows={4}
+          maxLength={200}
+          showCount
           value={note}
           onChange={onNoteChange}
           style={{ width: '95%' }}
@@ -111,7 +122,12 @@ const Index = ({
         >
           <Button
             onClick={createNote}
-            disabled={subscriptionId == null || subscriptionId == ''}
+            disabled={
+              loading ||
+              submitting ||
+              subscriptionId == null ||
+              subscriptionId == ''
+            }
           >
             Submit
           </Button>
@@ -122,3 +138,15 @@ const Index = ({
 }
 
 export default Index
+
+const Note = ({ content }: { content: TAdminNote }) => {
+  return (
+    <div className="my-2">
+      <div className="mb-1 whitespace-pre-wrap">{content.note}</div>
+      <div className="mb-2" style={{ fontSize: '11px' }}>
+        <span>{content.firstName}</span>&nbsp;&nbsp;
+        {dayjs(new Date(content.gmtModify)).format('YYYY-MMM-DD HH:MM:ss')}
+      </div>
+    </div>
+  )
+}
