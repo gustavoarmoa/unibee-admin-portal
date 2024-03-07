@@ -153,7 +153,7 @@ const Note = ({ content }: { content: TAdminNote }) => {
   return (
     <div className="my-2">
       <div className="mb-1 whitespace-pre-wrap">{content.note}</div>
-      <div className="my-2" style={{ fontSize: '11px' }}>
+      <div className="my-2" style={{ fontSize: '11px', color: 'lightgray' }}>
         <span>{content.firstName}</span>:&nbsp;&nbsp;
         {dayjs(new Date(content.createTime * 1000)).format(
           'YYYY-MMM-DD HH:MM:ss'

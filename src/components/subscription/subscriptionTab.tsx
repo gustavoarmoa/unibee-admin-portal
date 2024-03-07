@@ -384,7 +384,8 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       <div
         style={{
           display: showSimDatePicker() ? 'flex' : 'none',
-          width: '540px'
+          width: '540px',
+          zIndex: 999
         }}
         className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
       >
