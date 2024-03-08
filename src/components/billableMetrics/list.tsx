@@ -12,6 +12,7 @@ import {
 import { getMetricsListReq } from '../../requests'
 import { IBillableMetrics } from '../../shared.types.d'
 
+import { usePagination } from '../../hooks'
 import '../../shared.css'
 
 const PAGE_SIZE = 10
@@ -84,10 +85,11 @@ const columns: ColumnsType<IBillableMetrics> = [
 
 const Index = () => {
   const navigate = useNavigate()
+  const { page, onPageChange } = usePagination()
   const [loading, setLoading] = useState(false)
   const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([])
-  const [page, setPage] = useState(0) // pagination props
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
+  // const [page, setPage] = useState(0) // pagination props
+  // const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
 
   const fetchMetricsList = async () => {
     setLoading(true)
@@ -115,7 +117,8 @@ const Index = () => {
   }
 
   const onNewMetrics = () => {
-    setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
+    onPageChange(1, 100)
+    // setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
     navigate(`${APP_PATH}billable-metrics/new`)
   }
 

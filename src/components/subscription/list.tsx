@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
+import { usePagination } from '../../hooks'
 import { getSublist } from '../../requests'
 import '../../shared.css'
 import { ISubscriptionType } from '../../shared.types.d'
@@ -90,18 +91,17 @@ const columns: ColumnsType<ISubscriptionType> = [
 ]
 
 const Index = () => {
+  const { page, onPageChange } = usePagination()
   const [subList, setSubList] = useState<ISubscriptionType[]>([])
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const [page, setPage] = useState(0) // pagination props
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
   const [statusFilter, setStatusFilter] = useState<number[]>([])
 
   const fetchData = async () => {
     setLoading(true)
     const [subscriptions, err] = await getSublist(
       {
-        page,
+        page: page as number,
         count: PAGE_SIZE,
         status: statusFilter
       },
@@ -148,7 +148,6 @@ const Index = () => {
   }
 
   useEffect(() => {
-    // console.log('page/statusFilter chnaged: ', page, '//', statusFilter);
     fetchData()
   }, [page, statusFilter])
 

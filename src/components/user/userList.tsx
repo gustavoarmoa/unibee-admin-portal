@@ -16,6 +16,7 @@ import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SUBSCRIPTION_STATUS } from '../../constants'
+import { usePagination } from '../../hooks'
 import { getUserListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
@@ -26,11 +27,12 @@ const PAGE_SIZE = 10
 
 const Index = () => {
   const navigate = useNavigate()
-  const appConfigStore = useAppConfigStore()
+  const { page, onPageChange } = usePagination()
+
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<IProfile[]>([])
-  const [page, setPage] = useState(0) // pagination props
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
+  // const [page, setPage] = useState(0) // pagination props
+  // const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
   const [form] = Form.useForm()
 
   const columns: ColumnsType<IProfile> = [

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
+import { usePagination } from '../../hooks'
 import { getPlanList } from '../../requests'
 import '../../shared.css'
 import { IPlan } from '../../shared.types.d'
@@ -102,11 +103,9 @@ type TFilters = {
 }
 const Index = () => {
   const navigate = useNavigate()
-  // const appConfigStore = useAppConfigStore();
+  const { page, onPageChange } = usePagination()
   const [loading, setLoading] = useState(false)
   const [plan, setPlan] = useState<IPlan[]>([])
-  const [page, setPage] = useState(0) // pagination props
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
   const [filters, setFilters] = useState<TFilters>({
     type: null,
     status: null
@@ -120,7 +119,7 @@ const Index = () => {
         // type: undefined, // get main plan and addon
         // status: undefined, // active, inactive, expired, editing, all of them
         ...filters,
-        page,
+        page: page,
         count: PAGE_SIZE
       },
       fetchPlan
@@ -154,7 +153,8 @@ const Index = () => {
   }
 
   const onNewPlan = () => {
-    setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
+    // setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
+    onPageChange(1, 100)
     navigate(`${APP_PATH}plan/new`)
   }
 

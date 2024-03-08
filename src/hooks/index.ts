@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 // import { useNavigate } from 'react-router-dom';
 // const APP_PATH = import.meta.env.BASE_URL;
 
@@ -21,6 +22,23 @@ export const useCopyContent = async (text: string) => {
     const e = err instanceof Error ? err : new Error('Unknown copy error')
     return e
   }
+}
+
+export const usePagination = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const pageNum = parseInt(searchParams.get('page') ?? '0')
+  const [page, setPage] = useState(
+    isNaN(pageNum) || pageNum <= 0 ? 0 : pageNum - 1
+  )
+  const onPageChange: (page: number, pageSize: number) => void = (
+    page: number,
+    pageSize: number
+  ) => {
+    setPage(page - 1)
+    setSearchParams({ page: page + '' })
+  }
+
+  return { page, onPageChange }
 }
 
 export const useCountdown = (
