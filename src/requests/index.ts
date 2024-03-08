@@ -143,7 +143,8 @@ export const logoutReq = async () => {
     session.setSession({ expired: true, refresh: null })
     return [null, null]
   } catch (err) {
-    return [null, null]
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
   }
 }
 

@@ -114,7 +114,7 @@ const Index = () => {
           throw new Error(res.data.message)
         }
         navigate(`${APP_PATH}login`, {
-          state: { msg: 'Thanks for your sign-up on UniBee' }
+          state: { msg: 'Thanks for your sign-up.' }
         })
       })
       .catch((err) => {

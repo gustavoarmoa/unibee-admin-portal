@@ -110,7 +110,6 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    console.log('customer list: ', users)
     setUsers(users)
   }
 

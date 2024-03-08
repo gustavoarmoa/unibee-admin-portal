@@ -11,7 +11,12 @@ import {
   uploadLogoReq
 } from '../requests'
 import { IProfile, TMerchantInfo } from '../shared.types.d'
-import { useMerchantInfoStore, useProfileStore } from '../stores'
+import {
+  useAppConfigStore,
+  useMerchantInfoStore,
+  useProfileStore,
+  useSessionStore
+} from '../stores'
 
 const APP_PATH = import.meta.env.BASE_URL
 
@@ -251,11 +256,24 @@ interface IResetPassProps {
 }
 const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
   const navigate = useNavigate()
+  const merchantInfoStore = useMerchantInfoStore()
+  const profileStore = useProfileStore()
+  const sessionStore = useSessionStore()
+  const appConfig = useAppConfigStore()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
 
   const logout = async () => {
     const [_, err] = await logoutReq()
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    sessionStore.reset()
+    profileStore.reset()
+    merchantInfoStore.reset()
+    appConfig.reset()
+
     localStorage.removeItem('merchantToken')
     localStorage.removeItem('appConfig')
     localStorage.removeItem('merchantInfo')

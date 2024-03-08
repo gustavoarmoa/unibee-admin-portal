@@ -31,6 +31,7 @@ const INITIAL_PROFILE: IProfile = {
 interface ProfileSlice extends IProfile {
   getProfile: () => IProfile
   setProfile: (p: IProfile) => void
+  reset: () => void
   // setProfileField: (field: string, value: any) => void;
 }
 
@@ -39,7 +40,8 @@ export const useProfileStore = create<ProfileSlice>()(
     (set, get) => ({
       ...INITIAL_PROFILE,
       getProfile: () => get(),
-      setProfile: (p) => set({ ...p })
+      setProfile: (p) => set({ ...p }),
+      reset: () => set(INITIAL_PROFILE)
     }),
     { name: 'profile' }
   )
@@ -60,6 +62,7 @@ const INITIAL_INFO: TMerchantInfo = {
 interface MerchantInfoSlice extends TMerchantInfo {
   getMerchantInfo: () => TMerchantInfo
   setMerchantInfo: (p: TMerchantInfo) => void
+  reset: () => void
 }
 
 export const useMerchantInfoStore = create<MerchantInfoSlice>()(
@@ -67,7 +70,8 @@ export const useMerchantInfoStore = create<MerchantInfoSlice>()(
     (set, get) => ({
       ...INITIAL_INFO,
       getMerchantInfo: () => get(),
-      setMerchantInfo: (p) => set({ ...p })
+      setMerchantInfo: (p) => set({ ...p }),
+      reset: () => set(INITIAL_INFO)
     }),
     { name: 'merchantInfo' }
   )
@@ -86,6 +90,7 @@ interface AppConfigSlice extends IAppConfig {
   getAppConfig: () => IAppConfig
   setAppConfig: (a: IAppConfig) => void
   setGateway: (g: any) => void
+  reset: () => void
 }
 
 export const useAppConfigStore = create<AppConfigSlice>()(
@@ -96,7 +101,8 @@ export const useAppConfigStore = create<AppConfigSlice>()(
       setAppConfig: (a) => set({ ...a }),
       setGateway: (g: any) => {
         set({ ...get(), gateway: g })
-      }
+      },
+      reset: () => set(INITIAL_APP_VALUE)
     }),
     { name: 'appConfig' }
   )
@@ -114,6 +120,7 @@ const INITIAL_SESSION: ISession = {
 interface SessionStoreSlice extends ISession {
   getSession: () => ISession
   setSession: (s: ISession) => void
+  reset: () => void
 }
 
 export const useSessionStore = create<SessionStoreSlice>()(
@@ -121,7 +128,8 @@ export const useSessionStore = create<SessionStoreSlice>()(
     (set, get) => ({
       ...INITIAL_SESSION,
       getSession: () => get(),
-      setSession: (a) => set({ ...a })
+      setSession: (a) => set({ ...a }),
+      reset: () => set(INITIAL_SESSION)
     }),
     { name: 'session' }
   )

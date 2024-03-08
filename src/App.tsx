@@ -83,6 +83,7 @@ const App: React.FC = () => {
   const merchantInfoStore = useMerchantInfoStore()
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
+  const appConfig = useAppConfigStore()
   const [openLoginModal, setOpenLoginModal] = useState(false)
   const toggleLoginModal = () => setOpenLoginModal(!openLoginModal)
   const location = useLocation()
@@ -107,12 +108,19 @@ const App: React.FC = () => {
 
   const logout = async () => {
     const [_, err] = await logoutReq()
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    sessionStore.reset()
+    profileStore.reset()
+    merchantInfoStore.reset()
+    appConfig.reset()
     localStorage.removeItem('merchantToken')
     localStorage.removeItem('appConfig')
     localStorage.removeItem('merchantInfo')
     localStorage.removeItem('session')
     localStorage.removeItem('profile')
-    sessionStore.setSession({ expired: true, refresh: null })
     navigate(`${APP_PATH}login`)
   }
 
