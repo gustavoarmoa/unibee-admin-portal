@@ -1,4 +1,6 @@
 // this is logged-in user' profile
+import { Currency } from 'dinero.js'
+
 interface IProfile {
   address: string
   // country: string;
@@ -44,7 +46,12 @@ interface IAppConfig {
   isProd: boolean
   supportTimeZone: string[]
   supportCurrency: { Currency: string; Symbol: string; Scale: number }[]
-  gateway: { gatewayId: number; gatewayName: string }[]
+  gateway: {
+    gatewayId: number
+    gatewayName: string
+    gatewayLogo: string
+    gatewayType: number
+  }[]
 }
 
 interface IAddon extends IPlan {
@@ -57,7 +64,7 @@ interface IPlan {
   planName: string
   description: string
   type: number // 1: main plan, 2: add-on
-  currency: number
+  currency: Currency
   intervalCount: number
   intervalUnit: string
   amount: number
@@ -65,6 +72,7 @@ interface IPlan {
   publishStatus: number // 1: unpublished(not visible to users), 2: published(users could see and choose this plan)
   addons?: IAddon[] // bad design, make a ISubscriptionPlan interface extending from IPlan with quantity/checked
   addonIds?: number[] // which addons have been attached to this plan.
+  onetimeAddonIds?: number[] // which one-time payment addons have been attached to this plan (main plan only)
   metricPlanLimits?: { metricId: number; metricLimit: number }[]
   createTime: number
   companyId: number

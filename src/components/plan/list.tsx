@@ -5,6 +5,8 @@ import {
 } from '@ant-design/icons'
 import { Button, Pagination, Space, Table, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
+// import currency from 'currency.js'
+import Dinero, { Currency } from 'dinero.js'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
@@ -25,7 +27,8 @@ const PLAN_STATUS_FILTER = Object.keys(PLAN_STATUS)
 
 const PLAN_TYPE_FILTER = [
   { text: 'Main plan', value: 1 },
-  { text: 'Add-on', value: 2 }
+  { text: 'Add-on', value: 2 },
+  { text: 'One-time payment', value: 3 }
 ] // main plan or addon
 
 const columns: ColumnsType<IPlan> = [
@@ -46,9 +49,14 @@ const columns: ColumnsType<IPlan> = [
     key: 'price',
     render: (_, p) => {
       return (
-        <span>{` ${showAmount(p.amount, p.currency)} /${
-          p.intervalCount == 1 ? '' : p.intervalCount
-        }${p.intervalUnit} `}</span>
+        <span>
+          {`${Dinero({
+            amount: p.amount,
+            currency: p.currency
+          }).toFormat('$0,0.00')} /${
+            p.intervalCount == 1 ? '' : p.intervalCount
+          }${p.intervalUnit}`}
+        </span>
       )
     }
   },
@@ -57,7 +65,13 @@ const columns: ColumnsType<IPlan> = [
     dataIndex: 'type',
     key: 'type',
     render: (_, plan) => {
-      return plan.type == 1 ? <span>Main plan</span> : <span>Add-on</span>
+      return plan.type == 1 ? (
+        <span>Main plan</span>
+      ) : plan.type == 2 ? (
+        <span>Add-on</span>
+      ) : (
+        <span>One-time payment</span>
+      )
     },
     filters: PLAN_TYPE_FILTER
     // onFilter: (value, record) => record.status == value,
@@ -92,6 +106,7 @@ const columns: ColumnsType<IPlan> = [
     render: (_, record) => (
       <Space size="middle">
         <a>Edit</a>
+        <a>Duplicate</a>
       </Space>
     )
   }

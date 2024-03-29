@@ -276,15 +276,13 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
 
     setLoading(true)
     const [detailRes, err] = await getSubDetailWithMore(subId, fetchData)
+    setLoading(false)
     if (err != null) {
-      setLoading(false)
       message.error(err.message)
       return
     }
     console.log('detailRes: ', detailRes)
     const { subDetail, planList } = detailRes
-    setLoading(false)
-
     const { user, addons, unfinishedSubscriptionPendingUpdate, subscription } =
       subDetail
     const localActiveSub: ISubscriptionType = { ...subscription }

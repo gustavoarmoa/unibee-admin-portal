@@ -51,3 +51,8 @@ export const METRICS_AGGREGATE_TYPE: { [key: number]: string } = {
   4: 'max',
   5: 'sum'
 }
+
+export const GATEWAY_TYPE: { [key: number]: string } = {
+  1: 'Card',
+  2: 'Crypto'
+}

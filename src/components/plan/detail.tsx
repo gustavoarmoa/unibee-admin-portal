@@ -37,6 +37,7 @@ type TNewPlan = {
   imageUrl: string
   homeUrl: string
   addonIds: number[]
+  onetimeAddonIds?: number[]
   metricLimits: TMetricsItem[]
 }
 const NEW_PLAN: TNewPlan = {
@@ -45,7 +46,7 @@ const NEW_PLAN: TNewPlan = {
   intervalCount: 1,
   status: 1, // 1: editing，2: active, 3: inactive，4: expired
   publishStatus: 1, //  // 1: unpublished(not visible to users), 2: published(users could see and choose this plan)
-  type: 1, // 1: main, 2: add-on
+  type: 1, // 1: main, 2: add-on, 3: one-time pyment addon
   imageUrl: 'http://www.google.com',
   homeUrl: 'http://www.google.com',
   addonIds: [],
@@ -67,6 +68,8 @@ const Index = () => {
   ) // plan obj is used for Form's initialValue, any changes is handled by Form itself, not updated here.
   const [addons, setAddons] = useState<IPlan[]>([]) // all the active addons we have (addon has the same structure as Plan).
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]) // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
+  const [selectOnetime, setSelectOnetime] = useState<IPlan[]>([]) // one-time payment addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
+  // one plan can have many regular addons, but only ONE one-time payment addon, but backend support multiple.
   const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]) // all the billable metrics, not used for edit, but used in <Select /> for user to choose.
   const [selectedMetrics, setSelectedMetrics] = useState<TMetricsItem[]>([
     { localId: ramdonString(8) }
@@ -87,7 +90,7 @@ const Index = () => {
       return
     }
     if (!isNew && plan?.type == 2) {
-      // 1: main plan, 2: addon
+      // 1: main plan, 2: addon, 3: one-time payment
       return
     }
     // main plan's currency/intervalUnit-Count must match its addons currency/*** */
@@ -107,14 +110,23 @@ const Index = () => {
     f.amount = Number(f.amount)
     f.amount *= CURRENCY[f.currency].stripe_factor
     f.intervalCount = Number(f.intervalCount)
-
+    console.log('is new: ', isNew)
     if (!isNew) {
       f.planId = f.id
       delete f.id
       delete f.status
       delete f.publishStatus
       delete f.type // once plan created, you cannot change its type(main plan, addon)
+    } // in editing mode, when can't I just disable the type.
+    console.log('plan type watch: ', planTypeWatch)
+    if (planTypeWatch == 3) {
+      // one-time payment plans don't have these props
+      delete f.intervalCount
+      delete f.intervalUnit
+      delete f.metricLimits
+      delete f.onetimeAddonIds
     }
+
     let m = JSON.parse(JSON.stringify(selectedMetrics)) // selectedMetrics.map(metric => ({metricLimit: Number(metric.metricLimit)}))
     m = m.map((metrics: any) => ({
       metricId: metrics.metricId,
@@ -172,7 +184,10 @@ const Index = () => {
     console.log('res: ', planDetail, '//', addonList, '//', metricsList)
 
     const addons = addonList == null ? [] : addonList.map((p: any) => p.plan)
-    setAddons(addons)
+    const regularAddons = addons.filter((p: any) => p.type == 2)
+    const onetimeAddons = addons.filter((p: any) => p.type == 3)
+    setAddons(regularAddons)
+    setSelectOnetime(onetimeAddons)
     setMetricsList(metricsList == null ? [] : metricsList)
     if (isNew) {
       return
@@ -188,6 +203,8 @@ const Index = () => {
 
     planDetail.plan.addonIds =
       planDetail.addonIds == null ? [] : planDetail.addonIds
+    planDetail.plan.onetimeAddonIds =
+      planDetail.onetimeAddonIds == null ? [] : planDetail.onetimeAddonIds
 
     setPlan(planDetail.plan)
     form.setFieldsValue(planDetail.plan)
@@ -207,7 +224,7 @@ const Index = () => {
     }
 
     setSelectAddons(
-      addons.filter(
+      regularAddons.filter(
         (a: any) =>
           a.intervalCount == planDetail.plan.intervalCount &&
           a.intervalUnit == planDetail.plan.intervalUnit &&
@@ -247,7 +264,6 @@ const Index = () => {
   const updateMetrics =
     (localId: string) => (evt: React.ChangeEvent<HTMLInputElement>) => {
       const idx = selectedMetrics.findIndex((m) => m.localId == localId)
-      console.log('localId: ', localId)
       if (idx != -1) {
         setSelectedMetrics(
           update(selectedMetrics, {
@@ -284,8 +300,8 @@ const Index = () => {
         <Form
           form={form}
           onFinish={onSave}
-          labelCol={{ span: 3 }}
-          wrapperCol={{ span: 24 }}
+          labelCol={{ span: 4 }}
+          wrapperCol={{ span: 20 }}
           layout="horizontal"
           // disabled={componentDisabled}
           // style={{ maxWidth: 1024 }}
@@ -392,13 +408,14 @@ const Index = () => {
             name="intervalUnit"
             rules={[
               {
-                required: true,
+                required: planTypeWatch != 3, // == 1 (main plan), == 2(addon), == 3(one time payment)
                 message: 'Please select interval unit!'
               }
             ]}
           >
             <Select
               style={{ width: 120 }}
+              disabled={planTypeWatch == 3} // one-time payment has no interval unit/count
               options={[
                 { value: 'day', label: 'day' },
                 { value: 'week', label: 'week' },
@@ -418,16 +435,18 @@ const Index = () => {
               }
             ]}
           >
-            <Input />
+            <Input disabled={planTypeWatch == 3} />
+            {/* one-time payment has no interval unit/count */}
           </Form.Item>
 
           <Form.Item label="Plan Type" name="type">
             <Select
-              style={{ width: 120 }}
+              style={{ width: 180 }}
               disabled={!isNew || plan.status != 1}
               options={[
                 { value: 1, label: 'Main plan' },
-                { value: 2, label: 'Addon' }
+                { value: 2, label: 'Addon' },
+                { value: 3, label: 'One time payment' }
               ]}
             />
           </Form.Item>
@@ -437,9 +456,23 @@ const Index = () => {
               <Select
                 mode="multiple"
                 allowClear
-                disabled={planTypeWatch == 2} // you cannot add addon to another addon
+                disabled={planTypeWatch == 2 || planTypeWatch == 3} // you cannot add addon to another addon (or another one time payment)
                 style={{ width: '100%' }}
                 options={selectAddons.map((a) => ({
+                  label: a.planName,
+                  value: a.id
+                }))}
+              />
+            </Form.Item>
+          )}
+
+          {plan.type == 1 && (
+            <Form.Item label="One-time payment add-on" name="onetimeAddonIds">
+              <Select
+                allowClear
+                disabled={planTypeWatch == 2 || planTypeWatch == 3} // you cannot add one-time payment addon to another addon (or another one time payment)
+                style={{ width: '100%' }}
+                options={selectOnetime.map((a) => ({
                   label: a.planName,
                   value: a.id
                 }))}
@@ -461,7 +494,7 @@ const Index = () => {
               <Col span={2}>
                 <div
                   onClick={addMetrics}
-                  className="w-16 cursor-pointer font-bold"
+                  className={`w-16 font-bold ${planTypeWatch == 3 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <PlusOutlined />
                 </div>
@@ -471,6 +504,7 @@ const Index = () => {
               <Row key={m.localId} gutter={[8, 8]} className="my-4">
                 <Col span={5}>
                   <Select
+                    disabled={planTypeWatch == 3}
                     value={m.metricId}
                     onChange={onMetricSelectChange(m.localId)}
                     style={{ width: 180 }}
@@ -499,6 +533,7 @@ const Index = () => {
                 </Col>
                 <Col span={3}>
                   <Input
+                    disabled={planTypeWatch == 3}
                     value={m.metricLimit}
                     onChange={updateMetrics(m.localId)}
                   />
@@ -506,7 +541,7 @@ const Index = () => {
                 <Col span={2}>
                   <div
                     onClick={() => removeMetrics(m.localId)}
-                    className="w-16 cursor-pointer font-bold"
+                    className={`w-16 font-bold ${planTypeWatch == 3 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <MinusOutlined />
                   </div>

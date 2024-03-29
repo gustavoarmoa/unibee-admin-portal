@@ -227,7 +227,7 @@ const ForgetPasswordModal = ({
       message.error(err.message)
       return
     }
-    message.success('Password reset succeeded, please relogin')
+    message.success('Password reset succeeded.')
     closeModal()
   }
 

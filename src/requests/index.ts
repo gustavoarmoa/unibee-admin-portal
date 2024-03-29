@@ -293,7 +293,7 @@ export const getPlanDetailWithMore = async (
     [metricsList, errMetrics]
   ] = await Promise.all([
     planDetailRes,
-    getPlanList({ type: [2], status: [2], page: 0, count: 100 }, null), // type: 2 -> addon, status: 2 -> active
+    getPlanList({ type: [2, 3], status: [2], page: 0, count: 100 }, null), // type: [2,3] -> [addon, one-time-pay], status: 2 -> active
     getMetricsListReq(null)
   ])
   const err = errDetail || addonErr || errMetrics
