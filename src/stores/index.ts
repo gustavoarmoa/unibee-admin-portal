@@ -134,3 +134,27 @@ export const useSessionStore = create<SessionStoreSlice>()(
     { name: 'session' }
   )
 )
+
+// --------------------------------
+interface IPermission {
+  role: string // Owner | Customer Support
+  permissions: string[] // not used yet
+}
+const INITIAL_PERM: IPermission = {
+  role: '',
+  permissions: []
+}
+interface PermissionStoreSlice extends IPermission {
+  getPerm: () => IPermission
+  setPerm: (s: IPermission) => void
+}
+export const usePermissionStore = create<PermissionStoreSlice>()(
+  persist(
+    (set, get) => ({
+      ...INITIAL_PERM,
+      getPerm: () => get(),
+      setPerm: (a) => set({ ...a })
+    }),
+    { name: 'permissions' }
+  )
+)

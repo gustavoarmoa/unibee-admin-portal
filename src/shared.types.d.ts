@@ -25,6 +25,15 @@ interface IProfile {
   token: string
 }
 
+interface IMerchantUserProfile {
+  email: string
+  firstName: string
+  lastName: string
+  id: number
+  role: string
+  merchantId: number
+}
+
 type TMerchantInfo = {
   id: number
   address: string
@@ -108,6 +117,7 @@ interface ISubscriptionType {
   firstPaidTime: number
   currentPeriodStart: number
   currentPeriodEnd: number
+  defaultPaymentMethodId: string
   trialEnd: number // if it's non-zero (seconds from Epoch): subscription'll end on that date(it should be >= currentPeriodEnd)
   // it's used by admin to extend the next due date.
   cancelAtPeriodEnd: number // whether this sub will end at the end of billing cycle, 0: false, 1: true
@@ -265,6 +275,7 @@ export type {
   Country,
   IAppConfig,
   IBillableMetrics,
+  IMerchantUserProfile,
   IPlan,
   IPreview,
   IProfile,

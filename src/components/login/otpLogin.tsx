@@ -12,6 +12,7 @@ import {
 import {
   useAppConfigStore,
   useMerchantInfoStore,
+  usePermissionStore,
   useProfileStore,
   useSessionStore
 } from '../../stores'
@@ -175,6 +176,7 @@ const OTPForm = ({
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
   const merchantStore = useMerchantInfoStore()
+  const permStore = usePermissionStore()
   const [submitting, setSubmitting] = useState(false)
   const [otp, setOtp] = useState('')
   const [errMsg, setErrMsg] = useState('')
@@ -209,9 +211,15 @@ const OTPForm = ({
       return
     }
     const { appConfig, gateways, merchantInfo } = initRes
+    console.log('after login, merchantInfo: ', merchantInfo)
     appConfigStore.setAppConfig(appConfig)
     appConfigStore.setGateway(gateways)
-    merchantStore.setMerchantInfo(merchantInfo)
+    merchantStore.setMerchantInfo(merchantInfo.merchant)
+    permStore.setPerm({
+      role: merchantInfo.merchantMember.role,
+      permissions: merchantInfo.merchantMember.permissions
+    })
+
     if (triggeredByExpired) {
       sessionStore.refresh && sessionStore.refresh()
       message.success('Login succeeded')

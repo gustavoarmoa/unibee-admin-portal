@@ -23,7 +23,7 @@ export const initializeReq = async () => {
   const [
     [appConfig, errConfig],
     [gateways, errGateway],
-    [merchant, errMerchant]
+    [merchantInfo, errMerchant]
   ] = await Promise.all([
     getAppConfigReq(),
     getGatewayListReq(),
@@ -33,7 +33,7 @@ export const initializeReq = async () => {
   if (null != err) {
     return [null, err]
   }
-  return [{ appConfig, gateways, merchant }, null]
+  return [{ appConfig, gateways, merchantInfo }, null]
 }
 
 type TPassLogin = {
@@ -187,7 +187,7 @@ export const getMerchantInfoReq = async () => {
       throw new Error('Session expired')
       // throw new ExpiredError('Session expired');
     }
-    return [res.data.data.merchant, null]
+    return [res.data.data, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]
@@ -1044,6 +1044,45 @@ export const getUserListReq = async (
       throw new Error('Session expired')
     }
     return [res.data.data.userAccounts, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getMerchantUserListReq = async (refreshCb: () => void) => {
+  try {
+    const res = await request.get('/merchant/member/list')
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
+    }
+    return [res.data.data.merchantMembers, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const inviteMemberReq = async ({
+  email,
+  firstName,
+  lastName,
+  role
+}: {
+  email: string
+  firstName: string
+  lastName: string
+  role: string
+}) => {
+  const body = { email, firstName, lastName, role }
+  try {
+    const res = await request.post('/merchant/member/new_member', body)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [res.data.data, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]

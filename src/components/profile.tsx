@@ -41,8 +41,8 @@ const Index = () => {
       return
     }
 
-    setMerchantInfo(merchantInfo)
-    setLogoUrl(merchantInfo.companyLogo)
+    setMerchantInfo(merchantInfo.merchant)
+    setLogoUrl(merchantInfo.merchant.companyLogo)
   }
 
   const onFileUplaod = async (event: React.ChangeEvent<HTMLInputElement>) => {

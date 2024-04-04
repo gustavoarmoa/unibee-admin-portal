@@ -13,6 +13,7 @@ import {
 import {
   useAppConfigStore,
   useMerchantInfoStore,
+  usePermissionStore,
   useProfileStore,
   useSessionStore
 } from '../../stores'
@@ -32,6 +33,7 @@ const Index = ({
   const appConfigStore = useAppConfigStore()
   const sessionStore = useSessionStore()
   const merchantStore = useMerchantInfoStore()
+  const permStore = usePermissionStore()
   const [errMsg, setErrMsg] = useState('')
   const [countVal, counting, startCount, stopCounter] = useCountdown(60)
   const navigate = useNavigate()
@@ -87,10 +89,14 @@ const Index = ({
       return
     }
 
-    const { appConfig, gateways, merchant } = initRes
+    const { appConfig, gateways, merchantInfo } = initRes
     appConfigStore.setAppConfig(appConfig)
     appConfigStore.setGateway(gateways)
-    merchantStore.setMerchantInfo(merchant)
+    merchantStore.setMerchantInfo(merchantInfo.merchant)
+    permStore.setPerm({
+      role: merchantInfo.merchantMember.role,
+      permissions: merchantInfo.merchantMember.permissions
+    })
 
     if (triggeredByExpired) {
       sessionStore.refresh && sessionStore.refresh()

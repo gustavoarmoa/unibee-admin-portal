@@ -141,7 +141,7 @@ const Index = ({
                               rules={[{ required: true }]}
                             >
                               <Select
-                                style={{ width: 200, margin: '8px 0' }}
+                                style={{ width: 360, margin: '8px 0' }}
                                 options={eventList.map((e) => ({
                                   label: e,
                                   value: e,
@@ -172,7 +172,7 @@ const Index = ({
                       <Button
                         type="dashed"
                         block
-                        style={{ width: '80%' }}
+                        style={{ width: '100%' }}
                         icon={<PlusOutlined />}
                         onClick={() => add()}
                       >

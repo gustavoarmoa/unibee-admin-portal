@@ -20,6 +20,7 @@ import {
 import {
   useAppConfigStore,
   useMerchantInfoStore,
+  usePermissionStore,
   useProfileStore,
   useSessionStore
 } from './stores'
@@ -39,6 +40,8 @@ import SubscriptionList from './components/subscription/list'
 import CustomerDetail from './components/user/userDetail'
 import CustomerList from './components/user/userList'
 // import Users from "./components/userList";
+import MerchantUsserList from './components/merchantUser/userList'
+
 import AppSearch from './components/appSearch'
 import Login from './components/login'
 import LoginModal from './components/login/LoginModal'
@@ -65,12 +68,13 @@ function getItem(
   } as MenuItem
 }
 
-const items: MenuItem[] = [
+let items: MenuItem[] = [
   getItem('Plan', '/plan/list', <DesktopOutlined />),
   getItem('Billable metrics', '/billable-metrics/list', <DesktopOutlined />),
   getItem('Subscription', '/subscription/list', <PieChartOutlined />),
   getItem('Invoice', '/invoice/list', <PieChartOutlined />),
   getItem('Customer', '/customer/list', <PieChartOutlined />),
+  getItem('Merchant-user', '/merchant-user/list', <PieChartOutlined />),
   getItem('Analytics', '/analytics', <PieChartOutlined />),
   getItem('Profile', '/profile', <PieChartOutlined />),
   getItem('Settings', '/settings', <PieChartOutlined />)
@@ -81,11 +85,12 @@ const noSiderRoutes = [`${APP_PATH}login`, `${APP_PATH}signup`]
 
 const App: React.FC = () => {
   const merchantInfoStore = useMerchantInfoStore()
+  const permStore = usePermissionStore()
+  console.log('perm role: ', permStore.role)
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
   const appConfig = useAppConfigStore()
   const [openLoginModal, setOpenLoginModal] = useState(false)
-  const toggleLoginModal = () => setOpenLoginModal(!openLoginModal)
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
   const [activeMenuItem, setActiveMenuItem] = useState<string[]>([
@@ -97,6 +102,20 @@ const App: React.FC = () => {
   const {
     token: { colorBgContainer, borderRadiusLG }
   } = theme.useToken()
+
+  if (permStore.role == 'Customer Support') {
+    items = items.filter(
+      (i) =>
+        i?.key != '/plan/list' &&
+        i?.key != '/billable-metrics/list' &&
+        i?.key != '/merchant-user/list' &&
+        i?.key != '/analytics' &&
+        i?.key != '/settings' &&
+        i?.key != '/profile'
+    )
+  }
+
+  console.log('menu items: ', items)
 
   const navigate = useNavigate()
 
@@ -132,6 +151,8 @@ const App: React.FC = () => {
       setActiveMenuItem(['/plan/list'])
     } else if (pathItems[0] == 'customer') {
       setActiveMenuItem(['/customer/list'])
+    } else if (pathItems[0] == 'merchant-user') {
+      setActiveMenuItem(['/merchant-user/list'])
     } else if (pathItems[0] == 'invoice') {
       setActiveMenuItem(['/invoice/list'])
     } else if (pathItems[0] == 'billable-metrics') {
@@ -233,10 +254,19 @@ const App: React.FC = () => {
                     path={APP_PATH}
                     element={<Navigate to={`${APP_PATH}subscription/list`} />} // default page after login
                   />
-                  <Route path={`${APP_PATH}profile`} Component={Profile} />
-                  <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
+                  {permStore.role == 'Owner' && (
+                    <Route path={`${APP_PATH}profile`} Component={Profile} />
+                  )}
+                  {permStore.role == 'Owner' && (
+                    <Route
+                      path={`${APP_PATH}analytics`}
+                      Component={Dashboard}
+                    />
+                  )}
                   {/* <Route path={`${APP_PATH}invoice`} Component={Invoices} /> */}
-                  <Route path={`${APP_PATH}settings`} Component={Settings} />
+                  {permStore.role == 'Owner' && (
+                    <Route path={`${APP_PATH}settings`} Component={Settings} />
+                  )}
                   {/* <Route path={`${APP_PATH}users`} Component={Users} /> */}
                   <Route
                     path={`${APP_PATH}subscription`}
@@ -249,29 +279,42 @@ const App: React.FC = () => {
                     />
                   </Route>
 
-                  <Route path={`${APP_PATH}plan`} Component={OutletPage}>
-                    <Route path="list" element={<PricePlanList />} />
-                    <Route path="new" element={<PlanDetail />} />
-                    {/* <Route path="new" element={<PlanNew />} /> */}
-                    <Route path=":planId" element={<PlanDetail />} />
-                  </Route>
+                  {permStore.role == 'Owner' && (
+                    <Route path={`${APP_PATH}plan`} Component={OutletPage}>
+                      <Route path="list" element={<PricePlanList />} />
+                      <Route path="new" element={<PlanDetail />} />
+                      {/* <Route path="new" element={<PlanNew />} /> */}
+                      <Route path=":planId" element={<PlanDetail />} />
+                    </Route>
+                  )}
 
-                  <Route
-                    path={`${APP_PATH}billable-metrics`}
-                    Component={OutletPage}
-                  >
-                    <Route path="list" element={<BillableMetricsList />} />
-                    <Route path="new" element={<BillableMetricsDetail />} />
+                  {permStore.role == 'Owner' && (
                     <Route
-                      path=":metricsId"
-                      element={<BillableMetricsDetail />}
-                    />
-                  </Route>
+                      path={`${APP_PATH}billable-metrics`}
+                      Component={OutletPage}
+                    >
+                      <Route path="list" element={<BillableMetricsList />} />
+                      <Route path="new" element={<BillableMetricsDetail />} />
+                      <Route
+                        path=":metricsId"
+                        element={<BillableMetricsDetail />}
+                      />
+                    </Route>
+                  )}
 
                   <Route path={`${APP_PATH}customer`} Component={OutletPage}>
                     <Route path="list" element={<CustomerList />} />
                     <Route path=":userId" element={<CustomerDetail />} />
                   </Route>
+                  {permStore.role == 'Owner' && (
+                    <Route
+                      path={`${APP_PATH}merchant-user`}
+                      Component={OutletPage}
+                    >
+                      <Route path="list" element={<MerchantUsserList />} />
+                      {/* <Route path=":userId" element={<CustomerDetail />} /> */}
+                    </Route>
+                  )}
 
                   <Route path={`${APP_PATH}invoice`} Component={OutletPage}>
                     <Route path="list" element={<InvoiceList />} />
