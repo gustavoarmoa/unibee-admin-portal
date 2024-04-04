@@ -147,13 +147,15 @@ const INITIAL_PERM: IPermission = {
 interface PermissionStoreSlice extends IPermission {
   getPerm: () => IPermission
   setPerm: (s: IPermission) => void
+  reset: () => void
 }
 export const usePermissionStore = create<PermissionStoreSlice>()(
   persist(
     (set, get) => ({
       ...INITIAL_PERM,
       getPerm: () => get(),
-      setPerm: (a) => set({ ...a })
+      setPerm: (a) => set({ ...a }),
+      reset: () => set(INITIAL_PERM)
     }),
     { name: 'permissions' }
   )

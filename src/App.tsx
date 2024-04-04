@@ -68,25 +68,12 @@ function getItem(
   } as MenuItem
 }
 
-let items: MenuItem[] = [
-  getItem('Plan', '/plan/list', <DesktopOutlined />),
-  getItem('Billable metrics', '/billable-metrics/list', <DesktopOutlined />),
-  getItem('Subscription', '/subscription/list', <PieChartOutlined />),
-  getItem('Invoice', '/invoice/list', <PieChartOutlined />),
-  getItem('Customer', '/customer/list', <PieChartOutlined />),
-  getItem('Merchant-user', '/merchant-user/list', <PieChartOutlined />),
-  getItem('Analytics', '/analytics', <PieChartOutlined />),
-  getItem('Profile', '/profile', <PieChartOutlined />),
-  getItem('Settings', '/settings', <PieChartOutlined />)
-]
-
 const APP_PATH = import.meta.env.BASE_URL // import.meta.env.VITE_APP_PATH;
 const noSiderRoutes = [`${APP_PATH}login`, `${APP_PATH}signup`]
 
 const App: React.FC = () => {
   const merchantInfoStore = useMerchantInfoStore()
   const permStore = usePermissionStore()
-  console.log('perm role: ', permStore.role)
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
   const appConfig = useAppConfigStore()
@@ -103,6 +90,18 @@ const App: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG }
   } = theme.useToken()
 
+  let items: MenuItem[] = [
+    getItem('Plan', '/plan/list', <DesktopOutlined />),
+    getItem('Billable metrics', '/billable-metrics/list', <DesktopOutlined />),
+    getItem('Subscription', '/subscription/list', <PieChartOutlined />),
+    getItem('Invoice', '/invoice/list', <PieChartOutlined />),
+    getItem('Customer', '/customer/list', <PieChartOutlined />),
+    getItem('Merchant-user', '/merchant-user/list', <PieChartOutlined />),
+    getItem('Analytics', '/analytics', <PieChartOutlined />),
+    getItem('Profile', '/profile', <PieChartOutlined />),
+    getItem('Settings', '/settings', <PieChartOutlined />)
+  ]
+
   if (permStore.role == 'Customer Support') {
     items = items.filter(
       (i) =>
@@ -115,12 +114,9 @@ const App: React.FC = () => {
     )
   }
 
-  console.log('menu items: ', items)
-
   const navigate = useNavigate()
 
   const onItemClick = ({ key }: { key: string; needNavigate?: boolean }) => {
-    console.log('on item click, key: ', key)
     navigate(`${APP_PATH}${key.substring(1)}`) // remove the leading '/' character, coz APP_PATH already has it
     setActiveMenuItem([key])
   }
@@ -135,11 +131,13 @@ const App: React.FC = () => {
     profileStore.reset()
     merchantInfoStore.reset()
     appConfig.reset()
+    permStore.reset()
     localStorage.removeItem('merchantToken')
     localStorage.removeItem('appConfig')
     localStorage.removeItem('merchantInfo')
     localStorage.removeItem('session')
     localStorage.removeItem('profile')
+    localStorage.removeItem('permissions')
     navigate(`${APP_PATH}login`)
   }
 

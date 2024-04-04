@@ -14,6 +14,7 @@ import { IProfile, TMerchantInfo } from '../shared.types.d'
 import {
   useAppConfigStore,
   useMerchantInfoStore,
+  usePermissionStore,
   useProfileStore,
   useSessionStore
 } from '../stores'
@@ -259,6 +260,7 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
   const merchantInfoStore = useMerchantInfoStore()
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
+  const permStore = usePermissionStore()
   const appConfig = useAppConfigStore()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -273,12 +275,14 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
     profileStore.reset()
     merchantInfoStore.reset()
     appConfig.reset()
+    permStore.reset()
 
     localStorage.removeItem('merchantToken')
     localStorage.removeItem('appConfig')
     localStorage.removeItem('merchantInfo')
     localStorage.removeItem('session')
     localStorage.removeItem('profile')
+    localStorage.removeItem('permissions')
     navigate(`${APP_PATH}login`, {
       state: { msg: 'Password reset succeeded, please relogin.' }
     })
