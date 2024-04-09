@@ -1,6 +1,7 @@
 import { LoadingOutlined } from '@ant-design/icons'
 import { Button, Modal, Pagination, Popover, Table, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
+import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
@@ -128,10 +129,11 @@ const Index = ({
     },
     {
       title: 'Created at',
-      dataIndex: 'gmtCreate',
-      key: 'gmtCreate',
+      dataIndex: 'createTime',
+      key: 'createTime',
       width: 80,
-      render: (text) => <span>{text}</span>
+      render: (d, plan) =>
+        dayjs(new Date(d * 1000)).format('YYYY-MMM-DD HH:MM:ss')
     }
   ]
 

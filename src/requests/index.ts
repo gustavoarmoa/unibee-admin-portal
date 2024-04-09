@@ -36,6 +36,38 @@ export const initializeReq = async () => {
   return [{ appConfig, gateways, merchantInfo }, null]
 }
 
+// ------------
+type TSignupReq = {
+  email: string
+  firstName: string
+  lastName: string
+  password: string
+}
+export const signUpReq = async (body: TSignupReq) => {
+  try {
+    const res = await request.post(`/merchant/auth/sso/register`, body)
+    return [null, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+// -------------
+
+type TSignupVerifyReq = {
+  email: string
+  verificationCode: string
+}
+export const signUpVerifyReq = async (body: TSignupVerifyReq) => {
+  try {
+    const res = await request.post(`/user/auth/sso/registerVerify`, body)
+    return [null, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 type TPassLogin = {
   email: string
   password: string

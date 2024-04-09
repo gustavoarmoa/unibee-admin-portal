@@ -5,17 +5,14 @@ import { useNavigate } from 'react-router-dom'
 // import { login } from "../api/auth";
 import axios from 'axios'
 import OtpInput from 'react-otp-input'
-import { emailValidate } from '../helpers'
-import { getAppConfigReq } from '../requests'
+import { emailValidate, passwordRegx } from '../helpers'
+import { getAppConfigReq, signUpReq } from '../requests'
 import { useAppConfigStore } from '../stores'
 import AppFooter from './appFooter'
 import AppHeader from './appHeader'
 
 const APP_PATH = import.meta.env.BASE_URL
 const API_URL = import.meta.env.VITE_API_URL
-
-const passwordRegx =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*?&])[A-Za-z\d@.#$!%*?&]{8,15}$/
 
 const Index = () => {
   const navigate = useNavigate()
@@ -57,48 +54,25 @@ const Index = () => {
 
   const goLogin = () => navigate(`${APP_PATH}login`)
 
-  const onSubmit = () => {
-    if (
-      firstName == '' ||
-      lastName == '' ||
-      email == '' ||
-      password == '' ||
-      password2 == '' ||
-      password != password2 ||
-      !passwordRegx.test(password)
-    ) {
-      return
-    }
-
+  // submit basic signup ingo
+  const onSubmitBasicInfo = async () => {
     setErrMsg('')
     setSubmitting(true)
-    const user_name = 'ewo' + Math.random() // TO BE Deleted
-    axios
-      .post(`${API_URL}/merchant/auth/sso/register`, {
-        email,
-        firstName,
-        lastName,
-        password,
-        phone,
-        address,
-        user_name
-      })
-      .then((res) => {
-        setErrMsg(res.data.message)
-        setSubmitting(false)
-        if (res.data.code != 0) {
-          throw new Error(res.data.message)
-        }
-        setCurrentStep(1)
-        console.log('reg res: ', res)
-      })
-      .catch((err) => {
-        setSubmitting(false)
-        console.log('reg err: ', err)
-      })
+    const [res, err] = await signUpReq(form.getFieldsValue())
+    setSubmitting(false)
+    console.log('signup res: ', res)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success('Verification code sent.')
+    setCurrentStep(1)
+    // stopCounter()
+    // startCountdown()
   }
 
-  const onSubmit2 = () => {
+  // submit verification code
+  const onSubmitCode = () => {
     setErrMsg('')
     setSubmitting(true)
     // const user_name = "ewo" + Math.random();
@@ -154,9 +128,7 @@ const Index = () => {
           marginTop: '100px'
         }}
       >
-        <h1 style={{ marginBottom: '24px', marginTop: '36px' }}>
-          Merchant Signup
-        </h1>
+        <h1 className=" mb-6 mt-9">Merchant Signup</h1>
         {currentStep == 0 ? (
           <>
             <div
@@ -172,7 +144,7 @@ const Index = () => {
               <Form
                 name="basic"
                 form={form}
-                onFinish={onSubmit}
+                onFinish={onSubmitBasicInfo}
                 labelCol={{
                   span: 10
                 }}
@@ -197,7 +169,7 @@ const Index = () => {
                     }
                   ]}
                 >
-                  <Input value={firstName} onChange={onFirstNameChange} />
+                  <Input />
                 </Form.Item>
 
                 <Form.Item
@@ -210,7 +182,7 @@ const Index = () => {
                     }
                   ]}
                 >
-                  <Input value={lastName} onChange={onLastNameChange} />
+                  <Input />
                 </Form.Item>
 
                 <Form.Item
@@ -223,7 +195,11 @@ const Index = () => {
                     },
                     ({ getFieldValue }) => ({
                       validator(rule, value) {
-                        if (emailValidate(value)) {
+                        if (
+                          value != null &&
+                          value != '' &&
+                          emailValidate(value)
+                        ) {
                           return Promise.resolve()
                         }
                         return Promise.reject('Invalid email address')
@@ -231,7 +207,7 @@ const Index = () => {
                     })
                   ]}
                 >
-                  <Input value={email} onChange={onEmailChange} />
+                  <Input />
                 </Form.Item>
 
                 <Form.Item
@@ -240,11 +216,10 @@ const Index = () => {
                   rules={[
                     {
                       required: false
-                      // message: "Please input your Email!",
                     }
                   ]}
                 >
-                  <Input value={phone} onChange={onPhoneChange} />
+                  <Input />
                 </Form.Item>
 
                 {/* <Form.Item
@@ -270,20 +245,26 @@ const Index = () => {
                     },
                     ({ getFieldValue }) => ({
                       validator(rule, value) {
-                        if (passwordRegx.test(password) && value == password2) {
+                        console.log('password reg: ', value)
+                        if (
+                          passwordRegx.test(value) &&
+                          value == getFieldValue('password2')
+                        ) {
                           return Promise.resolve()
                         }
+                        if (value != getFieldValue('password2')) {
+                          return Promise.reject(
+                            'Please retype the same password'
+                          )
+                        }
                         return Promise.reject(
-                          '8-15 characters with lowercase, uppercase, numeric and special character(@ $ # ! % ? * &  ^)'
+                          '8-15 characters with lowercase, uppercase, numeric and special character(@ $ # ! % ? * & _ ^)'
                         )
                       }
                     })
                   ]}
                 >
-                  <Input.Password
-                    value={password}
-                    onChange={onPasswordChange}
-                  />
+                  <Input.Password />
                 </Form.Item>
 
                 <Form.Item
@@ -296,7 +277,7 @@ const Index = () => {
                     },
                     ({ getFieldValue }) => ({
                       validator(rule, value) {
-                        if (value == password) {
+                        if (value == getFieldValue('password')) {
                           return Promise.resolve()
                         }
                         return Promise.reject('please retype the same password')
@@ -304,10 +285,7 @@ const Index = () => {
                     })
                   ]}
                 >
-                  <Input.Password
-                    value={password2}
-                    onChange={onPassword2Change}
-                  />
+                  <Input.Password onPressEnter={form.submit} />
                 </Form.Item>
 
                 <Form.Item
@@ -320,17 +298,6 @@ const Index = () => {
                   <span style={{ color: 'red' }}>{errMsg}</span>
                 </Form.Item>
 
-                {/* <Form.Item
-                name="remember"
-                valuePropName="checked"
-                wrapperCol={{
-                  offset: 8,
-                  span: 16,
-                }}
-              >
-                <Checkbox>Remember me</Checkbox>
-              </Form.Item> */}
-
                 <Form.Item
                   wrapperCol={{
                     offset: 11,
@@ -340,7 +307,7 @@ const Index = () => {
                   <Button
                     type="primary"
                     htmlType="submit"
-                    onClick={onSubmit}
+                    onClick={form.submit}
                     loading={submitting}
                     disabled={submitting}
                   >
@@ -408,12 +375,17 @@ const Index = () => {
               <Button
                 type="primary"
                 block
-                onClick={onSubmit2}
+                onClick={onSubmitCode}
                 loading={submitting}
               >
                 Submit
               </Button>
-              <Button type="link" block onClick={onSubmit} loading={submitting}>
+              <Button
+                type="link"
+                block
+                onClick={onSubmitBasicInfo}
+                loading={submitting}
+              >
                 Resend
               </Button>
               {/* <Button
