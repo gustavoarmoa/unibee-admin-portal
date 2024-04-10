@@ -1,10 +1,8 @@
 import { Button, Checkbox, Divider, Form, Input, message } from 'antd'
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-// import { request } from "../api/axios2";
-// import { login } from "../api/auth";
 import axios from 'axios'
+import React, { useEffect, useState } from 'react'
 import OtpInput from 'react-otp-input'
+import { useNavigate } from 'react-router-dom'
 import { emailValidate, passwordRegx } from '../helpers'
 import { getAppConfigReq, signUpReq } from '../requests'
 import { useAppConfigStore } from '../stores'
@@ -18,35 +16,10 @@ const Index = () => {
   const navigate = useNavigate()
   const appConfigStore = useAppConfigStore()
   const [form] = Form.useForm()
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
-  const [password, setPassword] = useState('')
-  const [password2, setPassword2] = useState('')
-  // const [verificationCode, setVerificationCode] = useState("");
   const [currentStep, setCurrentStep] = useState(0) // [0, 1]
   const [errMsg, setErrMsg] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  // const onEmailChange = (evt: ChangeEvent<HTMLInputElement>) =>
-  //     setEmail(evt.target.value);
-  const onFirstNameChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setFirstName(evt.target.value)
-  const onLastNameChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setLastName(evt.target.value)
-  const onEmailChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setEmail(evt.target.value)
-  const onPhoneChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setPhone(evt.target.value)
-  const onAdderssChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setAddress(evt.target.value)
-  const onPasswordChange = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setPassword(evt.target.value)
-  const onPassword2Change = (evt: React.ChangeEvent<HTMLInputElement>) =>
-    setPassword2(evt.target.value)
-  // const onCodeChange = (evt) => setVerificationCode(evt.target.value);
   const [otp, setOtp] = useState('')
   const onOTPchange = (value: string) => {
     setOtp(value.toUpperCase())
@@ -78,7 +51,7 @@ const Index = () => {
     // const user_name = "ewo" + Math.random();
     axios
       .post(`${API_URL}/merchant/auth/sso/registerVerify`, {
-        email,
+        email: form.getFieldValue('email'),
         verificationCode: otp
       })
       .then((res) => {
@@ -222,19 +195,6 @@ const Index = () => {
                   <Input />
                 </Form.Item>
 
-                {/* <Form.Item
-                label="Physical address"
-                name="address"
-                rules={[
-                  {
-                    required: false,
-                    // message: "Please input your Email!",
-                  },
-                ]}
-              >
-                <Input value={address} onChange={onAdderssChange} />
-              </Form.Item> */}
-
                 <Form.Item
                   label="Password"
                   name="password"
@@ -341,7 +301,7 @@ const Index = () => {
                 height: '78px'
               }}
             >
-              <h3>Enter verification code for {email}</h3>
+              <h3>Enter verification code for {form.getFieldValue('email')}</h3>
             </div>
             <OtpInput
               value={otp}
