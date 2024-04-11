@@ -612,7 +612,7 @@ const Index = () => {
                             <Col>
                               <Form.Item
                                 name={[field.name, 'property']}
-                                label={`Event - ${index + 1}`}
+                                // label={`Event - ${index + 1}`}
                                 noStyle={true}
                                 rules={[
                                   {
@@ -621,17 +621,9 @@ const Index = () => {
                                   },
                                   ({ getFieldValue }) => ({
                                     validator(rule, value) {
-                                      console.log(
-                                        'value: ',
-                                        value,
-                                        '//',
-                                        getFieldValue('metadata').filter(
-                                          (m) => m.property == value
-                                        )
-                                      )
                                       if (
                                         getFieldValue('metadata').filter(
-                                          (m) => m.property == value
+                                          (m: any) => m.property == value
                                         ).length >= 2
                                       ) {
                                         return Promise.reject(
@@ -654,7 +646,7 @@ const Index = () => {
                             <Col>
                               <Form.Item
                                 name={[field.name, 'value']}
-                                label={`Event - ${index + 1}`}
+                                // label={`Event - ${index + 1}`}
                                 noStyle={true}
                                 rules={[{ required: true }]}
                               >
