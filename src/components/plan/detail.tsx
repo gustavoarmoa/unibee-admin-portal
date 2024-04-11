@@ -6,7 +6,7 @@ import {
 } from '@ant-design/icons'
 import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd'
 import update from 'immutability-helper'
-import React, { ReactElement, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY, PLAN_STATUS } from '../../constants'
 import { ramdonString } from '../../helpers'
@@ -39,6 +39,7 @@ type TNewPlan = {
   addonIds: number[]
   onetimeAddonIds?: number[]
   metricLimits: TMetricsItem[]
+  metadata?: { property: string; value: string }[]
 }
 const NEW_PLAN: TNewPlan = {
   currency: 'EUR',
@@ -50,7 +51,27 @@ const NEW_PLAN: TNewPlan = {
   imageUrl: 'http://www.google.com',
   homeUrl: 'http://www.google.com',
   addonIds: [],
-  metricLimits: []
+  metricLimits: [],
+  metadata: []
+}
+
+const array2obj = (arr: { property: string; value: string }[]) => {
+  if (null == arr) {
+    return {}
+  }
+  const obj: { [key: string]: string } = {}
+  arr.forEach((a) => (obj[a.property] = a.value))
+  return obj
+}
+const obj2array = (obj: { [key: string]: string }) => {
+  if (null == obj) {
+    return []
+  }
+  const arr: { [key: string]: string }[] = []
+  for (const prop in obj) {
+    arr.push({ property: prop, value: obj[prop] })
+  }
+  return arr
 }
 
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
@@ -83,6 +104,11 @@ const Index = () => {
   const planTypeWatch = Form.useWatch('type', form)
   // The selector is static and does not support closures.
   // const customValue = Form.useWatch((values) => `name: ${values.itvCountValue || ''}`, form);
+
+  let addMetadata: (
+    defaultValue?: any,
+    insertIndex?: number | undefined
+  ) => void
 
   useEffect(() => {
     if (!isNew && plan?.status != 1) {
@@ -134,6 +160,11 @@ const Index = () => {
     }))
     m = m.filter((metric: any) => !isNaN(metric.metricLimit))
     f.metricLimits = m
+
+    f.metadata = array2obj(f.metadata)
+    console.log('saving...: ', f)
+
+    // return
 
     setLoading(true)
     const [_, err] = await savePlan(f, isNew)
@@ -206,22 +237,21 @@ const Index = () => {
     planDetail.plan.onetimeAddonIds =
       planDetail.onetimeAddonIds == null ? [] : planDetail.onetimeAddonIds
 
+    planDetail.plan.metadata = obj2array(planDetail.plan.metadata)
     setPlan(planDetail.plan)
     form.setFieldsValue(planDetail.plan)
 
-    if (!isNew) {
-      // if empty, insert an placeholder item.
-      const metrics =
-        null == planDetail.metricPlanLimits ||
-        planDetail.metricPlanLimits.length == 0
-          ? [{ localId: ramdonString(8) }]
-          : planDetail.metricPlanLimits.map((m: any) => ({
-              localId: ramdonString(8),
-              metricId: m.metricId,
-              metricLimit: m.metricLimit
-            }))
-      setSelectedMetrics(metrics)
-    }
+    // if empty, insert an placeholder item.
+    const metrics =
+      null == planDetail.metricPlanLimits ||
+      planDetail.metricPlanLimits.length == 0
+        ? [{ localId: ramdonString(8) }]
+        : planDetail.metricPlanLimits.map((m: any) => ({
+            localId: ramdonString(8),
+            metricId: m.metricId,
+            metricLimit: m.metricLimit
+          }))
+    setSelectedMetrics(metrics)
 
     setSelectAddons(
       regularAddons.filter(
@@ -515,7 +545,6 @@ const Index = () => {
                   />
                 </Col>
                 <Col span={3}>
-                  {' '}
                   {metricsList.find((metric) => metric.id == m.metricId)?.code}
                 </Col>
                 <Col span={6}>
@@ -525,7 +554,6 @@ const Index = () => {
                   }
                 </Col>
                 <Col span={5}>
-                  {' '}
                   {
                     metricsList.find((metric) => metric.id == m.metricId)
                       ?.aggregationProperty
@@ -548,6 +576,80 @@ const Index = () => {
                 </Col>
               </Row>
             ))}
+          </Form.Item>
+
+          <Form.Item label="Custom data">
+            <Row
+              gutter={[8, 8]}
+              style={{ marginTop: '0px' }}
+              className=" font-bold text-gray-500"
+            >
+              <Col span={5}>Property</Col>
+              <Col span={3}>Value</Col>
+              <Col span={2}>
+                <div
+                  onClick={() => addMetadata()}
+                  className={`w-16 cursor-pointer font-bold`}
+                >
+                  <PlusOutlined />
+                </div>
+              </Col>
+            </Row>
+
+            <Form.List name="metadata">
+              {(fields, { add, remove }) => {
+                addMetadata = add
+                return (
+                  <>
+                    {fields &&
+                      fields.map((field, index) => {
+                        return (
+                          <Row
+                            key={ramdonString(8)}
+                            className="flex items-center"
+                            style={{ marginBottom: '12px' }}
+                          >
+                            <Col>
+                              <Form.Item
+                                name={[field.name, 'property']}
+                                label={`Event - ${index + 1}`}
+                                noStyle={true}
+                                rules={[{ required: true }]}
+                              >
+                                <Input style={{ width: '85%' }} />
+                              </Form.Item>
+                            </Col>
+                            <Col>
+                              <Form.Item
+                                name={[field.name, 'value']}
+                                label={`Event - ${index + 1}`}
+                                noStyle={true}
+                                rules={[{ required: true }]}
+                              >
+                                <Input style={{ width: '85%' }} />
+                              </Form.Item>
+                            </Col>
+                            <Col>
+                              <div
+                                onClick={() => {
+                                  remove(field.name)
+                                }}
+                                style={{
+                                  fontWeight: 'bold',
+                                  width: '32px',
+                                  cursor: `${fields.length == 1 ? 'not-allowed' : 'pointer'}`
+                                }}
+                              >
+                                <MinusOutlined />
+                              </div>
+                            </Col>
+                          </Row>
+                        )
+                      })}
+                  </>
+                )
+              }}
+            </Form.List>
           </Form.Item>
 
           <Form.Item label="Product Name" name="productName" hidden>
