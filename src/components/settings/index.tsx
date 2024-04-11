@@ -1,3 +1,4 @@
+import { LoadingOutlined } from '@ant-design/icons'
 import type { CheckboxProps, TabsProps } from 'antd'
 import {
   Button,
@@ -7,8 +8,10 @@ import {
   Input,
   Modal,
   Row,
+  Spin,
   Table,
-  Tabs
+  Tabs,
+  message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
@@ -16,8 +19,10 @@ import React, { CSSProperties, useState } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { useNavigate } from 'react-router-dom'
+import { generateApiKeyReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
+import ModalApiKey from './apiKeyModal'
 import WebhookList from './webhookList'
 
 type TPermission = {
@@ -182,8 +187,21 @@ const Index = () => {
 export default Index
 
 const AppConfig = () => {
+  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
+  const toggleKeyModal = () => setApiKeyModalOpen(!apiKeyModalOpen)
   return (
     <div style={{ margin: '32px 0' }}>
+      {apiKeyModalOpen && <ModalApiKey closeModal={toggleKeyModal} />}
+      <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
+        <Col span={4}>API Key</Col>
+        <Col span={12}>
+          <span>Current key expired in ****</span>
+        </Col>
+        <Col span={4}>
+          <Button onClick={toggleKeyModal}>Generate</Button>
+        </Col>
+      </Row>
+
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>Stripe App Key</Col>
         <Col span={12}>
