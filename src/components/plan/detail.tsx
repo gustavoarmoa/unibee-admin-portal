@@ -614,7 +614,39 @@ const Index = () => {
                                 name={[field.name, 'property']}
                                 label={`Event - ${index + 1}`}
                                 noStyle={true}
-                                rules={[{ required: true }]}
+                                rules={[
+                                  {
+                                    required: true
+                                    // message: 'property cannot be empty'
+                                  },
+                                  ({ getFieldValue }) => ({
+                                    validator(rule, value) {
+                                      console.log(
+                                        'value: ',
+                                        value,
+                                        '//',
+                                        getFieldValue('metadata').filter(
+                                          (m) => m.property == value
+                                        )
+                                      )
+                                      if (
+                                        getFieldValue('metadata').filter(
+                                          (m) => m.property == value
+                                        ).length >= 2
+                                      ) {
+                                        return Promise.reject(
+                                          'Duplicate property'
+                                        )
+                                      } else if (value.trim() == '') {
+                                        return Promise.reject(
+                                          'Property cannot be empty'
+                                        )
+                                      } else {
+                                        return Promise.resolve()
+                                      }
+                                    }
+                                  })
+                                ]}
                               >
                                 <Input style={{ width: '85%' }} />
                               </Form.Item>
