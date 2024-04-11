@@ -262,6 +262,22 @@ export const uploadLogoReq = async (f: FormData) => {
   }
 }
 
+export const generateApiKeyReq = async () => {
+  // http://api.unibee.top/merchant/new_apikey
+  try {
+    const res = await request.post('/merchant/new_apikey', {})
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      // throw new Error('Session expired');
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data.apiKey, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // ---------------
 type TPlanListBody = {
   type?: number[] | null
