@@ -30,7 +30,7 @@ const newPlaceholderItem = (): InvoiceItem => ({
   quantity: '1',
   currency: 'EUR',
   tax: 0,
-  taxScale: 0
+  taxPercentage: 0
 })
 
 interface Props {
@@ -70,8 +70,8 @@ const Index = ({
       ? 'EUR'
       : detail.lines[0].currency // assume all invoice items have the same currencies.
   const [currency, setCurrency] = useState(defaultCurrency)
-  const taxScaleTmp = detail == null ? '' : detail.taxScale / 100
-  const [taxScale, setTaxScale] = useState<string>(taxScaleTmp + '')
+  const taxPercentageTmp = detail == null ? '' : detail.taxPercentage / 100
+  const [taxPercentage, setTaxScale] = useState<string>(taxPercentageTmp + '')
   const [invoiceName, setInvoiceName] = useState(
     detail == null ? '' : detail.invoiceName
   )
@@ -116,9 +116,9 @@ const Index = ({
 
   const validateFields = () => {
     if (
-      taxScale.trim() == '' ||
-      isNaN(Number(taxScale)) ||
-      Number(taxScale) < 0
+      taxPercentage.trim() == '' ||
+      isNaN(Number(taxPercentage)) ||
+      Number(taxPercentage) < 0
     ) {
       message.error('Please input valid tax rate(in percentage)')
       return false
@@ -158,7 +158,7 @@ const Index = ({
       // creating a new invoice
       ;[saveInvoiceRes, err] = await createInvoiceReq({
         userId: user!.id as number,
-        taxScale: Number(taxScale) * 100,
+        taxPercentage: Number(taxPercentage) * 100,
         currency,
         name: invoiceName,
         invoiceItems,
@@ -168,7 +168,7 @@ const Index = ({
       // saving an invoice
       ;[saveInvoiceRes, err] = await saveInvoiceReq({
         invoiceId: detail.invoiceId,
-        taxScale: Number(taxScale) / 100,
+        taxPercentage: Number(taxPercentage) / 100,
         currency: detail.currency,
         name: invoiceName,
         invoiceItems
@@ -306,7 +306,7 @@ const Index = ({
               Math.round(
                 Number(newList[idx].quantity) *
                   Number(newList[idx].unitAmountExcludingTax) *
-                  (Number(taxScale) / 100) *
+                  (Number(taxPercentage) / 100) *
                   100
               ) / 100
           }
@@ -397,10 +397,10 @@ const Index = ({
         </Col>
         <Col span={4}>
           {!permission.editable ? (
-            <span>{taxScale} %</span>
+            <span>{taxPercentage} %</span>
           ) : (
             <Input
-              value={taxScale}
+              value={taxPercentage}
               suffix="%"
               onChange={onTaxScaleChange}
               type="number"
