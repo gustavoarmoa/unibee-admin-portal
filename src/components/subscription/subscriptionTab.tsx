@@ -636,9 +636,9 @@ const SubscriptionInfoSection = ({
         </Col>
         <Col span={6}>
           {subInfo?.amount && showAmount(subInfo.amount, subInfo.currency)}
-          {subInfo && subInfo.taxScale && subInfo.taxScale != 0 ? (
+          {subInfo && subInfo.taxPercentage && subInfo.taxPercentage != 0 ? (
             <span className="text-xs text-gray-500">
-              {` (${subInfo.taxScale / 100}% tax incl)`}
+              {` (${subInfo.taxPercentage / 100}% tax incl)`}
             </span>
           ) : null}
         </Col>

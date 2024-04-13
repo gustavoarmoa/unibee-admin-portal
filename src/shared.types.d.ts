@@ -124,7 +124,7 @@ interface ISubscriptionType {
   cancelAtPeriodEnd: number // whether this sub will end at the end of billing cycle, 0: false, 1: true
   amount: number
   currency: string
-  taxScale: number // 20000 means 20%
+  taxPercentage: number // 20000 means 20%
   plan: IPlan | undefined // ?????????? why it can be undefined.
   addons: ISubAddon[]
   user: IProfile | null
@@ -165,7 +165,7 @@ type InvoiceItem = {
   proration?: boolean
   quantity: number | string
   tax: number | string // tax amount
-  taxScale: number | string // tax rate
+  taxPercentage: number | string // tax rate
   unitAmountExcludingTax: number | string
 }
 
@@ -193,7 +193,7 @@ interface UserInvoice {
   createTime: number
   totalAmount: number
   taxAmount: number
-  taxScale: number
+  taxPercentage: number
   subscriptionAmount: number
   currency: string
   lines: InvoiceItem[]
