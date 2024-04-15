@@ -115,7 +115,7 @@ const Index = () => {
           <span className="text-xs text-gray-500">
             {invoiceDetail == null
               ? ''
-              : ` (${invoiceDetail.taxScale / 100}% tax incl)`}
+              : ` (${invoiceDetail.taxPercentage / 100}% tax incl)`}
           </span>
         </Col>
         <Col span={4} style={colStyle}>

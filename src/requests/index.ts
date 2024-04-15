@@ -902,7 +902,7 @@ type TCreateInvoiceReq = {
   name: string
   userId: number
   currency: string
-  taxScale: number
+  taxPercentage: number
   invoiceItems: TInvoiceItems[]
   lines?: TInvoiceItems[]
   finish: boolean
@@ -933,7 +933,7 @@ export const createInvoiceReq = async (body: TCreateInvoiceReq) => {
 // before publish, admin can still edit and save.
 type TSaveInvoiceReq = {
   invoiceId: string
-  taxScale: number
+  taxPercentage: number
   currency: string
   name: string
   invoiceItems: TInvoiceItems[]
