@@ -193,9 +193,9 @@ const AppConfig = () => {
     <div style={{ margin: '32px 0' }}>
       {apiKeyModalOpen && <ModalApiKey closeModal={toggleKeyModal} />}
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>API Key</Col>
+        <Col span={4}>UniBee API Key</Col>
         <Col span={12}>
-          <span>Current key expired in ****</span>
+          <span></span>
         </Col>
         <Col span={4}>
           <Button onClick={toggleKeyModal}>Generate</Button>

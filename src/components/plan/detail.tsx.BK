@@ -4,7 +4,17 @@ import {
   MinusOutlined,
   PlusOutlined
 } from '@ant-design/icons'
-import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd'
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Spin,
+  Switch,
+  message
+} from 'antd'
 import update from 'immutability-helper'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -22,7 +32,6 @@ const APP_PATH = import.meta.env.BASE_URL
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor
 
-type TMetaValueType = 'string' | 'boolean' | 'number'
 type TMetricsItem = {
   localId: string
   metricId?: number
@@ -43,8 +52,8 @@ type TNewPlan = {
   metadata?: {
     property: string
     value: string
-    valueType: TMetaValueType
-  }[]
+    valueType: 'string' | 'boolean' | 'number'
+  }[] // valueType:
 }
 const NEW_PLAN: TNewPlan = {
   currency: 'EUR',
@@ -68,7 +77,7 @@ const array2obj = (
   arr: {
     property: string
     value: string
-    valueType: TMetaValueType
+    valueType: 'string' | 'boolean' | 'number'
   }[]
 ) => {
   if (null == arr) {
@@ -91,18 +100,13 @@ const array2obj = (
   })
   return obj
 }
-
-const obj2array = (obj: { [key: string]: string | number | boolean }) => {
+const obj2array = (obj: { [key: string]: string }) => {
   if (null == obj) {
     return []
   }
-  const arr: { property: string; value: string; valueType: string }[] = []
+  const arr: { [key: string]: string }[] = []
   for (const prop in obj) {
-    arr.push({
-      property: prop,
-      value: obj[prop] + '',
-      valueType: typeof obj[prop]
-    })
+    arr.push({ property: prop, value: obj[prop] })
   }
   return arr
 }
@@ -137,6 +141,7 @@ const Index = () => {
   const planTypeWatch = Form.useWatch('type', form)
   // The selector is static and does not support closures.
   // const customValue = Form.useWatch((values) => `name: ${values.itvCountValue || ''}`, form);
+  const metaDataWatch = Form.useWatch('metadata', form)
 
   let addMetadata: (
     defaultValue?: any,
@@ -177,7 +182,6 @@ const Index = () => {
       delete f.publishStatus
       delete f.type // once plan created, you cannot change its type(main plan, addon)
     } // in editing mode, when can't I just disable the type.
-    console.log('plan type watch: ', planTypeWatch)
     if (planTypeWatch == 3) {
       // one-time payment plans don't have these props
       delete f.intervalCount
@@ -197,7 +201,7 @@ const Index = () => {
     f.metadata = array2obj(f.metadata)
     console.log('saving...: ', f)
 
-    // return
+    return
 
     setLoading(true)
     const [_, err] = await savePlan(f, isNew)
@@ -349,6 +353,8 @@ const Index = () => {
   useEffect(() => {
     fetchData()
   }, [])
+
+  // console.log('form getFV: ', form.getFieldValue(['metadata', 0, 'valueType']))
 
   return (
     <div>
@@ -720,7 +726,7 @@ const Index = () => {
                                             value.toLowerCase() != 'false'
                                           ) {
                                             return Promise.reject(
-                                              'Invalid boolean value, only "true" or "false" are allowed!'
+                                              'Invalid boolean value'
                                             )
                                           }
                                           return Promise.resolve()
@@ -743,14 +749,9 @@ const Index = () => {
                             </Col>
                             <Col span={5}>
                               <div
+                                className={`w-16 cursor-pointer font-bold`}
                                 onClick={() => {
                                   remove(field.name)
-                                }}
-                                style={{
-                                  marginLeft: '5px',
-                                  fontWeight: 'bold',
-                                  width: '32px',
-                                  cursor: `pointer`
                                 }}
                               >
                                 <MinusOutlined />

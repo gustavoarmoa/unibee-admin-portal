@@ -157,13 +157,6 @@ const Index = () => {
 
   return (
     <div>
-      <Spin
-        spinning={loading}
-        indicator={
-          <LoadingOutlined style={{ fontSize: 32, color: '#FFF' }} spin />
-        }
-        fullscreen
-      />
       <Table
         columns={columns}
         dataSource={subList}
@@ -180,7 +173,12 @@ const Index = () => {
             }
           }
         }}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+        }}
       />
+
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
