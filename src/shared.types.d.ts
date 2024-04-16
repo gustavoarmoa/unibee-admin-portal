@@ -270,6 +270,15 @@ type TWebhookLogs = {
   createTime: 0
 }
 
+type TGateway = {
+  gatewayId?: number
+  gatewayKey?: string
+  gatewayName: string
+  // gatewayLogo: string
+  gatewayType?: number
+  createTime?: number
+}
+
 export class ExpiredError extends Error {
   constructor(m: string) {
     super(m)
@@ -287,6 +296,7 @@ export type {
   ISubscriptionType,
   InvoiceItem,
   TAdminNote,
+  TGateway,
   TInvoicePerm,
   TMerchantInfo,
   TWebhook,

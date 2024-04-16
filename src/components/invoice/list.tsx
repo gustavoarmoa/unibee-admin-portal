@@ -35,9 +35,9 @@ const Index = () => {
 
   const columns: ColumnsType<UserInvoice> = [
     {
-      title: 'Invoice Name',
-      dataIndex: 'invoiceName',
-      key: 'invoiceName'
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId'
       // render: (text) => <a>{text}</a>,
     },
     {

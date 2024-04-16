@@ -23,6 +23,7 @@ import { generateApiKeyReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
 import ModalApiKey from './apiKeyModal'
+import PaymentGatewayList from './paymentGatewayList'
 import WebhookList from './webhookList'
 
 type TPermission = {
@@ -195,25 +196,16 @@ const AppConfig = () => {
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>UniBee API Key</Col>
         <Col span={12}>
-          <span></span>
+          <div className=" text-gray-500">
+            Use this key to communicate safely with your App.
+          </div>
         </Col>
         <Col span={4}>
           <Button onClick={toggleKeyModal}>Generate</Button>
         </Col>
       </Row>
 
-      <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>Stripe App Key</Col>
-        <Col span={12}>
-          <Input.Password
-            defaultValue={'1234567890-abcdefghijklmnopq'}
-            style={{ width: '80%' }}
-          />
-        </Col>
-        <Col span={4}>
-          <Button>Save</Button>
-        </Col>
-      </Row>
+      <PaymentGatewayList />
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>SendGrid Email Key</Col>
         <Col span={12}>

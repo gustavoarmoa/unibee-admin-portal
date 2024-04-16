@@ -179,8 +179,11 @@ const Index = () => {
         <object
           data={invoiceDetail.sendPdf}
           type="application/pdf"
-          width="100%"
-          height="100%"
+          style={{
+            height: 'calc(100vh - 460px)',
+            width: '100%',
+            marginTop: '24px'
+          }}
         >
           <p>
             <a href={invoiceDetail.sendPdf}>Download invoice</a>
