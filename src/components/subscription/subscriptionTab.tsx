@@ -371,6 +371,12 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     fetchData()
   }, [])
 
+  /*
+  useEffect(() => {
+    fetchData()
+  }, [window.location.pathname])
+  */
+
   useEffect(() => {
     if (!changePlanModal && activeSub != null) {
       setSelectedPlan(activeSub?.planId)

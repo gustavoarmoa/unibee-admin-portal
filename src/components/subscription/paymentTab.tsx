@@ -24,15 +24,23 @@ import {
   MailOutlined,
   MoneyCollectOutlined
 } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import { CURRENCY, INVOICE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
 import { downloadInvoice, getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, UserInvoice } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
-import { normalizeAmt } from '../helpers'
 
 const PAGE_SIZE = 10
+// export const INVOICE_STATUS: { [key: number]: string } = {
+const APP_PATH = import.meta.env.BASE_URL
+
+const PAYMENT_STATUS: { [key: number]: string } = {
+  0: 'Pending',
+  1: 'Succeeded',
+  2: 'Failed'
+}
 
 type TPayment = {
   id: number
@@ -50,6 +58,7 @@ type TPayment = {
 }
 
 const Index = ({ user }: { user: IProfile | null }) => {
+  const navigate = useNavigate()
   const appConfigStore = useAppConfigStore()
   const [paymentList, setPaymentList] = useState<TPayment[]>([])
   const [loading, setLoading] = useState(false)
@@ -75,11 +84,34 @@ const Index = ({ user }: { user: IProfile | null }) => {
       dataIndex: 'subscriptionId',
       key: 'subscriptionId'
       // render: (amt, invoice) => showAmount(amt, invoice.currency, true)
+      /* render: (subId) => (
+        <span className="btn-subid-in-payment">
+          <Button
+            className="btn-subid-in-payment"
+            onClick={() => navigate(`${APP_PATH}subscription/${subId}`)}
+            type="link"
+          >
+            {subId}
+          </Button>
+        </span>
+      ) */
     },
+    // btn-view-webhook-logs
     {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
-      key: 'invoiceId'
+      key: 'invoiceId',
+      render: (ivId) => (
+        <span className="btn-invoiceid-in-payment">
+          <Button
+            className="btn-invoiceid-in-payment"
+            onClick={() => navigate(`${APP_PATH}invoice/${ivId}`)}
+            type="link"
+          >
+            {ivId}
+          </Button>
+        </span>
+      )
       // render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
     },
     {
@@ -90,11 +122,12 @@ const Index = ({ user }: { user: IProfile | null }) => {
         appConfigStore.gateway.find((g) => g.gatewayId == gateway)?.gatewayName
       // subscriptionId == '' ? 'Admin' : 'System'
     },
-    /* {
-      title: 'User Id',
-      dataIndex: 'userId',
-      key: 'userId'
-    }, */
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status) => PAYMENT_STATUS[status]
+    },
     {
       title: 'Created at',
       dataIndex: 'createTime',
@@ -144,16 +177,16 @@ const Index = ({ user }: { user: IProfile | null }) => {
           pagination={false}
           onRow={(record, rowIndex) => {
             return {
-              onClick: (event) => {
-                // setInvoiceIdx(rowIndex as number)
-                // toggleNewInvoiceModal()
-              },
-              // onDoubleClick: (event) => {}, // double click row
-              onContextMenu: (event) => {
-                console.log('r click evt: ', event)
-              } // right button click row
-              // onMouseEnter: (event) => {}, // mouse enter row
-              // onMouseLeave: (event) => {}, // mouse leave row
+              onClick: (evt) => {
+                if (
+                  evt.target instanceof HTMLElement &&
+                  (evt.target.classList.contains('btn-subid-in-payment') ||
+                    evt.target.classList.contains('btn-invoiceid-in-payment'))
+                ) {
+                  console.log('twsdd')
+                  return
+                }
+              }
             }
           }}
           loading={{
