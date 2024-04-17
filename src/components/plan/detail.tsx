@@ -58,9 +58,11 @@ const NEW_PLAN: TNewPlan = {
   addonIds: [],
   metricLimits: [],
   metadata: [
+    /*
     { property: 'trafficUnit', value: 'Byte', valueType: 'string' },
     { property: 'trafficAmount', value: '1024', valueType: 'number' },
     { property: 'suspended', value: 'true', valueType: 'boolean' }
+    */
   ]
 }
 
