@@ -106,7 +106,7 @@ const columns: ColumnsType<IPlan> = [
     render: (_, record) => (
       <Space size="middle">
         <a>Edit</a>
-        <a>Duplicate</a>
+        {/* <a>Duplicate</a> */}
       </Space>
     )
   }
