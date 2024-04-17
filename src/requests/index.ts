@@ -709,6 +709,27 @@ export const getSubTimelineReq = async (body: TGetSubTimelineReq) => {
     return [null, e]
   }
 }
+
+// query params are the same as getSubTimelineReq
+export const getPaymentTimelineReq = async (
+  params: TGetSubTimelineReq,
+  refreshCb: () => void
+) => {
+  try {
+    const res = await request.get(
+      `/merchant/payment/timeline/list?userId=${params.userId}&page=${params.page}&count=${params.count}`
+    )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
+    }
+    return [res.data.data.paymentTimeLines, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // -----------
 export const getCountryListReq = async () => {
   const merchantStore = useMerchantInfoStore.getState()
@@ -904,14 +925,17 @@ export const getInvoiceListReq = async (
 }
 // ----------
 
-export const getInvoiceDetailReq = async (invoiceId: string) => {
+export const getInvoiceDetailReq = async (
+  invoiceId: string,
+  refreshCb: () => void
+) => {
   try {
     const res = await request.post(`/merchant/invoice/detail`, {
       invoiceId
     })
 
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null })
+      session.setSession({ expired: true, refresh: refreshCb })
       throw new Error('Session expired')
     }
     return [res.data.data, null]

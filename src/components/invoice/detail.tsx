@@ -46,15 +46,13 @@ const Index = () => {
 
   const fetchData = async () => {
     const pathName = window.location.pathname.split('/')
-    console.log('path name: ', pathName)
     const ivId = pathName.pop()
     if (ivId == null) {
       message.error('Invalid invoice')
       return
     }
     setLoading(true)
-    const [res, err] = await getInvoiceDetailReq(ivId)
-    console.log('get invoicde detail res: ', res)
+    const [res, err] = await getInvoiceDetailReq(ivId, fetchData)
     setLoading(false)
     if (null != err) {
       message.error(err.message)

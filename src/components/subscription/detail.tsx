@@ -8,6 +8,7 @@ import UserInfoSection from '../shared/userInfo'
 import AdminNote from './adminNote'
 import './detail.css'
 import InvoiceTab from './invoicesTab'
+import PaymentTab from './paymentTab'
 import SubscriptionTab from './subscriptionTab'
 import UserAccount from './userAccountTab'
 
@@ -43,7 +44,7 @@ const Index = () => {
     {
       key: 'Payment',
       label: 'Payment',
-      children: 'content of payment'
+      children: <PaymentTab user={userProfile} />
     }
   ]
   const onTabChange = (key: string) => {}

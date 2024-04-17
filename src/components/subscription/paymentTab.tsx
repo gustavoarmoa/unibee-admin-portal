@@ -26,52 +26,75 @@ import {
 } from '@ant-design/icons'
 import { CURRENCY, INVOICE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
-import { downloadInvoice, getInvoiceListReq } from '../../requests'
+import { downloadInvoice, getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, UserInvoice } from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
 import { normalizeAmt } from '../helpers'
 
 const PAGE_SIZE = 10
 
+type TPayment = {
+  id: number
+  merchantId: number
+  userId: number
+  subscriptionId: string
+  invoiceId: string
+  currency: string
+  totalAmount: number
+  gatewayId: number
+  paymentId: string
+  status: number
+  timelineType: number
+  createTime: number
+}
+
 const Index = ({ user }: { user: IProfile | null }) => {
-  // const appConfigStore = useAppConfigStore();
-  const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
+  const appConfigStore = useAppConfigStore()
+  const [paymentList, setPaymentList] = useState<TPayment[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0) // pagination props
-  const [newInvoiceModal, setNewInvoiceModal] = useState(false)
+  // const [newInvoiceModal, setNewInvoiceModal] = useState(false)
 
-  const columns: ColumnsType<UserInvoice> = [
+  const columns: ColumnsType<TPayment> = [
     {
-      title: 'Invoice Id',
-      dataIndex: 'invoiceId',
-      key: 'invoiceId'
-    },
-    {
-      title: 'Title',
-      dataIndex: 'invoiceName',
-      key: 'invoiceName',
-      render: (title, invoice) => <a>{title}</a>
-      // render: (_, sub) => <a>{sub.plan?.planName}</a>,
+      title: 'Payment Id',
+      dataIndex: 'paymentId',
+      key: 'paymentId'
     },
     {
       title: 'Total Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
-      render: (amt, invoice) => showAmount(amt, invoice.currency, true)
+      render: (amt, pay) => showAmount(amt, pay.currency)
+      // render: (title, invoice) => <a>{title}</a>
+      // render: (_, sub) => <a>{sub.plan?.planName}</a>,
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
-    },
-    {
-      title: 'Created by',
+      title: 'Subscription Id',
       dataIndex: 'subscriptionId',
-      key: 'subscriptionId',
-      render: (subscriptionId, invoice) =>
-        subscriptionId == '' ? 'Admin' : 'System'
+      key: 'subscriptionId'
+      // render: (amt, invoice) => showAmount(amt, invoice.currency, true)
     },
+    {
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId'
+      // render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
+    },
+    {
+      title: 'Payment gateway',
+      dataIndex: 'gatewayId',
+      key: 'gatewayId',
+      render: (gateway) =>
+        appConfigStore.gateway.find((g) => g.gatewayId == gateway)?.gatewayName
+      // subscriptionId == '' ? 'Admin' : 'System'
+    },
+    /* {
+      title: 'User Id',
+      dataIndex: 'userId',
+      key: 'userId'
+    }, */
     {
       title: 'Created at',
       dataIndex: 'createTime',
@@ -85,16 +108,12 @@ const Index = ({ user }: { user: IProfile | null }) => {
   }
 
   const fetchData = async () => {
-    if (user == null) {
+    if (null == user) {
       return
     }
     setLoading(true)
-    const [invoices, err] = await getInvoiceListReq(
-      {
-        page,
-        count: PAGE_SIZE,
-        userId: user!.id as number
-      },
+    const [invoices, err] = await getPaymentTimelineReq(
+      { userId: user!.id as number, page, count: PAGE_SIZE },
       fetchData
     )
     setLoading(false)
@@ -102,13 +121,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       message.error(err.message)
       return
     }
-
-    if (invoices != null) {
-      normalizeAmt(invoices)
-      setInvoiceList(invoices)
-    } else {
-      setInvoiceList([])
-    }
+    setPaymentList(invoices)
   }
 
   useEffect(() => {
@@ -125,7 +138,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
         {/* <Searchbar refresh={fetchData} /> */}
         <Table
           columns={columns}
-          dataSource={invoiceList}
+          dataSource={paymentList}
           rowKey={'id'}
           rowClassName="clickable-tbl-row"
           pagination={false}
