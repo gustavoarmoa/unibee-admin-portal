@@ -1,4 +1,5 @@
 // this is logged-in user' profile
+import { Dayjs } from 'dayjs'
 import { Currency } from 'dinero.js'
 
 interface IProfile {
@@ -158,6 +159,27 @@ interface IPreview {
   nextPeriodInvoice: Invoice
 }
 
+type DiscountCode = {
+  id?: number
+  merchantId: number
+  name: string
+  code: string
+  status?: number
+  billingType: number
+  discountType: number
+  discountAmount: number
+  discountPercentage: number
+  currency: string
+  cycleLimit: numbe
+  startTime: number
+  endTime: number
+  validityRange: [Dayjs | null, Dayjs | null]
+  createTime?: number
+  metadata?: {
+    [key: string]: string
+  }
+}
+
 type InvoiceItem = {
   id?: string // when creating new invoice, list needs an id for each row, but backend response has no id.
   amount: number | string // when admin creating an invoice, inputbox value is string.
@@ -287,6 +309,7 @@ export class ExpiredError extends Error {
 
 export type {
   Country,
+  DiscountCode,
   IAppConfig,
   IBillableMetrics,
   IMerchantUserProfile,

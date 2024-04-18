@@ -2,6 +2,7 @@ import axios from 'axios'
 // import { useProfileStore } from "../stores";
 import { CURRENCY } from '../constants'
 import {
+  DiscountCode,
   ExpiredError,
   IBillableMetrics,
   IProfile,
@@ -886,6 +887,34 @@ export const appSearchReq = async (searchKey: string) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getDiscountCodeListReq = async (refreshCb: () => void) => {
+  try {
+    const res = await request.get(`/merchant/discount/list`)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
+    }
+    return [res.data.data.merchantDiscountCodes, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const createDiscountCodeReq = async (body: DiscountCode) => {
+  try {
+    const res = await request.post(`/merchant/discount/new`, body)
+    if (res.data.code == 61) {
+      // session.setSession({ expired: true, refresh: null })
       throw new Error('Session expired')
     }
     return [res.data.data, null]

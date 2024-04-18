@@ -25,7 +25,8 @@ export const CURRENCY: {
   CNY: { symbol: '¥', stripe_factor: 100 },
   USD: { symbol: '$', stripe_factor: 100 },
   JPY: { symbol: '¥', stripe_factor: 1 },
-  EUR: { symbol: '€', stripe_factor: 100 }
+  EUR: { symbol: '€', stripe_factor: 100 },
+  USDT: { symbol: '₮', stripe_factor: 100 }
 }
 
 export const INVOICE_STATUS: { [key: number]: string } = {
