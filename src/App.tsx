@@ -33,6 +33,8 @@ import PlanDetail from './components/plan/detail'
 // import PricePlans from './components/pricePlans';
 import BillableMetricsDetail from './components/billableMetrics/detail'
 import BillableMetricsList from './components/billableMetrics/list'
+import DiscountCodeDetail from './components/discountCode/detail'
+import DiscountCodeList from './components/discountCode/list'
 import PricePlanList from './components/plan/list'
 import Settings from './components/settings'
 import SubscriptionDetail from './components/subscription/detail'
@@ -93,6 +95,7 @@ const App: React.FC = () => {
   let items: MenuItem[] = [
     getItem('Plan', '/plan/list', <DesktopOutlined />),
     getItem('Billable metrics', '/billable-metrics/list', <DesktopOutlined />),
+    getItem('Discount-code', '/discount-code/list', <DesktopOutlined />),
     getItem('Subscription', '/subscription/list', <PieChartOutlined />),
     getItem('Invoice', '/invoice/list', <PieChartOutlined />),
     getItem('Customer', '/customer/list', <PieChartOutlined />),
@@ -107,6 +110,7 @@ const App: React.FC = () => {
       (i) =>
         i?.key != '/plan/list' &&
         i?.key != '/billable-metrics/list' &&
+        i?.key != '/discount-code/list' &&
         i?.key != '/merchant-user/list' &&
         i?.key != '/analytics' &&
         i?.key != '/settings' &&
@@ -153,6 +157,8 @@ const App: React.FC = () => {
       setActiveMenuItem(['/merchant-user/list'])
     } else if (pathItems[0] == 'invoice') {
       setActiveMenuItem(['/invoice/list'])
+    } else if (pathItems[0] == 'discount-code') {
+      setActiveMenuItem(['/discount-code/list'])
     } else if (pathItems[0] == 'billable-metrics') {
       setActiveMenuItem(['/billable-metrics/list'])
     } else {
@@ -295,6 +301,20 @@ const App: React.FC = () => {
                       <Route path="new" element={<BillableMetricsDetail />} />
                       <Route
                         path=":metricsId"
+                        element={<BillableMetricsDetail />}
+                      />
+                    </Route>
+                  )}
+
+                  {permStore.role == 'Owner' && (
+                    <Route
+                      path={`${APP_PATH}discount-code`}
+                      Component={OutletPage}
+                    >
+                      <Route path="list" element={<DiscountCodeList />} />
+                      <Route path="new" element={<DiscountCodeDetail />} />
+                      <Route
+                        path=":discountCodeId"
                         element={<BillableMetricsDetail />}
                       />
                     </Route>
