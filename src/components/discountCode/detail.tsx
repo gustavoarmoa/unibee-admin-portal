@@ -430,6 +430,7 @@ const Index = () => {
                     return Promise.reject('Please select a valid date range.')
                   }
                   const d = new Date()
+                  d.setUTCHours(0, 0, 0, 0)
                   const sec = Math.round(d.getTime() / 1000)
                   if (value[0].unix() < sec) {
                     return Promise.reject(
@@ -441,7 +442,7 @@ const Index = () => {
               })
             ]}
           >
-            <RangePicker />
+            <RangePicker showTime />
           </Form.Item>
         </Form>
       )}
