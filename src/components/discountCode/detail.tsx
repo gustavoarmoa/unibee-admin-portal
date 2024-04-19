@@ -1,18 +1,8 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import {
-  Button,
-  Col,
-  DatePicker,
-  Form,
-  Input,
-  Row,
-  Select,
-  Spin,
-  message
-} from 'antd'
+import { Button, DatePicker, Form, Input, Select, Spin, message } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
 import React, { CSSProperties, useEffect, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY, DISCOUNT_CODE_STATUS, INVOICE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
 import {
@@ -67,7 +57,6 @@ const Index = () => {
   const params = useParams()
   const codeId = params.discountCodeId
   const isNew = codeId == null
-  const location = useLocation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [code, setCode] = useState<DiscountCode | null>(isNew ? NEW_CODE : null)
@@ -103,6 +92,9 @@ const Index = () => {
     if (code.discountType == 2) {
       // fixed amount
       code.discountAmount /= CURRENCY[code.currency].stripe_factor
+    } else if (code.discountType == 1) {
+      // percentage
+      code.discountPercentage /= 100
     }
     console.log('code detail: ', code)
     setCode(code)
@@ -117,7 +109,7 @@ const Index = () => {
     code.endTime = r[1].unix()
     code.cycleLimit = Number(code.cycleLimit)
     code.discountAmount = Number(code.discountAmount)
-    code.discountPercentage = Number(code.discountPercentage)
+    code.discountPercentage = Number(code.discountPercentage) * 100
     delete code.validityRange
 
     if (code.discountType == 1) {

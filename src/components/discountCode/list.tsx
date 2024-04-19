@@ -79,7 +79,8 @@ const Index = () => {
       title: 'Percentage',
       dataIndex: 'discountPercentage',
       key: 'discountPercentage',
-      render: (percent, code) => (code.discountType == 1 ? `${percent} %` : '')
+      render: (percent, code) =>
+        code.discountType == 1 ? `${percent / 100} %` : ''
     },
     {
       title: 'Cycle Limit',
