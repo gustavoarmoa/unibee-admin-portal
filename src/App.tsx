@@ -29,6 +29,7 @@ import Dashboard from './components/dashboard'
 import InvoiceDetail from './components/invoice/detail'
 import InvoiceList from './components/invoice/list'
 import OutletPage from './components/outletPage'
+import PaymentList from './components/payment/list'
 import PlanDetail from './components/plan/detail'
 // import PricePlans from './components/pricePlans';
 import BillableMetricsDetail from './components/billableMetrics/detail'
@@ -98,6 +99,7 @@ const App: React.FC = () => {
     getItem('Discount-code', '/discount-code/list', <DesktopOutlined />),
     getItem('Subscription', '/subscription/list', <PieChartOutlined />),
     getItem('Invoice', '/invoice/list', <PieChartOutlined />),
+    getItem('Payment', '/payment/list', <PieChartOutlined />),
     getItem('Customer', '/customer/list', <PieChartOutlined />),
     getItem('Merchant-user', '/merchant-user/list', <PieChartOutlined />),
     getItem('Analytics', '/analytics', <PieChartOutlined />),
@@ -157,6 +159,8 @@ const App: React.FC = () => {
       setActiveMenuItem(['/merchant-user/list'])
     } else if (pathItems[0] == 'invoice') {
       setActiveMenuItem(['/invoice/list'])
+    } else if (pathItems[0] == 'payment') {
+      setActiveMenuItem(['/payment/list'])
     } else if (pathItems[0] == 'discount-code') {
       setActiveMenuItem(['/discount-code/list'])
     } else if (pathItems[0] == 'billable-metrics') {
@@ -315,7 +319,7 @@ const App: React.FC = () => {
                       <Route path="new" element={<DiscountCodeDetail />} />
                       <Route
                         path=":discountCodeId"
-                        element={<BillableMetricsDetail />}
+                        element={<DiscountCodeDetail />}
                       />
                     </Route>
                   )}
@@ -337,6 +341,10 @@ const App: React.FC = () => {
                   <Route path={`${APP_PATH}invoice`} Component={OutletPage}>
                     <Route path="list" element={<InvoiceList />} />
                     <Route path=":invoiceId" element={<InvoiceDetail />} />
+                  </Route>
+                  <Route path={`${APP_PATH}payment`} Component={OutletPage}>
+                    <Route path="list" element={<PaymentList />} />
+                    {/* <Route path=":invoiceId" element={<InvoiceDetail />} /> */}
                   </Route>
                 </Routes>
               </div>

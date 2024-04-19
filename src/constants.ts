@@ -57,3 +57,29 @@ export const GATEWAY_TYPE: { [key: number]: string } = {
   1: 'Card',
   2: 'Crypto'
 }
+
+export const DISCOUNT_CODE_STATUS: { [key: number]: string } = {
+  1: 'Editing',
+  2: 'Active',
+  3: 'Deactive',
+  4: 'Expired'
+}
+export const DISCOUNT_CODE_BILLING_TYPE: { [key: number]: string } = {
+  1: 'one-time',
+  2: 'recurring'
+}
+export const DISCOUNT_CODE_TYPE: { [key: number]: string } = {
+  1: 'percentage',
+  2: 'fixed-amount'
+}
+
+export const PAYMENT_STATUS: { [key: number]: string } = {
+  0: 'Pending',
+  1: 'Succeeded',
+  2: 'Failed'
+}
+
+export const PAYMENT_TYPE: { [key: number]: string } = {
+  0: 'Payment',
+  1: 'Refund'
+}

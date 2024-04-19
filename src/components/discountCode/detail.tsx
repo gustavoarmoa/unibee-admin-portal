@@ -10,18 +10,19 @@ import {
   Spin,
   message
 } from 'antd'
-import { Dayjs } from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import React, { CSSProperties, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { CURRENCY, INVOICE_STATUS } from '../../constants'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { CURRENCY, DISCOUNT_CODE_STATUS, INVOICE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
-import { createDiscountCodeReq, getInvoiceDetailReq } from '../../requests'
 import {
-  DiscountCode,
-  IProfile,
-  TInvoicePerm,
-  UserInvoice
-} from '../../shared.types.d'
+  createDiscountCodeReq,
+  deleteDiscountCodeReq,
+  getDiscountCodeDetailReq,
+  toggleDiscountCodeActivateReq,
+  updateDiscountCodeReq
+} from '../../requests'
+import { DiscountCode, IProfile } from '../../shared.types.d'
 import { useAppConfigStore, useMerchantInfoStore } from '../../stores'
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
@@ -49,8 +50,8 @@ id?: number
 */
 const NEW_CODE: DiscountCode = {
   merchantId: useMerchantInfoStore.getState().id,
-  name: 'code name',
-  code: 'code code',
+  name: '',
+  code: '',
   billingType: 1,
   discountType: 1,
   discountAmount: 0,
@@ -66,7 +67,7 @@ const Index = () => {
   const params = useParams()
   const codeId = params.discountCodeId
   const isNew = codeId == null
-
+  const location = useLocation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [code, setCode] = useState<DiscountCode | null>(isNew ? NEW_CODE : null)
@@ -80,24 +81,31 @@ const Index = () => {
   const goBack = () => navigate(`${APP_PATH}discount-code/list`)
 
   const fetchData = async () => {
-    /*
     const pathName = window.location.pathname.split('/')
-    const ivId = pathName.pop()
-    if (ivId == null) {
-      message.error('Invalid invoice')
+    const codeId = pathName.pop()
+    const codeNum = Number(codeId)
+    if (codeId == null || isNaN(codeNum)) {
+      message.error('Invalid discount code')
       return
     }
     setLoading(true)
-    const [res, err] = await getInvoiceDetailReq(ivId, fetchData)
+    const [code, err] = await getDiscountCodeDetailReq(codeNum, fetchData)
     setLoading(false)
     if (null != err) {
       message.error(err.message)
       return
     }
-    const { invoice } = res
-    normalizeAmt([invoice])
-    setInvoiceDetail(invoice)
-    */
+
+    code.validityRange = [
+      dayjs(code.startTime * 1000),
+      dayjs(code.endTime * 1000)
+    ]
+    if (code.discountType == 2) {
+      // fixed amount
+      code.discountAmount /= CURRENCY[code.currency].stripe_factor
+    }
+    console.log('code detail: ', code)
+    setCode(code)
   }
 
   const onSave = async () => {
@@ -119,23 +127,78 @@ const Index = () => {
     } else {
       // fixed amount
       delete code.discountPercentage
+      code.discountAmount *= CURRENCY[code.currency].stripe_factor
     }
 
     console.log('sumbtting: ', code)
     // return
+    const method = isNew ? createDiscountCodeReq : updateDiscountCodeReq
     setLoading(true)
-    const [res, err] = await createDiscountCodeReq(code)
+    const [res, err] = await method(code)
     setLoading(false)
-    console.log('create code res: ', res)
     if (null != err) {
       message.error(err.message)
       return
     }
-    message.success('Discount code created')
+    message.success(`Discount code ${isNew ? 'created' : 'updated'}`)
     goBack()
   }
 
+  const onDelete = async () => {
+    if (code == null || code.id == null) {
+      return
+    }
+    setLoading(true)
+    const [res, err] = await deleteDiscountCodeReq(code.id)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success(`Discount code (${code.code}) deleted`)
+    goBack()
+  }
+
+  const toggleActivate = async () => {
+    console.log('toggle act: ', code)
+    if (code == null || code.id == null) {
+      return
+    }
+    // status: 1 (editing), 2(active), 3(deactive), 4(expired)
+    const action =
+      code.status == 1 || code.status == 3
+        ? 'activate'
+        : code.status == 2
+          ? 'deactivate'
+          : ''
+    if (action == '') {
+      return
+    }
+    setLoading(true)
+    const [res, err] = await toggleDiscountCodeActivateReq(code.id, action)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success(`Discount code (${code.code}) ${action}d`)
+    goBack()
+  }
+
+  const savable = () => {
+    if (isNew) {
+      return true
+    }
+    if (code != null && code.status != null && code.status == 1) {
+      return true
+    }
+    return false
+  }
+
   useEffect(() => {
+    if (isNew) {
+      return
+    }
     fetchData()
   }, [])
 
@@ -192,8 +255,13 @@ const Index = () => {
               }
             ]}
           >
-            <Input />
+            <Input disabled={!isNew} />
           </Form.Item>
+          {!isNew && (
+            <Form.Item label="Status">
+              <span>{DISCOUNT_CODE_STATUS[code.status as number]}</span>
+            </Form.Item>
+          )}
           <Form.Item
             label="Billing Type"
             name="billingType"
@@ -277,7 +345,9 @@ const Index = () => {
             <Input
               style={{ width: 180 }}
               prefix={
-                watchCurrency == null ? '' : CURRENCY[watchCurrency].symbol
+                watchCurrency == null || watchCurrency == ''
+                  ? ''
+                  : CURRENCY[watchCurrency].symbol
               }
               disabled={watchDiscountType == 1}
             />
@@ -338,13 +408,13 @@ const Index = () => {
           >
             <Input style={{ width: 180 }} />
           </Form.Item>
-          <div
+          {/* <div
             className="relative ml-2 text-xs text-gray-500"
             style={{ top: '-40px', left: '360px' }}
           >
             How many billing cycles this discount code can be applied on a
             recurring subscription (0 means no-limit)
-          </div>
+          </div> */}
 
           <Form.Item
             label="Validity Date Range"
@@ -375,12 +445,28 @@ const Index = () => {
           </Form.Item>
         </Form>
       )}
-      <div className="flex justify-center gap-4">
-        <Button onClick={goBack}>Go back</Button>
-        <Button disabled={isNew}>Activate</Button>
-        <Button onClick={form.submit} type="primary">
-          Save
+      <div className="flex justify-between">
+        <Button danger onClick={onDelete} disabled={isNew}>
+          Delete
         </Button>
+
+        <div className="flex justify-center gap-4">
+          <Button onClick={goBack}>Go back</Button>
+          {code != null &&
+            (code.status == 1 || code.status == 2 || code.status == 3) && (
+              <Button onClick={toggleActivate}>
+                {code.status == 1
+                  ? 'Activate'
+                  : code.status == 2
+                    ? 'Deactivate'
+                    : 'Activate'}
+              </Button>
+            )}
+
+          <Button onClick={form.submit} type="primary" disabled={!savable()}>
+            Save
+          </Button>
+        </div>
       </div>
     </div>
   )

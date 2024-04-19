@@ -16,7 +16,12 @@ import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants'
+import {
+  CURRENCY,
+  DISCOUNT_CODE_BILLING_TYPE,
+  DISCOUNT_CODE_STATUS,
+  DISCOUNT_CODE_TYPE
+} from '../../constants'
 import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { getDiscountCodeListReq, getInvoiceListReq } from '../../requests'
@@ -48,27 +53,33 @@ const Index = () => {
     {
       title: 'Status',
       dataIndex: 'status',
-      key: 'status'
+      key: 'status',
+      render: (s) => DISCOUNT_CODE_STATUS[s]
     },
     {
       title: 'Billing Type',
       dataIndex: 'billingType',
-      key: 'billingType'
+      key: 'billingType',
+      render: (s) => DISCOUNT_CODE_BILLING_TYPE[s]
     },
     {
       title: 'Discount Type',
       dataIndex: 'discountType',
-      key: 'discountType'
+      key: 'discountType',
+      render: (s) => DISCOUNT_CODE_TYPE[s]
     },
     {
       title: 'Amount',
       dataIndex: 'discountAmount',
-      key: 'discountAmount'
+      key: 'discountAmount',
+      render: (amt, code) =>
+        code.discountType == 1 ? '' : showAmount(amt, code.currency)
     },
     {
       title: 'Percentage',
       dataIndex: 'discountPercentage',
-      key: 'discountPercentage'
+      key: 'discountPercentage',
+      render: (percent, code) => (code.discountType == 1 ? `${percent} %` : '')
     },
     {
       title: 'Cycle Limit',
@@ -130,7 +141,9 @@ const Index = () => {
         onRow={(code, rowIndex) => {
           return {
             onClick: (evt) => {
-              navigate(`${APP_PATH}discount-code/${code.id}`)
+              navigate(`${APP_PATH}discount-code/${code.id}`, {
+                state: codeList[rowIndex as number]
+              })
             }
           }
         }}

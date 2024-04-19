@@ -180,6 +180,21 @@ type DiscountCode = {
   }
 }
 
+type PaymentItem = {
+  id: number
+  merchantId: number
+  userId: number
+  subscriptionId: string
+  invoiceId: string
+  currency: string
+  totalAmount: number
+  gatewayId: number
+  paymentId: string
+  status: number
+  timelineType: number
+  createTime: number
+}
+
 type InvoiceItem = {
   id?: string // when creating new invoice, list needs an id for each row, but backend response has no id.
   amount: number | string // when admin creating an invoice, inputbox value is string.
@@ -318,6 +333,7 @@ export type {
   IProfile,
   ISubscriptionType,
   InvoiceItem,
+  PaymentItem,
   TAdminNote,
   TGateway,
   TInvoicePerm,

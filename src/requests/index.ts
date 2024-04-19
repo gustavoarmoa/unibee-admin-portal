@@ -692,7 +692,7 @@ export const resumeSubReq = async (subscriptionId: string) => {
 
 // -------------
 type TGetSubTimelineReq = {
-  userId: number
+  userId?: number
   page: number
   count: number
 }
@@ -716,10 +716,13 @@ export const getPaymentTimelineReq = async (
   params: TGetSubTimelineReq,
   refreshCb: () => void
 ) => {
+  const { page, count, userId } = params
+  let url = `/merchant/payment/timeline/list?page=${page}&count=${count}`
+  if (userId != null) {
+    url += `&userId=${params.userId}`
+  }
   try {
-    const res = await request.get(
-      `/merchant/payment/timeline/list?userId=${params.userId}&page=${params.page}&count=${params.count}`
-    )
+    const res = await request.get(url)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
       throw new Error('Session expired')
@@ -903,7 +906,24 @@ export const getDiscountCodeListReq = async (refreshCb: () => void) => {
       session.setSession({ expired: true, refresh: refreshCb })
       throw new Error('Session expired')
     }
-    return [res.data.data.merchantDiscountCodes, null]
+    return [res.data.data.discounts, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getDiscountCodeDetailReq = async (
+  codeId: number,
+  refreshCb: () => void
+) => {
+  try {
+    const res = await request.get(`/merchant/discount/detail?id=${codeId}`)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new Error('Session expired')
+    }
+    return [res.data.data.discount, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]
@@ -924,6 +944,50 @@ export const createDiscountCodeReq = async (body: DiscountCode) => {
   }
 }
 
+export const updateDiscountCodeReq = async (body: DiscountCode) => {
+  try {
+    const res = await request.post(`/merchant/discount/edit`, body)
+    if (res.data.code == 61) {
+      // session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const deleteDiscountCodeReq = async (id: number) => {
+  try {
+    const res = await request.post(`/merchant/discount/delete`, { id })
+    if (res.data.code == 61) {
+      // session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const toggleDiscountCodeActivateReq = async (
+  id: number,
+  action: 'activate' | 'deactivate'
+) => {
+  try {
+    const res = await request.post(`/merchant/discount/${action}`, { id })
+    if (res.data.code == 61) {
+      // session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
 // ----------
 type TGetInvoicesReq = {
   userId?: number
