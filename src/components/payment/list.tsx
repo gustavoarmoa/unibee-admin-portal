@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { PAYMENT_STATUS, PAYMENT_TYPE } from '../../constants'
 import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { getPaymentListReq, getPaymentTimelineReq } from '../../requests'
+import { getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { PaymentItem } from '../../shared.types.d'
 
