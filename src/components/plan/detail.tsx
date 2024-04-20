@@ -4,9 +4,9 @@ import {
   MinusOutlined,
   PlusOutlined
 } from '@ant-design/icons'
-import { Button, Col, Form, Input, Row, Select, Spin, message } from 'antd'
+import { Button, Col, Form, Input, Row, Select, Spin, Tag, message } from 'antd'
 import update from 'immutability-helper'
-import React, { useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY, PLAN_STATUS } from '../../constants'
 import { ramdonString } from '../../helpers'
@@ -107,6 +107,13 @@ const obj2array = (obj: { [key: string]: string | number | boolean }) => {
     })
   }
   return arr
+}
+
+const STATUS: { [key: number]: ReactElement } = {
+  1: <Tag color="blue">{PLAN_STATUS[1]}</Tag>,
+  2: <Tag color="#87d068">{PLAN_STATUS[2]}</Tag>,
+  3: <Tag color="purple">{PLAN_STATUS[3]}</Tag>,
+  4: <Tag color="red">{PLAN_STATUS[4]}</Tag>
 }
 
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
@@ -405,7 +412,8 @@ const Index = () => {
           </Form.Item>
 
           <Form.Item label="Status" name="status">
-            <span>{PLAN_STATUS[plan.status]}</span>
+            {/* <span>{PLAN_STATUS[plan.status]}</span> */}
+            {STATUS[plan.status]}
           </Form.Item>
 
           <Form.Item label="Is Published" name="publishStatus">

@@ -1,7 +1,16 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Button, DatePicker, Form, Input, Select, Spin, message } from 'antd'
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  Select,
+  Spin,
+  Tag,
+  message
+} from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
-import React, { CSSProperties, useEffect, useState } from 'react'
+import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY, DISCOUNT_CODE_STATUS, INVOICE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
@@ -18,26 +27,13 @@ import { useAppConfigStore, useMerchantInfoStore } from '../../stores'
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
 const API_URL = import.meta.env.VITE_API_URL
 const { RangePicker } = DatePicker
+const STATUS: { [key: number]: ReactElement } = {
+  1: <Tag color="blue">{DISCOUNT_CODE_STATUS[1]}</Tag>,
+  2: <Tag color="#87d068">{DISCOUNT_CODE_STATUS[2]}</Tag>,
+  3: <Tag color="purple">{DISCOUNT_CODE_STATUS[3]}</Tag>,
+  4: <Tag color="red">{DISCOUNT_CODE_STATUS[4]}</Tag>
+}
 
-/*
-id?: number
-  merchantId: number
-  name: string
-  code: string
-  status?: number
-  billingType: number
-  discountType: number
-  discountAmount: number
-  discountPercentage: number
-  currency: string
-  cycleLimit: numbe
-  startTime: number
-  endTime: number
-  createTime?: number
-  metadata?: {
-    [key: string]: string
-  }
-*/
 const NEW_CODE: DiscountCode = {
   merchantId: useMerchantInfoStore.getState().id,
   name: '',
@@ -47,7 +43,7 @@ const NEW_CODE: DiscountCode = {
   discountAmount: 0,
   discountPercentage: 0,
   currency: 'EUR',
-  cycleLimit: 0,
+  cycleLimit: 1,
   startTime: 0,
   endTime: 0,
   validityRange: [null, null]
@@ -65,7 +61,13 @@ const Index = () => {
   const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems)
 
   const watchDiscountType = Form.useWatch('discountType', form)
+  const watchBillingType = Form.useWatch('billingType', form)
   const watchCurrency = Form.useWatch('currency', form)
+
+  if (watchBillingType == 1) {
+    // one-time use: you can only use this code once, aka: cycleLimit is 1
+    form.setFieldValue('cycleLimit', 1)
+  }
 
   const goBack = () => navigate(`${APP_PATH}discount-code/list`)
 
@@ -251,7 +253,7 @@ const Index = () => {
           </Form.Item>
           {!isNew && (
             <Form.Item label="Status">
-              <span>{DISCOUNT_CODE_STATUS[code.status as number]}</span>
+              {STATUS[code.status as number]}
             </Form.Item>
           )}
           <Form.Item
@@ -382,7 +384,7 @@ const Index = () => {
             name="cycleLimit"
             rules={[
               {
-                required: true,
+                required: watchBillingType != 1,
                 message: 'Please choose your cycleLimit!'
               },
               ({ getFieldValue }) => ({
@@ -398,7 +400,8 @@ const Index = () => {
               })
             ]}
           >
-            <Input style={{ width: 180 }} />
+            <Input style={{ width: 180 }} disabled={watchBillingType == 1} />
+            {/* 1: one-time use */}
           </Form.Item>
           {/* <div
             className="relative ml-2 text-xs text-gray-500"

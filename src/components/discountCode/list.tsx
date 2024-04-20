@@ -10,11 +10,12 @@ import {
   Row,
   Select,
   Table,
+  Tag,
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import React, { useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CURRENCY,
@@ -30,6 +31,12 @@ import { DiscountCode, UserInvoice } from '../../shared.types.d'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
+const STATUS: { [key: number]: ReactElement } = {
+  1: <Tag color="blue">{DISCOUNT_CODE_STATUS[1]}</Tag>,
+  2: <Tag color="#87d068">{DISCOUNT_CODE_STATUS[2]}</Tag>,
+  3: <Tag color="purple">{DISCOUNT_CODE_STATUS[3]}</Tag>,
+  4: <Tag color="red">{DISCOUNT_CODE_STATUS[4]}</Tag>
+}
 
 const Index = () => {
   const { page, onPageChange } = usePagination()
@@ -54,7 +61,7 @@ const Index = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (s) => DISCOUNT_CODE_STATUS[s]
+      render: (s) => STATUS[s]
     },
     {
       title: 'Billing Type',

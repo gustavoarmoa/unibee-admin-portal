@@ -1,3 +1,6 @@
+import { Tag } from 'antd'
+import { ReactElement } from 'react'
+
 export const PLAN_STATUS: { [key: number]: string } = {
   1: 'editing',
   2: 'active',
@@ -61,9 +64,10 @@ export const GATEWAY_TYPE: { [key: number]: string } = {
 export const DISCOUNT_CODE_STATUS: { [key: number]: string } = {
   1: 'Editing',
   2: 'Active',
-  3: 'Deactive',
+  3: 'Inactive',
   4: 'Expired'
 }
+
 export const DISCOUNT_CODE_BILLING_TYPE: { [key: number]: string } = {
   1: 'one-time',
   2: 'recurring'

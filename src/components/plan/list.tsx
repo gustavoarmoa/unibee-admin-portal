@@ -3,11 +3,11 @@ import {
   LoadingOutlined,
   MinusOutlined
 } from '@ant-design/icons'
-import { Button, Pagination, Space, Table, message } from 'antd'
+import { Button, Pagination, Space, Table, Tag, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
-import { useEffect, useState } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
@@ -30,6 +30,13 @@ const PLAN_TYPE_FILTER = [
   { text: 'Add-on', value: 2 },
   { text: 'One-time payment', value: 3 }
 ] // main plan or addon
+
+const STATUS: { [key: number]: ReactElement } = {
+  1: <Tag color="blue">{PLAN_STATUS[1]}</Tag>,
+  2: <Tag color="#87d068">{PLAN_STATUS[2]}</Tag>,
+  3: <Tag color="purple">{PLAN_STATUS[3]}</Tag>,
+  4: <Tag color="red">{PLAN_STATUS[4]}</Tag>
+}
 
 const columns: ColumnsType<IPlan> = [
   {
@@ -80,7 +87,7 @@ const columns: ColumnsType<IPlan> = [
     title: 'Status',
     dataIndex: 'status',
     key: 'status',
-    render: (_, plan) => <span>{PLAN_STATUS[plan.status]}</span>,
+    render: (_, plan) => STATUS[plan.status],
     filters: PLAN_STATUS_FILTER
     // onFilter: (value, record) => record.status == value,
   },
