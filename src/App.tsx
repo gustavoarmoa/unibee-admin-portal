@@ -96,7 +96,7 @@ const App: React.FC = () => {
 
   let items: MenuItem[] = [
     getItem('Plan', '/plan/list', <DesktopOutlined />),
-    getItem('Billable Metrics', '/billable-metrics/list', <DesktopOutlined />),
+    getItem('Billable Metric', '/billable-metric/list', <DesktopOutlined />),
     getItem('Discount Code', '/discount-code/list', <DesktopOutlined />),
     getItem('Subscription', '/subscription/list', <PieChartOutlined />),
     getItem('Invoice', '/invoice/list', <PieChartOutlined />),
@@ -113,7 +113,7 @@ const App: React.FC = () => {
       (i) =>
         i?.key != '/plan/list' &&
         i?.key != '/discount-code/list' &&
-        i?.key != '/billable-metrics/list' &&
+        i?.key != '/billable-metric/list' &&
         i?.key != '/discount-code/list' &&
         i?.key != '/admin/list' &&
         i?.key != '/analytics' &&
@@ -165,8 +165,8 @@ const App: React.FC = () => {
       setActiveMenuItem(['/payment/list'])
     } else if (pathItems[0] == 'discount-code') {
       setActiveMenuItem(['/discount-code/list'])
-    } else if (pathItems[0] == 'billable-metrics') {
-      setActiveMenuItem(['/billable-metrics/list'])
+    } else if (pathItems[0] == 'billable-metric') {
+      setActiveMenuItem(['/billable-metric/list'])
     } else {
       setActiveMenuItem(['/' + pathItems[0]])
     }
@@ -303,7 +303,7 @@ const App: React.FC = () => {
 
                   {permStore.role == 'Owner' && (
                     <Route
-                      path={`${APP_PATH}billable-metrics`}
+                      path={`${APP_PATH}billable-metric`}
                       Component={OutletPage}
                     >
                       <Route path="list" element={<BillableMetricsList />} />

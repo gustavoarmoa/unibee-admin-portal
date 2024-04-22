@@ -119,7 +119,7 @@ const Index = () => {
   const onNewMetrics = () => {
     onPageChange(1, 100)
     // setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
-    navigate(`${APP_PATH}billable-metrics/new`)
+    navigate(`${APP_PATH}billable-metric/new`)
   }
 
   useEffect(() => {
@@ -157,7 +157,7 @@ const Index = () => {
           return {
             onClick: (event) => {
               console.log('row click: ', record, '///', rowIndex)
-              navigate(`${APP_PATH}billable-metrics/${record.id}`)
+              navigate(`${APP_PATH}billable-metric/${record.id}`)
             }
           }
         }}

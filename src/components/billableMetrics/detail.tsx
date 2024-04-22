@@ -71,7 +71,7 @@ const Index = () => {
     }
     message.success(`Metrics ${isNew ? 'created' : 'updated'}.`)
     setTimeout(() => {
-      navigate(`${APP_PATH}billable-metrics/list`)
+      navigate(`${APP_PATH}billable-metric/list`)
     }, 1500)
   }
 
@@ -252,7 +252,7 @@ const Index = () => {
 
             <div className="my-12 flex justify-center gap-5">
               <Button
-                onClick={() => navigate(`${APP_PATH}billable-metrics/list`)}
+                onClick={() => navigate(`${APP_PATH}billable-metric/list`)}
                 disabled={loading}
               >
                 Go Back
