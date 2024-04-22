@@ -57,17 +57,10 @@ const Index = () => {
   const [loading, setLoading] = useState(false)
   const [code, setCode] = useState<DiscountCode | null>(isNew ? NEW_CODE : null)
   const [form] = Form.useForm()
-  const [showInvoiceItems, setShowInvoiceItems] = useState(false)
-  const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems)
 
   const watchDiscountType = Form.useWatch('discountType', form)
   const watchBillingType = Form.useWatch('billingType', form)
   const watchCurrency = Form.useWatch('currency', form)
-
-  if (watchBillingType == 1) {
-    // one-time use: you can only use this code once, aka: cycleLimit is 1
-    form.setFieldValue('cycleLimit', 1)
-  }
 
   const goBack = () => navigate(`${APP_PATH}discount-code/list`)
 
@@ -154,7 +147,6 @@ const Index = () => {
   }
 
   const toggleActivate = async () => {
-    console.log('toggle act: ', code)
     if (code == null || code.id == null) {
       return
     }
@@ -195,6 +187,13 @@ const Index = () => {
     }
     fetchData()
   }, [])
+
+  useEffect(() => {
+    if (watchBillingType == 1) {
+      //  one-time use: you can only use this code once, aka: cycleLimit is 1
+      form.setFieldValue('cycleLimit', 1)
+    }
+  }, [watchBillingType])
 
   return (
     <div>

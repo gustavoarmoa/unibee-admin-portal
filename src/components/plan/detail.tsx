@@ -450,7 +450,7 @@ const Index = () => {
             ]}
           >
             <Select
-              style={{ width: 120 }}
+              style={{ width: 180 }}
               options={[
                 { value: 'EUR', label: 'EUR' },
                 { value: 'USD', label: 'USD' },
@@ -470,33 +470,37 @@ const Index = () => {
             ]}
           >
             <Input
+              style={{ width: 180 }}
               prefix={
                 CURRENCY[form.getFieldValue('currency') ?? plan.currency].symbol
               }
             />
           </Form.Item>
 
-          <Form.Item
-            label="Interval Unit"
-            name="intervalUnit"
-            rules={[
-              {
-                required: planTypeWatch != 3, // == 1 (main plan), == 2(addon), == 3(one time payment)
-                message: 'Please select interval unit!'
-              }
-            ]}
-          >
-            <Select
-              style={{ width: 120 }}
-              disabled={planTypeWatch == 3} // one-time payment has no interval unit/count
-              options={[
-                { value: 'day', label: 'day' },
-                { value: 'week', label: 'week' },
-                { value: 'month', label: 'month' },
-                { value: 'year', label: 'year' }
+          <div>
+            <Form.Item
+              label="Interval Unit"
+              name="intervalUnit"
+              rules={[
+                {
+                  required: planTypeWatch != 3, // == 1 (main plan), == 2(addon), == 3(one time payment)
+                  message: 'Please select interval unit!'
+                }
               ]}
-            />
-          </Form.Item>
+            >
+              <Select
+                style={{ width: 180 }}
+                disabled={planTypeWatch == 3} // one-time payment has no interval unit/count
+                options={[
+                  { value: 'day', label: 'day' },
+                  { value: 'week', label: 'week' },
+                  { value: 'month', label: 'month' },
+                  { value: 'year', label: 'year' }
+                ]}
+              />
+            </Form.Item>
+            <div style={{ position: 'relative' }}>interval unit desc</div>
+          </div>
 
           <Form.Item
             label="Interval Count"
@@ -508,7 +512,7 @@ const Index = () => {
               }
             ]}
           >
-            <Input disabled={planTypeWatch == 3} />
+            <Input disabled={planTypeWatch == 3} style={{ width: 180 }} />
             {/* one-time payment has no interval unit/count */}
           </Form.Item>
 
@@ -696,7 +700,7 @@ const Index = () => {
                                 // dependencies={[field.name, 'value']}
                               >
                                 <Select
-                                  style={{ width: 120 }}
+                                  style={{ width: 180 }}
                                   options={[
                                     { value: 'string', label: 'String' },
                                     { value: 'number', label: 'Number' },

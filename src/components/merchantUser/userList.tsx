@@ -117,7 +117,7 @@ const Index = () => {
               ) {
                 return
               }
-              navigate(`${APP_PATH}customer/${user.id}`)
+              navigate(`${APP_PATH}admin/${user.id}`)
             }
           }
         }}

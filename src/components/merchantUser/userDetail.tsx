@@ -14,8 +14,9 @@ const Index = () => {
   const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
 
+  /*
   const fetchUserProfile = async () => {
-    const userId = Number(params.userId)
+    const userId = Number(params.adminId)
     if (isNaN(userId) || userId < 0) {
       message.error('User not found')
       return
@@ -29,14 +30,16 @@ const Index = () => {
     }
     setUserProfile(user)
   }
+  */
 
   useEffect(() => {
-    fetchUserProfile()
+    // fetchUserProfile()
   }, [])
 
   return (
     <div>
-      <Spin
+      admin user detail
+      {/* <Spin
         spinning={loading}
         indicator={
           <LoadingOutlined style={{ fontSize: 32, color: '#FFF' }} spin />
@@ -47,11 +50,11 @@ const Index = () => {
         user={userProfile}
         setUserProfile={setUserProfile}
         extraButton={
-          <Button onClick={() => navigate(`${APP_PATH}customer/list`)}>
+          <Button onClick={() => navigate(`${APP_PATH}admin/list`)}>
             Go Back
           </Button>
         }
-      />
+      />*/}
     </div>
   )
 }

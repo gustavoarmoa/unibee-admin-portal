@@ -43,6 +43,7 @@ import SubscriptionList from './components/subscription/list'
 import CustomerDetail from './components/user/userDetail'
 import CustomerList from './components/user/userList'
 // import Users from "./components/userList";
+import MerchantUserDetail from './components/merchantUser/userDetail'
 import MerchantUsserList from './components/merchantUser/userList'
 
 import AppSearch from './components/appSearch'
@@ -95,25 +96,26 @@ const App: React.FC = () => {
 
   let items: MenuItem[] = [
     getItem('Plan', '/plan/list', <DesktopOutlined />),
-    getItem('Billable metrics', '/billable-metrics/list', <DesktopOutlined />),
-    getItem('Discount-code', '/discount-code/list', <DesktopOutlined />),
+    getItem('Billable Metrics', '/billable-metrics/list', <DesktopOutlined />),
+    getItem('Discount Code', '/discount-code/list', <DesktopOutlined />),
     getItem('Subscription', '/subscription/list', <PieChartOutlined />),
     getItem('Invoice', '/invoice/list', <PieChartOutlined />),
     getItem('Payment', '/payment/list', <PieChartOutlined />),
-    getItem('Customer', '/customer/list', <PieChartOutlined />),
-    getItem('Merchant-user', '/merchant-user/list', <PieChartOutlined />),
+    getItem('User List', '/user/list', <PieChartOutlined />),
+    getItem('Admin List', '/admin/list', <PieChartOutlined />),
     getItem('Analytics', '/analytics', <PieChartOutlined />),
-    getItem('Profile', '/profile', <PieChartOutlined />),
-    getItem('Settings', '/settings', <PieChartOutlined />)
+    getItem('My Account', '/my-account', <PieChartOutlined />), // /profile
+    getItem('Configuration', '/configuration', <PieChartOutlined />)
   ]
 
   if (permStore.role == 'Customer Support') {
     items = items.filter(
       (i) =>
         i?.key != '/plan/list' &&
+        i?.key != '/discount-code/list' &&
         i?.key != '/billable-metrics/list' &&
         i?.key != '/discount-code/list' &&
-        i?.key != '/merchant-user/list' &&
+        i?.key != '/admin/list' &&
         i?.key != '/analytics' &&
         i?.key != '/settings' &&
         i?.key != '/profile'
@@ -153,10 +155,10 @@ const App: React.FC = () => {
       setActiveMenuItem(['/subscription/list'])
     } else if (pathItems[0] == 'plan') {
       setActiveMenuItem(['/plan/list'])
-    } else if (pathItems[0] == 'customer') {
-      setActiveMenuItem(['/customer/list'])
-    } else if (pathItems[0] == 'merchant-user') {
-      setActiveMenuItem(['/merchant-user/list'])
+    } else if (pathItems[0] == 'user') {
+      setActiveMenuItem(['/user/list'])
+    } else if (pathItems[0] == 'admin') {
+      setActiveMenuItem(['/admin/list'])
     } else if (pathItems[0] == 'invoice') {
       setActiveMenuItem(['/invoice/list'])
     } else if (pathItems[0] == 'payment') {
@@ -263,7 +265,7 @@ const App: React.FC = () => {
                     element={<Navigate to={`${APP_PATH}subscription/list`} />} // default page after login
                   />
                   {permStore.role == 'Owner' && (
-                    <Route path={`${APP_PATH}profile`} Component={Profile} />
+                    <Route path={`${APP_PATH}my-account`} Component={Profile} />
                   )}
                   {permStore.role == 'Owner' && (
                     <Route
@@ -273,7 +275,10 @@ const App: React.FC = () => {
                   )}
                   {/* <Route path={`${APP_PATH}invoice`} Component={Invoices} /> */}
                   {permStore.role == 'Owner' && (
-                    <Route path={`${APP_PATH}settings`} Component={Settings} />
+                    <Route
+                      path={`${APP_PATH}configuration`}
+                      Component={Settings}
+                    />
                   )}
                   {/* <Route path={`${APP_PATH}users`} Component={Users} /> */}
                   <Route
@@ -324,17 +329,14 @@ const App: React.FC = () => {
                     </Route>
                   )}
 
-                  <Route path={`${APP_PATH}customer`} Component={OutletPage}>
+                  <Route path={`${APP_PATH}user`} Component={OutletPage}>
                     <Route path="list" element={<CustomerList />} />
                     <Route path=":userId" element={<CustomerDetail />} />
                   </Route>
                   {permStore.role == 'Owner' && (
-                    <Route
-                      path={`${APP_PATH}merchant-user`}
-                      Component={OutletPage}
-                    >
+                    <Route path={`${APP_PATH}admin`} Component={OutletPage}>
                       <Route path="list" element={<MerchantUsserList />} />
-                      {/* <Route path=":userId" element={<CustomerDetail />} /> */}
+                      <Route path=":adminId" element={<MerchantUserDetail />} />
                     </Route>
                   )}
 

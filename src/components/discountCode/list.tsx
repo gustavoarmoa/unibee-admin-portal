@@ -95,7 +95,7 @@ const Index = () => {
       key: 'cycleLimit'
     },
     {
-      title: 'Validity range',
+      title: 'Validity Range',
       dataIndex: 'startTime',
       key: 'startTime',
       render: (start, code) =>
@@ -133,7 +133,7 @@ const Index = () => {
       {/* <Search form={form} goSearch={fetchData} searching={loading} /> */}
       <div className="my-4 flex justify-end">
         <Button type="primary" onClick={onNewCode}>
-          New Discount-Code
+          New Discount Code
         </Button>
       </div>
       <Table
