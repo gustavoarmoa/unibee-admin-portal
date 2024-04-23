@@ -264,22 +264,13 @@ const App: React.FC = () => {
                     path={APP_PATH}
                     element={<Navigate to={`${APP_PATH}subscription/list`} />} // default page after login
                   />
-                  {permStore.role == 'Owner' && (
-                    <Route path={`${APP_PATH}my-account`} Component={Profile} />
-                  )}
-                  {permStore.role == 'Owner' && (
-                    <Route
-                      path={`${APP_PATH}analytics`}
-                      Component={Dashboard}
-                    />
-                  )}
+                  <Route path={`${APP_PATH}my-account`} Component={Profile} />
+                  <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
                   {/* <Route path={`${APP_PATH}invoice`} Component={Invoices} /> */}
-                  {permStore.role == 'Owner' && (
-                    <Route
-                      path={`${APP_PATH}configuration`}
-                      Component={Settings}
-                    />
-                  )}
+                  <Route
+                    path={`${APP_PATH}configuration`}
+                    Component={Settings}
+                  />
                   {/* <Route path={`${APP_PATH}users`} Component={Users} /> */}
                   <Route
                     path={`${APP_PATH}subscription`}
@@ -292,53 +283,45 @@ const App: React.FC = () => {
                     />
                   </Route>
 
-                  {permStore.role == 'Owner' && (
-                    <Route path={`${APP_PATH}plan`} Component={OutletPage}>
-                      <Route path="list" element={<PricePlanList />} />
-                      <Route path="new" element={<PlanDetail />} />
-                      {/* <Route path="new" element={<PlanNew />} /> */}
-                      <Route path=":planId" element={<PlanDetail />} />
-                    </Route>
-                  )}
+                  <Route path={`${APP_PATH}plan`} Component={OutletPage}>
+                    <Route path="list" element={<PricePlanList />} />
+                    <Route path="new" element={<PlanDetail />} />
+                    {/* <Route path="new" element={<PlanNew />} /> */}
+                    <Route path=":planId" element={<PlanDetail />} />
+                  </Route>
 
-                  {permStore.role == 'Owner' && (
+                  <Route
+                    path={`${APP_PATH}billable-metric`}
+                    Component={OutletPage}
+                  >
+                    <Route path="list" element={<BillableMetricsList />} />
+                    <Route path="new" element={<BillableMetricsDetail />} />
                     <Route
-                      path={`${APP_PATH}billable-metric`}
-                      Component={OutletPage}
-                    >
-                      <Route path="list" element={<BillableMetricsList />} />
-                      <Route path="new" element={<BillableMetricsDetail />} />
-                      <Route
-                        path=":metricsId"
-                        element={<BillableMetricsDetail />}
-                      />
-                    </Route>
-                  )}
+                      path=":metricsId"
+                      element={<BillableMetricsDetail />}
+                    />
+                  </Route>
 
-                  {permStore.role == 'Owner' && (
+                  <Route
+                    path={`${APP_PATH}discount-code`}
+                    Component={OutletPage}
+                  >
+                    <Route path="list" element={<DiscountCodeList />} />
+                    <Route path="new" element={<DiscountCodeDetail />} />
                     <Route
-                      path={`${APP_PATH}discount-code`}
-                      Component={OutletPage}
-                    >
-                      <Route path="list" element={<DiscountCodeList />} />
-                      <Route path="new" element={<DiscountCodeDetail />} />
-                      <Route
-                        path=":discountCodeId"
-                        element={<DiscountCodeDetail />}
-                      />
-                    </Route>
-                  )}
+                      path=":discountCodeId"
+                      element={<DiscountCodeDetail />}
+                    />
+                  </Route>
 
                   <Route path={`${APP_PATH}user`} Component={OutletPage}>
                     <Route path="list" element={<CustomerList />} />
                     <Route path=":userId" element={<CustomerDetail />} />
                   </Route>
-                  {permStore.role == 'Owner' && (
-                    <Route path={`${APP_PATH}admin`} Component={OutletPage}>
-                      <Route path="list" element={<MerchantUsserList />} />
-                      <Route path=":adminId" element={<MerchantUserDetail />} />
-                    </Route>
-                  )}
+                  <Route path={`${APP_PATH}admin`} Component={OutletPage}>
+                    <Route path="list" element={<MerchantUsserList />} />
+                    <Route path=":adminId" element={<MerchantUserDetail />} />
+                  </Route>
 
                   <Route path={`${APP_PATH}invoice`} Component={OutletPage}>
                     <Route path="list" element={<InvoiceList />} />

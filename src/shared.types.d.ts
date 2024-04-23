@@ -170,7 +170,7 @@ type DiscountCode = {
   discountAmount: number
   discountPercentage: number
   currency: string
-  cycleLimit: numbe
+  cycleLimit: number
   startTime: number
   endTime: number
   validityRange: [Dayjs | null, Dayjs | null]
