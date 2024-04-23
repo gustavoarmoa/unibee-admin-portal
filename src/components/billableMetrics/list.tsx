@@ -122,16 +122,15 @@ const Index = () => {
     navigate(`${APP_PATH}billable-metric/new`)
   }
 
-  useEffect(() => {
-    // fetchPlan();
-    fetchMetricsList()
-  }, [])
-
   /*
   useEffect(() => {
-    // fetchPlan();
-  }, [page]);
+    fetchMetricsList()
+  }, [])
   */
+
+  useEffect(() => {
+    fetchMetricsList()
+  }, [page])
 
   return (
     <>

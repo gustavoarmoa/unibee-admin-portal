@@ -78,10 +78,11 @@ const Index = () => {
     }
     setUsers(users)
   }
-
+  /*
   useEffect(() => {
     fetchData()
   }, [])
+  */
 
   useEffect(() => {
     fetchData()

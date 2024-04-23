@@ -100,7 +100,7 @@ const App: React.FC = () => {
     getItem('Discount Code', '/discount-code/list', <DesktopOutlined />),
     getItem('Subscription', '/subscription/list', <PieChartOutlined />),
     getItem('Invoice', '/invoice/list', <PieChartOutlined />),
-    getItem('Payment', '/payment/list', <PieChartOutlined />),
+    getItem('Transaction', '/transaction/list', <PieChartOutlined />),
     getItem('User List', '/user/list', <PieChartOutlined />),
     getItem('Admin List', '/admin/list', <PieChartOutlined />),
     getItem('Analytics', '/analytics', <PieChartOutlined />),
@@ -161,8 +161,8 @@ const App: React.FC = () => {
       setActiveMenuItem(['/admin/list'])
     } else if (pathItems[0] == 'invoice') {
       setActiveMenuItem(['/invoice/list'])
-    } else if (pathItems[0] == 'payment') {
-      setActiveMenuItem(['/payment/list'])
+    } else if (pathItems[0] == 'transaction') {
+      setActiveMenuItem(['/transaction/list'])
     } else if (pathItems[0] == 'discount-code') {
       setActiveMenuItem(['/discount-code/list'])
     } else if (pathItems[0] == 'billable-metric') {
@@ -327,7 +327,7 @@ const App: React.FC = () => {
                     <Route path="list" element={<InvoiceList />} />
                     <Route path=":invoiceId" element={<InvoiceDetail />} />
                   </Route>
-                  <Route path={`${APP_PATH}payment`} Component={OutletPage}>
+                  <Route path={`${APP_PATH}transaction`} Component={OutletPage}>
                     <Route path="list" element={<PaymentList />} />
                     {/* <Route path=":invoiceId" element={<InvoiceDetail />} /> */}
                   </Route>

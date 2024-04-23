@@ -121,9 +121,11 @@ const Index = () => {
     setCodeList(list || [])
   }
 
+  /*
   useEffect(() => {
     fetchData()
   }, [])
+  */
   useEffect(() => {
     fetchData()
   }, [page])

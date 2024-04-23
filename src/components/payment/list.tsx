@@ -22,7 +22,7 @@ const Index = () => {
 
   const columns: ColumnsType<PaymentItem> = [
     {
-      title: 'Payment Id',
+      title: 'Transaction Id',
       dataIndex: 'paymentId',
       key: 'paymentId'
     },
@@ -46,7 +46,7 @@ const Index = () => {
       )
     },
     {
-      title: 'Payment for',
+      title: 'Transaction for',
       dataIndex: 'timelineType',
       key: 'timelineType',
       render: (s) => <span>{PAYMENT_TYPE[s as keyof typeof PAYMENT_TYPE]}</span>
@@ -105,9 +105,11 @@ const Index = () => {
     setPaymentList(paymentList || [])
   }
 
+  /*
   useEffect(() => {
     fetchData()
   }, [])
+  */
   useEffect(() => {
     fetchData()
   }, [page])

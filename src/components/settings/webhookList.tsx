@@ -115,12 +115,6 @@ const Index = () => {
     fetchData()
   }, [])
 
-  /*
-  useEffect(() => {
-    !detailModalOpen && setCurrentWebhookIdx(-1);
-  }, [detailModalOpen]);
-  */
-
   return (
     <div>
       {detailModalOpen && (

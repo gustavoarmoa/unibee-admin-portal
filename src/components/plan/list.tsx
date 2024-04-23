@@ -180,9 +180,11 @@ const Index = () => {
     navigate(`${APP_PATH}plan/new`)
   }
 
+  /*
   useEffect(() => {
     fetchPlan()
   }, [])
+  */
 
   useEffect(() => {
     fetchPlan()

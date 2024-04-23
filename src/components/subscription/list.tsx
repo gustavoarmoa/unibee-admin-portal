@@ -151,9 +151,11 @@ const Index = () => {
     fetchData()
   }, [page, statusFilter])
 
+  /*
   useEffect(() => {
     fetchData()
   }, [])
+  */
 
   return (
     <div>

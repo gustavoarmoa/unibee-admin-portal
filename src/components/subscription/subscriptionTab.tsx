@@ -971,7 +971,7 @@ const SubTimeline = ({
   return (
     <>
       <Divider orientation="left" style={{ margin: '32px 0' }}>
-        Subscription History
+        Subscription Log
       </Divider>
       <Table
         columns={columns}
