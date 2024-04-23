@@ -40,7 +40,7 @@ const Index = () => {
 
   const goBack = () => navigate(`${APP_PATH}invoice/list`)
   const goToUser = (userId: number) => () =>
-    navigate(`${APP_PATH}customer/${userId}`)
+    navigate(`${APP_PATH}user/${userId}`)
   const goToSub = (subId: string) => () =>
     navigate(`${APP_PATH}subscription/${subId}`)
 
@@ -155,7 +155,7 @@ const Index = () => {
         </Col>
         <Col span={6}>{invoiceDetail?.gateway.gatewayName}</Col>
         <Col span={4} style={colStyle}>
-          User Id{' '}
+          User Name
         </Col>
         <Col span={6}>
           <span

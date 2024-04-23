@@ -139,7 +139,7 @@ const Index = () => {
         style={{ padding: '16px 0', display: 'flex', justifyContent: 'end' }}
       >
         <Button type="primary" onClick={onNewMetrics}>
-          New Billable Metrics
+          New Billable Metric
         </Button>
       </div>
       <Table

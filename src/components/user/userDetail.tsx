@@ -47,7 +47,7 @@ const Index = () => {
         user={userProfile}
         setUserProfile={setUserProfile}
         extraButton={
-          <Button onClick={() => navigate(`${APP_PATH}customer/list`)}>
+          <Button onClick={() => navigate(`${APP_PATH}user/list`)}>
             Go Back
           </Button>
         }

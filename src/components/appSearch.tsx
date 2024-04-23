@@ -347,7 +347,7 @@ const AccountMatch = ({
               // style={{ height: "32px", margin: "6px 0" }}
               className="clickable-item"
               key={u.id}
-              onClick={() => goToDetail(`customer/${u.id}`)}
+              onClick={() => goToDetail(`user/${u.id}`)}
             >
               <Col
                 span={5}
