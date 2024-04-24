@@ -24,6 +24,7 @@ import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
 import ModalApiKey from './apiKeyModal'
 import PaymentGatewayList from './paymentGatewayList'
+import ModalVATsenseKeyModal from './vatKeyModal'
 import WebhookList from './webhookList'
 
 type TPermission = {
@@ -189,10 +190,18 @@ export default Index
 
 const AppConfig = () => {
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
+  const [vatSenseKeyModalOpen, setVatSenseKeyModalOpen] = useState(false)
   const toggleKeyModal = () => setApiKeyModalOpen(!apiKeyModalOpen)
+  const toggleVatSenseKeyModal = () =>
+    setVatSenseKeyModalOpen(!vatSenseKeyModalOpen)
   return (
     <div style={{ margin: '32px 0' }}>
       {apiKeyModalOpen && <ModalApiKey closeModal={toggleKeyModal} />}
+
+      {vatSenseKeyModalOpen && (
+        <ModalVATsenseKeyModal closeModal={toggleVatSenseKeyModal} />
+      )}
+
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>UniBee API Key</Col>
         <Col span={12}>
@@ -204,22 +213,20 @@ const AppConfig = () => {
           <Button onClick={toggleKeyModal}>Generate</Button>
         </Col>
       </Row>
-
       <PaymentGatewayList />
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>SendGrid Email Key</Col>
+        <Col span={4}>VAT Sense Key</Col>
         <Col span={12}>
-          <Input.Password
-            defaultValue={'1234567890-abcdefghijklmnopq'}
-            style={{ width: '80%' }}
-          />
+          <div className=" text-gray-500">
+            Use this key to calculate VAT for your payment.
+          </div>
         </Col>
         <Col span={4}>
-          <Button>Save</Button>
+          <Button onClick={toggleVatSenseKeyModal}>Edit</Button>
         </Col>
       </Row>
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>VAT Sense Key</Col>
+        <Col span={4}>SendGrid Email Key</Col>
         <Col span={12}>
           <Input.Password
             defaultValue={'1234567890-abcdefghijklmnopq'}

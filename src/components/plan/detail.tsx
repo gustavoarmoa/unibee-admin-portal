@@ -499,7 +499,6 @@ const Index = () => {
                 ]}
               />
             </Form.Item>
-            <div style={{ position: 'relative' }}>interval unit desc</div>
           </div>
 
           <Form.Item

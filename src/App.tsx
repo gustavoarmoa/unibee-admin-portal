@@ -108,6 +108,7 @@ const App: React.FC = () => {
     getItem('Configuration', '/configuration', <PieChartOutlined />)
   ]
 
+  /*
   if (permStore.role == 'Customer Support') {
     items = items.filter(
       (i) =>
@@ -121,6 +122,7 @@ const App: React.FC = () => {
         i?.key != '/profile'
     )
   }
+  */
 
   const navigate = useNavigate()
 

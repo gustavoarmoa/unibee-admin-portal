@@ -384,7 +384,7 @@ const Index = () => {
             rules={[
               {
                 required: watchBillingType != 1,
-                message: 'Please choose your cycleLimit!'
+                message: 'Please input your cycleLimit!'
               },
               ({ getFieldValue }) => ({
                 validator(rule, value) {
