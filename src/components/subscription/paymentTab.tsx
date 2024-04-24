@@ -25,7 +25,7 @@ import {
   MoneyCollectOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { CURRENCY, INVOICE_STATUS } from '../../constants'
+import { CURRENCY, INVOICE_STATUS,PAYMENT_TYPE } from '../../constants'
 import { showAmount } from '../../helpers'
 import { downloadInvoice, getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
@@ -67,9 +67,9 @@ const Index = ({ user }: { user: IProfile | null }) => {
 
   const columns: ColumnsType<TPayment> = [
     {
-      title: 'Payment Id',
-      dataIndex: 'paymentId',
-      key: 'paymentId'
+      title: 'Transaction Id',
+      dataIndex: 'transactionId',
+      key: 'transactionId'
     },
     {
       title: 'Total Amount',
@@ -78,6 +78,12 @@ const Index = ({ user }: { user: IProfile | null }) => {
       render: (amt, pay) => showAmount(amt, pay.currency)
       // render: (title, invoice) => <a>{title}</a>
       // render: (_, sub) => <a>{sub.plan?.planName}</a>,
+    },
+    {
+      title: 'Type',
+      dataIndex: 'timelineType',
+      key: 'timelineType',
+      render: (s) => <span>{PAYMENT_TYPE[s as keyof typeof PAYMENT_TYPE]}</span>
     },
     {
       title: 'Subscription Id',
@@ -132,7 +138,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, invoice) => dayjs(d).format('YYYY-MMM-DD')
+      render: (d, invoice) => dayjs(d * 1000).format('YYYY-MMM-DD')
     }
   ]
 

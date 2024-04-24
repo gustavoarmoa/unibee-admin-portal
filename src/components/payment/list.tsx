@@ -10,12 +10,14 @@ import { usePagination } from '../../hooks'
 import { getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { PaymentItem } from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
   const { page, onPageChange } = usePagination()
+  const appConfigStore = useAppConfigStore()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [paymentList, setPaymentList] = useState<PaymentItem[]>([])
@@ -23,8 +25,8 @@ const Index = () => {
   const columns: ColumnsType<PaymentItem> = [
     {
       title: 'Transaction Id',
-      dataIndex: 'paymentId',
-      key: 'paymentId'
+      dataIndex: 'transactionId',
+      key: 'transactionId'
     },
     {
       title: 'Total Amount',
@@ -46,7 +48,7 @@ const Index = () => {
       )
     },
     {
-      title: 'Transaction for',
+      title: 'Type',
       dataIndex: 'timelineType',
       key: 'timelineType',
       render: (s) => <span>{PAYMENT_TYPE[s as keyof typeof PAYMENT_TYPE]}</span>
@@ -78,6 +80,14 @@ const Index = () => {
       title: 'User Id',
       dataIndex: 'userId',
       key: 'userId'
+    },
+    {
+      title: 'Payment gateway',
+      dataIndex: 'gatewayId',
+      key: 'gatewayId',
+      render: (gateway) =>
+        appConfigStore.gateway.find((g) => g.gatewayId == gateway)?.gatewayName
+      // subscriptionId == '' ? 'Admin' : 'System'
     },
     {
       title: 'Created at',
