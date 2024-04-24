@@ -53,7 +53,16 @@ const Index = () => {
         <GatewayModal closeModal={toggleModal} gatewayDetail={gatewayEdit} />
       )}
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>Stripe</Col>
+        <Col span={4}>
+          Stripe{' '}
+          <a
+            href="http://stripe.com"
+            target="_blank"
+            style={{ fontSize: '10px' }}
+          >
+            Apply
+          </a>
+        </Col>
         <Col span={12}>
           <div className=" text-gray-500">
             Use public and private key to secure the bank card payment.
@@ -71,7 +80,16 @@ const Index = () => {
       </Row>
 
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>Changelly</Col>
+        <Col span={4}>
+          Changelly{' '}
+          <a
+            href="https://changelly.com"
+            target="_blank"
+            style={{ fontSize: '10px' }}
+          >
+            Apply
+          </a>
+        </Col>
         <Col span={12}>
           <div className=" text-gray-500">
             Use public and private key to secure the crypto payment.
@@ -87,28 +105,6 @@ const Index = () => {
           </Button>
         </Col>
       </Row>
-
-      {/* gatewayList.map((g, idx: number) => (
-        <Row
-          key={g.gatewayId}
-          gutter={[16, 32]}
-          style={{ marginBottom: '16px' }}
-        >
-          <Col span={4}>{g.gatewayName}</Col>
-          <Col span={12}>
-            <div className=" text-gray-500">
-              {g.gatewayName.toLowerCase() == 'stripe'
-                ? 'Use public and private key to secure the bank card payment.'
-                : g.gatewayName.toLowerCase() == 'changelly'
-                  ? 'Use public and private key to secure the crypto payment.'
-                  : ''}
-            </div>
-          </Col>
-          <Col span={4}>
-            <Button onClick={onGatewayClick(idx)}>Edit</Button>
-          </Col>
-        </Row>
-      )) */}
     </div>
   )
 }

@@ -50,7 +50,7 @@ const Index = ({ closeModal }: IProps) => {
               Apply your key at&nbsp;&nbsp;
               <a href="https://sendgrid.com" target="_blank">
                 https://sendgrid.com
-              </a>{' '}
+              </a>
             </Col>
           </Row>
         </div>

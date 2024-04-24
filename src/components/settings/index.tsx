@@ -221,10 +221,19 @@ const AppConfig = () => {
       </Row>
       <PaymentGatewayList />
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>VAT Sense Key</Col>
+        <Col span={4}>
+          VAT Sense Key{' '}
+          <a
+            href="https://vatsense.com"
+            target="_blank"
+            style={{ fontSize: '10px' }}
+          >
+            Apply
+          </a>{' '}
+        </Col>
         <Col span={12}>
           <div className=" text-gray-500">
-            Use this key to calculate VAT for your payment.
+            Use this key to calculate VAT for your payment.{' '}
           </div>
         </Col>
         <Col span={4}>
@@ -232,7 +241,16 @@ const AppConfig = () => {
         </Col>
       </Row>
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>SendGrid Email Key</Col>
+        <Col span={4}>
+          SendGrid Email Key{' '}
+          <a
+            href="https://sendgrid.com"
+            style={{ fontSize: '10px' }}
+            target="_blank"
+          >
+            Apply
+          </a>
+        </Col>
         <Col span={12}>
           <div className=" text-gray-500">
             Use this key to send email to your customers.
