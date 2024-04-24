@@ -1,4 +1,8 @@
-import { LoadingOutlined } from '@ant-design/icons'
+import {
+  CheckOutlined,
+  ExclamationOutlined,
+  LoadingOutlined
+} from '@ant-design/icons'
 import { Button, Col, Popover, Row, Space, Table, Tag, message } from 'antd'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
@@ -7,6 +11,16 @@ import { IProfile, TGateway } from '../../shared.types.d'
 // import { useAppConfigStore } from '../../stores';
 import GatewayModal from './paymentGatewayModal'
 
+const SetTag = () => (
+  <Tag icon={<CheckOutlined />} color="#87d068">
+    Set
+  </Tag>
+)
+const NotSetTag = () => (
+  <Tag icon={<ExclamationOutlined />} color="#f50">
+    Not Set
+  </Tag>
+)
 const Index = () => {
   // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false)
@@ -25,7 +39,6 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    console.log('getting gatewayList res: ', gatewayList)
     setGatewayList(gatewayList ?? [])
   }
 
@@ -53,19 +66,10 @@ const Index = () => {
         <GatewayModal closeModal={toggleModal} gatewayDetail={gatewayEdit} />
       )}
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>
-          Stripe{' '}
-          <a
-            href="http://stripe.com"
-            target="_blank"
-            style={{ fontSize: '10px' }}
-          >
-            Apply
-          </a>
-        </Col>
+        <Col span={4}>Stripe</Col>
         <Col span={12}>
           <div className=" text-gray-500">
-            Use public and private key to secure the bank card payment.
+            Use public and private keys to secure the bank card payment.
           </div>
         </Col>
         <Col span={4}>
@@ -80,19 +84,10 @@ const Index = () => {
       </Row>
 
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>
-          Changelly{' '}
-          <a
-            href="https://changelly.com"
-            target="_blank"
-            style={{ fontSize: '10px' }}
-          >
-            Apply
-          </a>
-        </Col>
+        <Col span={4}>Changelly</Col>
         <Col span={12}>
           <div className=" text-gray-500">
-            Use public and private key to secure the crypto payment.
+            Use public and private keys to secure the crypto payment.
           </div>
         </Col>
         <Col span={4}>

@@ -1,4 +1,9 @@
-import { LoadingOutlined } from '@ant-design/icons'
+import {
+  CheckOutlined,
+  ExclamationOutlined,
+  LoadingOutlined,
+  SyncOutlined
+} from '@ant-design/icons'
 import type { CheckboxProps, TabsProps } from 'antd'
 import {
   Button,
@@ -11,15 +16,16 @@ import {
   Spin,
   Table,
   Tabs,
+  Tag,
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import React, { CSSProperties, useState } from 'react'
+import React, { CSSProperties, useEffect, useState } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { useNavigate } from 'react-router-dom'
-import { generateApiKeyReq } from '../../requests'
+import { generateApiKeyReq, getMerchantInfoReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
 import ModalApiKey from './apiKeyModal'
@@ -189,15 +195,64 @@ const Index = () => {
 
 export default Index
 
+const SetTag = () => (
+  <Tag icon={<CheckOutlined />} color="#87d068">
+    Set
+  </Tag>
+)
+const NotSetTag = () => (
+  <Tag icon={<ExclamationOutlined />} color="#f50">
+    Not Set
+  </Tag>
+)
+
+const LoadingTag = () => (
+  <Tag icon={<SyncOutlined spin />} color="#2db7f5"></Tag>
+)
+
 const AppConfig = () => {
+  const [loadingKeys, setLoadingKeys] = useState(false)
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
   const [vatSenseKeyModalOpen, setVatSenseKeyModalOpen] = useState(false)
   const [sendgridKeyModalOpen, setSendgridKeyModalOpen] = useState(false)
+  const [keys, setKeys] = useState({
+    openApiKey: '',
+    sendGridKey: '',
+    vatSenseKey: ''
+  })
   const toggleKeyModal = () => setApiKeyModalOpen(!apiKeyModalOpen)
   const toggleSendgridModal = () =>
     setSendgridKeyModalOpen(!sendgridKeyModalOpen)
   const toggleVatSenseKeyModal = () =>
     setVatSenseKeyModalOpen(!vatSenseKeyModalOpen)
+
+  // these keys have been desensitized, their purposes is to show which keys have been set, which haven't
+  const getApiKeysInfo = async () => {
+    setLoadingKeys(true)
+    const [res, err] = await getMerchantInfoReq()
+    setLoadingKeys(false)
+    console.log('res getting api key info: ', res)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    const { openApiKey, sendGridKey, vatSenseKey } = res
+    const k = { openApiKey: '', sendGridKey: '', vatSenseKey: '' }
+    if (openApiKey != null && openApiKey != '') {
+      k.openApiKey = openApiKey
+    }
+    if (sendGridKey != null && sendGridKey != '') {
+      k.sendGridKey = sendGridKey
+    }
+    if (vatSenseKey != null && vatSenseKey != '') {
+      k.vatSenseKey = vatSenseKey
+    }
+    setKeys(k)
+  }
+
+  useEffect(() => {
+    getApiKeysInfo()
+  }, [])
   return (
     <div style={{ margin: '32px 0' }}>
       {apiKeyModalOpen && <ModalApiKey closeModal={toggleKeyModal} />}
@@ -209,55 +264,70 @@ const AppConfig = () => {
       )}
 
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>UniBee API Key</Col>
-        <Col span={12}>
+        <Col span={3}>UniBee API Key</Col>
+        <Col span={2}>
+          {loadingKeys ? (
+            <LoadingTag />
+          ) : keys.openApiKey != '' ? (
+            <SetTag />
+          ) : (
+            <NotSetTag />
+          )}
+        </Col>
+        <Col span={10}>
           <div className=" text-gray-500">
             Use this key to communicate safely with your App.
           </div>
         </Col>
-        <Col span={4}>
-          <Button onClick={toggleKeyModal}>Generate</Button>
+        <Col span={2}>
+          <Button onClick={toggleKeyModal} disabled={loadingKeys}>
+            Generate
+          </Button>
         </Col>
       </Row>
       <PaymentGatewayList />
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>
-          VAT Sense Key{' '}
-          <a
-            href="https://vatsense.com"
-            target="_blank"
-            style={{ fontSize: '10px' }}
-          >
-            Apply
-          </a>{' '}
+        <Col span={3}>VAT Sense Key</Col>
+        <Col span={2}>
+          {loadingKeys ? (
+            <LoadingTag />
+          ) : keys.vatSenseKey != '' ? (
+            <SetTag />
+          ) : (
+            <NotSetTag />
+          )}
         </Col>
-        <Col span={12}>
+        <Col span={10}>
           <div className=" text-gray-500">
             Use this key to calculate VAT for your payment.{' '}
           </div>
         </Col>
-        <Col span={4}>
-          <Button onClick={toggleVatSenseKeyModal}>Edit</Button>
+        <Col span={2}>
+          <Button onClick={toggleVatSenseKeyModal} disabled={loadingKeys}>
+            Edit
+          </Button>
         </Col>
       </Row>
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>
-          SendGrid Email Key{' '}
-          <a
-            href="https://sendgrid.com"
-            style={{ fontSize: '10px' }}
-            target="_blank"
-          >
-            Apply
-          </a>
+        <Col span={3}>SendGrid Email Key</Col>
+        <Col span={2}>
+          {loadingKeys ? (
+            <LoadingTag />
+          ) : keys.sendGridKey != '' ? (
+            <SetTag />
+          ) : (
+            <NotSetTag />
+          )}
         </Col>
-        <Col span={12}>
+        <Col span={10}>
           <div className=" text-gray-500">
             Use this key to send email to your customers.
           </div>
         </Col>
-        <Col span={4}>
-          <Button onClick={toggleSendgridModal}>Edit</Button>
+        <Col span={2}>
+          <Button onClick={toggleSendgridModal} disabled={loadingKeys}>
+            Edit
+          </Button>
         </Col>
       </Row>
     </div>
