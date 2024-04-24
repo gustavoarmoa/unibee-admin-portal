@@ -1,7 +1,8 @@
 import {
   CheckOutlined,
   ExclamationOutlined,
-  LoadingOutlined
+  LoadingOutlined,
+  SyncOutlined
 } from '@ant-design/icons'
 import { Button, Col, Popover, Row, Space, Table, Tag, message } from 'antd'
 import dayjs from 'dayjs'
@@ -13,7 +14,7 @@ import GatewayModal from './paymentGatewayModal'
 
 const SetTag = () => (
   <Tag icon={<CheckOutlined />} color="#87d068">
-    Set
+    Ready
   </Tag>
 )
 const NotSetTag = () => (
@@ -21,6 +22,10 @@ const NotSetTag = () => (
     Not Set
   </Tag>
 )
+const LoadingTag = () => (
+  <Tag icon={<SyncOutlined spin />} color="#2db7f5"></Tag>
+)
+
 const Index = () => {
   // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false)
@@ -66,13 +71,22 @@ const Index = () => {
         <GatewayModal closeModal={toggleModal} gatewayDetail={gatewayEdit} />
       )}
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>Stripe</Col>
-        <Col span={12}>
+        <Col span={3}>Stripe</Col>
+        <Col span={2}>
+          {loading ? (
+            <LoadingTag />
+          ) : gatewayDetail('stripe') != null ? (
+            <SetTag />
+          ) : (
+            <NotSetTag />
+          )}
+        </Col>
+        <Col span={10}>
           <div className=" text-gray-500">
             Use public and private keys to secure the bank card payment.
           </div>
         </Col>
-        <Col span={4}>
+        <Col span={2}>
           <Button
             onClick={onGatewayClick('stripe')}
             disabled={loading}
@@ -84,13 +98,22 @@ const Index = () => {
       </Row>
 
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={4}>Changelly</Col>
-        <Col span={12}>
+        <Col span={3}>Changelly</Col>
+        <Col span={2}>
+          {loading ? (
+            <LoadingTag />
+          ) : gatewayDetail('changelly') != null ? (
+            <SetTag />
+          ) : (
+            <NotSetTag />
+          )}
+        </Col>
+        <Col span={10}>
           <div className=" text-gray-500">
             Use public and private keys to secure the crypto payment.
           </div>
         </Col>
-        <Col span={4}>
+        <Col span={2}>
           <Button
             onClick={onGatewayClick('changelly')}
             disabled={loading}

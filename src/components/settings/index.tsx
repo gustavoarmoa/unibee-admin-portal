@@ -177,11 +177,6 @@ const Index = () => {
     // console.log(key);
   }
 
-  // const x: keyof TPermission = "appConfig";
-  // const allPerm = Object.keys()
-
-  // console.log("key of : ", x);
-
   return (
     <div style={{ width: '100%' }}>
       <Tabs
@@ -197,7 +192,7 @@ export default Index
 
 const SetTag = () => (
   <Tag icon={<CheckOutlined />} color="#87d068">
-    Set
+    Ready
   </Tag>
 )
 const NotSetTag = () => (
@@ -231,7 +226,6 @@ const AppConfig = () => {
     setLoadingKeys(true)
     const [res, err] = await getMerchantInfoReq()
     setLoadingKeys(false)
-    console.log('res getting api key info: ', res)
     if (null != err) {
       message.error(err.message)
       return
@@ -408,7 +402,6 @@ const EditTemplate = () => {
   const onTextChange = (content: string) => {
     setValue(content)
   }
-  // console.log("txt: ", value);
   return (
     <div>
       <ReactQuill theme="snow" value={value} onChange={onTextChange} />

@@ -48,17 +48,6 @@ const Index = ({ closeModal }: IProps) => {
                 You current key will still be valid within 1 hour after creating
                 a new key. Are you sure you want to create the new key?
               </p>
-
-              <div className="flex justify-center">
-                <Button
-                  type="primary"
-                  onClick={onCreateKey}
-                  disabled={loading}
-                  loading={loading}
-                >
-                  Create
-                </Button>
-              </div>
             </div>
           ) : (
             <div>
@@ -95,9 +84,17 @@ const Index = ({ closeModal }: IProps) => {
             </div>
           )}
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-4">
           <Button onClick={closeModal} disabled={loading}>
             Close
+          </Button>
+          <Button
+            type="primary"
+            onClick={onCreateKey}
+            disabled={loading}
+            loading={loading}
+          >
+            Create
           </Button>
         </div>
       </Modal>
