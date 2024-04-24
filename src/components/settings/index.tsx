@@ -24,6 +24,7 @@ import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
 import ModalApiKey from './apiKeyModal'
 import PaymentGatewayList from './paymentGatewayList'
+import ModalSendgridKeyModal from './sendGridKeyModal'
 import ModalVATsenseKeyModal from './vatKeyModal'
 import WebhookList from './webhookList'
 
@@ -191,13 +192,18 @@ export default Index
 const AppConfig = () => {
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
   const [vatSenseKeyModalOpen, setVatSenseKeyModalOpen] = useState(false)
+  const [sendgridKeyModalOpen, setSendgridKeyModalOpen] = useState(false)
   const toggleKeyModal = () => setApiKeyModalOpen(!apiKeyModalOpen)
+  const toggleSendgridModal = () =>
+    setSendgridKeyModalOpen(!sendgridKeyModalOpen)
   const toggleVatSenseKeyModal = () =>
     setVatSenseKeyModalOpen(!vatSenseKeyModalOpen)
   return (
     <div style={{ margin: '32px 0' }}>
       {apiKeyModalOpen && <ModalApiKey closeModal={toggleKeyModal} />}
-
+      {sendgridKeyModalOpen && (
+        <ModalSendgridKeyModal closeModal={toggleSendgridModal} />
+      )}
       {vatSenseKeyModalOpen && (
         <ModalVATsenseKeyModal closeModal={toggleVatSenseKeyModal} />
       )}
@@ -228,13 +234,12 @@ const AppConfig = () => {
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>SendGrid Email Key</Col>
         <Col span={12}>
-          <Input.Password
-            defaultValue={'1234567890-abcdefghijklmnopq'}
-            style={{ width: '80%' }}
-          />
+          <div className=" text-gray-500">
+            Use this key to send email to your customers.
+          </div>
         </Col>
         <Col span={4}>
-          <Button>Save</Button>
+          <Button onClick={toggleSendgridModal}>Edit</Button>
         </Col>
       </Row>
     </div>

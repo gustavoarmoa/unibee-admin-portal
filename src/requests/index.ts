@@ -309,7 +309,6 @@ export const saveVatSenseKeyReq = async (vatKey: string) => {
     gatewayName: 'vatsense',
     data: vatKey
   }
-  console.log('body: ', body)
   try {
     const res = await request.post('/merchant/vat/setup_gateway', body)
     if (res.data.code == 61) {
@@ -324,6 +323,25 @@ export const saveVatSenseKeyReq = async (vatKey: string) => {
   }
 }
 
+export const saveSendGridKeyReq = async (vatKey: string) => {
+  const body = {
+    IsDefault: true,
+    gatewayName: 'sendgrid',
+    data: vatKey
+  }
+  try {
+    const res = await request.post('/merchant/email/gateway_setup', body)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      // throw new Error('Session expired');
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
 // ---------------
 type TPlanListBody = {
   type?: number[] | null
