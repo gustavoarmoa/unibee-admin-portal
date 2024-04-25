@@ -55,6 +55,11 @@ const Index = () => {
       key: 'lastName'
     },
     {
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role'
+    },
+    {
       title: 'Email',
       dataIndex: 'email',
       key: 'email'
