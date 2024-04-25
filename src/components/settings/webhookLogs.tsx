@@ -1,4 +1,4 @@
-import { LoadingOutlined } from '@ant-design/icons'
+import { CopyOutlined, LoadingOutlined } from '@ant-design/icons'
 import { Button, Modal, Pagination, Popover, Table, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
+import { useCopyContent } from '../../hooks'
 import { getWebhookLogs } from '../../requests'
 import { TWebhookLogs } from '../../shared.types.d'
 SyntaxHighlighter.registerLanguage('json', json)
@@ -23,6 +24,14 @@ const Index = ({
   const [logs, setLogs] = useState<TWebhookLogs[]>([])
   const [page, setPage] = useState(0)
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
+  const copyContent = (text: string) => async () => {
+    const err = await useCopyContent(JSON.stringify(JSON.parse(text), null, 2))
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success('Copied')
+  }
   const renderJson = (text: string) => {
     if (null == text || '' == text) {
       return ''
@@ -31,10 +40,25 @@ const Index = ({
       <Popover
         placement="right"
         content={
-          <div style={{ width: '360px', height: '360px', overflow: 'auto' }}>
+          <div style={{ width: '360px', height: '380px', overflow: 'auto' }}>
             <SyntaxHighlighter language="json" style={prism}>
               {JSON.stringify(JSON.parse(text), null, 2)}
             </SyntaxHighlighter>
+
+            <Button
+              type="link"
+              size="small"
+              onClick={copyContent(text)}
+              icon={<CopyOutlined />}
+              style={{
+                position: 'absolute',
+                right: '22px',
+                bottom: '12px',
+                opacity: 0.7
+              }}
+            >
+              Copy
+            </Button>
           </div>
         }
       >
