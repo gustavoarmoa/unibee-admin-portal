@@ -71,7 +71,11 @@ const Index = () => {
         <GatewayModal closeModal={toggleModal} gatewayDetail={gatewayEdit} />
       )}
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>Stripe</Col>
+        <Col span={3}>
+          <a href="http://www.stripe.com" target="_blank" rel="noreferrer">
+            Stripe
+          </a>
+        </Col>
         <Col span={2}>
           {loading ? (
             <LoadingTag />
@@ -98,7 +102,11 @@ const Index = () => {
       </Row>
 
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>Changelly</Col>
+        <Col span={3}>
+          <a href="http://www.changelly.com" target="_blank" rel="noreferrer">
+            Changelly
+          </a>
+        </Col>
         <Col span={2}>
           {loading ? (
             <LoadingTag />

@@ -17,6 +17,10 @@ const Index = ({ closeModal }: IProps) => {
     setApiKey(evt.target.value)
   }
   const onSaveKey = async () => {
+    if (apiKey.trim() == '') {
+      message.error('Key is empty')
+      return
+    }
     setLoading(true)
     const [res, err] = await saveSendGridKeyReq(apiKey)
     setLoading(false)
@@ -47,10 +51,15 @@ const Index = ({ closeModal }: IProps) => {
           <Row>
             <Col span={4}></Col>
             <Col span={20}>
-              Apply your key at&nbsp;&nbsp;
-              <a href="https://sendgrid.com" target="_blank">
-                https://sendgrid.com
-              </a>
+              <div className=" text-xs text-gray-400">
+                For security reason, your key won't show up here after submit.
+              </div>
+              <div>
+                Apply your key on&nbsp;&nbsp;
+                <a href="https://sendgrid.com" target="_blank" rel="noreferrer">
+                  https://sendgrid.com
+                </a>
+              </div>
             </Col>
           </Row>
         </div>

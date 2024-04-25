@@ -281,7 +281,11 @@ const AppConfig = () => {
       </Row>
       <PaymentGatewayList />
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>VAT Sense Key</Col>
+        <Col span={3}>
+          <a href="https://vatsense.com" target="_blank" rel="noreferrer">
+            VAT Sense Key
+          </a>
+        </Col>
         <Col span={2}>
           {loadingKeys ? (
             <LoadingTag />
@@ -303,7 +307,11 @@ const AppConfig = () => {
         </Col>
       </Row>
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>SendGrid Email Key</Col>
+        <Col span={3}>
+          <a href="https://sendgrid.com" target="_blank" rel="noreferrer">
+            SendGrid Email Key
+          </a>
+        </Col>
         <Col span={2}>
           {loadingKeys ? (
             <LoadingTag />

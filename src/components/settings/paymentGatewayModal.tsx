@@ -27,8 +27,15 @@ const Index = ({ closeModal, gatewayDetail }: IProps) => {
         setPrivateKey(evt.target.value)
       }
     }
-  // React.ChangeEventHandler<HTMLTextAreaElement>
   const onSaveKey = async () => {
+    if (pubKey.trim() == '') {
+      message.error('Public Key is empty')
+      return
+    }
+    if (privateKey.trim() == '') {
+      message.error('Private Key is empty')
+      return
+    }
     const body: any = {
       gatewayKey: pubKey,
       gatewaySecret: privateKey
@@ -79,12 +86,15 @@ const Index = ({ closeModal, gatewayDetail }: IProps) => {
               />
             </Col>
           </Row>
-          {/* !isNew && (
-            <Row gutter={[16, 32]}>
-              <Col span={4}>Created at</Col>
-              <Col span={20}>date</Col>
-            </Row>
-          ) */}
+          <Row gutter={[16, 32]}>
+            <Col span={4}></Col>
+            <Col span={20}>
+              <div className=" text-xs text-gray-400">
+                For security reason, your Private Key won't show up here after
+                submit.
+              </div>
+            </Col>
+          </Row>
         </div>
         <div className="flex justify-end gap-4">
           <Button onClick={closeModal} disabled={loading}>
