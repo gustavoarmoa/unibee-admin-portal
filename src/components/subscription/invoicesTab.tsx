@@ -30,7 +30,8 @@ import { downloadInvoice, getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
-import InvoiceModal from './modals/newInvoice'
+import InvoiceDetailModal from './modals/invoiceDetail'
+import NewInvoiceModal from './modals/newInvoice'
 
 const PAGE_SIZE = 10
 
@@ -39,11 +40,29 @@ const Index = ({ user }: { user: IProfile | null }) => {
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0) // pagination props
-  const [newInvoiceModal, setNewInvoiceModal] = useState(false)
+  const [newInvoiceModalOpen, setNewInvoiceModalOpen] = useState(false)
+  const [invoiceDetailModalOpen, setInvoiceDetailModalOpen] = useState(false)
   const [invoiceIdx, setInvoiceIdx] = useState(-1) // -1: not selected, any action button: (delete, edit,refund) will set this value to the selected invoiceIdx
   const [deleteMode, setDeleteMode] = useState(false) // looks like I am not using it,
   const [refundMode, setRefundMode] = useState(false)
 
+  const toggleNewInvoiceModal = () => {
+    if (newInvoiceModalOpen) {
+      setInvoiceIdx(-1)
+      setDeleteMode(false)
+      setRefundMode(false)
+    }
+    setNewInvoiceModalOpen(!newInvoiceModalOpen)
+  }
+
+  const toggleInvoiceDetailModal = () => {
+    if (invoiceDetailModalOpen) {
+      setInvoiceIdx(-1)
+      setDeleteMode(false)
+      setRefundMode(false)
+    }
+    setInvoiceDetailModalOpen(!invoiceDetailModalOpen)
+  }
   /*
   0: "Initiating", // this status only exist for a very short period, users/admin won't even know it exist
   1: "Pending", // admin manually create an invoice, ready for edit, but not published yet, users won't see it, won't receive email
@@ -150,7 +169,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
         _,
         invoice // use fn to generate these icons, only show available ones.
       ) => (
-        <Space size="middle">
+        <Space size="middle" className="invoice-action-btn-wrapper">
           <Tooltip title="Edit">
             <Button
               onClick={toggleNewInvoiceModal}
@@ -203,15 +222,6 @@ const Index = ({ user }: { user: IProfile | null }) => {
     toggleNewInvoiceModal()
   }
 
-  const toggleNewInvoiceModal = () => {
-    if (newInvoiceModal) {
-      setInvoiceIdx(-1)
-      setDeleteMode(false)
-      setRefundMode(false)
-    }
-    setNewInvoiceModal(!newInvoiceModal)
-  }
-
   const onPageChange = (page: number, pageSize: number) => {
     setPage(page - 1)
   }
@@ -243,9 +253,11 @@ const Index = ({ user }: { user: IProfile | null }) => {
     }
   }
 
+  /*
   useEffect(() => {
     fetchData()
   }, [])
+  */
 
   useEffect(() => {
     fetchData()
@@ -253,8 +265,8 @@ const Index = ({ user }: { user: IProfile | null }) => {
 
   return (
     <div>
-      {newInvoiceModal && (
-        <InvoiceModal
+      {newInvoiceModalOpen && (
+        <NewInvoiceModal
           isOpen={true}
           refundMode={refundMode}
           detail={invoiceIdx == -1 ? null : invoiceList[invoiceIdx]}
@@ -264,6 +276,13 @@ const Index = ({ user }: { user: IProfile | null }) => {
           user={user}
           closeModal={toggleNewInvoiceModal}
           refresh={fetchData}
+        />
+      )}
+      {invoiceDetailModalOpen && (
+        <InvoiceDetailModal
+          detail={invoiceList[invoiceIdx]}
+          user={user}
+          closeModal={toggleInvoiceDetailModal}
         />
       )}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -278,14 +297,14 @@ const Index = ({ user }: { user: IProfile | null }) => {
             return {
               onClick: (event) => {
                 setInvoiceIdx(rowIndex as number)
-                toggleNewInvoiceModal()
-              },
-              // onDoubleClick: (event) => {}, // double click row
-              onContextMenu: (event) => {
-                console.log('r click evt: ', event)
-              } // right button click row
-              // onMouseEnter: (event) => {}, // mouse enter row
-              // onMouseLeave: (event) => {}, // mouse leave row
+                if (
+                  event.target instanceof Element &&
+                  event.target.closest('.invoice-action-btn-wrapper') == null
+                ) {
+                  toggleInvoiceDetailModal()
+                  return
+                }
+              }
             }
           }}
           loading={{

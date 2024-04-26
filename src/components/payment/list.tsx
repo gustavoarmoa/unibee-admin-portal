@@ -11,6 +11,7 @@ import { getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { PaymentItem } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
+import RefundModal from './refundModal'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
@@ -21,6 +22,9 @@ const Index = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [paymentList, setPaymentList] = useState<PaymentItem[]>([])
+  const [paymentIdx, setPaymentIdx] = useState(-1)
+  const [refundModalOpen, setRefundModalOpen] = useState(false)
+  const toggleRefundModal = () => setRefundModalOpen(!refundModalOpen)
 
   const columns: ColumnsType<PaymentItem> = [
     {
@@ -51,7 +55,24 @@ const Index = () => {
       title: 'Type',
       dataIndex: 'timelineType',
       key: 'timelineType',
-      render: (s) => <span>{PAYMENT_TYPE[s as keyof typeof PAYMENT_TYPE]}</span>
+      render: (s) => {
+        const title = PAYMENT_TYPE[s as keyof typeof PAYMENT_TYPE]
+        if (s == 1) {
+          // refund
+          return (
+            <Button
+              type="link"
+              style={{ padding: 0 }}
+              className="btn-refunded-payment"
+            >
+              {title}
+            </Button>
+          )
+        } else if (s == 0) {
+          // regular payment
+          return title
+        }
+      }
     },
     {
       title: 'Sub Id',
@@ -127,7 +148,12 @@ const Index = () => {
   return (
     <div>
       {/* <Search form={form} goSearch={fetchData} searching={loading} /> */}
-
+      {refundModalOpen && (
+        <RefundModal
+          closeModal={toggleRefundModal}
+          detail={paymentList[paymentIdx].refund!}
+        />
+      )}
       <Table
         columns={columns}
         dataSource={paymentList}
@@ -137,6 +163,20 @@ const Index = () => {
         loading={{
           spinning: loading,
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+        }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {
+              if (
+                event.target instanceof Element &&
+                event.target.closest('.btn-refunded-payment') != null
+              ) {
+                setPaymentIdx(rowIndex as number)
+                toggleRefundModal()
+                return
+              }
+            }
+          }
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">

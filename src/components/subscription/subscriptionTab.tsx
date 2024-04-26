@@ -953,13 +953,15 @@ const SubTimeline = ({
     setPage(page - 1)
   }
 
+  /*
   useEffect(() => {
     fetchTimeline()
   }, [page])
+  */
 
   useEffect(() => {
     fetchTimeline()
-  }, [userId])
+  }, [userId, page])
 
   useEffect(() => {
     if (testClock == null || testClock <= 0) {

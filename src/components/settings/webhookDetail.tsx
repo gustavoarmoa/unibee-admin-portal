@@ -23,10 +23,9 @@ const Index = ({
   const [eventList, setEventList] = useState<string[]>([]) // this is to populate the event <Select />, not used for update.
 
   const onConfirm = async () => {
-    console.log('form v: ', form.getFieldsValue())
+    // console.log('form v: ', form.getFieldsValue())
     setSubmitting(true)
     const [res, err] = await saveWebhookReq(form.getFieldsValue())
-    console.log('save webhook res: ', res, '//', err)
     if (err != null) {
       setSubmitting(false)
       message.error(err.message)
@@ -43,7 +42,6 @@ const Index = ({
     }
     setSubmitting(true)
     const [res, err] = await deleteWebhookReq(detail?.id)
-    console.log('delete webhook res: ', res, '//', err)
     if (err != null) {
       setSubmitting(false)
       message.error(err.message)
@@ -71,8 +69,6 @@ const Index = ({
   useEffect(() => {
     fetchEventList()
   }, [])
-
-  console.log('webhook detail: ', detail)
 
   return (
     <Modal open={true} footer={null} title="Webhook Detail" closeIcon={null}>

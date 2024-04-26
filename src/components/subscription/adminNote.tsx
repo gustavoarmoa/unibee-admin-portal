@@ -70,6 +70,7 @@ const Index = ({
   useEffect(() => {
     fetchData()
   }, [])
+
   return (
     <div
       id="admin-note-wrapper"

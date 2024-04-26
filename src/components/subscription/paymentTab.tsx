@@ -25,7 +25,7 @@ import {
   MoneyCollectOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { CURRENCY, INVOICE_STATUS,PAYMENT_TYPE } from '../../constants'
+import { CURRENCY, INVOICE_STATUS, PAYMENT_TYPE } from '../../constants'
 import { showAmount } from '../../helpers'
 import { downloadInvoice, getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
@@ -163,9 +163,11 @@ const Index = ({ user }: { user: IProfile | null }) => {
     setPaymentList(invoices)
   }
 
+  /*
   useEffect(() => {
     fetchData()
   }, [])
+  */
 
   useEffect(() => {
     fetchData()
