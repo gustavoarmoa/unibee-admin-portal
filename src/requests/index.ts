@@ -958,10 +958,47 @@ export const getDiscountCodeListReq = async (refreshCb: () => void) => {
   }
 }
 
-export const getDiscountCodeDetailReq = async (
+const getDiscountCodeDetailReq = async (codeId: number) => {
+  try {
+    const res = await request.get(`/merchant/discount/detail?id=${codeId}`)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [res.data.data.discount, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getDiscountCodeDetailWithMore = async (
   codeId: number,
   refreshCb: () => void
 ) => {
+  const [[discount, errDiscount], [planList, errPlanList]] = await Promise.all([
+    getDiscountCodeDetailReq(codeId),
+    getPlanList(
+      {
+        type: [1], // main plan
+        status: [2], // active
+        page: 0,
+        count: 100
+      },
+      null
+    )
+  ])
+
+  const err = errDiscount || errPlanList
+  if (null != err) {
+    if (err instanceof ExpiredError) {
+      session.setSession({ expired: true, refresh: refreshCb })
+    }
+    return [null, err]
+  }
+
+  return [{ discount, planList }, null]
+
   try {
     const res = await request.get(`/merchant/discount/detail?id=${codeId}`)
     if (res.data.code == 61) {

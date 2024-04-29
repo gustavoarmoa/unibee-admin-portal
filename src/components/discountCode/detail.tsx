@@ -10,18 +10,24 @@ import {
   message
 } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
-import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
+import React, {
+  CSSProperties,
+  ReactElement,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CURRENCY, DISCOUNT_CODE_STATUS, INVOICE_STATUS } from '../../constants'
+import { CURRENCY, DISCOUNT_CODE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
 import {
   createDiscountCodeReq,
   deleteDiscountCodeReq,
-  getDiscountCodeDetailReq,
+  getDiscountCodeDetailWithMore,
   toggleDiscountCodeActivateReq,
   updateDiscountCodeReq
 } from '../../requests'
-import { DiscountCode, IProfile } from '../../shared.types.d'
+import { DiscountCode, IPlan } from '../../shared.types.d'
 import { useAppConfigStore, useMerchantInfoStore } from '../../stores'
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
@@ -56,11 +62,14 @@ const Index = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [code, setCode] = useState<DiscountCode | null>(isNew ? NEW_CODE : null)
+  const [planList, setPlanList] = useState<IPlan[]>([])
+  const planListRef = useRef<IPlan[]>([])
   const [form] = Form.useForm()
 
   const watchDiscountType = Form.useWatch('discountType', form)
   const watchBillingType = Form.useWatch('billingType', form)
   const watchCurrency = Form.useWatch('currency', form)
+  const watchPlanIds = Form.useWatch('planIds', form)
 
   const goBack = () => navigate(`${APP_PATH}discount-code/list`)
 
@@ -73,26 +82,30 @@ const Index = () => {
       return
     }
     setLoading(true)
-    const [code, err] = await getDiscountCodeDetailReq(codeNum, fetchData)
+    const [res, err] = await getDiscountCodeDetailWithMore(codeNum, fetchData)
     setLoading(false)
     if (null != err) {
       message.error(err.message)
       return
     }
+    const { discount, planList } = res
+    console.log('code/plan: ', discount, '//', planList)
+    setPlanList(planList == null ? [] : planList.map((p: any) => p.plan))
+    planListRef.current =
+      planList == null ? [] : planList.map((p: any) => p.plan)
 
-    code.validityRange = [
-      dayjs(code.startTime * 1000),
-      dayjs(code.endTime * 1000)
+    discount.validityRange = [
+      dayjs(discount.startTime * 1000),
+      dayjs(discount.endTime * 1000)
     ]
-    if (code.discountType == 2) {
+    if (discount.discountType == 2) {
       // fixed amount
-      code.discountAmount /= CURRENCY[code.currency].stripe_factor
-    } else if (code.discountType == 1) {
+      discount.discountAmount /= CURRENCY[discount.currency].stripe_factor
+    } else if (discount.discountType == 1) {
       // percentage
-      code.discountPercentage /= 100
+      discount.discountPercentage /= 100
     }
-    console.log('code detail: ', code)
-    setCode(code)
+    setCode(discount)
   }
 
   const onSave = async () => {
@@ -181,6 +194,14 @@ const Index = () => {
     return false
   }
 
+  const getPlanLabel = (planId: number) => {
+    const p = planListRef.current.find((p) => p.id == planId)
+    if (null == p) {
+      return ''
+    }
+    return `${p.planName} (${showAmount(p.amount, p.currency)}/${p.intervalCount == 1 ? '' : p.intervalCount}${p.intervalUnit})`
+  }
+
   useEffect(() => {
     if (isNew) {
       return
@@ -194,6 +215,15 @@ const Index = () => {
       form.setFieldValue('cycleLimit', 1)
     }
   }, [watchBillingType])
+
+  useEffect(() => {
+    if (watchDiscountType == 2) {
+      // fixed amt
+      setPlanList(
+        planListRef.current.filter((p) => p.currency == watchCurrency)
+      )
+    }
+  }, [watchDiscountType, watchCurrency])
 
   return (
     <div>
@@ -437,6 +467,41 @@ const Index = () => {
             ]}
           >
             <RangePicker showTime />
+          </Form.Item>
+
+          <Form.Item
+            label="Apply to which plans"
+            name="planIds"
+            rules={[
+              {
+                required: watchPlanIds != null && watchPlanIds.length > 0
+              },
+              ({ getFieldValue }) => ({
+                validator(rule, plans) {
+                  if (plans == null || plans.length == 0) {
+                    return Promise.resolve()
+                  }
+                  for (let i = 0; i < plans.length; i++) {
+                    if (planList.findIndex((p) => p.id == plans[i]) == -1) {
+                      return Promise.reject(
+                        `${getPlanLabel(plans[i])} doesn't exist in plan list, please remove it.`
+                      )
+                    }
+                  }
+                  return Promise.resolve()
+                }
+              })
+            ]}
+          >
+            <Select
+              mode="multiple"
+              allowClear
+              style={{ width: '100%' }}
+              options={planList.map((p) => ({
+                label: getPlanLabel(p.id),
+                value: p.id
+              }))}
+            />
           </Form.Item>
         </Form>
       )}
