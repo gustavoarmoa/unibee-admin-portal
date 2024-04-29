@@ -85,7 +85,7 @@ const Index = () => {
         fullscreen
       />
       <Divider orientation="left" style={{ margin: '16px 0' }}>
-        Subscription
+        Current Subscription
       </Divider>
 
       <Row style={rowStyle}>
