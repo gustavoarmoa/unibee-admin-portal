@@ -80,7 +80,7 @@ const Index = ({
     localStorage.setItem('merchantToken', token)
     merchantMember.token = token
     profileStore.setProfile(merchantMember)
-    sessionStore.setSession({ expired: false, refresh: null })
+    // sessionStore.setSession({ expired: false, refresh: null })
 
     const [initRes, errInit] = await initializeReq()
     setSubmitting(false)
@@ -100,8 +100,10 @@ const Index = ({
 
     if (triggeredByExpired) {
       sessionStore.refresh && sessionStore.refresh()
+      sessionStore.setSession({ expired: false, refresh: null })
       message.success('Login succeeded')
     } else {
+      sessionStore.setSession({ expired: false, refresh: null })
       navigate(`${APP_PATH}subscription/list`)
     }
   }

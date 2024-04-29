@@ -22,6 +22,7 @@ import { usePagination } from '../../hooks'
 import { getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { UserInvoice } from '../../shared.types.d'
+import RefundModal from '../payment/refundModal'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
@@ -32,6 +33,9 @@ const Index = () => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
+  const [refundModalOpen, setRefundModalOpen] = useState(false)
+  const [invoiceIdx, setInvoiceIdx] = useState(-1)
+  const toggleRefundModal = () => setRefundModalOpen(!refundModalOpen)
 
   const columns: ColumnsType<UserInvoice> = [
     {
@@ -61,6 +65,24 @@ const Index = () => {
       render: (s, iv) => (
         <span>{INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]}</span>
       )
+    },
+    {
+      title: 'Is refund',
+      dataIndex: 'refund',
+      key: 'refund',
+      render: (refund, iv) =>
+        refund == null ? (
+          'No'
+        ) : (
+          <Button
+            type="link"
+            size="small"
+            className="btn-refund-modal-wrapper"
+            style={{ padding: 0 }}
+          >
+            Yes
+          </Button>
+        )
     },
     {
       title: 'Start',
@@ -141,6 +163,12 @@ const Index = () => {
   return (
     <div>
       <Search form={form} goSearch={fetchData} searching={loading} />
+      {refundModalOpen && invoiceList[invoiceIdx].refund != null && (
+        <RefundModal
+          detail={invoiceList[invoiceIdx].refund!}
+          closeModal={toggleRefundModal}
+        />
+      )}
       <Table
         columns={columns}
         dataSource={invoiceList}
@@ -154,6 +182,14 @@ const Index = () => {
         onRow={(iv, rowIndex) => {
           return {
             onClick: (evt) => {
+              if (
+                evt.target instanceof Element &&
+                evt.target.closest('.btn-refund-modal-wrapper') != null
+              ) {
+                setInvoiceIdx(rowIndex as number)
+                toggleRefundModal()
+                return
+              }
               navigate(`${APP_PATH}invoice/${iv.invoiceId}`)
             }
           }

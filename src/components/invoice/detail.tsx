@@ -7,6 +7,7 @@ import { showAmount } from '../../helpers'
 import { getInvoiceDetailReq } from '../../requests'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
+import RefundModal from '../payment/refundModal'
 import InvoiceItemsModal from '../subscription/modals/newInvoice'
 
 const invoicePerm: TInvoicePerm = {
@@ -37,6 +38,8 @@ const Index = () => {
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
   const [showInvoiceItems, setShowInvoiceItems] = useState(false)
   const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems)
+  const [refundModalOpen, setRefundModalOpen] = useState(false)
+  const toggleRefundModal = () => setRefundModalOpen(!refundModalOpen)
 
   const goBack = () => navigate(`${APP_PATH}invoice/list`)
   const goToUser = (userId: number) => () =>
@@ -87,6 +90,12 @@ const Index = () => {
           permission={invoicePerm}
         />
       )}
+      {invoiceDetail && refundModalOpen && (
+        <RefundModal
+          detail={invoiceDetail.refund!}
+          closeModal={toggleRefundModal}
+        />
+      )}
 
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
@@ -130,7 +139,36 @@ const Index = () => {
         <Col span={6}>
           <Button onClick={toggleInvoiceItems}>Show Detail</Button>
         </Col>
+        <Col span={4} style={colStyle}>
+          Refund
+        </Col>
+        <Col span={6}>
+          {invoiceDetail?.refund == null ? (
+            'No'
+          ) : (
+            <>
+              <span>
+                {showAmount(
+                  invoiceDetail.refund.refundAmount,
+                  invoiceDetail.refund.currency
+                )}
+              </span>
+              &nbsp;&nbsp;
+              <Button onClick={toggleRefundModal}>Show Detail</Button>
+            </>
+          )}
+        </Col>
+      </Row>
 
+      <Row style={rowStyle} gutter={[16, 16]}>
+        <Col span={4} style={colStyle}>
+          Discount Amount
+        </Col>
+        <Col span={6}>
+          {invoiceDetail?.discountAmount != null
+            ? showAmount(invoiceDetail?.discountAmount, invoiceDetail.currency)
+            : 'N/A'}
+        </Col>
         <Col span={4} style={colStyle}>
           Subscription Id
         </Col>
@@ -149,6 +187,7 @@ const Index = () => {
           )}
         </Col>
       </Row>
+
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
           Payment Gateway

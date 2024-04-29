@@ -1,27 +1,8 @@
-import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Col, Divider, Input, Modal, Row, Select, message } from 'antd'
+// import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Col, Modal, Row } from 'antd'
 import dayjs from 'dayjs'
-import update from 'immutability-helper'
-import { useState } from 'react'
-import { CURRENCY } from '../../constants'
-import { daysBetweenDate, ramdonString, showAmount } from '../../helpers'
-import {
-  createInvoiceReq,
-  deleteInvoiceReq,
-  publishInvoiceReq,
-  refundReq,
-  revokeInvoiceReq,
-  saveInvoiceReq,
-  sendInvoiceInMailReq
-} from '../../requests'
-import {
-  IProfile,
-  ISubscriptionType,
-  InvoiceItem,
-  TInvoicePerm,
-  TRefund,
-  UserInvoice
-} from '../../shared.types'
+import { showAmount } from '../../helpers'
+import { TRefund } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
 
 interface Props {
@@ -31,18 +12,6 @@ interface Props {
 
 const Index = ({ detail, closeModal }: Props) => {
   const appConfigStore = useAppConfigStore()
-  console.log('refund detai: ', detail)
-
-  const getUserName = (iv: UserInvoice) => {
-    if (iv.userAccount == null) {
-      return ''
-    }
-    return (
-      <a
-        href={`mailto: ${iv.userAccount.email}`}
-      >{`${iv.userAccount.firstName} ${iv.userAccount.lastName}`}</a>
-    )
-  }
 
   return (
     <Modal
