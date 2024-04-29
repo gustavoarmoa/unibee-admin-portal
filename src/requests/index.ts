@@ -571,6 +571,22 @@ export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
 }
 // ------------
 
+export const getSubByUserReq = async (userId: number) => {
+  try {
+    const res = await request.get(
+      `/merchant/subscription/user_subscription_detail?userId=${userId}`
+    )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const getSubDetail = async (subscriptionId: string) => {
   try {
     const res = await request.post(`/merchant/subscription/detail`, {
