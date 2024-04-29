@@ -276,6 +276,7 @@ interface UserInvoice {
   refundId: string
   refund?: TRefund //
   userAccount: IProfile
+  subscription?: ISubscriptionType
 }
 
 type TInvoicePerm = {

@@ -162,6 +162,17 @@ const Index = () => {
 
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
+          Payment type
+        </Col>
+        <Col span={6}>
+          {invoiceDetail?.subscription != null ? 'Recurring' : 'One-time'}
+        </Col>
+        <Col span={4} style={colStyle}></Col>
+        <Col span={6}></Col>
+      </Row>
+
+      <Row style={rowStyle} gutter={[16, 16]}>
+        <Col span={4} style={colStyle}>
           Discount Amount
         </Col>
         <Col span={6}>
