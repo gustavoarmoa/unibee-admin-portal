@@ -85,7 +85,13 @@ const Index = () => {
         )
     },
     {
-      title: 'Start',
+      title: 'Payment Type',
+      dataIndex: 'subscription',
+      key: 'subscription',
+      render: (s, iv) => <span>{s == null ? 'One-time' : 'Recurring'}</span>
+    },
+    {
+      title: 'Issue date',
       dataIndex: 'periodStart',
       key: 'periodStart',
       render: (d, plan) =>
