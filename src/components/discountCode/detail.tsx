@@ -10,13 +10,7 @@ import {
   message
 } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
-import React, {
-  CSSProperties,
-  ReactElement,
-  useEffect,
-  useRef,
-  useState
-} from 'react'
+import React, { ReactElement, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY, DISCOUNT_CODE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
@@ -29,10 +23,9 @@ import {
   updateDiscountCodeReq
 } from '../../requests'
 import { DiscountCode, IPlan } from '../../shared.types.d'
-import { useAppConfigStore, useMerchantInfoStore } from '../../stores'
+import { useMerchantInfoStore } from '../../stores'
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
-const API_URL = import.meta.env.VITE_API_URL
 const { RangePicker } = DatePicker
 const STATUS: { [key: number]: ReactElement } = {
   1: <Tag color="blue">{DISCOUNT_CODE_STATUS[1]}</Tag>,
@@ -75,6 +68,7 @@ const Index = () => {
 
   const goBack = () => navigate(`${APP_PATH}discount-code/list`)
 
+  // for editing code, need to fetch code detail and planList
   const fetchData = async () => {
     const pathName = window.location.pathname.split('/')
     const codeId = pathName.pop()
@@ -91,8 +85,15 @@ const Index = () => {
       return
     }
     const { discount, planList } = res
-    console.log('code/plan: ', discount, '//', planList)
-    setPlanList(planList == null ? [] : planList.map((p: any) => p.plan))
+    // console.log('code/plan: ', discount, '//', planList)
+
+    // if discount.currency is EUR, and discountType == 2(fixed amt), then filter the planList to contain only euro plans
+    let plans = planList == null ? [] : planList.map((p: any) => p.plan)
+    if (discount.discountType == 2) {
+      // fixed amt
+      plans = plans.filter((p: IPlan) => p.currency == discount.currency)
+    }
+    setPlanList(plans)
     planListRef.current =
       planList == null ? [] : planList.map((p: any) => p.plan)
 
@@ -110,6 +111,7 @@ const Index = () => {
     setCode(discount)
   }
 
+  // for creating new code, there is no codeDetail to fetch.
   const fetchPlans = async () => {
     setLoading(true)
     const [planList, err] = await getPlanList(
@@ -126,14 +128,20 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    setPlanList(planList == null ? [] : planList.map((p: any) => p.plan))
+    // if NEW_CODE.currency is EUR, and discountType == 2(fixed amt), then filter the planList to contain only euro plans
+    let plans = planList == null ? [] : planList.map((p: any) => p.plan)
+    if (NEW_CODE.discountType == 2) {
+      // fixed amt
+      plans = plans.filter((p: IPlan) => p.currency == NEW_CODE.currency)
+    }
+    setPlanList(plans)
     planListRef.current =
       planList == null ? [] : planList.map((p: any) => p.plan)
   }
 
   const onSave = async () => {
     const body = form.getFieldsValue()
-    console.log('form val: ', body)
+    // console.log('form val: ', body)
     const code = JSON.parse(JSON.stringify(body))
     const r = form.getFieldValue('validityRange') as [Dayjs, Dayjs]
     code.startTime = r[0].unix()
@@ -153,7 +161,7 @@ const Index = () => {
       code.discountAmount *= CURRENCY[code.currency].stripe_factor
     }
 
-    console.log('sumbtting: ', code)
+    // console.log('sumbtting: ', code)
     // return
     const method = isNew ? createDiscountCodeReq : updateDiscountCodeReq
     setLoading(true)
