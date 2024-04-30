@@ -349,9 +349,10 @@ export const saveSendGridKeyReq = async (vatKey: string) => {
   }
 }
 // ---------------
-type TPlanListBody = {
+export type TPlanListBody = {
   type?: number[] | null
   status?: number[] | null
+  publishStatus?: number // 1-UnPublished，2-Published
   page: number
   count: number
 }
@@ -571,13 +572,16 @@ export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
 }
 // ------------
 
-export const getSubByUserReq = async (userId: number) => {
+export const getSubByUserReq = async (
+  userId: number,
+  refreshCb: () => void
+) => {
   try {
     const res = await request.get(
       `/merchant/subscription/user_subscription_detail?userId=${userId}`
     )
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null })
+      session.setSession({ expired: true, refresh: refreshCb })
       throw new Error('Session expired')
     }
     return [res.data.data, null]
@@ -689,6 +693,45 @@ export const updateSubscription = async (
       confirmTotalAmount,
       confirmCurrency,
       prorationDate
+    })
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+type TCreateSubReq = {
+  planId: number
+  gatewayId: number
+  userId: number
+  trialEnd?: number
+  addons?: { quantity: number; addonPlanId: number }[]
+  confirmTotalAmount?: number
+  confirmCurrency?: string
+}
+export const createSubscriptionReq = async ({
+  planId,
+  gatewayId,
+  userId,
+  trialEnd,
+  addons,
+  confirmCurrency,
+  confirmTotalAmount
+}: TCreateSubReq) => {
+  try {
+    const res = await request.post(`/merchant/subscription/create_submit`, {
+      planId,
+      gatewayId,
+      userId,
+      trialEnd,
+      quantity: 1,
+      addonParams: addons,
+      confirmTotalAmount,
+      confirmCurrency
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
