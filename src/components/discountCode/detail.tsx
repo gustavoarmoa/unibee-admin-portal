@@ -535,7 +535,11 @@ const Index = () => {
         </Form>
       )}
       <div className="flex justify-between">
-        <Button danger onClick={onDelete} disabled={isNew}>
+        <Button
+          danger
+          onClick={onDelete}
+          disabled={isNew || (code != null && code.status != 1)} // 1: editing
+        >
           Delete
         </Button>
 
