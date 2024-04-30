@@ -10,7 +10,7 @@ import {
   Tag
 } from 'antd'
 import update from 'immutability-helper'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   createSubscriptionReq,
   getPlanList,
@@ -89,7 +89,12 @@ const Index = ({ user, closeModal, refresh }: Props) => {
   }
 
   const onSubmit = async () => {
-    if (selectedPlan == null || gatewayId == undefined) {
+    if (selectedPlan == null) {
+      message.error('Please choose a plan')
+      return
+    }
+    if (gatewayId == undefined) {
+      message.error('Please choose a payment method')
       return
     }
     console.log('submitting: ', selectedPlan, '//', gatewayId, '//', user)
@@ -136,7 +141,6 @@ const Index = ({ user, closeModal, refresh }: Props) => {
       message.error(err.message)
       return
     }
-    console.log('planList: ', planList)
     if (planList == null) {
       return
     }
@@ -240,7 +244,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
           type="primary"
           onClick={onSubmit}
           loading={loading}
-          disabled={selectedPlan == null || loading}
+          disabled={loading}
         >
           OK
         </Button>

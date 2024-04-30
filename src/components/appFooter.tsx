@@ -5,6 +5,7 @@ import {
   TwitterOutlined
 } from '@ant-design/icons'
 import { Divider } from 'antd'
+import React from 'react'
 const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => (

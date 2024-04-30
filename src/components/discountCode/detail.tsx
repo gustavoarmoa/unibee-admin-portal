@@ -24,6 +24,7 @@ import {
   createDiscountCodeReq,
   deleteDiscountCodeReq,
   getDiscountCodeDetailWithMore,
+  getPlanList,
   toggleDiscountCodeActivateReq,
   updateDiscountCodeReq
 } from '../../requests'
@@ -52,7 +53,8 @@ const NEW_CODE: DiscountCode = {
   cycleLimit: 1,
   startTime: 0,
   endTime: 0,
-  validityRange: [null, null]
+  validityRange: [null, null],
+  planIds: []
 }
 
 const Index = () => {
@@ -106,6 +108,27 @@ const Index = () => {
       discount.discountPercentage /= 100
     }
     setCode(discount)
+  }
+
+  const fetchPlans = async () => {
+    setLoading(true)
+    const [planList, err] = await getPlanList(
+      {
+        type: [1], // main plan
+        status: [2], // active
+        page: 0,
+        count: 100
+      },
+      fetchPlans
+    )
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    setPlanList(planList == null ? [] : planList.map((p: any) => p.plan))
+    planListRef.current =
+      planList == null ? [] : planList.map((p: any) => p.plan)
   }
 
   const onSave = async () => {
@@ -204,9 +227,10 @@ const Index = () => {
 
   useEffect(() => {
     if (isNew) {
-      return
+      fetchPlans()
+    } else {
+      fetchData()
     }
-    fetchData()
   }, [])
 
   useEffect(() => {
@@ -454,12 +478,9 @@ const Index = () => {
                     return Promise.reject('Please select a valid date range.')
                   }
                   const d = new Date()
-                  d.setUTCHours(0, 0, 0, 0)
                   const sec = Math.round(d.getTime() / 1000)
-                  if (value[0].unix() < sec) {
-                    return Promise.reject(
-                      'Start date must be greater than now.'
-                    )
+                  if (value[1].unix() < sec) {
+                    return Promise.reject('End date must be greater than now.')
                   }
                   return Promise.resolve()
                 }
