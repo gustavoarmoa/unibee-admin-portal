@@ -33,7 +33,7 @@ export const currencyDecimalValidate = (val: number, currency: string) => {
   if (CURRENCY[currency].decimal_places == null) {
     return true
   }
-  return CURRENCY[currency].decimal_places >= decimalCnt
+  return CURRENCY[currency]!.decimal_places! >= decimalCnt
 }
 
 export const toFixedNumber = (num: number, digits: number, base?: number) => {
