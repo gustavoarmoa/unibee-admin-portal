@@ -25,6 +25,22 @@ export const daysBetweenDate = (
   return Math.ceil(Math.abs((d1 - d2) / (1000 * 60 * 60 * 24)))
 }
 
+export const currencyDecimalValidate = (val: number, currency: string) => {
+  if (Number.isInteger(val)) {
+    return true
+  }
+  const decimalCnt = val.toString().split('.')[1].length
+  if (CURRENCY[currency].decimal_places == null) {
+    return true
+  }
+  return CURRENCY[currency].decimal_places >= decimalCnt
+}
+
+export const toFixedNumber = (num: number, digits: number, base?: number) => {
+  const pow = Math.pow(base ?? 10, digits)
+  return Math.round(num * pow) / pow
+}
+
 export const ramdonString = (length: number | null) => {
   if (length == null || length <= 0) {
     length = 8

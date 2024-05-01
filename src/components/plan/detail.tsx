@@ -20,7 +20,11 @@ import update from 'immutability-helper'
 import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY, PLAN_STATUS } from '../../constants'
-import { ramdonString } from '../../helpers'
+import {
+  currencyDecimalValidate,
+  ramdonString,
+  toFixedNumber
+} from '../../helpers'
 import {
   activatePlan,
   getPlanDetailWithMore,
@@ -199,7 +203,7 @@ const Index = () => {
   const selectAfter = (
     <Select
       value={trialLengthUnit}
-      style={{ width: 140 }}
+      style={{ width: 150 }}
       onChange={onTrialLengthUnitChange}
       disabled={!enableTrialWatch}
     >
@@ -241,6 +245,7 @@ const Index = () => {
     const f = JSON.parse(JSON.stringify(values))
     f.amount = Number(f.amount)
     f.amount *= CURRENCY[f.currency].stripe_factor
+    f.amount = toFixedNumber(f.amount, 2)
     f.intervalCount = Number(f.intervalCount)
 
     /*
@@ -260,6 +265,7 @@ const Index = () => {
     } else {
       f.trialAmount = Number(f.trialAmount)
       f.trialAmount *= CURRENCY[f.currency].stripe_factor
+      f.trialAmount = toFixedNumber(f.trialAmount, 2)
       f.trialDurationTime = Number(f.trialDurationTime)
       f.trialDurationTime = unitToSeconds(
         f.trialDurationTime,
@@ -570,11 +576,26 @@ const Index = () => {
           <Form.Item
             label="Price"
             name="amount"
+            dependencies={['currency']}
             rules={[
               {
                 required: true,
                 message: 'Please input your plan price!'
-              }
+              },
+              ({ getFieldValue }) => ({
+                validator(rule, value) {
+                  const num = Number(value)
+                  if (isNaN(num) || num < 0) {
+                    return Promise.reject(`Please input a valid price (> 0).`)
+                  }
+                  if (
+                    !currencyDecimalValidate(num, getFieldValue('currency'))
+                  ) {
+                    return Promise.reject('Please input a valid price')
+                  }
+                  return Promise.resolve()
+                }
+              })
             ]}
           >
             <Input
@@ -671,7 +692,7 @@ const Index = () => {
           <Form.Item
             label="Trial Price"
             name="trialAmount"
-            dependencies={['amount']}
+            dependencies={['amount', 'currency']}
             rules={[
               {
                 required: enableTrialWatch,
@@ -688,6 +709,11 @@ const Index = () => {
                     return Promise.reject(
                       `Please input a valid price (>= 0 and < plan price ${getFieldValue('amount')}).`
                     )
+                  }
+                  if (
+                    !currencyDecimalValidate(num, getFieldValue('currency'))
+                  ) {
+                    return Promise.reject('Please input a valid price')
                   }
                   return Promise.resolve()
                 }

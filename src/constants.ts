@@ -22,14 +22,18 @@ export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
 }
 
 export const CURRENCY: {
-  [key: string]: { symbol: string; stripe_factor: number }
+  [key: string]: {
+    symbol: string
+    stripe_factor: number
+    decimal_places: number | null
+  }
 } = {
   // what about PayPal
-  CNY: { symbol: '¥', stripe_factor: 100 },
-  USD: { symbol: '$', stripe_factor: 100 },
-  JPY: { symbol: '¥', stripe_factor: 1 },
-  EUR: { symbol: '€', stripe_factor: 100 },
-  USDT: { symbol: '₮', stripe_factor: 100 }
+  CNY: { symbol: '¥', stripe_factor: 100, decimal_places: 2 },
+  USD: { symbol: '$', stripe_factor: 100, decimal_places: 2 },
+  JPY: { symbol: '¥', stripe_factor: 1, decimal_places: 0 },
+  EUR: { symbol: '€', stripe_factor: 100, decimal_places: 2 },
+  USDT: { symbol: '₮', stripe_factor: 100, decimal_places: null }
 }
 
 export const INVOICE_STATUS: { [key: number]: string } = {
