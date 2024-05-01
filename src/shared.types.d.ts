@@ -235,6 +235,7 @@ type TRefund = {
   refundAmount: number
   refundComment: string
   refundTime: number
+  createTime: number
   status: number // 10-pending，20-success，30-failure, 40-cancel
   gatewayId: number
   paymentId: string

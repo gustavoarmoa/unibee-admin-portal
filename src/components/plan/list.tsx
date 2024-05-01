@@ -7,7 +7,7 @@ import { Button, Pagination, Space, Table, Tag, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
-import { ReactElement, useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
@@ -211,7 +211,6 @@ const Index = () => {
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
-              console.log('row click: ', record, '///', rowIndex)
               navigate(`${APP_PATH}plan/${record.id}`)
             }
           }

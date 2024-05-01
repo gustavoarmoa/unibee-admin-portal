@@ -1,6 +1,7 @@
 // import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Modal, Row } from 'antd'
 import dayjs from 'dayjs'
+import React from 'react'
 import { showAmount } from '../../helpers'
 import { TRefund } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
@@ -75,10 +76,10 @@ const Index = ({ detail, closeModal }: Props) => {
           style={{ fontWeight: 'bold' }}
           className=" text-gray-600"
         >
-          Created at
+          Refund at
         </Col>
         <Col span={14}>
-          {dayjs(detail.refundTime * 1000).format('YYYY-MMM-DD')}
+          {dayjs(detail.createTime * 1000).format('YYYY-MMM-DD')}
         </Col>
       </Row>
 

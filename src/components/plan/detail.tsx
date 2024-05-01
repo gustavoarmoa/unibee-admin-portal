@@ -249,19 +249,18 @@ const Index = () => {
     f.intervalCount = Number(f.intervalCount)
 
     /*
-      enableTrial?: boolean
-  trialAmount?: number
-  trialDurationTime?: number
-  trialDemand?: 'paymentMethod' | '' | boolean // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UX, front-end use <Switch />
-  cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
+enableTrial?: boolean
+trialAmount?: number
+trialDurationTime?: number
+trialDemand?: 'paymentMethod' | '' | boolean // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UX, front-end use <Switch />
+cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
 
     */
     if (!f.enableTrial) {
-      delete f.trialAmount
-      delete f.trialDurationTime
-      delete f.trialDemand
-      delete f.cancelAtTrialEnd
-      delete f.enableTrial
+      f.trialAmount = 0
+      f.trialDurationTime = 0
+      f.trialDemand = ''
+      f.cancelAtTrialEnd = 0
     } else {
       f.trialAmount = Number(f.trialAmount)
       f.trialAmount *= CURRENCY[f.currency].stripe_factor
@@ -379,7 +378,8 @@ const Index = () => {
     planDetail.plan.metadata = obj2array(planDetail.plan.metadata)
 
     const trialAmount = Number(planDetail.plan.trialAmount)
-    if (!isNaN(trialAmount)) {
+    const trialDurationTime = Number(planDetail.plan.trialDurationTime)
+    if (!isNaN(trialDurationTime) && trialDurationTime > 0) {
       planDetail.plan.enableTrial = true
       planDetail.plan.trialAmount = getAmount(
         trialAmount,
@@ -389,9 +389,17 @@ const Index = () => {
       planDetail.plan.trialDurationTime = val
       setTrialLengthUnit(unit)
       //  trialDemand?: 'paymentMethod' | '' | boolean // backe
-      planDetail.plan.trialDemand == 'paymentMethod' ? true : false
+      planDetail.plan.trialDemand =
+        planDetail.plan.trialDemand == 'paymentMethod' ? true : false
       //   cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
-      planDetail.plan.cancelAtTrialEnd == 1 ? true : false
+      planDetail.plan.cancelAtTrialEnd =
+        planDetail.plan.cancelAtTrialEnd == 1 ? true : false
+    } else {
+      planDetail.plan.enableTrial = false
+      planDetail.plan.trialAmount = 0
+      planDetail.plan.trialDurationTime = 0
+      planDetail.plan.trialDemand = false
+      planDetail.plan.cancelAtTrialEnd = false
     }
 
     setPlan(planDetail.plan)
@@ -685,7 +693,7 @@ const Index = () => {
             </Form.Item>
           )}
 
-          <Form.Item label="Enable Trial" name="enableTrial">
+          <Form.Item label="Allow Trial" name="enableTrial">
             <Switch />
           </Form.Item>
 
@@ -700,6 +708,9 @@ const Index = () => {
               },
               ({ getFieldValue }) => ({
                 validator(rule, value) {
+                  if (!enableTrialWatch) {
+                    return Promise.resolve()
+                  }
                   const num = Number(value)
                   const planPrice = Number(getFieldValue('amount'))
                   if (isNaN(planPrice)) {
@@ -739,6 +750,9 @@ const Index = () => {
               },
               ({ getFieldValue }) => ({
                 validator(rule, value) {
+                  if (!enableTrialWatch) {
+                    return Promise.resolve()
+                  }
                   const num = Number(value)
                   if (isNaN(num) || num <= 0) {
                     return Promise.reject('Invalid trial length (>0)')
