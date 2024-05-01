@@ -92,6 +92,11 @@ interface IPlan {
   createTime: number
   companyId: number
   merchantId: number
+  enableTrial?: boolean
+  trialAmount?: number
+  trialDurationTime?: number
+  trialDemand?: 'paymentMethod' | '' | boolean // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UX, front-end use <Switch />
+  cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
 }
 
 interface ISubAddon extends IPlan {

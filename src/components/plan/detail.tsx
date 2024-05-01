@@ -4,7 +4,18 @@ import {
   MinusOutlined,
   PlusOutlined
 } from '@ant-design/icons'
-import { Button, Col, Form, Input, Row, Select, Spin, Tag, message } from 'antd'
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Spin,
+  Switch,
+  Tag,
+  message
+} from 'antd'
 import update from 'immutability-helper'
 import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -29,6 +40,7 @@ type TMetricsItem = {
   metricLimit?: number | string
 }
 type TNewPlan = {
+  // why can't I use IPlan??????????
   currency: string
   intervalUnit: string
   intervalCount: number
@@ -45,6 +57,11 @@ type TNewPlan = {
     value: string
     valueType: TMetaValueType
   }[]
+  enableTrial?: boolean
+  trialAmount?: number
+  trialDurationTime?: number
+  trialDemand?: 'paymentMethod' | '' | boolean // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UI, front-end use <Switch />
+  cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UI, front-end use <Switch />
 }
 const NEW_PLAN: TNewPlan = {
   currency: 'EUR',
@@ -63,7 +80,12 @@ const NEW_PLAN: TNewPlan = {
     { property: 'trafficAmount', value: '1024', valueType: 'number' },
     { property: 'suspended', value: 'true', valueType: 'boolean' }
     */
-  ]
+  ],
+  enableTrial: false,
+  trialAmount: 0,
+  trialDurationTime: 0,
+  trialDemand: true, // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UI, front-end use <Switch />
+  cancelAtTrialEnd: true
 }
 
 const array2obj = (
@@ -109,12 +131,35 @@ const obj2array = (obj: { [key: string]: string | number | boolean }) => {
   return arr
 }
 
+const TIME_UNITS = [
+  // in seconds
+  { label: 'hours', value: 60 * 60 },
+  { label: 'days', value: 60 * 60 * 24 },
+  { label: 'weeks', value: 60 * 60 * 24 * 7 },
+  { label: 'months(30days)', value: 60 * 60 * 24 * 30 }
+]
+const secondsToUnit = (sec: number) => {
+  const units = [...TIME_UNITS].sort((a, b) => b.value - a.value)
+  for (let i = 0; i < units.length; i++) {
+    if (sec % units[i].value === 0) {
+      return [sec / units[i].value, units[i].value] // if sec is 60 * 60 * 24 * 30 * 3, then return [3, 60 * 60 * 24 * 30 * 3]
+    }
+  }
+  throw Error('Invalid time unit')
+}
+
+const unitToSeconds = (value: number, unit: number) => {
+  return value * unit
+}
+
 const STATUS: { [key: number]: ReactElement } = {
   1: <Tag color="blue">{PLAN_STATUS[1]}</Tag>,
   2: <Tag color="#87d068">{PLAN_STATUS[2]}</Tag>,
   3: <Tag color="purple">{PLAN_STATUS[3]}</Tag>,
   4: <Tag color="red">{PLAN_STATUS[4]}</Tag>
 }
+
+const { Option } = Select
 
 // this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
@@ -137,6 +182,9 @@ const Index = () => {
   const [selectedMetrics, setSelectedMetrics] = useState<TMetricsItem[]>([
     { localId: ramdonString(8) }
   ])
+  const [trialLengthUnit, setTrialLengthUnit] = useState(
+    TIME_UNITS.find((u) => u.label == 'days')?.value
+  ) // default unit is days
   const navigate = useNavigate()
   const [form] = Form.useForm()
 
@@ -144,8 +192,24 @@ const Index = () => {
   const itvCountUnit = Form.useWatch('intervalUnit', form)
   const addonCurrency = Form.useWatch('currency', form)
   const planTypeWatch = Form.useWatch('type', form)
-  // The selector is static and does not support closures.
-  // const customValue = Form.useWatch((values) => `name: ${values.itvCountValue || ''}`, form);
+  const enableTrialWatch = Form.useWatch('enableTrial', form)
+
+  const onTrialLengthUnitChange = (val: number) => setTrialLengthUnit(val)
+
+  const selectAfter = (
+    <Select
+      value={trialLengthUnit}
+      style={{ width: 140 }}
+      onChange={onTrialLengthUnitChange}
+      disabled={!enableTrialWatch}
+    >
+      {TIME_UNITS.map((u) => (
+        <Option key={u.label} value={u.value}>
+          {u.label}
+        </Option>
+      ))}
+    </Select>
+  )
 
   let addMetadata: (
     defaultValue?: any,
@@ -178,6 +242,34 @@ const Index = () => {
     f.amount = Number(f.amount)
     f.amount *= CURRENCY[f.currency].stripe_factor
     f.intervalCount = Number(f.intervalCount)
+
+    /*
+      enableTrial?: boolean
+  trialAmount?: number
+  trialDurationTime?: number
+  trialDemand?: 'paymentMethod' | '' | boolean // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UX, front-end use <Switch />
+  cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
+
+    */
+    if (!f.enableTrial) {
+      delete f.trialAmount
+      delete f.trialDurationTime
+      delete f.trialDemand
+      delete f.cancelAtTrialEnd
+      delete f.enableTrial
+    } else {
+      f.trialAmount = Number(f.trialAmount)
+      f.trialAmount *= CURRENCY[f.currency].stripe_factor
+      f.trialDurationTime = Number(f.trialDurationTime)
+      f.trialDurationTime = unitToSeconds(
+        f.trialDurationTime,
+        trialLengthUnit as number
+      )
+      f.trialDemand = f.trialDemand ? 'paymentMethod' : ''
+      f.cancelAtTrialEnd = f.cancelAtTrialEnd ? 1 : 0
+    }
+    delete f.enableTrial
+
     console.log('is new: ', isNew)
     if (!isNew) {
       f.planId = f.id
@@ -185,8 +277,7 @@ const Index = () => {
       delete f.status
       delete f.publishStatus
       delete f.type // once plan created, you cannot change its type(main plan, addon)
-    } // in editing mode, when can't I just disable the type.
-    console.log('plan type watch: ', planTypeWatch)
+    }
     if (planTypeWatch == 3) {
       // one-time payment plans don't have these props
       delete f.intervalCount
@@ -280,6 +371,23 @@ const Index = () => {
       planDetail.onetimeAddonIds == null ? [] : planDetail.onetimeAddonIds
 
     planDetail.plan.metadata = obj2array(planDetail.plan.metadata)
+
+    const trialAmount = Number(planDetail.plan.trialAmount)
+    if (!isNaN(trialAmount)) {
+      planDetail.plan.enableTrial = true
+      planDetail.plan.trialAmount = getAmount(
+        trialAmount,
+        planDetail.plan.currency
+      )
+      const [val, unit] = secondsToUnit(planDetail.plan.trialDurationTime)
+      planDetail.plan.trialDurationTime = val
+      setTrialLengthUnit(unit)
+      //  trialDemand?: 'paymentMethod' | '' | boolean // backe
+      planDetail.plan.trialDemand == 'paymentMethod' ? true : false
+      //   cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
+      planDetail.plan.cancelAtTrialEnd == 1 ? true : false
+    }
+
     setPlan(planDetail.plan)
     form.setFieldsValue(planDetail.plan)
 
@@ -555,6 +663,79 @@ const Index = () => {
               />
             </Form.Item>
           )}
+
+          <Form.Item label="Enable Trial" name="enableTrial">
+            <Switch />
+          </Form.Item>
+
+          <Form.Item
+            label="Trial Price"
+            name="trialAmount"
+            dependencies={['amount']}
+            rules={[
+              {
+                required: enableTrialWatch,
+                message: 'Please input your trial price!'
+              },
+              ({ getFieldValue }) => ({
+                validator(rule, value) {
+                  const num = Number(value)
+                  const planPrice = Number(getFieldValue('amount'))
+                  if (isNaN(planPrice)) {
+                    return Promise.reject('Invalid plan price')
+                  }
+                  if (isNaN(num) || num < 0 || num >= planPrice) {
+                    return Promise.reject(
+                      `Please input a valid price (>= 0 and < plan price ${getFieldValue('amount')}).`
+                    )
+                  }
+                  return Promise.resolve()
+                }
+              })
+            ]}
+          >
+            <Input
+              disabled={!enableTrialWatch}
+              style={{ width: 180 }}
+              prefix={
+                CURRENCY[form.getFieldValue('currency') ?? plan.currency].symbol
+              }
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Trial length"
+            name="trialDurationTime"
+            rules={[
+              {
+                required: enableTrialWatch,
+                message: 'Please input your trial length!'
+              },
+              ({ getFieldValue }) => ({
+                validator(rule, value) {
+                  const num = Number(value)
+                  if (isNaN(num) || num <= 0) {
+                    return Promise.reject('Invalid trial length (>0)')
+                  }
+                  return Promise.resolve()
+                }
+              })
+            ]}
+          >
+            <Input
+              style={{ width: 220 }}
+              addonAfter={selectAfter}
+              disabled={!enableTrialWatch}
+            />
+          </Form.Item>
+
+          <Form.Item label="Trial requires billing info" name="trialDemand">
+            <Switch disabled={!enableTrialWatch} />
+          </Form.Item>
+
+          <Form.Item label="Auto renew after trial end" name="cancelAtTrialEnd">
+            <Switch disabled={!enableTrialWatch} />
+          </Form.Item>
 
           <Form.Item label="Billable Metrics">
             <Row
