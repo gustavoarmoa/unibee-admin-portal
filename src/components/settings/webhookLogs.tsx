@@ -48,7 +48,14 @@ const Index = ({
       <Popover
         placement="right"
         content={
-          <div style={{ width: '360px', height: '380px', overflow: 'auto' }}>
+          <div
+            style={{
+              width: '360px',
+              maxHeight: '380px',
+              minHeight: '80px',
+              overflow: 'auto'
+            }}
+          >
             <SyntaxHighlighter language="json" style={prism}>
               {parsedJson}
             </SyntaxHighlighter>
