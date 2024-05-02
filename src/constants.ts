@@ -91,3 +91,10 @@ export const PAYMENT_TYPE: { [key: number]: string } = {
   0: 'Payment',
   1: 'Refund'
 }
+
+export const REFUND_STATUS: { [key: number]: string } = {
+  10: 'Pending',
+  20: 'Succeeded',
+  30: 'Failed',
+  40: 'Cancelled'
+}

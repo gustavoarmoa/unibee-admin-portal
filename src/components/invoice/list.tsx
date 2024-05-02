@@ -257,12 +257,13 @@ const Search = ({
               <Input onPressEnter={goSearch} placeholder="first name" />
             </Form.Item>
           </Col>
+          /
           <Col span={4}>
             <Form.Item name="lastName" noStyle={true}>
               <Input onPressEnter={goSearch} placeholder="last name" />
             </Form.Item>
           </Col>
-          <Col span={4}>
+          <Col span={3}>
             <span></span>
             {/* <Form.Item name="refunded" noStyle={true} valuePropName="checked">
               <Checkbox>Refunded</Checkbox>

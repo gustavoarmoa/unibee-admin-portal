@@ -2,6 +2,7 @@
 import { Button, Col, Modal, Row } from 'antd'
 import dayjs from 'dayjs'
 import React from 'react'
+import { REFUND_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
 import { TRefund } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
@@ -43,7 +44,16 @@ const Index = ({ detail, closeModal }: Props) => {
         </Col>
         <Col span={14}>{detail.refundComment}</Col>
       </Row>
-
+      <Row style={{ margin: '8px 0' }}>
+        <Col
+          span={10}
+          style={{ fontWeight: 'bold' }}
+          className=" text-gray-600"
+        >
+          Refund status
+        </Col>
+        <Col span={14}>{REFUND_STATUS[detail.status]}</Col>
+      </Row>
       <Row style={{ margin: '8px 0' }}>
         <Col
           span={10}

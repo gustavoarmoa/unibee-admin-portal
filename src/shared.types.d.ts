@@ -251,10 +251,10 @@ interface UserInvoice {
   gatewayInvoiceId: string
   uniqueId: string
   createTime: number
+  originAmount?: number
   discountAmount?: number
   totalAmount: number
   taxAmount: number
-  taxPercentage: number
   subscriptionAmount: number
   currency: string
   lines: InvoiceItem[]

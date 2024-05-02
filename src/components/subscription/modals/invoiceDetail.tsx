@@ -1,19 +1,8 @@
-import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Col, Divider, Input, Modal, Row, Select, message } from 'antd'
+import { Button, Col, Divider, Modal, Row } from 'antd'
 import dayjs from 'dayjs'
-import update from 'immutability-helper'
-import { useState } from 'react'
-import { CURRENCY } from '../../../constants'
-import { daysBetweenDate, ramdonString, showAmount } from '../../../helpers'
-import {
-  createInvoiceReq,
-  deleteInvoiceReq,
-  publishInvoiceReq,
-  refundReq,
-  revokeInvoiceReq,
-  saveInvoiceReq,
-  sendInvoiceInMailReq
-} from '../../../requests'
+import React, { useState } from 'react'
+import { CURRENCY, REFUND_STATUS } from '../../../constants'
+import { ramdonString, showAmount } from '../../../helpers'
 import {
   IProfile,
   ISubscriptionType,
@@ -41,6 +30,7 @@ const Index = ({ user, detail, closeModal }: Props) => {
 
   const [invoiceList, setInvoiceList] = useState<InvoiceItem[]>(detail.lines)
 
+  /*
   const onSendInvoice = async () => {
     if (detail == null || detail.invoiceId == '' || detail.invoiceId == null) {
       return
@@ -55,6 +45,7 @@ const Index = ({ user, detail, closeModal }: Props) => {
     message.success('Invoice sent.')
     closeModal()
   }
+  */
 
   const getUserName = (iv: UserInvoice) => {
     if (iv.userAccount == null) {
@@ -111,13 +102,17 @@ const Index = ({ user, detail, closeModal }: Props) => {
           </Row>
           <Row className=" text-gray-500">
             <Col span={4}>
-              {showAmount(detail.refund.refundAmount, detail.refund.currency)}
+              {showAmount(
+                detail.refund.refundAmount,
+                detail.refund.currency,
+                true
+              )}
             </Col>
             <Col span={8}>{detail.refund.refundComment}</Col>
             <Col span={8}>
               {dayjs(detail.refund.refundTime * 1000).format('YYYY-MMM-DD')}
             </Col>
-            <Col span={4}>{detail.refund.status}</Col>
+            <Col span={4}>{REFUND_STATUS[detail.refund.status]}</Col>
           </Row>
         </div>
       )}
@@ -146,7 +141,7 @@ const Index = ({ user, detail, closeModal }: Props) => {
           >
             <Col span={12}>{v.description}</Col>
             <Col span={4}>
-              {showAmount(v.unitAmountExcludingTax as number, v.currency)}
+              {showAmount(v.unitAmountExcludingTax as number, v.currency, true)}
             </Col>
             <Col span={1} style={{ fontSize: '18px' }}>
               ×
@@ -154,7 +149,7 @@ const Index = ({ user, detail, closeModal }: Props) => {
             <Col span={3}>{v.quantity}</Col>
             {/* <Col span={2}>tax</Col> */}
             <Col span={4}>
-              {showAmount(v.amountExcludingTax as number, v.currency)}
+              {showAmount(v.amountExcludingTax as number, v.currency, true)}
             </Col>
           </Row>
         ))}
@@ -168,7 +163,7 @@ const Index = ({ user, detail, closeModal }: Props) => {
         <Col
           className=" text-red-800"
           span={4}
-        >{`${showAmount(detail.discountAmount || 0, detail.currency)}`}</Col>
+        >{`${showAmount(detail.discountAmount || 0, detail.currency, true)}`}</Col>
       </Row>
       <Row>
         <Col span={16}> </Col>
@@ -194,7 +189,7 @@ const Index = ({ user, detail, closeModal }: Props) => {
           style={{ fontSize: '18px', fontWeight: 'bold' }}
           className=" text-gray-600"
           span={4}
-        >{`${showAmount(detail.totalAmount, detail.currency)}`}</Col>
+        >{`${showAmount(detail.totalAmount, detail.currency, true)}`}</Col>
       </Row>
 
       {/* <Row className="flex items-center">

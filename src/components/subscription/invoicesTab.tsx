@@ -150,6 +150,12 @@ const Index = ({ user }: { user: IProfile | null }) => {
       render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
     },
     {
+      title: 'Is refund',
+      dataIndex: 'refund',
+      key: 'refund',
+      render: (refund, iv) => (refund == null ? 'No' : 'Yes')
+    },
+    {
       title: 'Created by',
       dataIndex: 'subscriptionId',
       key: 'subscriptionId',
