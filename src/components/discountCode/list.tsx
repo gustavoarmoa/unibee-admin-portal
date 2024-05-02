@@ -92,7 +92,18 @@ const Index = () => {
     {
       title: 'Cycle Limit',
       dataIndex: 'cycleLimit',
-      key: 'cycleLimit'
+      key: 'cycleLimit',
+      render: (lim, code) => {
+        if (code.billingType == 1) {
+          // one-time use
+          return '1'
+        } else if (code.billingType == 2) {
+          // recurring
+          return lim === 0 ? 'Unlimited' : lim
+        } else {
+          return lim
+        }
+      }
     },
     {
       title: 'Validity Range',

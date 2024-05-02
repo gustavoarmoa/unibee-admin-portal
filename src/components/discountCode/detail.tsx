@@ -13,7 +13,11 @@ import dayjs, { Dayjs } from 'dayjs'
 import React, { ReactElement, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY, DISCOUNT_CODE_STATUS } from '../../constants'
-import { showAmount } from '../../helpers'
+import {
+  currencyDecimalValidate,
+  showAmount,
+  toFixedNumber
+} from '../../helpers'
 import {
   createDiscountCodeReq,
   deleteDiscountCodeReq,
@@ -159,6 +163,7 @@ const Index = () => {
       // fixed amount
       delete code.discountPercentage
       code.discountAmount *= CURRENCY[code.currency].stripe_factor
+      code.discountAmount = toFixedNumber(code.discountAmount, 2)
     }
 
     // console.log('sumbtting: ', code)
@@ -243,7 +248,7 @@ const Index = () => {
 
   useEffect(() => {
     if (watchBillingType == 1) {
-      //  one-time use: you can only use this code once, aka: cycleLimit is 1
+      //  one-time use: you can only use this code once, aka: cycleLimit is always 1
       form.setFieldValue('cycleLimit', 1)
     }
   }, [watchBillingType])
@@ -378,6 +383,7 @@ const Index = () => {
           <Form.Item
             label="Discount Amount"
             name="discountAmount"
+            dependencies={['currency']}
             rules={[
               {
                 required: watchDiscountType != 1, // 1: percentage, 2: fixed-amt
@@ -391,6 +397,11 @@ const Index = () => {
                   const num = Number(value)
                   if (isNaN(num) || num <= 0) {
                     return Promise.reject('Please input a valid amount (> 0).')
+                  }
+                  if (
+                    !currencyDecimalValidate(num, getFieldValue('currency'))
+                  ) {
+                    return Promise.reject('Please input a valid amount')
                   }
                   return Promise.resolve()
                 }
@@ -451,9 +462,14 @@ const Index = () => {
               ({ getFieldValue }) => ({
                 validator(rule, value) {
                   const num = Number(value)
-                  if (isNaN(num) || num < 0 || num > 100) {
+                  if (!Number.isInteger(num)) {
                     return Promise.reject(
-                      'Please input a valid cycle limit number between 0 ~ 100.'
+                      'Please input a valid cycle limit number between 0 ~ 1000.'
+                    )
+                  }
+                  if (isNaN(num) || num < 0 || num > 999) {
+                    return Promise.reject(
+                      'Please input a valid cycle limit number between 0 ~ 1000.'
                     )
                   }
                   return Promise.resolve()
@@ -473,7 +489,7 @@ const Index = () => {
           </div> */}
 
           <Form.Item
-            label="Validity Date Range"
+            label="Valid Date Range"
             name="validityRange"
             rules={[
               {

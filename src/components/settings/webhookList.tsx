@@ -55,11 +55,16 @@ const Index = () => {
             </Space>
           }
         >
-          <span
-            style={{ marginLeft: '8px', cursor: 'pointer', color: '#1677ff' }}
+          <div
+            style={{
+              width: '18px',
+              height: '24px',
+              cursor: 'pointer',
+              color: '#1677ff'
+            }}
           >
             {evt.length}
-          </span>
+          </div>
         </Popover>
       )
     },
