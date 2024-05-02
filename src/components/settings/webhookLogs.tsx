@@ -2,7 +2,7 @@ import { CopyOutlined, LoadingOutlined } from '@ant-design/icons'
 import { Button, Modal, Pagination, Popover, Table, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
@@ -141,15 +141,15 @@ const Index = ({
       title: 'Response',
       dataIndex: 'response',
       key: 'response',
-      width: 80,
-      render: (text) => renderJson(text)
+      width: 80
+      // render: (text) => renderJson(text)
     },
     {
       title: 'mamo',
       dataIndex: 'mamo',
       key: 'mamo',
-      width: 80,
-      render: (text) => renderJson(text)
+      width: 80
+      // render: (text) => renderJson(text)
     },
     {
       title: 'Created at',
