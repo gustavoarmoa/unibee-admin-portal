@@ -380,7 +380,7 @@ const Index = () => {
             name="discountAmount"
             rules={[
               {
-                required: watchDiscountType != 1, // 1: percentage
+                required: watchDiscountType != 1, // 1: percentage, 2: fixed-amt
                 message: 'Please choose your discount amount!'
               },
               ({ getFieldValue }) => ({
