@@ -152,6 +152,7 @@ const Index = () => {
         <RefundModal
           closeModal={toggleRefundModal}
           detail={paymentList[paymentIdx].refund!}
+          ignoreAmtFactor={false}
         />
       )}
       <Table

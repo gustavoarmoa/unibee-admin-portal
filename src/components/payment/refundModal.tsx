@@ -10,9 +10,10 @@ import { useAppConfigStore } from '../../stores'
 interface Props {
   detail: TRefund
   closeModal: () => void
+  ignoreAmtFactor?: boolean
 }
 
-const Index = ({ detail, closeModal }: Props) => {
+const Index = ({ detail, closeModal, ignoreAmtFactor }: Props) => {
   const appConfigStore = useAppConfigStore()
 
   return (
@@ -32,7 +33,9 @@ const Index = ({ detail, closeModal }: Props) => {
         >
           Refund amount
         </Col>
-        <Col span={14}>{showAmount(detail.refundAmount, detail.currency)}</Col>
+        <Col span={14}>
+          {showAmount(detail.refundAmount, detail.currency, !!ignoreAmtFactor)}
+        </Col>
       </Row>
       <Row style={{ margin: '8px 0' }}>
         <Col

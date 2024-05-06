@@ -11,18 +11,6 @@ import RefundModal from '../payment/refundModal'
 import InvoiceDetailModal from '../subscription/modals/invoiceDetail'
 // import InvoiceItemsModal from '../subscription/modals/newInvoice' // obsolete
 
-const invoicePerm: TInvoicePerm = {
-  editable: false,
-  savable: false,
-  creatable: false,
-  publishable: false,
-  revokable: false,
-  deletable: false,
-  refundable: false,
-  downloadable: true,
-  sendable: false
-}
-
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
 const API_URL = import.meta.env.VITE_API_URL
 const rowStyle: CSSProperties = {
@@ -36,7 +24,7 @@ const Index = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [invoiceDetail, setInvoiceDetail] = useState<UserInvoice | null>(null)
-  const [userProfile, setUserProfile] = useState<IProfile | null>(null)
+  //   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
   const [showInvoiceItems, setShowInvoiceItems] = useState(false)
   const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems)
   const [refundModalOpen, setRefundModalOpen] = useState(false)
@@ -81,17 +69,6 @@ const Index = () => {
         fullscreen
       />
       {invoiceDetail && showInvoiceItems && (
-        /*
-        <InvoiceItemsModal
-          user={invoiceDetail.userAccount}
-          isOpen={true}
-          detail={invoiceDetail}
-          closeModal={toggleInvoiceItems}
-          refresh={() => {}}
-          refundMode={false}
-          permission={invoicePerm}
-        />
-        */
         <InvoiceDetailModal
           user={invoiceDetail.userAccount}
           closeModal={toggleInvoiceItems}
@@ -102,6 +79,7 @@ const Index = () => {
         <RefundModal
           detail={invoiceDetail.refund!}
           closeModal={toggleRefundModal}
+          ignoreAmtFactor={true}
         />
       )}
 
@@ -158,7 +136,8 @@ const Index = () => {
               <span>
                 {showAmount(
                   invoiceDetail.refund.refundAmount,
-                  invoiceDetail.refund.currency
+                  invoiceDetail.refund.currency,
+                  true
                 )}
               </span>
               &nbsp;&nbsp;
@@ -185,7 +164,11 @@ const Index = () => {
         </Col>
         <Col span={6}>
           {invoiceDetail?.discountAmount != null
-            ? showAmount(invoiceDetail?.discountAmount, invoiceDetail.currency)
+            ? showAmount(
+                invoiceDetail?.discountAmount,
+                invoiceDetail.currency,
+                true
+              )
             : 'N/A'}
         </Col>
         <Col span={4} style={colStyle}>

@@ -173,6 +173,7 @@ const Index = () => {
         <RefundModal
           detail={invoiceList[invoiceIdx].refund!}
           closeModal={toggleRefundModal}
+          ignoreAmtFactor={false}
         />
       )}
       <Table
