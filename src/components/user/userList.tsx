@@ -21,6 +21,7 @@ import { getUserListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
+import CreateUserModal from './createUserModal'
 
 const APP_PATH = import.meta.env.BASE_URL
 const PAGE_SIZE = 10
@@ -28,6 +29,8 @@ const PAGE_SIZE = 10
 const Index = () => {
   const navigate = useNavigate()
   const { page, onPageChange } = usePagination()
+  const [newUserModalOpen, setNewUserModalOpen] = useState(false)
+  const toggleNewUserModal = () => setNewUserModalOpen(!newUserModalOpen)
 
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<IProfile[]>([])
@@ -125,7 +128,20 @@ const Index = () => {
 
   return (
     <div>
-      <Search form={form} goSearch={fetchData} searching={loading} />
+      {newUserModalOpen && (
+        <CreateUserModal closeModal={toggleNewUserModal} refresh={fetchData} />
+      )}
+      <Row>
+        <Col span={22}>
+          <Search form={form} goSearch={fetchData} searching={loading} />{' '}
+        </Col>
+        <Col span={2}>
+          <Button type="primary" onClick={toggleNewUserModal}>
+            Add New
+          </Button>
+        </Col>
+      </Row>
+
       <Table
         columns={columns}
         dataSource={users}

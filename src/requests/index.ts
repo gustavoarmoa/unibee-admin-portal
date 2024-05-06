@@ -987,6 +987,30 @@ export const saveUserProfileReq = async (newProfile: IProfile) => {
   }
 }
 
+// not the same as user signup, this is for admin to create the user.
+type TNewUserInfo = {
+  externalUserId?: string
+  email: string
+  firstName?: string
+  lastName?: string
+  password?: string
+  phone?: string
+  address?: string
+}
+export const createNewUserReq = async (newUser: TNewUserInfo) => {
+  try {
+    const res = await request.post(`/merchant/user/new`, newUser)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [null, null] // this call has no meaningful result to return
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const appSearchReq = async (searchKey: string) => {
   try {
     const res = await request.post(`/merchant/search/key_search`, {
