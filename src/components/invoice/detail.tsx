@@ -8,7 +8,8 @@ import { getInvoiceDetailReq } from '../../requests'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
 import RefundModal from '../payment/refundModal'
-import InvoiceItemsModal from '../subscription/modals/newInvoice'
+import InvoiceDetailModal from '../subscription/modals/invoiceDetail'
+// import InvoiceItemsModal from '../subscription/modals/newInvoice' // obsolete
 
 const invoicePerm: TInvoicePerm = {
   editable: false,
@@ -80,6 +81,7 @@ const Index = () => {
         fullscreen
       />
       {invoiceDetail && showInvoiceItems && (
+        /*
         <InvoiceItemsModal
           user={invoiceDetail.userAccount}
           isOpen={true}
@@ -88,6 +90,12 @@ const Index = () => {
           refresh={() => {}}
           refundMode={false}
           permission={invoicePerm}
+        />
+        */
+        <InvoiceDetailModal
+          user={invoiceDetail.userAccount}
+          closeModal={toggleInvoiceItems}
+          detail={invoiceDetail}
         />
       )}
       {invoiceDetail && refundModalOpen && (

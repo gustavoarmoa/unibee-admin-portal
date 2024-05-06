@@ -309,13 +309,13 @@ const Search = ({
               />
             </Form.Item>
           </Col>
+          &nbsp;
           <Col span={4}>
             <Form.Item name="amountEnd" noStyle={true}>
               <Input prefix={`to ${currencySymbol}`} onPressEnter={goSearch} />
             </Form.Item>
           </Col>
-
-          <Col span={12}>
+          <Col span={11}>
             <span className="mr-2">Status</span>
             <Form.Item name="status" noStyle={true}>
               <Select

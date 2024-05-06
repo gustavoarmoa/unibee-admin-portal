@@ -1,15 +1,9 @@
 import { Button, Col, Divider, Modal, Row } from 'antd'
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
-import { CURRENCY, REFUND_STATUS } from '../../../constants'
+import { REFUND_STATUS } from '../../../constants'
 import { ramdonString, showAmount } from '../../../helpers'
-import {
-  IProfile,
-  ISubscriptionType,
-  InvoiceItem,
-  TInvoicePerm,
-  UserInvoice
-} from '../../../shared.types'
+import { IProfile, InvoiceItem, UserInvoice } from '../../../shared.types'
 
 interface Props {
   user: IProfile | null
@@ -29,23 +23,6 @@ const Index = ({ user, detail, closeModal }: Props) => {
   }
 
   const [invoiceList, setInvoiceList] = useState<InvoiceItem[]>(detail.lines)
-
-  /*
-  const onSendInvoice = async () => {
-    if (detail == null || detail.invoiceId == '' || detail.invoiceId == null) {
-      return
-    }
-    setLoading(true)
-    const [_, err] = await sendInvoiceInMailReq(detail.invoiceId)
-    setLoading(false)
-    if (null != err) {
-      message.error(err.message)
-      return
-    }
-    message.success('Invoice sent.')
-    closeModal()
-  }
-  */
 
   const getUserName = (iv: UserInvoice) => {
     if (iv.userAccount == null) {
@@ -156,9 +133,9 @@ const Index = ({ user, detail, closeModal }: Props) => {
       <Divider />
 
       <Row className="flex items-center">
-        <Col span={16}> </Col>
-        <Col span={4} style={{ fontSize: '18px' }} className=" text-red-800">
-          Saved
+        <Col span={14}> </Col>
+        <Col span={6} style={{ fontSize: '18px' }} className=" text-red-800">
+          Total Discounted
         </Col>
         <Col
           className=" text-red-800"
@@ -166,20 +143,20 @@ const Index = ({ user, detail, closeModal }: Props) => {
         >{`${showAmount(detail.discountAmount || 0, detail.currency, true)}`}</Col>
       </Row>
       <Row>
-        <Col span={16}> </Col>
-        <Col span={4} style={{ fontSize: '18px' }} className=" text-gray-700">
-          Tax
+        <Col span={14}> </Col>
+        <Col span={6} style={{ fontSize: '18px' }} className=" text-gray-700">
+          VAT{`(${detail.taxPercentage / 100} %)`}
         </Col>
         <Col
           span={4}
           className=" text-gray-700"
-        >{`${detail.taxPercentage / 100} %`}</Col>
+        >{`${showAmount(detail.taxAmount, detail.currency, true)}`}</Col>
       </Row>
       <Divider style={{ margin: '4px 0' }} />
       <Row>
-        <Col span={16}> </Col>
+        <Col span={14}> </Col>
         <Col
-          span={4}
+          span={6}
           style={{ fontSize: '18px', fontWeight: 'bold' }}
           className=" text-gray-600"
         >
