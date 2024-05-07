@@ -271,7 +271,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
         trialLengthUnit as number
       )
       f.trialDemand = f.trialDemand ? 'paymentMethod' : ''
-      f.cancelAtTrialEnd = f.cancelAtTrialEnd ? 1 : 0
+      f.cancelAtTrialEnd = f.cancelAtTrialEnd ? 0 : 1
     }
     delete f.enableTrial
 
@@ -393,7 +393,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
         planDetail.plan.trialDemand == 'paymentMethod' ? true : false
       //   cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
       planDetail.plan.cancelAtTrialEnd =
-        planDetail.plan.cancelAtTrialEnd == 1 ? true : false
+        planDetail.plan.cancelAtTrialEnd == 1 ? false : true
     } else {
       planDetail.plan.enableTrial = false
       planDetail.plan.trialAmount = 0
