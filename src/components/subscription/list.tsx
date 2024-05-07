@@ -1,8 +1,8 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Pagination, Spin, Table, message } from 'antd'
+import { Pagination, Spin, Table, Tag, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
-import React, { useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
@@ -19,6 +19,14 @@ const SUB_STATUS_FILTER = Object.keys(SUBSCRIPTION_STATUS)
     value: Number(s)
   }))
   .sort((a, b) => (a.value < b.value ? -1 : 1))
+
+const SUB_STATUS: { [key: number]: ReactElement } = {
+  1: <Tag color="magenta">{SUBSCRIPTION_STATUS[1]}</Tag>, // 1: pending
+  2: <Tag color="#87d068">{SUBSCRIPTION_STATUS[2]}</Tag>, // 2: active
+  4: <Tag color="purple">{SUBSCRIPTION_STATUS[4]}</Tag>, // 4: cancelled
+  5: <Tag color="red">{SUBSCRIPTION_STATUS[5]}</Tag>, // 5: expired
+  7: <Tag color="cyan">{SUBSCRIPTION_STATUS[7]}</Tag> // 7: Incomplete
+}
 
 const columns: ColumnsType<ISubscriptionType> = [
   {
@@ -62,7 +70,7 @@ const columns: ColumnsType<ISubscriptionType> = [
     title: 'Status',
     dataIndex: 'status',
     key: 'status',
-    render: (_, sub) => <span>{SUBSCRIPTION_STATUS[sub.status]}</span>,
+    render: (_, sub) => SUB_STATUS[sub.status], //  <span>{SUBSCRIPTION_STATUS[sub.status]}</span>,
     filters: SUB_STATUS_FILTER
     // onFilter: (value, record) => record.status == value,
   },

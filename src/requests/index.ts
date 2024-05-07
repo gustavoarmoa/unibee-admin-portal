@@ -653,6 +653,30 @@ export const cancelSubReq = async (subscriptionId: string) => {
   }
 }
 
+// mark pending subscription as incomplete until this date
+export const markAsIncompleteReq = async (
+  subscriptionId: string,
+  until: number
+) => {
+  try {
+    const res = await request.post(
+      `/merchant/subscription/active_temporarily`,
+      {
+        subscriptionId,
+        expireTime: until
+      }
+    )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new Error('Session expired')
+    }
+    return [null, null] // backend has no meaningful return value
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const createPreviewReq = async (
   subscriptionId: string,
   newPlanId: number,

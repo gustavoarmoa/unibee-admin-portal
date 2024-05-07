@@ -1,5 +1,7 @@
 import {
   CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
   InfoCircleOutlined,
   LoadingOutlined,
   MinusOutlined,
@@ -15,12 +17,14 @@ import {
   Row,
   Spin,
   Table,
+  Tag,
+  Tooltip,
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
 import update from 'immutability-helper'
-import { CSSProperties, useEffect, useRef, useState } from 'react'
+import { CSSProperties, ReactElement, useEffect, useRef, useState } from 'react'
 import { useOnClickOutside } from 'usehooks-ts'
 import { SUBSCRIPTION_STATUS } from '../../constants'
 import { daysBetweenDate, showAmount } from '../../helpers'
@@ -42,6 +46,7 @@ import {
 } from '../../shared.types.d'
 import CancelPendingSubModal from './modals/cancelPendingSub'
 import ChangePlanModal from './modals/changePlan'
+import ChangeSubStatusModal from './modals/changeSubStatus'
 import ExtendSubModal from './modals/extendSub'
 import ResumeSubModal from './modals/resumeSub'
 import TerminateSubModal from './modals/terminateSub'
@@ -57,7 +62,8 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [dueDateModal, setDueDateModal] = useState(false)
   const [newDueDate, setNewDueDate] = useState('')
   const [changePlanModal, setChangePlanModal] = useState(false)
-  const [cancelSubModalOpen, setCancelSubModalOpen] = useState(false) // newly created sub has status == created if user hasn't paid yet, user(or admin) can cancel this sub.
+  const [cancelSubModalOpen, setCancelSubModalOpen] = useState(false) // newly created sub has status == pending if user hasn't paid yet, user(or admin) can cancel this sub.
+  const [changeSubStatusModal, setChangeSubStatusModal] = useState(false) // admin can mark subStatus from pending to incomplete
   const [preview, setPreview] = useState<IPreview | null>(null)
   const [loading, setLoading] = useState(true)
   const [terminateModal, setTerminateModal] = useState(false)
@@ -75,6 +81,8 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const toggleSetDueDateModal = () => setDueDateModal(!dueDateModal)
   const toggleChangPlanModal = () => setChangePlanModal(!changePlanModal)
   const toggleCancelSubModal = () => setCancelSubModalOpen(!cancelSubModalOpen)
+  const toggleChangeSubStatusModal = () =>
+    setChangeSubStatusModal(!changeSubStatusModal)
 
   const onSimDateChange = async (date: Dayjs | null, dateString: string) => {
     setLoading(true)
@@ -507,6 +515,13 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
           refresh={fetchData}
         />
       )}
+      {changeSubStatusModal && (
+        <ChangeSubStatusModal
+          subInfo={activeSub}
+          closeModal={toggleChangeSubStatusModal}
+          refresh={fetchData}
+        />
+      )}
       {/* <UserInfoSection user={activeSub?.user || null} /> */}
       <SubscriptionInfoSection
         subInfo={activeSub}
@@ -517,6 +532,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         toggleResumeSubModal={toggleResumeSubModal}
         toggleChangPlanModal={toggleChangPlanModal}
         toggleCancelSubModal={toggleCancelSubModal}
+        toggleChangeSubStatusModal={toggleChangeSubStatusModal}
       />
     </>
   )
@@ -531,6 +547,14 @@ const rowStyle: CSSProperties = {
 }
 const colStyle: CSSProperties = { fontWeight: 'bold' }
 
+const SUB_STATUS: { [key: number]: ReactElement } = {
+  1: <Tag color="magenta">{SUBSCRIPTION_STATUS[1]}</Tag>, // 1: pending
+  2: <Tag color="#87d068">{SUBSCRIPTION_STATUS[2]}</Tag>, // 2: active
+  4: <Tag color="purple">{SUBSCRIPTION_STATUS[4]}</Tag>, // 4: cancelled
+  5: <Tag color="red">{SUBSCRIPTION_STATUS[5]}</Tag>, // 5: expired
+  7: <Tag color="cyan">{SUBSCRIPTION_STATUS[7]}</Tag> // 7: Incomplete
+}
+
 interface ISubSectionProps {
   subInfo: ISubscriptionType | null
   plans: IPlan[]
@@ -540,6 +564,7 @@ interface ISubSectionProps {
   toggleResumeSubModal: () => void
   toggleChangPlanModal: () => void
   toggleCancelSubModal: () => void
+  toggleChangeSubStatusModal: () => void
 }
 const SubscriptionInfoSection = ({
   subInfo,
@@ -549,7 +574,8 @@ const SubscriptionInfoSection = ({
   toggleTerminateModal,
   toggleResumeSubModal,
   toggleChangPlanModal,
-  toggleCancelSubModal
+  toggleCancelSubModal,
+  toggleChangeSubStatusModal
 }: ISubSectionProps) => {
   return (
     <>
@@ -568,17 +594,37 @@ const SubscriptionInfoSection = ({
           Status
         </Col>
         <Col span={6}>
-          {subInfo && SUBSCRIPTION_STATUS[subInfo.status]}{' '}
-          <span
-            style={{ cursor: 'pointer', marginLeft: '8px' }}
-            onClick={refresh}
-          >
-            <SyncOutlined />
-          </span>
+          {subInfo && SUB_STATUS[subInfo.status]}
+          {subInfo && (
+            <Tooltip title="Refresh">
+              <span
+                style={{ cursor: 'pointer', margin: '0 8px' }}
+                onClick={refresh}
+              >
+                <SyncOutlined />
+              </span>
+            </Tooltip>
+          )}
+          {/* == 1: payment is pending (wait for user to finishe the payment), 7: incomplete */}
+          {subInfo && (subInfo.status == 1 || subInfo.status == 7) && (
+            <Tooltip title="Cancel">
+              <span
+                style={{ cursor: 'pointer', margin: '0 8px' }}
+                onClick={toggleCancelSubModal}
+              >
+                <CloseCircleOutlined />
+              </span>
+            </Tooltip>
+          )}
           {subInfo && subInfo.status == 1 && (
-            <Button type="link" onClick={toggleCancelSubModal}>
-              Cancel
-            </Button>
+            <Tooltip title="Mark as Incomplete">
+              <span
+                style={{ cursor: 'pointer', margin: '0 8px' }}
+                onClick={toggleChangeSubStatusModal}
+              >
+                <ClockCircleOutlined />
+              </span>
+            </Tooltip>
           )}
         </Col>
         <Col span={4} style={colStyle}>

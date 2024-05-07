@@ -157,10 +157,10 @@ const unitToSeconds = (value: number, unit: number) => {
 }
 
 const STATUS: { [key: number]: ReactElement } = {
-  1: <Tag color="blue">{PLAN_STATUS[1]}</Tag>,
-  2: <Tag color="#87d068">{PLAN_STATUS[2]}</Tag>,
-  3: <Tag color="purple">{PLAN_STATUS[3]}</Tag>,
-  4: <Tag color="red">{PLAN_STATUS[4]}</Tag>
+  1: <Tag color="blue">{PLAN_STATUS[1]}</Tag>, // editing
+  2: <Tag color="#87d068">{PLAN_STATUS[2]}</Tag>, // active
+  3: <Tag color="purple">{PLAN_STATUS[3]}</Tag>, // inactive
+  4: <Tag color="red">{PLAN_STATUS[4]}</Tag> // expired
 }
 
 const { Option } = Select

@@ -1,6 +1,6 @@
 import { Button, Col, Form, Input, Modal, Row, message } from 'antd'
 import { useState } from 'react'
-import { passwordRegx } from '../../helpers'
+import { emailValidate, passwordRegx } from '../../helpers'
 import { createNewUserReq } from '../../requests'
 // import { Country, IProfile } from '../../shared.types'
 
@@ -41,39 +41,9 @@ const Index = ({
         form={form}
         labelCol={{ span: 8 }}
         onFinish={onSave}
+        colon={false}
         // initialValues={}
       >
-        <Row>
-          <Col span={12}>
-            <Form.Item
-              label="First name"
-              name="firstName"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your first name!'
-                }
-              ]}
-            >
-              <Input style={{ width: '220px' }} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Last name"
-              name="lastName"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your last name!'
-                }
-              ]}
-            >
-              <Input style={{ width: '220px' }} />
-            </Form.Item>
-          </Col>
-        </Row>
-
         <Row>
           <Col span={12}>
             <Form.Item
@@ -82,8 +52,16 @@ const Index = ({
               rules={[
                 {
                   required: true,
-                  message: 'Please input your valid email!'
-                }
+                  message: "Please input new user's valid email!"
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (value != null && value != '' && emailValidate(value)) {
+                      return Promise.resolve()
+                    }
+                    return Promise.reject('Invalid email address')
+                  }
+                })
               ]}
             >
               <Input style={{ width: '220px' }} />
@@ -97,6 +75,41 @@ const Index = ({
         </Row>
 
         <Row>
+          <Col span={12}>
+            <Form.Item
+              label="First name"
+              name="firstName"
+              /*
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your first name!'
+                }
+              ]}
+              */
+            >
+              <Input style={{ width: '220px' }} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="Last name"
+              name="lastName"
+              /*
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your last name!'
+                }
+              ]}
+              */
+            >
+              <Input style={{ width: '220px' }} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {/* <Row>
           <Col span={12}>
             <Form.Item
               label="Password"
@@ -148,7 +161,7 @@ const Index = ({
               <Input.Password style={{ width: '220px' }} />
             </Form.Item>
           </Col>
-        </Row>
+            </Row> */}
 
         <Row>
           <Col span={12}>

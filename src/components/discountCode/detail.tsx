@@ -31,11 +31,12 @@ import { useMerchantInfoStore } from '../../stores'
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
 const { RangePicker } = DatePicker
+
 const STATUS: { [key: number]: ReactElement } = {
-  1: <Tag color="blue">{DISCOUNT_CODE_STATUS[1]}</Tag>,
-  2: <Tag color="#87d068">{DISCOUNT_CODE_STATUS[2]}</Tag>,
-  3: <Tag color="purple">{DISCOUNT_CODE_STATUS[3]}</Tag>,
-  4: <Tag color="red">{DISCOUNT_CODE_STATUS[4]}</Tag>
+  1: <Tag color="blue">{DISCOUNT_CODE_STATUS[1]}</Tag>, // editing
+  2: <Tag color="#87d068">{DISCOUNT_CODE_STATUS[2]}</Tag>, // active
+  3: <Tag color="purple">{DISCOUNT_CODE_STATUS[3]}</Tag>, // inactive
+  4: <Tag color="red">{DISCOUNT_CODE_STATUS[4]}</Tag> // expired
 }
 
 const NEW_CODE: DiscountCode = {

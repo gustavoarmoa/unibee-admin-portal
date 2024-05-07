@@ -18,6 +18,7 @@ import React, { useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
 import {
   CloseOutlined,
+  DollarOutlined,
   DownloadOutlined,
   EditOutlined,
   LoadingOutlined,
@@ -205,7 +206,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           <Tooltip title="Refund">
             <Button
               onClick={refund}
-              icon={<MoneyCollectOutlined />}
+              icon={<DollarOutlined />}
               style={{ border: 'unset' }}
               disabled={!getPermission(invoice).refundable}
             />
