@@ -494,9 +494,12 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
         <Form
           form={form}
           onFinish={onSave}
-          labelCol={{ span: 4 }}
-          wrapperCol={{ span: 20 }}
-          layout="horizontal"
+          // labelCol={{ span: 4 }}
+          labelCol={{ flex: '176px' }}
+          // wrapperCol={{ span: 20 }}
+          wrapperCol={{ flex: 1 }}
+          colon={false}
+          // layout="horizontal"
           // disabled={componentDisabled}
           // style={{ maxWidth: 1024 }}
           initialValues={plan}

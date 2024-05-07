@@ -275,9 +275,12 @@ const Index = () => {
         <Form
           form={form}
           onFinish={onSave}
-          labelCol={{ span: 4 }}
-          wrapperCol={{ span: 20 }}
-          layout="horizontal"
+          // labelCol={{ span: 4 }}
+          labelCol={{ flex: '160px' }}
+          // wrapperCol={{ span: 20 }}
+          wrapperCol={{ flex: 1 }}
+          colon={false}
+          // layout="horizontal"
           // disabled={componentDisabled}
           // style={{ maxWidth: 1024 }}
           initialValues={code}
@@ -480,13 +483,13 @@ const Index = () => {
             <Input style={{ width: 180 }} disabled={watchBillingType == 1} />
             {/* 1: one-time use */}
           </Form.Item>
-          {/* <div
-            className="relative ml-2 text-xs text-gray-500"
-            style={{ top: '-40px', left: '360px' }}
+          <div
+            className="relative ml-2 text-xs text-gray-400"
+            style={{ top: '-45px', left: '340px', width: '620px' }}
           >
             How many billing cycles this discount code can be applied on a
             recurring subscription (0 means no-limit)
-          </div> */}
+          </div>
 
           <Form.Item
             label="Valid Date Range"
