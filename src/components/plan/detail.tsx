@@ -88,7 +88,7 @@ const NEW_PLAN: TNewPlan = {
   enableTrial: false,
   trialAmount: 0,
   trialDurationTime: 0,
-  trialDemand: true, // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UI, front-end use <Switch />
+  trialDemand: false, // backend requires this field to be a fixed string of 'paymentMethod(represent true)' or ''(represent false), but to ease the UI/UX, front-end use <Switch />
   cancelAtTrialEnd: true
 }
 
@@ -275,7 +275,6 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     }
     delete f.enableTrial
 
-    console.log('is new: ', isNew)
     if (!isNew) {
       f.planId = f.id
       delete f.id
@@ -495,7 +494,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
           form={form}
           onFinish={onSave}
           // labelCol={{ span: 4 }}
-          labelCol={{ flex: '176px' }}
+          labelCol={{ flex: '186px' }}
           // wrapperCol={{ span: 20 }}
           wrapperCol={{ flex: 1 }}
           colon={false}
@@ -742,6 +741,12 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               }
             />
           </Form.Item>
+          <div
+            className="relative ml-2 text-xs text-gray-400"
+            style={{ top: '-45px', left: '376px', width: '140px' }}
+          >
+            For free trial, input 0.
+          </div>
 
           <Form.Item
             label="Trial length"
@@ -772,9 +777,16 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             />
           </Form.Item>
 
-          <Form.Item label="Trial requires billing info" name="trialDemand">
+          <Form.Item label="Trial requires bank card info" name="trialDemand">
             <Switch disabled={!enableTrialWatch} />
           </Form.Item>
+          <div
+            className="relative ml-2 text-xs text-gray-400"
+            style={{ top: '-45px', left: '240px', width: '600px' }}
+          >
+            When enabled, users can only use bank card payment (no Crypto or
+            wire transfer) for their first purchase.
+          </div>
 
           <Form.Item label="Auto renew after trial end" name="cancelAtTrialEnd">
             <Switch disabled={!enableTrialWatch} />

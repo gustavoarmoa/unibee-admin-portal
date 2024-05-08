@@ -159,7 +159,7 @@ export const resetPassReq = async (
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null]
   } catch (err) {
@@ -187,7 +187,7 @@ export const getAppConfigReq = async () => {
     const res = await request.get(`/system/information/get`, {})
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -202,7 +202,7 @@ export const getGatewayListReq = async () => {
     const res = await request.get(`/merchant/gateway/list`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.gateways, null]
   } catch (err) {
@@ -211,20 +211,13 @@ export const getGatewayListReq = async () => {
   }
 }
 
-/*
-export const getApiKeysWithMore = async () => {
-
-}
-*/
-
 export const getMerchantInfoReq = async () => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/get`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
-      // throw new ExpiredError('Session expired');
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -239,7 +232,7 @@ export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
     const res = await request.post(`/merchant/update`, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.merchant, null]
   } catch (err) {
@@ -260,7 +253,7 @@ export const uploadLogoReq = async (f: FormData) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.url, null]
   } catch (err) {
@@ -274,7 +267,6 @@ export const generateApiKeyReq = async () => {
     const res = await request.post('/merchant/new_apikey', {})
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      // throw new Error('Session expired');
       throw new ExpiredError('Session expired')
     }
     return [res.data.data.apiKey, null]
@@ -299,7 +291,6 @@ export const saveGatewayKeyReq = async (
     const res = await request.post(url, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      // throw new Error('Session expired');
       throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
@@ -319,7 +310,6 @@ export const saveVatSenseKeyReq = async (vatKey: string) => {
     const res = await request.post('/merchant/vat/setup_gateway', body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      // throw new Error('Session expired');
       throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
@@ -339,7 +329,6 @@ export const saveSendGridKeyReq = async (vatKey: string) => {
     const res = await request.post('/merchant/email/gateway_setup', body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      // throw new Error('Session expired');
       throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
@@ -365,7 +354,6 @@ export const getPlanList = async (
     const res = await request.post('/merchant/plan/list', body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      // throw new Error('Session expired');
       throw new ExpiredError('Session expired')
     }
     return [res.data.data.plans, null]
@@ -433,7 +421,7 @@ export const savePlan = async (planDetail: any, isNew: boolean) => {
     const res = await request.post(url, planDetail)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful result returned.
   } catch (err) {
@@ -449,7 +437,7 @@ export const activatePlan = async (planId: number) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful result returned.
   } catch (err) {
@@ -472,7 +460,7 @@ export const togglePublishReq = async ({
     const res = await request.post(url, { planId })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful result returned.
   } catch (err) {
@@ -487,7 +475,6 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
     const res = await request.get(`/merchant/metric/list`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      // throw new ExpiredError('Session expired');
       throw new ExpiredError('Session expired')
     }
     return [res.data.data.merchantMetrics, null]
@@ -522,7 +509,7 @@ export const saveMetricsReq = async (
     const res = await request.post(url, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful result returned.
   } catch (err) {
@@ -542,7 +529,7 @@ export const getMetricDetailReq = async (
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.merchantMetric, null]
   } catch (err) {
@@ -562,7 +549,7 @@ export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
     const res = await request.post(`/merchant/subscription/list`, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.subscriptions, null]
   } catch (err) {
@@ -582,7 +569,7 @@ export const getSubByUserReq = async (
     )
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -644,7 +631,7 @@ export const cancelSubReq = async (subscriptionId: string) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -668,7 +655,7 @@ export const markAsIncompleteReq = async (
     )
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -691,7 +678,7 @@ export const createPreviewReq = async (
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -720,7 +707,7 @@ export const updateSubscription = async (
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -736,6 +723,7 @@ type TCreateSubReq = {
   addons?: { quantity: number; addonPlanId: number }[]
   confirmTotalAmount?: number
   confirmCurrency?: string
+  startIncomplete?: boolean
 }
 export const createSubscriptionReq = async ({
   planId,
@@ -744,7 +732,8 @@ export const createSubscriptionReq = async ({
   trialEnd,
   addons,
   confirmCurrency,
-  confirmTotalAmount
+  confirmTotalAmount,
+  startIncomplete
 }: TCreateSubReq) => {
   try {
     const res = await request.post(`/merchant/subscription/create_submit`, {
@@ -755,11 +744,12 @@ export const createSubscriptionReq = async ({
       quantity: 1,
       addonParams: addons,
       confirmTotalAmount,
-      confirmCurrency
+      confirmCurrency,
+      startIncomplete
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -790,7 +780,7 @@ export const terminateSubReq = async (
     const res = await request.post(url, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -809,7 +799,7 @@ export const resumeSubReq = async (subscriptionId: string) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -830,7 +820,7 @@ export const getSubTimelineReq = async (body: TGetSubTimelineReq) => {
     const res = await request.post(`/merchant/subscription/timeline_list`, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.subscriptionTimeLines, null]
   } catch (err) {
@@ -853,7 +843,7 @@ export const getPaymentTimelineReq = async (
     const res = await request.get(url)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.paymentTimeLines, null]
   } catch (err) {
@@ -872,7 +862,7 @@ export const getCountryListReq = async () => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.vatCountryList, null]
   } catch (err) {
@@ -895,7 +885,7 @@ export const extendDueDateReq = async (
     )
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null]
   } catch (err) {
@@ -923,7 +913,7 @@ export const getAdminNoteReq = async ({
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.noteLists, null]
   } catch (err) {
@@ -948,7 +938,7 @@ export const createAdminNoteReq = async ({
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null]
   } catch (err) {
@@ -968,7 +958,7 @@ export const setSimDateReq = async (
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null]
   } catch (err) {
@@ -984,7 +974,7 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
     const res = await request.get(`/merchant/user/get?userId=${userId}`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.user, null]
   } catch (err) {
@@ -1002,7 +992,7 @@ export const saveUserProfileReq = async (newProfile: IProfile) => {
     const res = await request.post(`/merchant/user/update`, u)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // this call has no meaningful result to return
   } catch (err) {
@@ -1026,7 +1016,7 @@ export const createNewUserReq = async (newUser: TNewUserInfo) => {
     const res = await request.post(`/merchant/user/new`, newUser)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // this call has no meaningful result to return
   } catch (err) {
@@ -1042,7 +1032,7 @@ export const appSearchReq = async (searchKey: string) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1056,7 +1046,7 @@ export const getDiscountCodeListReq = async (refreshCb: () => void) => {
     const res = await request.get(`/merchant/discount/list`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.discounts, null]
   } catch (err) {
@@ -1070,7 +1060,7 @@ const getDiscountCodeDetailReq = async (codeId: number) => {
     const res = await request.get(`/merchant/discount/detail?id=${codeId}`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.discount, null]
   } catch (err) {
@@ -1110,7 +1100,7 @@ export const getDiscountCodeDetailWithMore = async (
     const res = await request.get(`/merchant/discount/detail?id=${codeId}`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.discount, null]
   } catch (err) {
@@ -1124,7 +1114,7 @@ export const createDiscountCodeReq = async (body: DiscountCode) => {
     const res = await request.post(`/merchant/discount/new`, body)
     if (res.data.code == 61) {
       // session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1138,7 +1128,7 @@ export const updateDiscountCodeReq = async (body: DiscountCode) => {
     const res = await request.post(`/merchant/discount/edit`, body)
     if (res.data.code == 61) {
       // session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1152,7 +1142,7 @@ export const deleteDiscountCodeReq = async (id: number) => {
     const res = await request.post(`/merchant/discount/delete`, { id })
     if (res.data.code == 61) {
       // session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1169,7 +1159,7 @@ export const toggleDiscountCodeActivateReq = async (
     const res = await request.post(`/merchant/discount/${action}`, { id })
     if (res.data.code == 61) {
       // session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1197,7 +1187,7 @@ export const getInvoiceListReq = async (
     const res = await request.post(`/merchant/invoice/list`, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.invoices, null]
   } catch (err) {
@@ -1218,7 +1208,7 @@ export const getInvoiceDetailReq = async (
 
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1250,7 +1240,7 @@ export const createInvoiceReq = async (body: TCreateInvoiceReq) => {
     const res = await request.post(`/merchant/invoice/new`, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -1275,7 +1265,7 @@ export const saveInvoiceReq = async (body: TSaveInvoiceReq) => {
     const res = await request.post(`/merchant/invoice/edit`, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1292,7 +1282,7 @@ export const deleteInvoiceReq = async (invoiceId: string) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1313,7 +1303,7 @@ export const publishInvoiceReq = async (body: TPublishInvoiceReq) => {
     const res = await request.post(`/merchant/invoice/finish`, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1330,7 +1320,7 @@ export const revokeInvoiceReq = async (invoiceId: string) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1354,7 +1344,7 @@ export const refundReq = async (
     const res = await request.post(`/merchant/invoice/refund`, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1370,7 +1360,7 @@ export const sendInvoiceInMailReq = async (invoiceId: string) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1419,7 +1409,7 @@ export const getUserListReq = async (
     const res = await request.post(`/merchant/user/list`, users)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.userAccounts, null]
   } catch (err) {
@@ -1433,7 +1423,7 @@ export const getMerchantUserListReq = async (refreshCb: () => void) => {
     const res = await request.get('/merchant/member/list')
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.merchantMembers, null]
   } catch (err) {
@@ -1458,7 +1448,7 @@ export const inviteMemberReq = async ({
     const res = await request.post('/merchant/member/new_member', body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1467,12 +1457,12 @@ export const inviteMemberReq = async ({
   }
 }
 
-export const getPaymentGatewayListReq = async (refreshCb: () => void) => {
+export const getPaymentGatewayListReq = async () => {
   try {
     const res = await request.get(`/merchant/gateway/list`)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.gateways, null]
   } catch (err) {
@@ -1481,13 +1471,26 @@ export const getPaymentGatewayListReq = async (refreshCb: () => void) => {
   }
 }
 
+export const getAppKeysWithMore = async (refreshCb: () => void) => {
+  const [[merchantInfo, errMerchantInfo], [gateways, errGateways]] =
+    await Promise.all([getMerchantInfoReq(), getPaymentGatewayListReq()])
+  const err = errMerchantInfo || errGateways
+  if (null != err) {
+    if (err instanceof ExpiredError) {
+      session.setSession({ expired: true, refresh: refreshCb })
+    }
+    return [null, err]
+  }
+  return [{ merchantInfo, gateways }, null]
+}
+
 export const getEventListReq = async () => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/webhook/event_list`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.eventList, null]
   } catch (err) {
@@ -1502,7 +1505,7 @@ export const getWebhookListReq = async (refreshCb: () => void) => {
     const res = await request.get(`/merchant/webhook/endpoint_list`)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.endpointList, null]
   } catch (err) {
@@ -1534,7 +1537,7 @@ export const saveWebhookReq = async ({
     const res = await request.post(actionUrl, body)
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // this call has no meaningful result
   } catch (err) {
@@ -1551,7 +1554,7 @@ export const deleteWebhookReq = async (endpointId: number) => {
     })
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [null, null] // this call has no meaningful result
   } catch (err) {
@@ -1575,7 +1578,7 @@ export const getWebhookLogs = async (
     )
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new Error('Session expired')
+      throw new ExpiredError('Session expired')
     }
     return [res.data.data.endpointLogList ?? [], null]
   } catch (err) {

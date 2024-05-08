@@ -489,7 +489,7 @@ const Index = () => {
             style={{ top: '-45px', left: '340px', width: '620px' }}
           >
             How many billing cycles this discount code can be applied on a
-            recurring subscription (0 means no-limit)
+            recurring subscription (0 means no-limit).
           </div>
 
           <Form.Item

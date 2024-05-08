@@ -99,17 +99,24 @@ const Index = ({ user, closeModal, refresh }: Props) => {
     }
     console.log('submitting: ', selectedPlan, '//', gatewayId, '//', user)
     // return
-    const fiveYearFromNow = new Date(
-      new Date().setFullYear(new Date().getFullYear() + 5)
-    )
-    const sec = Math.round(fiveYearFromNow.getTime() / 1000)
-    setLoading(true)
-    const [res, err] = await createSubscriptionReq({
+
+    const body: any = {
       planId: selectedPlan as number,
       gatewayId: gatewayId as number,
-      userId: user.id as number,
-      trialEnd: sec
-    })
+      userId: user.id as number
+      // trialEnd: sec
+    }
+    if (!requirePayment) {
+      const fiveYearFromNow = new Date(
+        new Date().setFullYear(new Date().getFullYear() + 5)
+      )
+      const sec = Math.round(fiveYearFromNow.getTime() / 1000)
+      body.trialEnd = sec
+    } else {
+      body.startIncomplete = true
+    }
+    setLoading(true)
+    const [res, err] = await createSubscriptionReq(body)
     setLoading(false)
     console.log('create submit res: ', res)
     if (null != err) {
@@ -219,11 +226,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
             )}
             <div className="my-3 flex items-center gap-3">
               <span>Require payment</span>
-              <Switch
-                disabled={true}
-                checked={requirePayment}
-                onChange={setRequirePayment}
-              />
+              <Switch checked={requirePayment} onChange={setRequirePayment} />
             </div>
             <div className=" flex items-center gap-3">
               <span>Include unpublished</span>

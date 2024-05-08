@@ -24,10 +24,9 @@ import dayjs from 'dayjs'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import { useNavigate } from 'react-router-dom'
-import { generateApiKeyReq, getMerchantInfoReq } from '../../requests'
+import { getAppKeysWithMore, getMerchantInfoReq } from '../../requests'
 import '../../shared.css'
-import { IProfile } from '../../shared.types.d'
+import { IProfile, TGateway } from '../../shared.types.d'
 import ModalApiKey from './apiKeyModal'
 import PaymentGatewayList from './paymentGatewayList'
 import ModalSendgridKeyModal from './sendGridKeyModal'
@@ -215,22 +214,25 @@ const AppConfig = () => {
     sendGridKey: '',
     vatSenseKey: ''
   })
+  const [gatewayList, setGatewayList] = useState<TGateway[]>([])
+
   const toggleKeyModal = () => setApiKeyModalOpen(!apiKeyModalOpen)
   const toggleSendgridModal = () =>
     setSendgridKeyModalOpen(!sendgridKeyModalOpen)
   const toggleVatSenseKeyModal = () =>
     setVatSenseKeyModalOpen(!vatSenseKeyModalOpen)
 
-  // these keys have been desensitized, their purposes is to show which keys have been set, which haven't
-  const getApiKeysInfo = async () => {
+  const getAppKeys = async () => {
     setLoadingKeys(true)
-    const [res, err] = await getMerchantInfoReq()
+    const [res, err] = await getAppKeysWithMore(getAppKeys)
     setLoadingKeys(false)
     if (null != err) {
       message.error(err.message)
       return
     }
-    const { openApiKey, sendGridKey, vatSenseKey } = res
+    const { merchantInfo, gateways } = res
+    // these keys have been desensitized, their purposes is to show which keys have been set, which haven't
+    const { openApiKey, sendGridKey, vatSenseKey } = merchantInfo
     const k = { openApiKey: '', sendGridKey: '', vatSenseKey: '' }
     if (openApiKey != null && openApiKey != '') {
       k.openApiKey = openApiKey
@@ -242,11 +244,13 @@ const AppConfig = () => {
       k.vatSenseKey = vatSenseKey
     }
     setKeys(k)
+    setGatewayList(gateways ?? [])
   }
 
   useEffect(() => {
-    getApiKeysInfo()
+    getAppKeys()
   }, [])
+
   return (
     <div style={{ margin: '32px 0' }}>
       {apiKeyModalOpen && <ModalApiKey closeModal={toggleKeyModal} />}
@@ -279,7 +283,7 @@ const AppConfig = () => {
           </Button>
         </Col>
       </Row>
-      <PaymentGatewayList />
+      <PaymentGatewayList loading={loadingKeys} gatewayList={gatewayList} />
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={3}>
           <a href="https://vatsense.com" target="_blank" rel="noreferrer">
