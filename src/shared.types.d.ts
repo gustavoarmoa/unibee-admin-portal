@@ -332,10 +332,19 @@ type TWebhookLogs = {
 type TGateway = {
   gatewayId?: number
   gatewayKey?: string
-  gatewayName: string
+  gatewayName: 'changelly' | 'stripe' | 'wire_transfer'
   // gatewayLogo: string
   gatewayType?: number
   createTime?: number
+  minimumAmount?: number // wire tranfer only
+  currency?: string // ditto
+  bank?: {
+    // ditto
+    accountHolder: string
+    bic: string
+    iban: string
+    address: string
+  }
 }
 
 export class ExpiredError extends Error {

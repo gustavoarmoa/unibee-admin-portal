@@ -1,7 +1,6 @@
 import {
   CheckOutlined,
   ExclamationOutlined,
-  LoadingOutlined,
   SyncOutlined
 } from '@ant-design/icons'
 import type { CheckboxProps, TabsProps } from 'antd'
@@ -10,10 +9,8 @@ import {
   Checkbox,
   Col,
   Divider,
-  Input,
   Modal,
   Row,
-  Spin,
   Table,
   Tabs,
   Tag,
@@ -24,14 +21,16 @@ import dayjs from 'dayjs'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
+import { CURRENCY } from '../../constants'
 import { getAppKeysWithMore, getMerchantInfoReq } from '../../requests'
 import '../../shared.css'
-import { IProfile, TGateway } from '../../shared.types.d'
+import { TGateway } from '../../shared.types.d'
 import ModalApiKey from './apiKeyModal'
 import PaymentGatewayList from './paymentGatewayList'
 import ModalSendgridKeyModal from './sendGridKeyModal'
 import ModalVATsenseKeyModal from './vatKeyModal'
 import WebhookList from './webhookList'
+import ModalWireTransfer from './wireTransferModal'
 
 type TPermission = {
   appConfig: { read: boolean; write: boolean }
@@ -209,6 +208,7 @@ const AppConfig = () => {
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
   const [vatSenseKeyModalOpen, setVatSenseKeyModalOpen] = useState(false)
   const [sendgridKeyModalOpen, setSendgridKeyModalOpen] = useState(false)
+  const [wireTransferModalOpen, setWireTransferModalOpen] = useState(false)
   const [keys, setKeys] = useState({
     openApiKey: '',
     sendGridKey: '',
@@ -221,6 +221,8 @@ const AppConfig = () => {
     setSendgridKeyModalOpen(!sendgridKeyModalOpen)
   const toggleVatSenseKeyModal = () =>
     setVatSenseKeyModalOpen(!vatSenseKeyModalOpen)
+  const toggleWireTransferModal = () =>
+    setWireTransferModalOpen(!wireTransferModalOpen)
 
   const getAppKeys = async () => {
     setLoadingKeys(true)
@@ -244,6 +246,15 @@ const AppConfig = () => {
       k.vatSenseKey = vatSenseKey
     }
     setKeys(k)
+    if (gateways != null) {
+      const wireTransfer = gateways.find(
+        (g: TGateway) => g.gatewayName == 'wire_transfer'
+      )
+      if (wireTransfer != null) {
+        wireTransfer.minimumAmount /=
+          CURRENCY[wireTransfer.currency].stripe_factor
+      }
+    }
     setGatewayList(gateways ?? [])
   }
 
@@ -260,9 +271,16 @@ const AppConfig = () => {
       {vatSenseKeyModalOpen && (
         <ModalVATsenseKeyModal closeModal={toggleVatSenseKeyModal} />
       )}
+      {wireTransferModalOpen && (
+        <ModalWireTransfer
+          closeModal={toggleWireTransferModal}
+          detail={gatewayList.find((g) => g.gatewayName == 'wire_transfer')}
+          refresh={getAppKeys}
+        />
+      )}
 
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>UniBee API Key</Col>
+        <Col span={4}>UniBee API Key</Col>
         <Col span={2}>
           {loadingKeys ? (
             <LoadingTag />
@@ -285,7 +303,30 @@ const AppConfig = () => {
       </Row>
       <PaymentGatewayList loading={loadingKeys} gatewayList={gatewayList} />
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>
+        <Col span={4}>Wire Transfer setup</Col>
+        <Col span={2}>
+          {loadingKeys ? (
+            <LoadingTag />
+          ) : gatewayList.find((g) => g.gatewayName == 'wire_transfer') !=
+            null ? (
+            <SetTag />
+          ) : (
+            <NotSetTag />
+          )}
+        </Col>
+        <Col span={10}>
+          <div className=" text-gray-500">
+            Use this method to receive payment from bank transfer
+          </div>
+        </Col>
+        <Col span={2}>
+          <Button onClick={toggleWireTransferModal} disabled={loadingKeys}>
+            Edit
+          </Button>
+        </Col>
+      </Row>
+      <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
+        <Col span={4}>
           <a href="https://vatsense.com" target="_blank" rel="noreferrer">
             VAT Sense Key
           </a>
@@ -311,7 +352,7 @@ const AppConfig = () => {
         </Col>
       </Row>
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>
+        <Col span={4}>
           <a href="https://sendgrid.com" target="_blank" rel="noreferrer">
             SendGrid Email Key
           </a>

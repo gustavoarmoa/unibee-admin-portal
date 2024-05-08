@@ -40,16 +40,17 @@ const Index = ({
   const gatewayDetail = (name: string) =>
     gatewayList.find((g) => g.gatewayName.toLowerCase() == name.toLowerCase())
 
-  const onGatewayClick = (gatewayName: string) => () => {
-    let g: TGateway | undefined = gatewayList.find(
-      (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
-    )
-    if (g == undefined) {
-      g = { gatewayName }
+  const onGatewayClick =
+    (gatewayName: 'changelly' | 'stripe' | 'wire_transfer') => () => {
+      let g: TGateway | undefined = gatewayList.find(
+        (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
+      )
+      if (g == undefined) {
+        g = { gatewayName }
+      }
+      setGatewayEdit(g)
+      toggleModal()
     }
-    setGatewayEdit(g)
-    toggleModal()
-  }
 
   /*
   useEffect(() => {
@@ -63,7 +64,7 @@ const Index = ({
         <GatewayModal closeModal={toggleModal} gatewayDetail={gatewayEdit} />
       )}
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>
+        <Col span={4}>
           <a href="http://www.stripe.com" target="_blank" rel="noreferrer">
             Stripe
           </a>
@@ -94,7 +95,7 @@ const Index = ({
       </Row>
 
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
-        <Col span={3}>
+        <Col span={4}>
           <a href="http://www.changelly.com" target="_blank" rel="noreferrer">
             Changelly
           </a>

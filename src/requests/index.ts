@@ -1484,6 +1484,52 @@ export const getAppKeysWithMore = async (refreshCb: () => void) => {
   return [{ merchantInfo, gateways }, null]
 }
 
+type TWireTransferAccount = {
+  gatewayId?: number // required only for updating
+  currency: string
+  minimumAmount: number
+  bank: {
+    accountHolder: string
+    bic: string
+    iban: string
+    address: string
+  }
+}
+export const createWireTransferAccountReq = async (
+  body: TWireTransferAccount
+) => {
+  try {
+    const res = await request.post(
+      '/merchant/gateway/wire_transfer_setup',
+      body
+    )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [null, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const updateWireTransferAccountReq = async (
+  body: TWireTransferAccount
+) => {
+  try {
+    const res = await request.post('/merchant/gateway/wire_transfer_edit', body)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [null, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const getEventListReq = async () => {
   const session = useSessionStore.getState()
   try {
