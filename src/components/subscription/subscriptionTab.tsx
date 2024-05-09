@@ -24,9 +24,8 @@ import {
 import { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
 import update from 'immutability-helper'
-import { CSSProperties, ReactElement, useEffect, useRef, useState } from 'react'
+import { CSSProperties, useEffect, useRef, useState } from 'react'
 import { useOnClickOutside } from 'usehooks-ts'
-import { SUBSCRIPTION_STATUS } from '../../constants'
 import { daysBetweenDate, showAmount } from '../../helpers'
 import {
   createPreviewReq,
@@ -44,6 +43,7 @@ import {
   IProfile,
   ISubscriptionType
 } from '../../shared.types.d'
+import { SubscriptionStatus } from '../ui/statusTag'
 import CancelPendingSubModal from './modals/cancelPendingSub'
 import ChangePlanModal from './modals/changePlan'
 import ChangeSubStatusModal from './modals/changeSubStatus'
@@ -53,6 +53,7 @@ import TerminateSubModal from './modals/terminateSub'
 import UpdateSubPreviewModal from './modals/updateSubPreview'
 
 import '../../shared.css'
+import { useAppConfigStore } from '../../stores'
 
 const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [plans, setPlans] = useState<IPlan[]>([])
@@ -547,14 +548,6 @@ const rowStyle: CSSProperties = {
 }
 const colStyle: CSSProperties = { fontWeight: 'bold' }
 
-const SUB_STATUS: { [key: number]: ReactElement } = {
-  1: <Tag color="magenta">{SUBSCRIPTION_STATUS[1]}</Tag>, // 1: pending
-  2: <Tag color="#87d068">{SUBSCRIPTION_STATUS[2]}</Tag>, // 2: active
-  4: <Tag color="purple">{SUBSCRIPTION_STATUS[4]}</Tag>, // 4: cancelled
-  5: <Tag color="red">{SUBSCRIPTION_STATUS[5]}</Tag>, // 5: expired
-  7: <Tag color="cyan">{SUBSCRIPTION_STATUS[7]}</Tag> // 7: Incomplete
-}
-
 interface ISubSectionProps {
   subInfo: ISubscriptionType | null
   plans: IPlan[]
@@ -577,6 +570,7 @@ const SubscriptionInfoSection = ({
   toggleCancelSubModal,
   toggleChangeSubStatusModal
 }: ISubSectionProps) => {
+  const appConfigStore = useAppConfigStore()
   return (
     <>
       <Row style={rowStyle}>
@@ -594,7 +588,7 @@ const SubscriptionInfoSection = ({
           Status
         </Col>
         <Col span={6}>
-          {subInfo && SUB_STATUS[subInfo.status]}
+          {subInfo && SubscriptionStatus(subInfo.status)}
           {subInfo && (
             <Tooltip title="Refresh">
               <span
@@ -709,9 +703,9 @@ const SubscriptionInfoSection = ({
           First pay
         </Col>
         <Col span={6}>
-          {subInfo && subInfo.firstPaidTime && (
+          {subInfo && subInfo.firstPaidTime != null && (
             <span>
-              {subInfo.firstPaidTime == 0 || subInfo.firstPaidTime == null
+              {subInfo.firstPaidTime == 0
                 ? 'N/A'
                 : dayjs(new Date(subInfo.firstPaidTime * 1000)).format(
                     'YYYY-MMM-DD'
@@ -758,6 +752,20 @@ const SubscriptionInfoSection = ({
               </span>
             )}
         </Col>
+      </Row>
+
+      <Row style={rowStyle}>
+        <Col span={4} style={colStyle}>
+          Payment Gateway
+        </Col>
+        <Col span={6}>
+          {subInfo &&
+            appConfigStore.gateway.find(
+              (g) => g.gatewayId == subInfo?.gatewayId
+            )?.gatewayName}
+        </Col>
+        <Col span={4} style={colStyle}></Col>
+        <Col span={10}></Col>
       </Row>
 
       {subInfo && subInfo.status == 2 && (

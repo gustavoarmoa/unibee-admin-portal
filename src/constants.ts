@@ -18,7 +18,8 @@ export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
   4: 'Cancelled', // users(or admin) cancelled the sub(immediately or automatically at the end of billing cycle). It's triggered by human.
   5: 'Expired', // sub ended.
   // 6: 'Suspended', // suspend for a while, might want to resume later
-  7: 'Incomplete'
+  7: 'Incomplete',
+  8: 'Processing'
 }
 
 export const CURRENCY: {

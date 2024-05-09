@@ -1217,6 +1217,32 @@ export const getInvoiceDetailReq = async (
   }
 }
 
+export const markInvoiceAsPaidReq = async (
+  invoiceId: string,
+  reason: string,
+  TransferNumber: string
+) => {
+  try {
+    const res = await request.post(
+      `/merchant/invoice/mark_wire_transfer_success`,
+      {
+        invoiceId,
+        reason,
+        TransferNumber
+      }
+    )
+
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // ------------
 type TCreateInvoiceReq = {
   name: string

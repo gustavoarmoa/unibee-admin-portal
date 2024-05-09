@@ -1,5 +1,9 @@
-import { LoadingOutlined } from '@ant-design/icons'
-import { Button, Col, Row, Spin, message } from 'antd'
+import {
+  CheckCircleOutlined,
+  DollarOutlined,
+  LoadingOutlined
+} from '@ant-design/icons'
+import { Button, Col, Row, Spin, Tooltip, message } from 'antd'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { INVOICE_STATUS } from '../../constants'
@@ -9,6 +13,7 @@ import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
 import RefundModal from '../payment/refundModal'
 import InvoiceDetailModal from '../subscription/modals/invoiceDetail'
+import MarkAsPaidModal from './markAsPaidModal'
 // import InvoiceItemsModal from '../subscription/modals/newInvoice' // obsolete
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
@@ -29,6 +34,8 @@ const Index = () => {
   const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems)
   const [refundModalOpen, setRefundModalOpen] = useState(false)
   const toggleRefundModal = () => setRefundModalOpen(!refundModalOpen)
+  const [markPaidModalOpen, setMarkPaidModalOpen] = useState(false)
+  const toggleMarkPaidModal = () => setMarkPaidModalOpen(!markPaidModalOpen)
 
   const goBack = () => navigate(`${APP_PATH}invoice/list`)
   const goToUser = (userId: number) => () =>
@@ -82,6 +89,13 @@ const Index = () => {
           ignoreAmtFactor={true}
         />
       )}
+      {invoiceDetail && markPaidModalOpen && (
+        <MarkAsPaidModal
+          closeModal={toggleMarkPaidModal}
+          refresh={fetchData}
+          invoiceId={invoiceDetail.invoiceId}
+        />
+      )}
 
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
@@ -115,7 +129,17 @@ const Index = () => {
           Status
         </Col>
         <Col span={6}>
-          {invoiceDetail == null ? '' : INVOICE_STATUS[invoiceDetail.status]}
+          {invoiceDetail != null && INVOICE_STATUS[invoiceDetail.status]}
+          {invoiceDetail != null && invoiceDetail.status == 2 && (
+            <Tooltip title="Mark as Paid">
+              <span
+                style={{ cursor: 'pointer', margin: '0 8px' }}
+                onClick={toggleMarkPaidModal}
+              >
+                <DollarOutlined />
+              </span>
+            </Tooltip>
+          )}
         </Col>
       </Row>
       <Row style={rowStyle} gutter={[16, 16]}>

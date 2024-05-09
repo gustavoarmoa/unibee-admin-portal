@@ -154,6 +154,7 @@ interface ISubscriptionType {
     updateAddons: ISubAddon[]
     note: string
   }
+  gatewayId: number
 }
 
 interface IPreview {

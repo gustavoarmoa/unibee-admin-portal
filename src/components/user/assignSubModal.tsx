@@ -224,14 +224,34 @@ const Index = ({ user, closeModal, refresh }: Props) => {
                 isActive={false}
               />
             )}
-            <div className="my-3 flex items-center gap-3">
+            <div className="w-full" style={{ padding: '0 40px' }}>
+              <Row style={{ margin: '12px 0' }}>
+                <Col span={18}>Require payment</Col>
+                <Col span={6}>
+                  <Switch
+                    checked={requirePayment}
+                    onChange={setRequirePayment}
+                  />
+                </Col>
+              </Row>
+              <Row>
+                <Col span={18}>Include unpublished</Col>
+                <Col span={6}>
+                  <Switch
+                    checked={includeUnpublished}
+                    onChange={onIncludeChange}
+                  />
+                </Col>
+              </Row>
+            </div>
+            {/* <div className="my-3 flex items-center gap-3">
               <span>Require payment</span>
               <Switch checked={requirePayment} onChange={setRequirePayment} />
             </div>
             <div className=" flex items-center gap-3">
               <span>Include unpublished</span>
               <Switch checked={includeUnpublished} onChange={onIncludeChange} />
-            </div>
+        </div>*/}
           </div>
         </div>
       </div>
