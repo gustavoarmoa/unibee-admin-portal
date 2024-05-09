@@ -423,7 +423,7 @@ export const savePlan = async (planDetail: any, isNew: boolean) => {
       session.setSession({ expired: true, refresh: null })
       throw new ExpiredError('Session expired')
     }
-    return [null, null] // backend has no meaningful result returned.
+    return [res.data.data.plan, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]
@@ -433,6 +433,22 @@ export const savePlan = async (planDetail: any, isNew: boolean) => {
 export const activatePlan = async (planId: number) => {
   try {
     const res = await request.post(`/merchant/plan/activate`, {
+      planId
+    })
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [null, null] // backend has no meaningful result returned.
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const deletePlanReq = async (planId: number) => {
+  try {
+    const res = await request.post(`/merchant/plan/delete`, {
       planId
     })
     if (res.data.code == 61) {

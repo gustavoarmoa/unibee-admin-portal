@@ -9,6 +9,7 @@ import {
   Col,
   Form,
   Input,
+  Popconfirm,
   Row,
   Select,
   Spin,
@@ -27,6 +28,7 @@ import {
 } from '../../helpers'
 import {
   activatePlan,
+  deletePlanReq,
   getPlanDetailWithMore,
   savePlan,
   togglePublishReq
@@ -304,16 +306,19 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     // return
 
     setLoading(true)
-    const [_, err] = await savePlan(f, isNew)
+    const [plan, err] = await savePlan(f, isNew)
     setLoading(false)
     if (null != err) {
       message.error(err.message)
       return
     }
+    console.log('saving plan res: ', plan)
     message.success(`Plan ${isNew ? 'created' : 'saved'}`)
-    setTimeout(() => {
-      navigate(`${APP_PATH}plan/list`)
-    }, 1500)
+    if (isNew) {
+      navigate(`${APP_PATH}plan/${plan.id}`, { replace: true })
+    } else {
+      // navigate(`${APP_PATH}plan/list`)
+    }
   }
 
   const onActivate = async () => {
@@ -330,9 +335,31 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       return
     }
     message.success('Plan activated')
-    setTimeout(() => {
-      navigate(`${APP_PATH}plan/list`)
-    }, 2000)
+    navigate(`${APP_PATH}plan/list`)
+  }
+
+  const onDelete = async () => {
+    const planId = Number(params.planId)
+    if (isNaN(planId)) {
+      message.error('Invalid planId')
+      return
+    }
+    if (isNew) {
+      return
+    }
+    if (plan?.status !== 1) {
+      // 1: editing，2: active, 3: inactive，4: expired
+      return
+    }
+    setLoading(true)
+    const [_, err] = await deletePlanReq(planId)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success('Plan deleted')
+    navigate(`${APP_PATH}plan/list`)
   }
 
   const fetchData = async () => {
@@ -1035,29 +1062,48 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
           </Form.Item>
 
           <div className="flex justify-center gap-5">
-            <Button
-              onClick={() => navigate(`${APP_PATH}plan/list`)}
-              disabled={loading || activating}
-            >
-              Go Back
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              disabled={plan.status != 1 || loading || activating}
-            >
-              Save
-            </Button>
-            {!isNew && (
-              <Button
-                onClick={onActivate}
-                loading={activating}
-                disabled={isNew || plan.status != 1 || activating || loading}
-              >
-                Activate
-              </Button>
-            )}
+            <div className="flex w-full justify-evenly">
+              {!isNew && plan.status == 1 && (
+                <Popconfirm
+                  title="Deletion Confirm"
+                  description="Are you sure to delete this plan?"
+                  onConfirm={onDelete}
+                  showCancel={false}
+                  okText="Yes"
+                >
+                  <Button danger disabled={loading || activating}>
+                    Delete
+                  </Button>
+                </Popconfirm>
+              )}
+              <div className="flex justify-center gap-5">
+                <Button
+                  onClick={() => navigate(`${APP_PATH}plan/list`)}
+                  disabled={loading || activating}
+                >
+                  Go Back
+                </Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  disabled={plan.status != 1 || loading || activating}
+                >
+                  Save
+                </Button>
+                {!isNew && (
+                  <Button
+                    onClick={onActivate}
+                    loading={activating}
+                    disabled={
+                      isNew || plan.status != 1 || activating || loading
+                    }
+                  >
+                    Activate
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </Form>
       )}
