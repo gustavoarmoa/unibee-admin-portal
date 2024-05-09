@@ -12,6 +12,7 @@ import { showAmount } from '../../helpers'
 import { getSubByUserReq, getUserProfile } from '../../requests'
 import { IProfile, ISubscriptionType } from '../../shared.types.d'
 import UserAccountTab from '../subscription/userAccountTab'
+import { SubscriptionStatus } from '../ui/statusTag'
 import ModalAssignSub from './assignSubModal'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -109,7 +110,7 @@ const Index = () => {
               Status
             </Col>
             <Col span={6}>
-              {SUBSCRIPTION_STATUS[subInfo.status]}
+              {SubscriptionStatus(subInfo.status)}
               <span
                 style={{ cursor: 'pointer', marginLeft: '8px' }}
                 onClick={getUserSub}
