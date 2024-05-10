@@ -23,6 +23,7 @@ import { getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { UserInvoice } from '../../shared.types.d'
 import RefundModal from '../payment/refundModal'
+import { InvoiceStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
@@ -62,9 +63,7 @@ const Index = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (s, iv) => (
-        <span>{INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]}</span>
-      )
+      render: (s, iv) => <span> {InvoiceStatus(s)}</span>
     },
     {
       title: 'Is refund',
@@ -322,7 +321,7 @@ const Search = ({
               <Select
                 mode="multiple"
                 options={statusOpt}
-                style={{ maxWidth: 420, minWidth: 100, margin: '8px 0' }}
+                style={{ maxWidth: 420, minWidth: 120, margin: '8px 0' }}
               />
             </Form.Item>
           </Col>

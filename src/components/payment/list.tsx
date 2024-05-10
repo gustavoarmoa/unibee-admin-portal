@@ -176,6 +176,7 @@ const Index = () => {
                 toggleRefundModal()
                 return
               }
+              navigate(`${APP_PATH}transaction/${record.paymentId}`)
             }
           }
         }}

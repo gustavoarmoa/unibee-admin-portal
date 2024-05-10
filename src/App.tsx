@@ -29,6 +29,7 @@ import Dashboard from './components/dashboard'
 import InvoiceDetail from './components/invoice/detail'
 import InvoiceList from './components/invoice/list'
 import OutletPage from './components/outletPage'
+import PaymentDetail from './components/payment/detail'
 import PaymentList from './components/payment/list'
 import PlanDetail from './components/plan/detail'
 // import PricePlans from './components/pricePlans';
@@ -94,7 +95,7 @@ const App: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG }
   } = theme.useToken()
 
-  let items: MenuItem[] = [
+  const items: MenuItem[] = [
     getItem('Plan', '/plan/list', <DesktopOutlined />),
     getItem('Billable Metric', '/billable-metric/list', <DesktopOutlined />),
     getItem('Discount Code', '/discount-code/list', <DesktopOutlined />),
@@ -331,7 +332,7 @@ const App: React.FC = () => {
                   </Route>
                   <Route path={`${APP_PATH}transaction`} Component={OutletPage}>
                     <Route path="list" element={<PaymentList />} />
-                    {/* <Route path=":invoiceId" element={<InvoiceDetail />} /> */}
+                    <Route path=":paymentId" element={<PaymentDetail />} />
                   </Route>
                 </Routes>
               </div>

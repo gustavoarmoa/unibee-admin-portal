@@ -868,6 +868,25 @@ export const getPaymentTimelineReq = async (
   }
 }
 
+export const getPaymentDetailReq = async (
+  paymentId: string,
+  refreshCb: () => void
+) => {
+  try {
+    const res = await request.get(
+      `/merchant/payment/detail?paymentId=${paymentId}`
+    )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data.paymentDetail, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // -----------
 export const getCountryListReq = async () => {
   const merchantStore = useMerchantInfoStore.getState()

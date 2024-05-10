@@ -31,6 +31,7 @@ import { downloadInvoice, getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
+import { InvoiceStatus } from '../ui/statusTag'
 import InvoiceDetailModal from './modals/invoiceDetail'
 import NewInvoiceModal from './modals/newInvoice'
 
@@ -148,7 +149,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
+      render: (s) => InvoiceStatus(s) // INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
     },
     {
       title: 'Is refund',

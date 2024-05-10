@@ -13,6 +13,7 @@ import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
 import RefundModal from '../payment/refundModal'
 import InvoiceDetailModal from '../subscription/modals/invoiceDetail'
+import { InvoiceStatus } from '../ui/statusTag'
 import MarkAsPaidModal from './markAsPaidModal'
 // import InvoiceItemsModal from '../subscription/modals/newInvoice' // obsolete
 
@@ -129,7 +130,7 @@ const Index = () => {
           Status
         </Col>
         <Col span={6}>
-          {invoiceDetail != null && INVOICE_STATUS[invoiceDetail.status]}
+          {invoiceDetail != null && InvoiceStatus(invoiceDetail.status)}
           {invoiceDetail != null && invoiceDetail.status == 2 && (
             <Tooltip title="Mark as Paid">
               <span
