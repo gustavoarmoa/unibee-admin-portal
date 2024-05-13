@@ -130,16 +130,19 @@ const Index = () => {
           Status
         </Col>
         <Col span={6}>
-          {invoiceDetail != null && InvoiceStatus(invoiceDetail.status)}
-          {invoiceDetail != null && invoiceDetail.status == 2 && (
-            <Tooltip title="Mark as Paid">
-              <span
+          {/* <span
                 style={{ cursor: 'pointer', margin: '0 8px' }}
                 onClick={toggleMarkPaidModal}
-              >
-                <DollarOutlined />
-              </span>
-            </Tooltip>
+          ></span>*/}
+          {invoiceDetail != null && InvoiceStatus(invoiceDetail.status)}
+          {invoiceDetail != null && invoiceDetail.status == 2 && (
+            <Button
+              onClick={toggleMarkPaidModal}
+              type="link"
+              style={{ padding: 0 }}
+            >
+              Mark as Paid
+            </Button>
           )}
         </Col>
       </Row>

@@ -53,7 +53,7 @@ const Index = ({
     let enabled = false
     const { trialAmount, trialDurationTime, trialDemand, cancelAtTrialEnd } =
       plan
-    let amount = Number(trialAmount)
+    const amount = Number(trialAmount)
     let durationTime = Number(trialDurationTime)
     let requireCardInfo = false
     let autoRenew = false
@@ -77,8 +77,8 @@ const Index = ({
       <div className=" text-sm text-gray-500">
         <div>Trial Price: {showAmount(amount, plan.currency)}</div>
         <div>
-          Trial lengh:
-          {durationTime}
+          Trial lengh:&nbsp;
+          {durationTime}&nbsp;
           {TIME_UNITS.find((u) => u.value == lengthUnit)?.label}
         </div>
         <div>{requireCardInfo && 'Require bank card'}</div>
