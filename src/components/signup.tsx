@@ -3,7 +3,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import OtpInput from 'react-otp-input'
 import { useNavigate } from 'react-router-dom'
-import { emailValidate, passwordRegx } from '../helpers'
+import { emailValidate, passwordSchema } from '../helpers'
 import { getAppConfigReq, signUpReq } from '../requests'
 import { useAppConfigStore } from '../stores'
 import AppFooter from './appFooter'
@@ -198,6 +198,7 @@ const Index = () => {
                 <Form.Item
                   label="Password"
                   name="password"
+                  dependencies={['password2']}
                   rules={[
                     {
                       required: true,
@@ -205,21 +206,12 @@ const Index = () => {
                     },
                     ({ getFieldValue }) => ({
                       validator(rule, value) {
-                        console.log('password reg: ', value)
-                        if (
-                          passwordRegx.test(value) &&
-                          value == getFieldValue('password2')
-                        ) {
-                          return Promise.resolve()
-                        }
-                        if (value != getFieldValue('password2')) {
+                        if (!passwordSchema.validate(value)) {
                           return Promise.reject(
-                            'Please retype the same password'
+                            'At least 8 characters containing lowercase, uppercase, number and special character.'
                           )
                         }
-                        return Promise.reject(
-                          '8-15 characters with lowercase, uppercase, numeric and special character(@ $ # ! % ? * & _ ^)'
-                        )
+                        return Promise.resolve()
                       }
                     })
                   ]}
@@ -230,6 +222,7 @@ const Index = () => {
                 <Form.Item
                   label="Password Confirm"
                   name="password2"
+                  dependencies={['password']}
                   rules={[
                     {
                       required: true,
@@ -240,7 +233,7 @@ const Index = () => {
                         if (value == getFieldValue('password')) {
                           return Promise.resolve()
                         }
-                        return Promise.reject('please retype the same password')
+                        return Promise.reject('Please retype the same password')
                       }
                     })
                   ]}

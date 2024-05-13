@@ -1,6 +1,6 @@
 import { Button, Col, Form, Input, Modal, Row, message } from 'antd'
 import { useState } from 'react'
-import { emailValidate, passwordRegx } from '../../helpers'
+import { emailValidate } from '../../helpers'
 import { createNewUserReq } from '../../requests'
 // import { Country, IProfile } from '../../shared.types'
 
@@ -108,60 +108,6 @@ const Index = ({
             </Form.Item>
           </Col>
         </Row>
-
-        {/* <Row>
-          <Col span={12}>
-            <Form.Item
-              label="Password"
-              name="password"
-              dependencies={['password2']}
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your password!'
-                },
-                ({ getFieldValue }) => ({
-                  validator(rule, value) {
-                    if (passwordRegx.test(value)) {
-                      return Promise.resolve()
-                    }
-                    return Promise.reject(
-                      '8-16 characters with lowercase, uppercase, numeric and special character(@ $ # ! % ? * & _- + = ()^)'
-                    )
-                  }
-                })
-              ]}
-            >
-              <Input.Password style={{ width: '220px' }} />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              label="Retype password"
-              name="password2"
-              dependencies={['password']}
-              rules={[
-                {
-                  required: true,
-                  message: 'Please retype your password!'
-                },
-                ({ getFieldValue }) => ({
-                  validator(rule, value) {
-                    if (
-                      passwordRegx.test(value) &&
-                      value == getFieldValue('password')
-                    ) {
-                      return Promise.resolve()
-                    }
-                    return Promise.reject('Please retype the same password')
-                  }
-                })
-              ]}
-            >
-              <Input.Password style={{ width: '220px' }} />
-            </Form.Item>
-          </Col>
-            </Row> */}
 
         <Row>
           <Col span={12}>

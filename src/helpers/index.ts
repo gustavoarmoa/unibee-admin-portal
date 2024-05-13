@@ -1,7 +1,23 @@
+import passwordValidator from 'password-validator'
 import { CURRENCY } from '../constants'
 
-export const passwordRegx =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.#$!%*_\-\+=()^?&])[A-Za-z\d@.#$!%*_\-\+=()^?&]{8,16}$/
+export const passwordSchema = new passwordValidator()
+passwordSchema
+  .is()
+  .min(8) // Minimum length 8
+  .is()
+  .max(30) // Maximum length 30
+  .has()
+  .uppercase() // Must have uppercase letters
+  .has()
+  .lowercase() // Must have lowercase letters
+  .has()
+  .digits(1) // Must have at least 1 digits
+  .has()
+  .not()
+  .spaces() // Should not have spaces
+  .is()
+  .symbols(1) // should have special characters
 
 export const urlRegx =
   /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/

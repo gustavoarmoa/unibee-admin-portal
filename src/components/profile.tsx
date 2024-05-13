@@ -2,7 +2,7 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Form, Input, Modal, Skeleton, Spin, message } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { emailValidate, passwordRegx } from '../helpers'
+import { emailValidate, passwordSchema } from '../helpers'
 import {
   getMerchantInfoReq,
   logoutReq,
@@ -328,6 +328,7 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
         <Form.Item
           label="Old Password"
           name="oldPassword"
+          dependencies={['newPassword']}
           rules={[
             {
               required: true,
@@ -343,6 +344,7 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
         <Form.Item
           label="New Password"
           name="newPassword"
+          dependencies={['newPassword2', 'oldPassword']}
           rules={[
             {
               required: true,
@@ -355,12 +357,12 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
                     'New password should not be the same as old password.'
                   )
                 }
-                if (passwordRegx.test(value)) {
-                  return Promise.resolve()
+                if (!passwordSchema.validate(value)) {
+                  return Promise.reject(
+                    'At least 8 characters containing lowercase, uppercase, number and special character.'
+                  )
                 }
-                return Promise.reject(
-                  '8-15 characters with lowercase, uppercase, numeric and special character(@ $ # ! % ? * & _ ^)'
-                )
+                return Promise.resolve()
               }
             })
           ]}
@@ -371,6 +373,7 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
         <Form.Item
           label="New Password Confirm"
           name="newPassword2"
+          dependencies={['newPassword']}
           rules={[
             {
               required: true,
@@ -381,7 +384,7 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
                 if (value == getFieldValue('newPassword')) {
                   return Promise.resolve()
                 }
-                return Promise.reject('please retype the same password')
+                return Promise.reject('Please retype the same password')
               }
             })
           ]}
