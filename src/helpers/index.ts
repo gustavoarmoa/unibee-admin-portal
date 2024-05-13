@@ -66,3 +66,21 @@ export const emailValidate = (email: string) =>
     .match(
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     )
+
+// backend uses obj(key-val pairs), aka Map(in Golang) to save metadata
+// but in case of null or empty string, it's also valid, which means no input.
+// array is also 'object' in JS, but not a valid map, so it need to be marked as invalid
+export const isValidMap = (str: string | null) => {
+  if (str == null || str == '') {
+    return true
+  }
+  try {
+    const obj = JSON.parse(str)
+    if (Array.isArray(obj)) {
+      return false
+    }
+    return typeof obj == 'object'
+  } catch (err) {
+    return false
+  }
+}

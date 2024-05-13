@@ -22,6 +22,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY } from '../../constants'
 import {
   currencyDecimalValidate,
+  isValidMap,
   ramdonString,
   toFixedNumber
 } from '../../helpers'
@@ -270,18 +271,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       delete f.onetimeAddonIds
     }
 
-    let isValidMetadata = false
-    if (f.metadata != '' && f.metadata != null) {
-      try {
-        const obj = JSON.parse(f.metadata)
-        isValidMetadata = true
-      } catch (err) {
-        console.log('invalid json')
-        message.error('Invalid custome data.')
-        return
-      }
-    } else {
-      isValidMetadata = true
+    if (!isValidMap(f.metadata)) {
+      message.error('Invalid custom data')
+      return
     }
 
     let m = JSON.parse(JSON.stringify(selectedMetrics)) // selectedMetrics.map(metric => ({metricLimit: Number(metric.metricLimit)}))
@@ -392,16 +384,12 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     planDetail.plan.onetimeAddonIds =
       planDetail.onetimeAddonIds == null ? [] : planDetail.onetimeAddonIds
 
-    // planDetail.plan.metadata = planDetail.plan.metadata == null ? '' :
-    let metadata = ''
-    if (
-      planDetail.plan.metadata != null &&
-      typeof planDetail.plan.metadata == 'object'
-    ) {
+    let metadata = planDetail.plan.metadata
+    if (metadata != null && metadata != '') {
       try {
-        metadata = JSON.stringify(planDetail.plan.metadata)
-      } catch {
-        console.log('invalid json')
+        metadata = JSON.stringify(metadata)
+      } catch (err) {
+        metadata = ''
       }
     }
     planDetail.plan.metadata = metadata
@@ -508,6 +496,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
 
   const prettifyJSON = () => {
     const metadata = form.getFieldValue('metadata')
+    if (metadata == '' || metadata == null) {
+      return
+    }
     try {
       const obj = JSON.parse(metadata)
       form.setFieldValue('metadata', JSON.stringify(obj, null, 4))
@@ -900,167 +891,38 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             ))}
           </Form.Item>
 
-          <Form.Item label="Custom data (JSON string)" name="metadata">
+          <Form.Item
+            label="Custom data (JSON string)"
+            name="metadata"
+            rules={[
+              {
+                required: false,
+                message: 'Please input a valid object JSON string!'
+              },
+              ({ getFieldValue }) => ({
+                validator(rule, value) {
+                  return isValidMap(value)
+                    ? Promise.resolve()
+                    : Promise.reject('Invalid JSON object string')
+                }
+              })
+            ]}
+          >
             <Input.TextArea rows={6} style={{ width: '640px' }} />
-            {/* <Row
-              gutter={[8, 8]}
-              style={{ marginTop: '0px' }}
-              className=" font-bold text-gray-500"
-            >
-              <Col span={5}>Property</Col>
-              <Col span={5}>Value Type</Col>
-              <Col span={5}>Value</Col>
-              <Col span={5}>
-                <div
-                  onClick={() => addMetadata()}
-                  className={`w-16 cursor-pointer font-bold`}
-                >
-                  <PlusOutlined />
-                </div>
-              </Col>
-          </Row> */}
-
-            {/* <Form.List name="metadata">
-              {(fields, { add, remove }) => {
-                addMetadata = add
-                return (
-                  <>
-                    {fields &&
-                      fields.map((field, index) => {
-                        return (
-                          <Row
-                            key={ramdonString(8)}
-                            className="flex items-center"
-                            style={{ marginBottom: '12px' }}
-                          >
-                            <Col span={5}>
-                              <Form.Item
-                                name={[field.name, 'property']}
-                                // label={`Event - ${index + 1}`}
-                                noStyle={true}
-                                rules={[
-                                  {
-                                    required: true
-                                    // message: 'property cannot be empty'
-                                  },
-                                  ({ getFieldValue }) => ({
-                                    validator(rule, value) {
-                                      if (
-                                        getFieldValue('metadata').filter(
-                                          (m: any) => m.property == value
-                                        ).length >= 2
-                                      ) {
-                                        return Promise.reject(
-                                          'Duplicate property'
-                                        )
-                                      } else if (value.trim() == '') {
-                                        return Promise.reject(
-                                          'Property cannot be empty'
-                                        )
-                                      } else {
-                                        return Promise.resolve()
-                                      }
-                                    }
-                                  })
-                                ]}
-                              >
-                                <Input style={{ width: '85%' }} />
-                              </Form.Item>
-                            </Col>
-                            <Col span={5}>
-                              <Form.Item
-                                name={[field.name, 'valueType']}
-                                // label={`Event - ${index + 1}`}
-                                noStyle={true}
-                                rules={[{ required: true }]}
-                                // dependencies={[field.name, 'value']}
-                              >
-                                <Select
-                                  style={{ width: 180 }}
-                                  options={[
-                                    { value: 'string', label: 'String' },
-                                    { value: 'number', label: 'Number' },
-                                    { value: 'boolean', label: 'Bool' }
-                                  ]}
-                                />
-                              </Form.Item>
-                            </Col>
-                            <Col span={5}>
-                              <Form.Item
-                                name={[field.name, 'value']}
-                                // label={`Event - ${index + 1}`}
-                                noStyle={true}
-                                rules={[
-                                  { required: true },
-                                  ({ getFieldValue }) => ({
-                                    validator(rule, value) {
-                                      // switch (metaDataWatch[index].valueType) {
-                                      switch (
-                                        getFieldValue([
-                                          'metadata',
-                                          index,
-                                          'valueType'
-                                        ])
-                                      ) {
-                                        case 'boolean':
-                                          if (
-                                            value != '1' &&
-                                            value != '0' &&
-                                            value.toLowerCase() != 'true' &&
-                                            value.toLowerCase() != 'false'
-                                          ) {
-                                            return Promise.reject(
-                                              'Invalid boolean value, only "true" or "false" are allowed!'
-                                            )
-                                          }
-                                          return Promise.resolve()
-                                        case 'number':
-                                          if (isNaN(Number(value))) {
-                                            return Promise.reject(
-                                              'Invalid numeric value'
-                                            )
-                                          }
-                                          return Promise.resolve()
-                                        default:
-                                          return Promise.resolve()
-                                      }
-                                    }
-                                  })
-                                ]}
-                              >
-                                <Input style={{ width: '85%' }} />
-                              </Form.Item>
-                            </Col>
-                            <Col span={5}>
-                              <div
-                                onClick={() => {
-                                  remove(field.name)
-                                }}
-                                style={{
-                                  marginLeft: '5px',
-                                  fontWeight: 'bold',
-                                  width: '32px',
-                                  cursor: `pointer`
-                                }}
-                              >
-                                <MinusOutlined />
-                              </div>
-                            </Col>
-                          </Row>
-                        )
-                      })}
-                  </>
-                )
-              }}
-            </Form.List> */}
           </Form.Item>
 
           <div
             className="relative ml-2 text-xs text-gray-400"
-            style={{ top: '-165px', left: '840px', width: '100px' }}
+            style={{ top: '-165px', left: '830px', width: '100px' }}
           >
             {' '}
             <Button onClick={prettifyJSON}>Prettify</Button>
+          </div>
+          <div
+            className="relative ml-2 text-xs text-gray-400"
+            style={{ top: '-32px', left: '178px', width: '450px' }}
+          >
+            {`Top level must be a key-value paired object, like {"a": 1, "b": 2, "c": [1,2,3]}.`}
           </div>
 
           <Form.Item label="Product Name" name="productName" hidden>
@@ -1083,7 +945,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             <Input disabled />
           </Form.Item>
 
-          <div className="flex justify-center gap-5">
+          <div className="my-6 flex justify-center gap-5">
             <div className="flex w-full justify-evenly">
               {!isNew && plan.status == 1 && (
                 <Popconfirm
