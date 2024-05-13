@@ -7,7 +7,7 @@ import { Button, Pagination, Space, Table, Tag, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
-import React, { ReactElement, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
 import { usePagination } from '../../hooks'
@@ -30,6 +30,11 @@ const PLAN_TYPE_FILTER = [
   { text: 'Add-on', value: 2 },
   { text: 'One-time payment', value: 3 }
 ] // main plan or addon
+
+/*
+const TrialInfo = (plan: IPlan) => {
+}
+*/
 
 const columns: ColumnsType<IPlan> = [
   {
@@ -90,6 +95,17 @@ const columns: ColumnsType<IPlan> = [
     key: 'publishStatus',
     render: (publishStatus, plan) =>
       publishStatus == 2 ? (
+        <CheckCircleOutlined style={{ color: 'green' }} />
+      ) : (
+        <MinusOutlined style={{ color: 'red' }} />
+      )
+  },
+  {
+    title: 'Allow Trial',
+    dataIndex: 'trialDurationTime',
+    key: 'trialDurationTime',
+    render: (trialDurationTime, plan) =>
+      trialDurationTime > 0 ? (
         <CheckCircleOutlined style={{ color: 'green' }} />
       ) : (
         <MinusOutlined style={{ color: 'red' }} />

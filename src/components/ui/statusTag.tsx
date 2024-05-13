@@ -4,6 +4,7 @@ import {
   CURRENCY,
   DISCOUNT_CODE_STATUS,
   INVOICE_STATUS,
+  PAYMENT_STATUS,
   PLAN_STATUS,
   SUBSCRIPTION_STATUS
 } from '../../constants'
@@ -45,6 +46,17 @@ const DISCOUNT_CODE_STATUS_TAG: { [key: number]: ReactElement } = {
 const DiscountCodeStatus = (statusId: number) =>
   DISCOUNT_CODE_STATUS_TAG[statusId]
 
-// payment status
+const PAYMENT_STATUS_TAG: { [key: number]: ReactElement } = {
+  0: <Tag color="blue">{PAYMENT_STATUS[0]}</Tag>, // pending
+  1: <Tag color="#87d068">{PAYMENT_STATUS[1]}</Tag>, // succeeded
+  2: <Tag color="purple">{PAYMENT_STATUS[2]}</Tag> // failed
+}
+const PaymentStatus = (statusId: number) => PAYMENT_STATUS_TAG[statusId]
 
-export { DiscountCodeStatus, InvoiceStatus, PlanStatus, SubscriptionStatus }
+export {
+  DiscountCodeStatus,
+  InvoiceStatus,
+  PaymentStatus,
+  PlanStatus,
+  SubscriptionStatus
+}

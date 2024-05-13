@@ -11,6 +11,7 @@ import { getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { PaymentItem } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
+import { PaymentStatus } from '../ui/statusTag'
 import RefundModal from './refundModal'
 
 const PAGE_SIZE = 10
@@ -52,9 +53,9 @@ const Index = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (s) => (
+      render: (s) => PaymentStatus(s) /* (
         <span>{PAYMENT_STATUS[s as keyof typeof PAYMENT_STATUS]}</span>
-      )
+      ) */
     },
     {
       title: 'Type',
@@ -105,7 +106,20 @@ const Index = () => {
     {
       title: 'User Id',
       dataIndex: 'userId',
-      key: 'userId'
+      key: 'userId',
+      render: (userId) =>
+        userId == '' || userId == null ? (
+          ''
+        ) : (
+          <Button
+            type="link"
+            style={{ padding: 0 }}
+            className="btn-user-id"
+            onClick={() => navigate(`${APP_PATH}user/${userId}`)}
+          >
+            {userId}
+          </Button>
+        )
     },
     {
       title: 'Payment gateway',
@@ -164,6 +178,7 @@ const Index = () => {
         columns={columns}
         dataSource={paymentList}
         rowKey={'id'}
+        scroll={{ x: 1400, y: 640 }}
         rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{
@@ -181,7 +196,7 @@ const Index = () => {
                 toggleRefundModal()
                 return
               }
-              navigate(`${APP_PATH}transaction/${record.paymentId}`)
+              // navigate(`${APP_PATH}transaction/${record.paymentId}`)
             }
           }
         }}
