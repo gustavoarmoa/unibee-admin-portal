@@ -53,9 +53,7 @@ const Index = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (s) => PaymentStatus(s) /* (
-        <span>{PAYMENT_STATUS[s as keyof typeof PAYMENT_STATUS]}</span>
-      ) */
+      render: (s) => PaymentStatus(s)
     },
     {
       title: 'Type',
