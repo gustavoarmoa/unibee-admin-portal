@@ -58,11 +58,7 @@ type TNewPlan = {
   addonIds: number[]
   onetimeAddonIds?: number[]
   metricLimits: TMetricsItem[]
-  metadata?: {
-    property: string
-    value: string
-    valueType: TMetaValueType
-  }[]
+  metadata?: string
   enableTrial?: boolean
   trialAmount?: number
   trialDurationTime?: number
@@ -80,13 +76,7 @@ const NEW_PLAN: TNewPlan = {
   homeUrl: 'http://www.google.com',
   addonIds: [],
   metricLimits: [],
-  metadata: [
-    /*
-    { property: 'trafficUnit', value: 'Byte', valueType: 'string' },
-    { property: 'trafficAmount', value: '1024', valueType: 'number' },
-    { property: 'suspended', value: 'true', valueType: 'boolean' }
-    */
-  ],
+  metadata: '',
   enableTrial: false,
   trialAmount: 0,
   trialDurationTime: 0,
@@ -210,11 +200,6 @@ const Index = () => {
     </Select>
   )
 
-  let addMetadata: (
-    defaultValue?: any,
-    insertIndex?: number | undefined
-  ) => void
-
   useEffect(() => {
     if (!isNew && plan?.status != 1) {
       // 1: editing, 2: active
@@ -285,6 +270,20 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       delete f.onetimeAddonIds
     }
 
+    let isValidMetadata = false
+    if (f.metadata != '' && f.metadata != null) {
+      try {
+        const obj = JSON.parse(f.metadata)
+        isValidMetadata = true
+      } catch (err) {
+        console.log('invalid json')
+        message.error('Invalid custome data.')
+        return
+      }
+    } else {
+      isValidMetadata = true
+    }
+
     let m = JSON.parse(JSON.stringify(selectedMetrics)) // selectedMetrics.map(metric => ({metricLimit: Number(metric.metricLimit)}))
     m = m.map((metrics: any) => ({
       metricId: metrics.metricId,
@@ -293,7 +292,6 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     m = m.filter((metric: any) => !isNaN(metric.metricLimit))
     f.metricLimits = m
 
-    f.metadata = array2obj(f.metadata)
     console.log('saving...: ', f)
 
     // return
@@ -394,7 +392,19 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     planDetail.plan.onetimeAddonIds =
       planDetail.onetimeAddonIds == null ? [] : planDetail.onetimeAddonIds
 
-    planDetail.plan.metadata = obj2array(planDetail.plan.metadata)
+    // planDetail.plan.metadata = planDetail.plan.metadata == null ? '' :
+    let metadata = ''
+    if (
+      planDetail.plan.metadata != null &&
+      typeof planDetail.plan.metadata == 'object'
+    ) {
+      try {
+        metadata = JSON.stringify(planDetail.plan.metadata)
+      } catch {
+        console.log('invalid json')
+      }
+    }
+    planDetail.plan.metadata = metadata
 
     const trialAmount = Number(planDetail.plan.trialAmount)
     const trialDurationTime = Number(planDetail.plan.trialDurationTime)
@@ -493,6 +503,17 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
         [idx]: { metricId: { $set: val } }
       })
       setSelectedMetrics(newMetrics)
+    }
+  }
+
+  const prettifyJSON = () => {
+    const metadata = form.getFieldValue('metadata')
+    try {
+      const obj = JSON.parse(metadata)
+      form.setFieldValue('metadata', JSON.stringify(obj, null, 4))
+    } catch (err) {
+      message.error('Invalid custome data.')
+      return
     }
   }
 
@@ -879,8 +900,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             ))}
           </Form.Item>
 
-          <Form.Item label="Custom data">
-            <Row
+          <Form.Item label="Custom data (JSON string)" name="metadata">
+            <Input.TextArea rows={6} style={{ width: '640px' }} />
+            {/* <Row
               gutter={[8, 8]}
               style={{ marginTop: '0px' }}
               className=" font-bold text-gray-500"
@@ -896,9 +918,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                   <PlusOutlined />
                 </div>
               </Col>
-            </Row>
+          </Row> */}
 
-            <Form.List name="metadata">
+            {/* <Form.List name="metadata">
               {(fields, { add, remove }) => {
                 addMetadata = add
                 return (
@@ -1030,8 +1052,16 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                   </>
                 )
               }}
-            </Form.List>
+            </Form.List> */}
           </Form.Item>
+
+          <div
+            className="relative ml-2 text-xs text-gray-400"
+            style={{ top: '-165px', left: '840px', width: '100px' }}
+          >
+            {' '}
+            <Button onClick={prettifyJSON}>Prettify</Button>
+          </div>
 
           <Form.Item label="Product Name" name="productName" hidden>
             <Input />
