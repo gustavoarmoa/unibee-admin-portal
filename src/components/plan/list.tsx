@@ -10,11 +10,11 @@ import Dinero, { Currency } from 'dinero.js'
 import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
-import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { getPlanList } from '../../requests'
 import '../../shared.css'
 import { IPlan } from '../../shared.types.d'
+import { PlanStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
@@ -30,13 +30,6 @@ const PLAN_TYPE_FILTER = [
   { text: 'Add-on', value: 2 },
   { text: 'One-time payment', value: 3 }
 ] // main plan or addon
-
-const STATUS: { [key: number]: ReactElement } = {
-  1: <Tag color="blue">{PLAN_STATUS[1]}</Tag>,
-  2: <Tag color="#87d068">{PLAN_STATUS[2]}</Tag>,
-  3: <Tag color="purple">{PLAN_STATUS[3]}</Tag>,
-  4: <Tag color="red">{PLAN_STATUS[4]}</Tag>
-}
 
 const columns: ColumnsType<IPlan> = [
   {
@@ -87,7 +80,7 @@ const columns: ColumnsType<IPlan> = [
     title: 'Status',
     dataIndex: 'status',
     key: 'status',
-    render: (_, plan) => STATUS[plan.status],
+    render: (s, plan) => PlanStatus(s), // (_, plan) => STATUS[plan.status],
     filters: PLAN_STATUS_FILTER
     // onFilter: (value, record) => record.status == value,
   },

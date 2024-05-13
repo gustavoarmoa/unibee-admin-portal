@@ -28,9 +28,14 @@ const Index = () => {
 
   const columns: ColumnsType<PaymentItem> = [
     {
-      title: 'Transaction Id',
+      title: 'Tx Id',
       dataIndex: 'transactionId',
-      key: 'transactionId'
+      key: 'txId'
+    },
+    {
+      title: 'Ex Tx Id',
+      dataIndex: ['payment', 'externalPaymentId'],
+      key: 'exTxId'
     },
     {
       title: 'Total Amount',

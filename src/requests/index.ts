@@ -868,6 +868,26 @@ export const getPaymentTimelineReq = async (
   }
 }
 
+export const getDetailPaymentListReq = async (
+  params: TGetSubTimelineReq,
+  refreshCb: () => void
+) => {
+  const { page, count } = params
+  try {
+    const res = await request.get(
+      `/merchant/payment/list?page=${page}&count=${count}`
+    )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data.paymentDetails, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const getPaymentDetailReq = async (
   paymentId: string,
   refreshCb: () => void

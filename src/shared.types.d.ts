@@ -187,6 +187,13 @@ type DiscountCode = {
   }
 }
 
+type TransactionItem = {
+  gateway: TGateway
+  invoice: UserInvoice
+  payment: PaymentItem
+  user: IProfile
+}
+
 type PaymentItem = {
   id: number
   merchantId: number
@@ -197,6 +204,9 @@ type PaymentItem = {
   totalAmount: number
   gatewayId: number
   paymentId: string
+  payment: {
+    externalPaymentId: string
+  }
   refund?: TRefund
   status: number
   timelineType: number
@@ -373,5 +383,6 @@ export type {
   TRefund,
   TWebhook,
   TWebhookLogs,
+  TransactionItem,
   UserInvoice
 }

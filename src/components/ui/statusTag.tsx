@@ -1,6 +1,12 @@
 import { Tag } from 'antd'
 import React, { ReactElement } from 'react'
-import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants'
+import {
+  CURRENCY,
+  DISCOUNT_CODE_STATUS,
+  INVOICE_STATUS,
+  PLAN_STATUS,
+  SUBSCRIPTION_STATUS
+} from '../../constants'
 
 const SUB_STATUS: { [key: number]: ReactElement } = {
   1: <Tag color="magenta">{SUBSCRIPTION_STATUS[1]}</Tag>, // 1: pending
@@ -22,6 +28,23 @@ const IV_STATUS: { [key: number]: ReactElement } = {
 }
 const InvoiceStatus = (statusId: number) => IV_STATUS[statusId]
 
+const PLAN_STATUS_TAG: { [key: number]: ReactElement } = {
+  1: <Tag color="blue">{PLAN_STATUS[1]}</Tag>,
+  2: <Tag color="#87d068">{PLAN_STATUS[2]}</Tag>,
+  3: <Tag color="purple">{PLAN_STATUS[3]}</Tag>,
+  4: <Tag color="red">{PLAN_STATUS[4]}</Tag>
+}
+const PlanStatus = (statusId: number) => PLAN_STATUS_TAG[statusId]
+
+const DISCOUNT_CODE_STATUS_TAG: { [key: number]: ReactElement } = {
+  1: <Tag color="blue">{DISCOUNT_CODE_STATUS[1]}</Tag>,
+  2: <Tag color="#87d068">{DISCOUNT_CODE_STATUS[2]}</Tag>,
+  3: <Tag color="purple">{DISCOUNT_CODE_STATUS[3]}</Tag>,
+  4: <Tag color="red">{DISCOUNT_CODE_STATUS[4]}</Tag>
+}
+const DiscountCodeStatus = (statusId: number) =>
+  DISCOUNT_CODE_STATUS_TAG[statusId]
+
 // payment status
 
-export { InvoiceStatus, SubscriptionStatus }
+export { DiscountCodeStatus, InvoiceStatus, PlanStatus, SubscriptionStatus }

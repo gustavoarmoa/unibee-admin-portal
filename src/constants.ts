@@ -10,7 +10,7 @@ export const PLAN_STATUS: { [key: number]: string } = {
 
 export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
   // 0: 'Initiating', // used when creating the sub, it only exist for a very short time, user might not realize it exists
-  1: 'Pending', // when sub is created, but user hasn't paid yet
+  1: 'Pending', // when sub is created, but user hasn't paid yet. this is for bank card payment
   2: 'Active', // 2: active: user paid the sub fee
   // 3: "Suspended", // suspend: not used yet. For future implementation: users might want to suspend the sub for a period of time, during which, they don't need to pay
   // 3: 'Pending', // when status is transitioning from 1 to 2, or 2 to 4, there is a pending status, it's not synchronous
@@ -18,8 +18,8 @@ export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
   4: 'Cancelled', // users(or admin) cancelled the sub(immediately or automatically at the end of billing cycle). It's triggered by human.
   5: 'Expired', // sub ended.
   // 6: 'Suspended', // suspend for a while, might want to resume later
-  7: 'Incomplete',
-  8: 'Processing'
+  7: 'Incomplete', // user claimed they have wired the transfer, admin mark the invoice as Incomplete until a DATE, so user can use it before that DATE
+  8: 'Processing' // user claimed they have wired the transfer(this status if for wire only), but we're checking
 }
 
 export const CURRENCY: {

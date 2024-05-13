@@ -14,13 +14,12 @@ import {
   Select,
   Spin,
   Switch,
-  Tag,
   message
 } from 'antd'
 import update from 'immutability-helper'
-import React, { ReactElement, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CURRENCY, PLAN_STATUS } from '../../constants'
+import { CURRENCY } from '../../constants'
 import {
   currencyDecimalValidate,
   ramdonString,
@@ -34,6 +33,7 @@ import {
   togglePublishReq
 } from '../../requests'
 import { IBillableMetrics, IPlan } from '../../shared.types.d'
+import { PlanStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL
 const getAmount = (amt: number, currency: string) =>
@@ -156,13 +156,6 @@ const secondsToUnit = (sec: number) => {
 
 const unitToSeconds = (value: number, unit: number) => {
   return value * unit
-}
-
-const STATUS: { [key: number]: ReactElement } = {
-  1: <Tag color="blue">{PLAN_STATUS[1]}</Tag>, // editing
-  2: <Tag color="#87d068">{PLAN_STATUS[2]}</Tag>, // active
-  3: <Tag color="purple">{PLAN_STATUS[3]}</Tag>, // inactive
-  4: <Tag color="red">{PLAN_STATUS[4]}</Tag> // expired
 }
 
 const { Option } = Select
@@ -563,8 +556,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
           </Form.Item>
 
           <Form.Item label="Status" name="status">
-            {/* <span>{PLAN_STATUS[plan.status]}</span> */}
-            {STATUS[plan.status]}
+            {PlanStatus(plan.status)}
           </Form.Item>
 
           <Form.Item label="Is Published" name="publishStatus">

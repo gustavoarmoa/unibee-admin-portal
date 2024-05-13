@@ -4,6 +4,7 @@ import {
   DatePicker,
   Form,
   Input,
+  Popconfirm,
   Select,
   Spin,
   Tag,
@@ -28,16 +29,10 @@ import {
 } from '../../requests'
 import { DiscountCode, IPlan } from '../../shared.types.d'
 import { useMerchantInfoStore } from '../../stores'
+import { DiscountCodeStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
 const { RangePicker } = DatePicker
-
-const STATUS: { [key: number]: ReactElement } = {
-  1: <Tag color="blue">{DISCOUNT_CODE_STATUS[1]}</Tag>, // editing
-  2: <Tag color="#87d068">{DISCOUNT_CODE_STATUS[2]}</Tag>, // active
-  3: <Tag color="purple">{DISCOUNT_CODE_STATUS[3]}</Tag>, // inactive
-  4: <Tag color="red">{DISCOUNT_CODE_STATUS[4]}</Tag> // expired
-}
 
 const NEW_CODE: DiscountCode = {
   merchantId: useMerchantInfoStore.getState().id,
@@ -323,7 +318,7 @@ const Index = () => {
           </Form.Item>
           {!isNew && (
             <Form.Item label="Status">
-              {STATUS[code.status as number]}
+              {DiscountCodeStatus(code.status as number)}
             </Form.Item>
           )}
           <Form.Item
@@ -555,13 +550,20 @@ const Index = () => {
         </Form>
       )}
       <div className="flex justify-between">
-        <Button
-          danger
-          onClick={onDelete}
-          disabled={isNew || (code != null && code.status != 1)} // 1: editing
+        <Popconfirm
+          title="Deletion Confirm"
+          description="Are you sure to delete this discount code?"
+          onConfirm={onDelete}
+          showCancel={false}
+          okText="Yes"
         >
-          Delete
-        </Button>
+          <Button
+            danger
+            disabled={isNew || (code != null && code.status != 1)} // 1: editing
+          >
+            Delete
+          </Button>
+        </Popconfirm>
 
         <div className="flex justify-center gap-4">
           <Button onClick={goBack}>Go back</Button>

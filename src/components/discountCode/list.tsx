@@ -25,18 +25,13 @@ import {
 } from '../../constants'
 import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { getDiscountCodeListReq, getInvoiceListReq } from '../../requests'
+import { getDiscountCodeListReq } from '../../requests'
 import '../../shared.css'
-import { DiscountCode, UserInvoice } from '../../shared.types.d'
+import { DiscountCode } from '../../shared.types.d'
+import { DiscountCodeStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
-const STATUS: { [key: number]: ReactElement } = {
-  1: <Tag color="blue">{DISCOUNT_CODE_STATUS[1]}</Tag>,
-  2: <Tag color="#87d068">{DISCOUNT_CODE_STATUS[2]}</Tag>,
-  3: <Tag color="purple">{DISCOUNT_CODE_STATUS[3]}</Tag>,
-  4: <Tag color="red">{DISCOUNT_CODE_STATUS[4]}</Tag>
-}
 
 const Index = () => {
   const { page, onPageChange } = usePagination()
@@ -61,7 +56,7 @@ const Index = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (s) => STATUS[s]
+      render: (s) => DiscountCodeStatus(s) // STATUS[s]
     },
     {
       title: 'Billing Type',
