@@ -21,6 +21,7 @@ import { getUserListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
+import { SubscriptionStatus, UserStatus } from '../ui/statusTag'
 import CreateUserModal from './createUserModal'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -56,13 +57,6 @@ const Index = () => {
       key: 'email'
     },
     {
-      title: 'Created at',
-      dataIndex: 'createTime',
-      key: 'createTime',
-      render: (d, plan) =>
-        d === 0 ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
-    },
-    {
       title: 'Subscription',
       dataIndex: 'subscriptionName',
       key: 'subscriptionName'
@@ -86,16 +80,21 @@ const Index = () => {
       title: 'Sub Status',
       dataIndex: 'subscriptionStatus',
       key: 'subscriptionStatus',
-      render: (status, plan) => SUBSCRIPTION_STATUS[status]
-    }
-    /*
-    {
-      title: 'Sub Amt',
-      dataIndex: 'recurringAmount',
-      key: 'recurringAmount',
-      // render: (amt, record) => <span>{amt}</span>,
+      render: (subStatus, _) => SubscriptionStatus(subStatus) // (status, plan) => SUBSCRIPTION_STATUS[status]
     },
-    */
+    {
+      title: 'Created at',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (d, plan) =>
+        d === 0 ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status, _) => UserStatus(status)
+    }
   ]
 
   const fetchData = async () => {
@@ -117,12 +116,6 @@ const Index = () => {
     setUsers(users)
   }
 
-  /*
-  useEffect(() => {
-    fetchData()
-  }, [])
-  */
-
   useEffect(() => {
     fetchData()
   }, [page])
@@ -134,7 +127,12 @@ const Index = () => {
       )}
       <Row>
         <Col span={22}>
-          <Search form={form} goSearch={fetchData} searching={loading} />{' '}
+          <Search
+            form={form}
+            goSearch={fetchData}
+            searching={loading}
+            onPageChange={onPageChange}
+          />{' '}
         </Col>
         <Col span={2}>
           <Button type="primary" onClick={toggleNewUserModal}>
@@ -191,15 +189,17 @@ const DEFAULT_SEARCH_TERM = {
 const Search = ({
   form,
   searching,
-  goSearch
+  goSearch,
+  onPageChange
 }: {
   form: FormInstance<any>
   searching: boolean
   goSearch: () => void
+  onPageChange: (page: number, pageSize: number) => void
 }) => {
   const clear = () => {
     form.resetFields()
-    // reset page to 1
+    onPageChange(1, PAGE_SIZE)
     goSearch()
   }
 

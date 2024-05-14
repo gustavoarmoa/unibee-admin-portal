@@ -6,7 +6,8 @@ import {
   INVOICE_STATUS,
   PAYMENT_STATUS,
   PLAN_STATUS,
-  SUBSCRIPTION_STATUS
+  SUBSCRIPTION_STATUS,
+  USER_STATUS
 } from '../../constants'
 
 const SUB_STATUS: { [key: number]: ReactElement } = {
@@ -53,10 +54,17 @@ const PAYMENT_STATUS_TAG: { [key: number]: ReactElement } = {
 }
 const PaymentStatus = (statusId: number) => PAYMENT_STATUS_TAG[statusId]
 
+const USER_STATUS_TAG: { [key: number]: ReactElement } = {
+  0: <Tag color="#87d068">{USER_STATUS[0]}</Tag>, // active
+  2: <Tag color="red">{USER_STATUS[2]}</Tag> // suspended
+}
+const UserStatus = (statusId: number) => USER_STATUS_TAG[statusId]
+
 export {
   DiscountCodeStatus,
   InvoiceStatus,
   PaymentStatus,
   PlanStatus,
-  SubscriptionStatus
+  SubscriptionStatus,
+  UserStatus
 }

@@ -14,6 +14,7 @@ interface IProfile {
   firstName: string
   lastName: string
   id: number | null
+  status: number // 0-Active, 2-Frozen
   phone: string
   mobile: string
   paymentMethod: string
