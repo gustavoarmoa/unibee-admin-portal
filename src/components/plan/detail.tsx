@@ -40,7 +40,6 @@ const APP_PATH = import.meta.env.BASE_URL
 const getAmount = (amt: number, currency: string) =>
   amt / CURRENCY[currency].stripe_factor
 
-type TMetaValueType = 'string' | 'boolean' | 'number'
 type TMetricsItem = {
   localId: string
   metricId?: number
@@ -85,49 +84,6 @@ const NEW_PLAN: TNewPlan = {
   cancelAtTrialEnd: true
 }
 
-const array2obj = (
-  arr: {
-    property: string
-    value: string
-    valueType: TMetaValueType
-  }[]
-) => {
-  if (null == arr) {
-    return {}
-  }
-  const obj: { [key: string]: string | number | boolean } = {}
-  arr.forEach((a) => {
-    switch (a.valueType) {
-      case 'number':
-        obj[a.property] = Number(a.value)
-        break
-      case 'boolean':
-        obj[a.property] =
-          a.value == '1' || a.value.toLowerCase() == 'true' ? true : false
-        break
-      case 'string':
-        obj[a.property] = a.value
-        break
-    }
-  })
-  return obj
-}
-
-const obj2array = (obj: { [key: string]: string | number | boolean }) => {
-  if (null == obj) {
-    return []
-  }
-  const arr: { property: string; value: string; valueType: string }[] = []
-  for (const prop in obj) {
-    arr.push({
-      property: prop,
-      value: obj[prop] + '',
-      valueType: typeof obj[prop]
-    })
-  }
-  return arr
-}
-
 const TIME_UNITS = [
   // in seconds
   { label: 'hours', value: 60 * 60 },
@@ -164,12 +120,14 @@ const Index = () => {
   const [plan, setPlan] = useState<IPlan | TNewPlan | null>(
     isNew ? NEW_PLAN : null
   ) // plan obj is used for Form's initialValue, any changes is handled by Form itself, not updated here.
+  // it's better to use useRef to save plan obj.
   const [addons, setAddons] = useState<IPlan[]>([]) // all the active addons we have (addon has the same structure as Plan).
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]) // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
   const [selectOnetime, setSelectOnetime] = useState<IPlan[]>([]) // one-time payment addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
   // one plan can have many regular addons, but only ONE one-time payment addon, but backend support multiple.
   const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]) // all the billable metrics, not used for edit, but used in <Select /> for user to choose.
   const [selectedMetrics, setSelectedMetrics] = useState<TMetricsItem[]>([
+    // metrics are hard to let form handle change, I have to manually handle it
     { localId: ramdonString(8) }
   ])
   const [trialLengthUnit, setTrialLengthUnit] = useState(
@@ -218,6 +176,9 @@ const Index = () => {
         a.currency == addonCurrency
     )
     setSelectAddons(newAddons)
+    // 为何 one time addon没有更新.
+    // 且: 这3个values一旦有变, 除了addon, onetime addon的Select有变, 当前他们已经选中的也要clear
+    // 做的好的话, 展示不clear, 但onSave时, 提示error(如果有的addon不在<Select />列表中)
     // when editing addon, don't do anything in this effect.
     // once changed, I'm gonna clear the selected addons,
   }, [itvCountUnit, itvCountValue, addonCurrency])
@@ -235,7 +196,6 @@ trialAmount?: number
 trialDurationTime?: number
 trialDemand?: 'paymentMethod' | '' | boolean // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UX, front-end use <Switch />
 cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
-
     */
     if (!f.enableTrial) {
       f.trialAmount = 0

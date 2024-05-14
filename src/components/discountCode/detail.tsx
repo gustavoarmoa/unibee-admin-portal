@@ -13,7 +13,7 @@ import {
 import dayjs, { Dayjs } from 'dayjs'
 import React, { ReactElement, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { CURRENCY, DISCOUNT_CODE_STATUS } from '../../constants'
+import { CURRENCY } from '../../constants'
 import {
   currencyDecimalValidate,
   showAmount,

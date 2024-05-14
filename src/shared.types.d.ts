@@ -160,6 +160,7 @@ interface ISubscriptionType {
     note: string
   }
   gatewayId: number
+  latestInvoice?: UserInvoice
 }
 
 interface IPreview {
@@ -269,6 +270,7 @@ interface UserInvoice {
   createTime: number
   originAmount?: number
   discountAmount?: number
+  discount?: DiscountCode
   totalAmount: number
   taxAmount: number
   subscriptionAmount: number

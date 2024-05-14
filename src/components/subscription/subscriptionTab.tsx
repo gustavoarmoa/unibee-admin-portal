@@ -25,6 +25,7 @@ import { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
 import update from 'immutability-helper'
 import { CSSProperties, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useOnClickOutside } from 'usehooks-ts'
 import { daysBetweenDate, showAmount } from '../../helpers'
 import {
@@ -37,8 +38,15 @@ import {
   terminateSubReq,
   updateSubscription
 } from '../../requests'
-import { IPlan, IPreview, ISubscriptionType } from '../../shared.types.d'
-import { SubscriptionStatus } from '../ui/statusTag'
+import '../../shared.css'
+import {
+  DiscountCode,
+  IPlan,
+  IPreview,
+  ISubscriptionType
+} from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
+import { DiscountCodeStatus, SubscriptionStatus } from '../ui/statusTag'
 import CancelPendingSubModal from './modals/cancelPendingSub'
 import ChangePlanModal from './modals/changePlan'
 import ChangeSubStatusModal from './modals/changeSubStatus'
@@ -47,8 +55,7 @@ import ResumeSubModal from './modals/resumeSub'
 import TerminateSubModal from './modals/terminateSub'
 import UpdateSubPreviewModal from './modals/updateSubPreview'
 
-import '../../shared.css'
-import { useAppConfigStore } from '../../stores'
+const APP_PATH = import.meta.env.BASE_URL // import.meta.env.VITE_APP_PATH;
 
 const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [plans, setPlans] = useState<IPlan[]>([])
@@ -287,9 +294,15 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     }
     console.log('detailRes: ', detailRes)
     const { subDetail, planList } = detailRes
-    const { user, addons, unfinishedSubscriptionPendingUpdate, subscription } =
-      subDetail
+    const {
+      user,
+      addons,
+      unfinishedSubscriptionPendingUpdate,
+      subscription,
+      latestInvoice
+    } = subDetail
     const localActiveSub: ISubscriptionType = { ...subscription }
+    localActiveSub.latestInvoice = latestInvoice
     localActiveSub.addons = addons?.map((a: any) => ({
       ...a.addonPlan,
       quantity: a.quantity,
@@ -374,12 +387,6 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   useEffect(() => {
     fetchData()
   }, [])
-
-  /*
-  useEffect(() => {
-    fetchData()
-  }, [window.location.pathname])
-  */
 
   useEffect(() => {
     if (!changePlanModal && activeSub != null) {
@@ -565,14 +572,40 @@ const SubscriptionInfoSection = ({
   toggleCancelSubModal,
   toggleChangeSubStatusModal
 }: ISubSectionProps) => {
+  const navigate = useNavigate()
   const appConfigStore = useAppConfigStore()
+  const goToPlan = (planId: number) => navigate(`${APP_PATH}plan/${planId}`)
+  const goToDiscount = (codeId: number) =>
+    navigate(`${APP_PATH}discount-code/${codeId}`)
+  const discountAmt = (code: DiscountCode) => {
+    if (code.discountType == 1) {
+      // percentage
+      return `${code.discountPercentage / 100} %`
+    } else if (code.discountType == 2) {
+      // fixed amt
+      return showAmount(code.discountAmount, code.currency)
+    } else {
+      return ''
+    }
+  }
   return (
     <>
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
           Plan
         </Col>
-        <Col span={6}>{subInfo?.plan?.planName}</Col>
+        <Col span={6}>
+          {subInfo && (
+            <Button
+              type="link"
+              size="small"
+              style={{ padding: 0 }}
+              onClick={() => goToPlan(subInfo.planId)}
+            >
+              {subInfo?.plan?.planName}
+            </Button>
+          )}
+        </Col>
         <Col span={4} style={colStyle}>
           Plan Description
         </Col>
@@ -644,7 +677,9 @@ const SubscriptionInfoSection = ({
                 <div style={{ width: '280px' }}>
                   {subInfo?.addons.map((a) => (
                     <Row key={a.id}>
-                      <Col span={10}>{a.planName}</Col>
+                      <Col span={10} className=" font-bold text-gray-500">
+                        {a.planName}
+                      </Col>
                       <Col span={14}>
                         {showAmount(a.amount, a.currency)} × {a.quantity} ={' '}
                         {showAmount(a.amount * a.quantity, a.currency)}
@@ -663,6 +698,108 @@ const SubscriptionInfoSection = ({
       </Row>
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
+          Discount Amount
+        </Col>
+        <Col span={6}>
+          {subInfo &&
+            subInfo.latestInvoice &&
+            showAmount(
+              subInfo.latestInvoice.discountAmount as number,
+              subInfo.latestInvoice.currency
+            )}
+
+          {subInfo &&
+            subInfo.latestInvoice &&
+            subInfo.latestInvoice.discount && (
+              <Popover
+                placement="top"
+                title="Discount code info"
+                content={
+                  <div style={{ width: '320px' }}>
+                    <Row>
+                      <Col span={10} className=" font-bold text-gray-500">
+                        Code
+                      </Col>
+                      <Col span={14}>
+                        <Button
+                          type="link"
+                          size="small"
+                          style={{ padding: 0 }}
+                          onClick={() =>
+                            goToDiscount(
+                              subInfo.latestInvoice?.discount?.id as number
+                            )
+                          }
+                        >
+                          {subInfo.latestInvoice.discount.code}
+                        </Button>{' '}
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={10} className=" font-bold text-gray-500">
+                        Name
+                      </Col>
+                      <Col span={14}>{subInfo.latestInvoice.discount.name}</Col>
+                    </Row>
+                    <Row>
+                      <Col span={10} className=" font-bold text-gray-500">
+                        Status
+                      </Col>
+                      <Col span={14}>
+                        {DiscountCodeStatus(
+                          subInfo.latestInvoice.discount.status as number
+                        )}
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={10} className=" font-bold text-gray-500">
+                        Billing Type
+                      </Col>
+                      <Col span={14}>
+                        {subInfo.latestInvoice.discount.billingType === 1
+                          ? 'One-time use'
+                          : 'Recurring'}
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={10} className=" font-bold text-gray-500">
+                        Discount Amt
+                      </Col>
+                      <Col span={14}>
+                        {discountAmt(subInfo.latestInvoice.discount)}
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={10} className=" font-bold text-gray-500">
+                        Cycle limit
+                      </Col>
+                      <Col span={14}>
+                        {subInfo.latestInvoice.discount.cycleLimit}
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col span={10} className=" font-bold text-gray-500">
+                        Valid range
+                      </Col>
+                      <Col span={14}>
+                        {`${dayjs(
+                          subInfo.latestInvoice.discount.startTime * 1000
+                        ).format(
+                          'YYYY-MMM-DD'
+                        )} ~ ${dayjs(subInfo.latestInvoice.discount.endTime * 1000).format('YYYY-MMM-DD')} `}
+                      </Col>
+                    </Row>
+                  </div>
+                }
+              >
+                <span style={{ marginLeft: '8px', cursor: 'pointer' }}>
+                  <InfoCircleOutlined />
+                </span>
+              </Popover>
+            )}
+        </Col>
+
+        <Col span={4} style={colStyle}>
           Total Amount
         </Col>
         <Col span={6}>
@@ -673,30 +810,16 @@ const SubscriptionInfoSection = ({
             </span>
           ) : null}
         </Col>
-
+      </Row>
+      <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
           Bill Period
         </Col>
         <Col span={6}>
+          {' '}
           {subInfo != null && subInfo.plan != null
             ? `${subInfo.plan.intervalCount} ${subInfo.plan.intervalUnit}`
             : ''}
-        </Col>
-      </Row>
-      <Row style={rowStyle}>
-        <Col span={4} style={colStyle}>
-          First pay
-        </Col>
-        <Col span={6}>
-          {subInfo && subInfo.firstPaidTime != null && (
-            <span>
-              {subInfo.firstPaidTime == 0
-                ? 'N/A'
-                : dayjs(new Date(subInfo.firstPaidTime * 1000)).format(
-                    'YYYY-MMM-DD'
-                  )}
-            </span>
-          )}
         </Col>
         <Col span={4} style={colStyle}>
           Next due date
@@ -741,16 +864,30 @@ const SubscriptionInfoSection = ({
 
       <Row style={rowStyle}>
         <Col span={4} style={colStyle}>
-          Payment Gateway
+          First Pay
         </Col>
         <Col span={6}>
+          {' '}
+          {subInfo && subInfo.firstPaidTime != null && (
+            <span>
+              {subInfo.firstPaidTime == 0
+                ? 'N/A'
+                : dayjs(new Date(subInfo.firstPaidTime * 1000)).format(
+                    'YYYY-MMM-DD'
+                  )}
+            </span>
+          )}
+        </Col>
+        <Col span={4} style={colStyle}>
+          Payment Gateway
+        </Col>
+        <Col span={10}>
+          {' '}
           {subInfo &&
             appConfigStore.gateway.find(
               (g) => g.gatewayId == subInfo?.gatewayId
             )?.gatewayName}
         </Col>
-        <Col span={4} style={colStyle}></Col>
-        <Col span={10}></Col>
       </Row>
 
       {subInfo && subInfo.status == 1 && (
