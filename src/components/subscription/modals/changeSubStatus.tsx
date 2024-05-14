@@ -4,6 +4,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import { useState } from 'react'
 import { markAsIncompleteReq } from '../../../requests'
 import { ISubscriptionType } from '../../../shared.types'
+import { SubscriptionStatus } from '../../ui/statusTag'
 
 interface Props {
   subInfo: ISubscriptionType | null
@@ -57,7 +58,7 @@ const Index = ({ subInfo, closeModal, refresh }: Props) => {
       <Row>
         <Col span={8}>
           <div className="flex h-full items-center justify-center">
-            Mark as &nbsp; <Tag color="cyan">Incomplete</Tag> until
+            Mark as &nbsp; {SubscriptionStatus(7)} until
           </div>
         </Col>
         <Col span={16}>

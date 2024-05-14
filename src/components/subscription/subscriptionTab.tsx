@@ -37,12 +37,7 @@ import {
   terminateSubReq,
   updateSubscription
 } from '../../requests'
-import {
-  IPlan,
-  IPreview,
-  IProfile,
-  ISubscriptionType
-} from '../../shared.types.d'
+import { IPlan, IPreview, ISubscriptionType } from '../../shared.types.d'
 import { SubscriptionStatus } from '../ui/statusTag'
 import CancelPendingSubModal from './modals/cancelPendingSub'
 import ChangePlanModal from './modals/changePlan'
@@ -610,16 +605,6 @@ const SubscriptionInfoSection = ({
               </span>
             </Tooltip>
           )}
-          {subInfo && subInfo.status == 1 && (
-            <Tooltip title="Mark as Incomplete">
-              <span
-                style={{ cursor: 'pointer', margin: '0 8px' }}
-                onClick={toggleChangeSubStatusModal}
-              >
-                <ClockCircleOutlined />
-              </span>
-            </Tooltip>
-          )}
         </Col>
         <Col span={4} style={colStyle}>
           Subscription Id
@@ -767,6 +752,14 @@ const SubscriptionInfoSection = ({
         <Col span={4} style={colStyle}></Col>
         <Col span={10}></Col>
       </Row>
+
+      {subInfo && subInfo.status == 1 && (
+        <div className="mx-0 my-6 flex items-center justify-start gap-9">
+          <Button onClick={toggleChangeSubStatusModal}>
+            Mark as Incomplete
+          </Button>
+        </div>
+      )}
 
       {subInfo && subInfo.status == 2 && (
         <div className="mx-0 my-6 flex items-center justify-start gap-9">
