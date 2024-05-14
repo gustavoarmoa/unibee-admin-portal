@@ -68,7 +68,7 @@ const Index = () => {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, plan) => dayjs(d).format('YYYY-MMM-DD')
+      render: (d, plan) => dayjs(d * 1000).format('YYYY-MMM-DD')
     }
   ]
 

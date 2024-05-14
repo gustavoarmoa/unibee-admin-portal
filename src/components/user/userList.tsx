@@ -196,7 +196,11 @@ const Search = ({
   searching: boolean
   goSearch: () => void
 }) => {
-  const clear = () => form.resetFields()
+  const clear = () => {
+    form.resetFields()
+    // reset page to 1
+    goSearch()
+  }
 
   return (
     <div>
