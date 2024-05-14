@@ -57,9 +57,10 @@ const Index = () => {
     },
     {
       title: 'Created at',
-      dataIndex: 'gmtCreate',
-      key: 'gmtCreate',
-      render: (d, plan) => dayjs(d).format('YYYY-MMM-DD')
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (d, plan) =>
+        d === 0 ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
     },
     {
       title: 'Subscription',

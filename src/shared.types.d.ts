@@ -9,6 +9,7 @@ interface IProfile {
   countryName: string
   companyName: string
   email: string
+  createTime: number
   facebook: string
   firstName: string
   lastName: string
