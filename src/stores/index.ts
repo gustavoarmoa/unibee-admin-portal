@@ -16,6 +16,7 @@ const INITIAL_PROFILE: IProfile = {
   countryCode: '',
   countryName: '',
   createTime: 0,
+  status: 0, // 0-Active, 2-Frozen
   id: null,
   phone: '',
   paymentMethod: '',
