@@ -4,7 +4,7 @@ import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PAYMENT_STATUS, PAYMENT_TYPE } from '../../constants'
+import { PAYMENT_TYPE } from '../../constants'
 import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { getPaymentTimelineReq } from '../../requests'
@@ -81,24 +81,35 @@ const Index = () => {
     {
       title: 'Sub Id',
       dataIndex: 'subscriptionId',
-      key: 'subscriptionId'
+      key: 'subscriptionId',
+      width: 140,
+      render: (subId) =>
+        subId == '' || subId == null ? (
+          ''
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}subscription/${subId}`)}
+          >
+            {subId}
+          </div>
+        )
     },
     {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
       key: 'invoiceId',
+      width: 140,
       render: (iv) =>
         iv == '' || iv == null ? (
           ''
         ) : (
-          <Button
-            type="link"
-            style={{ padding: 0 }}
-            className="btn-invoice-id"
+          <div
+            className="btn-invoice-id w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
             onClick={() => navigate(`${APP_PATH}invoice/${iv}`)}
           >
             {iv}
-          </Button>
+          </div>
         )
     },
     {
@@ -109,14 +120,12 @@ const Index = () => {
         userId == '' || userId == null ? (
           ''
         ) : (
-          <Button
-            type="link"
-            style={{ padding: 0 }}
-            className="btn-user-id"
+          <div
+            className="btn-user-id w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
             onClick={() => navigate(`${APP_PATH}user/${userId}`)}
           >
             {userId}
-          </Button>
+          </div>
         )
     },
     {
