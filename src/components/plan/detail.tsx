@@ -278,7 +278,8 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       return
     }
     message.success('Plan activated')
-    navigate(`${APP_PATH}plan/list`)
+    // navigate(`${APP_PATH}plan/list`)
+    fetchData()
   }
 
   const onDelete = async () => {
