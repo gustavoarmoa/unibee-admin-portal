@@ -79,7 +79,7 @@ const Index = () => {
       }
     },
     {
-      title: 'Sub Id',
+      title: 'Subscription Id',
       dataIndex: 'subscriptionId',
       key: 'subscriptionId',
       width: 140,
