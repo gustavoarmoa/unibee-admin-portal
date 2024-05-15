@@ -57,16 +57,6 @@ const Index = ({ detail, closeModal, ignoreAmtFactor }: Props) => {
         </Col>
         <Col span={14}>{REFUND_STATUS[detail.status]}</Col>
       </Row>
-      <Row style={{ margin: '8px 0' }}>
-        <Col
-          span={10}
-          style={{ fontWeight: 'bold' }}
-          className=" text-gray-600"
-        >
-          Payment Id
-        </Col>
-        <Col span={14}>{detail.paymentId}</Col>
-      </Row>
 
       <Row style={{ margin: '8px 0' }}>
         <Col

@@ -144,6 +144,10 @@ const Index = () => {
 
   const onTrialLengthUnitChange = (val: number) => setTrialLengthUnit(val)
 
+  const disableAfterActive = isNew
+    ? false
+    : plan?.status == 2 && plan.publishStatus == 1
+
   const selectAfter = (
     <Select
       value={trialLengthUnit}
@@ -883,7 +887,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             className="relative ml-2 text-xs text-gray-400"
             style={{ top: '-32px', left: '178px', width: '450px' }}
           >
-            {`Top level must be a key-value paired object, like {"a": 1, "b": 2, "c": [1,2,3]}.`}
+            {`JSON object must be a key-value paired object, like {"a": 1, "b": 2, "c": [1,2,3]}.`}
           </div>
 
           <Form.Item label="Product Name" name="productName" hidden>
