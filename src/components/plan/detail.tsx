@@ -17,7 +17,7 @@ import {
   message
 } from 'antd'
 import update from 'immutability-helper'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY } from '../../constants'
 import {
@@ -48,6 +48,7 @@ type TMetricsItem = {
 type TNewPlan = {
   // why can't I use IPlan??????????
   currency: string
+  // amount: number
   intervalUnit: string
   intervalCount: number
   status: number
@@ -67,6 +68,7 @@ type TNewPlan = {
 }
 const NEW_PLAN: TNewPlan = {
   currency: 'EUR',
+  // amount: 0,
   intervalUnit: 'month',
   intervalCount: 1,
   status: 1, // 1: editing，2: active, 3: inactive，4: expired
@@ -144,16 +146,21 @@ const Index = () => {
 
   const onTrialLengthUnitChange = (val: number) => setTrialLengthUnit(val)
 
-  const disableAfterActive = isNew
-    ? false
-    : plan?.status == 2 && plan.publishStatus == 1
+  // disable editing for 4 keys fields after activate(currency, price, intervalUnit/Count)
+  const disableAfterActive = useRef(
+    plan?.status == 2 && plan.publishStatus == 2 // plan active && published
+  )
+  let savable =
+    isNew || plan?.status == 1 || (plan?.status == 2 && plan.publishStatus == 1) // isNew || plan editing || (active && unpublished)
+
+  let formDisabled = plan?.status == 2 && plan.publishStatus == 2
 
   const selectAfter = (
     <Select
       value={trialLengthUnit}
       style={{ width: 150 }}
       onChange={onTrialLengthUnitChange}
-      disabled={!enableTrialWatch}
+      disabled={!enableTrialWatch || formDisabled}
     >
       {TIME_UNITS.map((u) => (
         <Option key={u.label} value={u.value}>
@@ -240,6 +247,14 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       return
     }
 
+    if (plan?.status == 2) {
+      // when in active, these fields are not editable. Although disabled, but backend will complain if included in body
+      delete f.intervalCount
+      delete f.intervalUnit
+      delete f.amount
+      delete f.currency
+    }
+
     let m = JSON.parse(JSON.stringify(selectedMetrics)) // selectedMetrics.map(metric => ({metricLimit: Number(metric.metricLimit)}))
     m = m.map((metrics: any) => ({
       metricId: metrics.metricId,
@@ -253,16 +268,16 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     // return
 
     setLoading(true)
-    const [plan, err] = await savePlan(f, isNew)
+    const [updatedPlan, err] = await savePlan(f, isNew)
     setLoading(false)
     if (null != err) {
       message.error(err.message)
       return
     }
-    console.log('saving plan res: ', plan)
+    console.log('saving plan res: ', updatedPlan)
     message.success(`Plan ${isNew ? 'created' : 'saved'}`)
     if (isNew) {
-      navigate(`${APP_PATH}plan/${plan.id}`, { replace: true })
+      navigate(`${APP_PATH}plan/${updatedPlan.id}`, { replace: true })
     } else {
       // navigate(`${APP_PATH}plan/list`)
     }
@@ -336,6 +351,23 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       return
     }
     // for editing existing plan, we continue with planDetailRes
+
+    disableAfterActive.current =
+      planDetail.plan.status == 2 && planDetail.plan.publishStatus == 1 // active and published
+
+    savable =
+      planDetail.plan.status == 1 ||
+      (planDetail.plan.status == 2 && planDetail.plan.publishStatus == 1) // plan editing || active
+
+    formDisabled =
+      planDetail.plan.status == 2 && planDetail.plan.publishStatus == 2
+
+    console.log(
+      'planDetail.plan.status == 2 && planDetail.plan.publishStatus == 1 ',
+      planDetail.plan.status == 2,
+      '///',
+      planDetail.plan.publishStatus == 1
+    )
 
     // plan obj and addon obj are at the same level in planDetailRes.data.data obj
     // but I want to put addonIds obj as a props of the local plan obj.
@@ -420,17 +452,23 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       message.error(err.message)
       return
     }
-    await fetchData()
     setPublishing(false)
+    fetchData()
   }
 
   // it just adds an empty metrics item
   const addMetrics = () => {
+    if (formDisabled) {
+      return
+    }
     const m: TMetricsItem = { localId: ramdonString(8) }
     setSelectedMetrics(update(selectedMetrics, { $push: [m] }))
   }
 
   const removeMetrics = (localId: string) => {
+    if (formDisabled) {
+      return
+    }
     const idx = selectedMetrics.findIndex((m) => m.localId == localId)
     if (idx != -1) {
       setSelectedMetrics(update(selectedMetrics, { $splice: [[idx, 1]] }))
@@ -477,6 +515,15 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     fetchData()
   }, [])
 
+  console.log(
+    'disableAfterActive/savable/formdisabled: ',
+    disableAfterActive.current,
+    '//',
+    savable,
+    '//',
+    formDisabled
+  )
+
   return (
     <div>
       <Spin
@@ -490,14 +537,10 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
         <Form
           form={form}
           onFinish={onSave}
-          // labelCol={{ span: 4 }}
           labelCol={{ flex: '186px' }}
-          // wrapperCol={{ span: 20 }}
           wrapperCol={{ flex: 1 }}
           colon={false}
-          // layout="horizontal"
-          // disabled={componentDisabled}
-          // style={{ maxWidth: 1024 }}
+          disabled={formDisabled}
           initialValues={plan}
         >
           {!isNew && (
@@ -550,7 +593,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               <Button
                 style={{ marginLeft: '12px' }}
                 onClick={togglePublish}
-                loading={publishing || loading}
+                loading={publishing}
                 disabled={plan.status != 2 || publishing || loading}
               >
                 {/* 2: active, you can only publish/unpublish an active plan */}
@@ -558,6 +601,14 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               </Button>
             </div>
           </Form.Item>
+          {plan.status == 2 && plan.publishStatus == 2 && (
+            <div
+              className="relative ml-2 text-xs text-gray-400"
+              style={{ top: '-45px', left: '336px', width: '340px' }}
+            >
+              Unpublish to enable form editing after activation.
+            </div>
+          )}
 
           <Form.Item
             label="Currency"
@@ -570,6 +621,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             ]}
           >
             <Select
+              disabled={disableAfterActive.current || formDisabled}
               style={{ width: 180 }}
               options={[
                 { value: 'EUR', label: 'EUR' },
@@ -605,6 +657,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             ]}
           >
             <Input
+              disabled={disableAfterActive.current || formDisabled}
               style={{ width: 180 }}
               prefix={
                 CURRENCY[form.getFieldValue('currency') ?? plan.currency].symbol
@@ -625,7 +678,11 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             >
               <Select
                 style={{ width: 180 }}
-                disabled={planTypeWatch == 3} // one-time payment has no interval unit/count
+                disabled={
+                  planTypeWatch == 3 ||
+                  disableAfterActive.current ||
+                  formDisabled
+                } // one-time payment has no interval unit/count
                 options={[
                   { value: 'day', label: 'day' },
                   { value: 'week', label: 'week' },
@@ -646,7 +703,12 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               }
             ]}
           >
-            <Input disabled={planTypeWatch == 3} style={{ width: 180 }} />
+            <Input
+              disabled={
+                planTypeWatch == 3 || disableAfterActive.current || formDisabled
+              }
+              style={{ width: 180 }}
+            />
             {/* one-time payment has no interval unit/count */}
           </Form.Item>
 
@@ -667,7 +729,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               <Select
                 mode="multiple"
                 allowClear
-                disabled={planTypeWatch == 2 || planTypeWatch == 3} // you cannot add addon to another addon (or another one time payment)
+                disabled={
+                  planTypeWatch == 2 || planTypeWatch == 3 || formDisabled
+                } // you cannot add addon to another addon (or another one time payment)
                 style={{ width: '100%' }}
                 options={selectAddons.map((a) => ({
                   label: a.planName,
@@ -681,7 +745,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             <Form.Item label="One-time payment add-on" name="onetimeAddonIds">
               <Select
                 allowClear
-                disabled={planTypeWatch == 2 || planTypeWatch == 3} // you cannot add one-time payment addon to another addon (or another one time payment)
+                disabled={
+                  planTypeWatch == 2 || planTypeWatch == 3 || formDisabled
+                } // you cannot add one-time payment addon to another addon (or another one time payment)
                 style={{ width: '100%' }}
                 options={selectOnetime.map((a) => ({
                   label: a.planName,
@@ -730,7 +796,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             ]}
           >
             <Input
-              disabled={!enableTrialWatch}
+              disabled={!enableTrialWatch || formDisabled}
               style={{ width: 180 }}
               prefix={
                 CURRENCY[form.getFieldValue('currency') ?? plan.currency].symbol
@@ -769,12 +835,12 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             <Input
               style={{ width: 220 }}
               addonAfter={selectAfter}
-              disabled={!enableTrialWatch}
+              disabled={!enableTrialWatch || formDisabled}
             />
           </Form.Item>
 
           <Form.Item label="Trial requires bank card info" name="trialDemand">
-            <Switch disabled={!enableTrialWatch} />
+            <Switch disabled={!enableTrialWatch || formDisabled} />
           </Form.Item>
           <div
             className="relative ml-2 text-xs text-gray-400"
@@ -785,7 +851,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
           </div>
 
           <Form.Item label="Auto renew after trial end" name="cancelAtTrialEnd">
-            <Switch disabled={!enableTrialWatch} />
+            <Switch disabled={!enableTrialWatch || formDisabled} />
           </Form.Item>
 
           <Form.Item label="Billable Metrics">
@@ -802,7 +868,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               <Col span={2}>
                 <div
                   onClick={addMetrics}
-                  className={`w-16 font-bold ${planTypeWatch == 3 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`w-16 font-bold ${planTypeWatch == 3 || formDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <PlusOutlined />
                 </div>
@@ -812,7 +878,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               <Row key={m.localId} gutter={[8, 8]} className="my-4">
                 <Col span={5}>
                   <Select
-                    disabled={planTypeWatch == 3}
+                    disabled={planTypeWatch == 3 || formDisabled}
                     value={m.metricId}
                     onChange={onMetricSelectChange(m.localId)}
                     style={{ width: 180 }}
@@ -839,7 +905,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                 </Col>
                 <Col span={3}>
                   <Input
-                    disabled={planTypeWatch == 3}
+                    disabled={planTypeWatch == 3 || formDisabled}
                     value={m.metricLimit}
                     onChange={updateMetrics(m.localId)}
                   />
@@ -847,7 +913,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                 <Col span={2}>
                   <div
                     onClick={() => removeMetrics(m.localId)}
-                    className={`w-16 font-bold ${planTypeWatch == 3 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                    className={`w-16 font-bold ${planTypeWatch == 3 || formDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <MinusOutlined />
                   </div>
@@ -936,7 +1002,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                   type="primary"
                   htmlType="submit"
                   loading={loading}
-                  disabled={plan.status != 1 || loading || activating}
+                  disabled={loading || activating || !savable}
                 >
                   Save
                 </Button>

@@ -124,7 +124,6 @@ const Index = ({ user, detail, closeModal }: Props) => {
               ×
             </Col>
             <Col span={3}>{v.quantity}</Col>
-            {/* <Col span={2}>tax</Col> */}
             <Col span={4}>
               {showAmount(
                 (v.unitAmountExcludingTax as number) * (v.quantity as number),
