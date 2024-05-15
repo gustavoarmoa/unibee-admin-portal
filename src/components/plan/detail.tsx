@@ -148,12 +148,12 @@ const Index = () => {
 
   // disable editing for 4 keys fields after activate(currency, price, intervalUnit/Count)
   const disableAfterActive = useRef(
-    plan?.status == 2 && plan.publishStatus == 2 // plan active && published
+    plan?.status == 2 && plan.publishStatus == 1 // plan active && unpublished
   )
   let savable =
     isNew || plan?.status == 1 || (plan?.status == 2 && plan.publishStatus == 1) // isNew || plan editing || (active && unpublished)
 
-  let formDisabled = plan?.status == 2 && plan.publishStatus == 2
+  let formDisabled = plan?.status == 2 && plan.publishStatus == 2 // plan active && published
 
   const selectAfter = (
     <Select
@@ -353,14 +353,14 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     // for editing existing plan, we continue with planDetailRes
 
     disableAfterActive.current =
-      planDetail.plan.status == 2 && planDetail.plan.publishStatus == 1 // active and published
+      planDetail.plan.status == 2 && planDetail.plan.publishStatus == 1 // active and unpublished
 
     savable =
       planDetail.plan.status == 1 ||
       (planDetail.plan.status == 2 && planDetail.plan.publishStatus == 1) // plan editing || active
 
     formDisabled =
-      planDetail.plan.status == 2 && planDetail.plan.publishStatus == 2
+      planDetail.plan.status == 2 && planDetail.plan.publishStatus == 2 // plan active && published
 
     console.log(
       'planDetail.plan.status == 2 && planDetail.plan.publishStatus == 1 ',
