@@ -1,15 +1,16 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Pagination, Spin, Table, Tag, message } from 'antd'
+import { Table, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants'
+import { SUBSCRIPTION_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { getSublist } from '../../requests'
 import '../../shared.css'
 import { ISubscriptionType } from '../../shared.types.d'
+import Pagination from '../ui/pagination'
 import { SubscriptionStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -93,6 +94,7 @@ const columns: ColumnsType<ISubscriptionType> = [
 
 const Index = () => {
   const { page, onPageChange } = usePagination()
+  const [isLastPage, setIsLastPage] = useState(false)
   const [subList, setSubList] = useState<ISubscriptionType[]>([])
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -113,6 +115,8 @@ const Index = () => {
       message.error(err.message)
       return
     }
+
+    setIsLastPage(subscriptions != null && subscriptions.length < PAGE_SIZE)
 
     const list: ISubscriptionType[] =
       subscriptions == null
@@ -152,12 +156,6 @@ const Index = () => {
     fetchData()
   }, [page, statusFilter])
 
-  /*
-  useEffect(() => {
-    fetchData()
-  }, [])
-  */
-
   return (
     <div>
       <Table
@@ -184,6 +182,13 @@ const Index = () => {
 
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
+          current={page + 1}
+          pageSize={PAGE_SIZE}
+          disabled={loading}
+          onChange={onPageChange}
+          isLastPage={isLastPage}
+        />
+        {/* <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
           total={500}
@@ -191,7 +196,7 @@ const Index = () => {
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
-        />
+      /> */}
       </div>
     </div>
   )

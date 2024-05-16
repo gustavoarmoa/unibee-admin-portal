@@ -1,32 +1,15 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import {
-  Button,
-  Col,
-  Form,
-  FormInstance,
-  Input,
-  Modal,
-  Pagination,
-  Row,
-  Select,
-  Table,
-  message
-} from 'antd'
+import { Button, Form, Input, Modal, Select, Table, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SUBSCRIPTION_STATUS } from '../../constants'
 import { emailValidate } from '../../helpers'
 import { usePagination } from '../../hooks'
-import {
-  getMerchantUserListReq,
-  getUserListReq,
-  inviteMemberReq
-} from '../../requests'
+import { getMerchantUserListReq, inviteMemberReq } from '../../requests'
 import '../../shared.css'
 import { IMerchantUserProfile, IProfile } from '../../shared.types'
-import { useAppConfigStore } from '../../stores'
+import Pagination from '../ui/pagination'
 
 const APP_PATH = import.meta.env.BASE_URL
 const PAGE_SIZE = 10
@@ -34,11 +17,9 @@ const PAGE_SIZE = 10
 const Index = () => {
   const navigate = useNavigate()
   const { page, onPageChange } = usePagination()
+  const [isLastPage, setIsLastPage] = useState(false)
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<IMerchantUserProfile[]>([])
-  // const [page, setPage] = useState(0) // pagination props
-  // const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
-  const [form] = Form.useForm()
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const toggleInviteModal = () => setInviteModalOpen(!inviteModalOpen)
 
@@ -77,18 +58,13 @@ const Index = () => {
     setLoading(true)
     const [users, err] = await getMerchantUserListReq(fetchData)
     setLoading(false)
-    console.log('userLIst: ', users)
     if (err != null) {
       message.error(err.message)
       return
     }
+    setIsLastPage(users != null && users.length < PAGE_SIZE)
     setUsers(users)
   }
-  /*
-  useEffect(() => {
-    fetchData()
-  }, [])
-  */
 
   useEffect(() => {
     fetchData()
@@ -130,7 +106,7 @@ const Index = () => {
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
-        <Pagination
+        {/* <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
           total={500}
@@ -138,6 +114,13 @@ const Index = () => {
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
+      /> */}
+        <Pagination
+          current={page + 1}
+          pageSize={PAGE_SIZE}
+          disabled={loading}
+          onChange={onPageChange}
+          isLastPage={isLastPage}
         />
       </div>
     </div>

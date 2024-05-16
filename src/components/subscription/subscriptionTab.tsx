@@ -1,6 +1,5 @@
 import {
   CheckCircleOutlined,
-  ClockCircleOutlined,
   CloseCircleOutlined,
   InfoCircleOutlined,
   LoadingOutlined,
@@ -17,7 +16,6 @@ import {
   Row,
   Spin,
   Table,
-  Tag,
   Tooltip,
   message
 } from 'antd'

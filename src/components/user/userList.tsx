@@ -5,9 +5,7 @@ import {
   Form,
   FormInstance,
   Input,
-  Pagination,
   Row,
-  Select,
   Table,
   message
 } from 'antd'
@@ -15,12 +13,11 @@ import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SUBSCRIPTION_STATUS } from '../../constants'
 import { usePagination } from '../../hooks'
 import { getUserListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types.d'
-import { useAppConfigStore } from '../../stores'
+import Pagination from '../ui/pagination'
 import { SubscriptionStatus, UserStatus } from '../ui/statusTag'
 import CreateUserModal from './createUserModal'
 
@@ -30,13 +27,12 @@ const PAGE_SIZE = 10
 const Index = () => {
   const navigate = useNavigate()
   const { page, onPageChange } = usePagination()
+  const [isLastPage, setIsLastPage] = useState(false)
   const [newUserModalOpen, setNewUserModalOpen] = useState(false)
   const toggleNewUserModal = () => setNewUserModalOpen(!newUserModalOpen)
 
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<IProfile[]>([])
-  // const [page, setPage] = useState(0) // pagination props
-  // const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
   const [form] = Form.useForm()
 
   const columns: ColumnsType<IProfile> = [
@@ -66,14 +62,14 @@ const Index = () => {
       dataIndex: 'subscriptionId',
       key: 'subscriptionId',
       render: (subId, _) => (
-        <span
-          className="btn-user-with-subid"
+        <div
+          className="btn-user-with-subid  w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
           onClick={(evt) => {
             navigate(`${APP_PATH}subscription/${subId}`)
           }}
         >
-          <a className="btn-user-with-subid">{subId}</a>
-        </span>
+          {subId}
+        </div>
       )
     },
     {
@@ -113,6 +109,7 @@ const Index = () => {
       message.error(err.message)
       return
     }
+    setIsLastPage(users != null && users.length < PAGE_SIZE)
     setUsers(users)
   }
 
@@ -166,7 +163,7 @@ const Index = () => {
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
-        <Pagination
+        {/* <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
           total={500}
@@ -174,6 +171,13 @@ const Index = () => {
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
+      /> */}
+        <Pagination
+          current={page + 1}
+          pageSize={PAGE_SIZE}
+          disabled={loading}
+          onChange={onPageChange}
+          isLastPage={isLastPage}
         />
       </div>
     </div>
