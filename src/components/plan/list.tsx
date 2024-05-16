@@ -32,11 +32,6 @@ const PLAN_TYPE_FILTER = [
   { text: 'One-time payment', value: 3 }
 ] // main plan or addon
 
-/*
-const TrialInfo = (plan: IPlan) => {
-}
-*/
-
 const columns: ColumnsType<IPlan> = [
   {
     title: 'Name',
@@ -162,7 +157,6 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    console.log('planList: ', planList)
     if (planList == null) {
       setIsLastPage(true)
       return
@@ -182,7 +176,7 @@ const Index = () => {
     sorter,
     extra
   ) => {
-    console.log('params', pagination, filters, sorter, extra)
+    // console.log('params', pagination, filters, sorter, extra)
     setFilters(filters as TFilters)
   }
 
