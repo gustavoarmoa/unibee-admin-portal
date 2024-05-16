@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Button, Pagination, Space, Table, Tag, Tooltip, message } from 'antd'
+import { Button, Space, Table, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -11,18 +11,13 @@ import {
 } from '../../constants'
 import { getMetricsListReq } from '../../requests'
 import { IBillableMetrics } from '../../shared.types.d'
+import Pagination from '../ui/pagination'
 
 import { usePagination } from '../../hooks'
 import '../../shared.css'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
-const PLAN_STATUS_FILTER = Object.keys(PLAN_STATUS)
-  .map((s) => ({
-    text: PLAN_STATUS[Number(s)],
-    value: Number(s)
-  }))
-  .sort((a, b) => (a.value < b.value ? -1 : 1))
 
 const columns: ColumnsType<IBillableMetrics> = [
   {
@@ -86,6 +81,7 @@ const columns: ColumnsType<IBillableMetrics> = [
 const Index = () => {
   const navigate = useNavigate()
   const { page, onPageChange } = usePagination()
+  const [isLastPage, setIsLastPage] = useState(false)
   const [loading, setLoading] = useState(false)
   const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([])
   // const [page, setPage] = useState(0) // pagination props
@@ -95,11 +91,11 @@ const Index = () => {
     setLoading(true)
     const [list, err] = await getMetricsListReq(fetchMetricsList)
     setLoading(false)
-    console.log('metrics list res: ', list)
     if (err != null) {
       message.error((err as Error).message)
       return
     }
+    setIsLastPage(list != null && list.length < PAGE_SIZE)
     setMetricsList(list)
   }
 
@@ -121,12 +117,6 @@ const Index = () => {
     // setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
     navigate(`${APP_PATH}billable-metric/new`)
   }
-
-  /*
-  useEffect(() => {
-    fetchMetricsList()
-  }, [])
-  */
 
   useEffect(() => {
     fetchMetricsList()
@@ -163,6 +153,13 @@ const Index = () => {
       />
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
+          current={page + 1}
+          pageSize={PAGE_SIZE}
+          disabled={loading}
+          onChange={onPageChange}
+          isLastPage={isLastPage}
+        />
+        {/* <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
           total={500}
@@ -170,7 +167,7 @@ const Index = () => {
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
-        />
+      /> */}
       </div>
     </>
   )

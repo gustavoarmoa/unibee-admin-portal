@@ -6,7 +6,6 @@ import {
   Form,
   FormInstance,
   Input,
-  Pagination,
   Row,
   Select,
   Table,
@@ -23,6 +22,7 @@ import { getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { UserInvoice } from '../../shared.types.d'
 import RefundModal from '../payment/refundModal'
+import Pagination from '../ui/pagination'
 import { InvoiceStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
@@ -30,6 +30,7 @@ const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
   const { page, onPageChange } = usePagination()
+  const [isLastPage, setIsLastPage] = useState(false)
   const navigate = useNavigate()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -155,12 +156,9 @@ const Index = () => {
       return
     }
     setInvoiceList(invoices || [])
+    setIsLastPage(invoices != null && invoices.length < PAGE_SIZE)
   }
-  /*
-  useEffect(() => {
-    fetchData()
-  }, [])
-  */
+
   useEffect(() => {
     fetchData()
   }, [page])
@@ -203,6 +201,13 @@ const Index = () => {
       />
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
+          current={page + 1}
+          pageSize={PAGE_SIZE}
+          disabled={loading}
+          onChange={onPageChange}
+          isLastPage={isLastPage}
+        />
+        {/* <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
           total={500}
@@ -210,7 +215,7 @@ const Index = () => {
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
-        />
+      /> */}
       </div>
     </div>
   )

@@ -890,7 +890,7 @@ const SubscriptionInfoSection = ({
         </Col>
       </Row>
 
-      {subInfo && subInfo.status == 1 && (
+      {subInfo && (subInfo.status == 1 || subInfo.status == 8) && (
         <div className="mx-0 my-6 flex items-center justify-start gap-9">
           <Button onClick={toggleChangeSubStatusModal}>
             Mark as Incomplete

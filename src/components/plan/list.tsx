@@ -3,7 +3,7 @@ import {
   LoadingOutlined,
   MinusOutlined
 } from '@ant-design/icons'
-import { Button, Pagination, Space, Table, Tag, message } from 'antd'
+import { Button, Space, Table, Tag, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
@@ -14,6 +14,7 @@ import { usePagination } from '../../hooks'
 import { getPlanList } from '../../requests'
 import '../../shared.css'
 import { IPlan } from '../../shared.types.d'
+import Pagination from '../ui/pagination'
 import { PlanStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
@@ -137,6 +138,7 @@ const Index = () => {
   const { page, onPageChange } = usePagination()
   const [loading, setLoading] = useState(false)
   const [plan, setPlan] = useState<IPlan[]>([])
+  const [isLastPage, setIsLastPage] = useState(false)
   const [filters, setFilters] = useState<TFilters>({
     type: null,
     status: null
@@ -144,7 +146,6 @@ const Index = () => {
 
   const fetchPlan = async () => {
     setLoading(true)
-
     const [planList, err] = await getPlanList(
       {
         // type: undefined, // get main plan and addon
@@ -163,6 +164,7 @@ const Index = () => {
     }
     console.log('planList: ', planList)
     if (planList == null) {
+      setIsLastPage(true)
       return
     }
     setPlan(
@@ -171,6 +173,7 @@ const Index = () => {
         metricPlanLimits: p.metricPlanLimits
       }))
     )
+    setIsLastPage(planList.length < PAGE_SIZE)
   }
 
   const onTableChange: TableProps<IPlan>['onChange'] = (
@@ -188,12 +191,6 @@ const Index = () => {
     onPageChange(1, 100)
     navigate(`${APP_PATH}plan/new`)
   }
-
-  /*
-  useEffect(() => {
-    fetchPlan()
-  }, [])
-  */
 
   useEffect(() => {
     fetchPlan()
@@ -227,14 +224,22 @@ const Index = () => {
       />
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
+          current={page + 1}
+          pageSize={PAGE_SIZE}
+          disabled={loading}
+          onChange={onPageChange}
+          isLastPage={isLastPage}
+        />
+        {/*  <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          // total={500}
           size="small"
+          showTotal={() => null}
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
-        />
+      /> */}
       </div>
     </>
   )
