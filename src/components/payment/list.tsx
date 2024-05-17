@@ -156,13 +156,18 @@ const Index = () => {
       },
       fetchData
     )
-    setIsLastPage(paymentList != null && paymentList.length < PAGE_SIZE)
     setLoading(false)
     if (null != err) {
       message.error(err.message)
       return
     }
-    setPaymentList(paymentList || [])
+    if (null == paymentList) {
+      setIsLastPage(true)
+      setPaymentList([])
+      return
+    }
+    setIsLastPage(paymentList.length < PAGE_SIZE)
+    setPaymentList(paymentList)
   }
 
   useEffect(() => {

@@ -108,8 +108,13 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    setCodeList(list || [])
-    setIsLastPage(list != null && list.length < PAGE_SIZE)
+    if (null == list) {
+      setIsLastPage(true)
+      setCodeList([])
+      return
+    }
+    setCodeList(list)
+    setIsLastPage(list.length < PAGE_SIZE)
   }
 
   useEffect(() => {

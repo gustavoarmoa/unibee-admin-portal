@@ -159,6 +159,7 @@ const Index = () => {
     }
     if (planList == null) {
       setIsLastPage(true)
+      setPlan([])
       return
     }
     setPlan(

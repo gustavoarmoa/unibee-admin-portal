@@ -109,7 +109,12 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    setIsLastPage(users != null && users.length < PAGE_SIZE)
+    if (null == users) {
+      setIsLastPage(true)
+      setUsers([])
+      return
+    }
+    setIsLastPage(users.length < PAGE_SIZE)
     setUsers(users)
   }
 

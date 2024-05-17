@@ -116,7 +116,12 @@ const Index = () => {
       return
     }
 
-    setIsLastPage(subscriptions != null && subscriptions.length < PAGE_SIZE)
+    if (subscriptions == null) {
+      setIsLastPage(true)
+      setSubList([])
+      return
+    }
+    setIsLastPage(subscriptions.length < PAGE_SIZE)
 
     const list: ISubscriptionType[] =
       subscriptions == null

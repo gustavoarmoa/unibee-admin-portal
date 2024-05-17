@@ -95,7 +95,12 @@ const Index = () => {
       message.error((err as Error).message)
       return
     }
-    setIsLastPage(list != null && list.length < PAGE_SIZE)
+    if (null == list) {
+      setMetricsList([])
+      setIsLastPage(true)
+      return
+    }
+    setIsLastPage(list.length < PAGE_SIZE)
     setMetricsList(list)
   }
 

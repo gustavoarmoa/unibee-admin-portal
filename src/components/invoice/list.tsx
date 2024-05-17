@@ -154,8 +154,13 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    setInvoiceList(invoices || [])
-    setIsLastPage(invoices != null && invoices.length < PAGE_SIZE)
+    if (null == invoices) {
+      setIsLastPage(true)
+      setInvoiceList([])
+      return
+    }
+    setInvoiceList(invoices)
+    setIsLastPage(invoices.length < PAGE_SIZE)
   }
 
   useEffect(() => {
