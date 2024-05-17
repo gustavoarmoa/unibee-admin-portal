@@ -4,15 +4,10 @@ import { CURRENCY } from '../constants'
 import {
   DiscountCode,
   ExpiredError,
-  IBillableMetrics,
   IProfile,
   TMerchantInfo
 } from '../shared.types.d'
-import {
-  useAppConfigStore,
-  useMerchantInfoStore,
-  useSessionStore
-} from '../stores'
+import { useMerchantInfoStore, useSessionStore } from '../stores'
 import { request } from './client'
 
 const API_URL = import.meta.env.VITE_API_URL

@@ -1,4 +1,5 @@
 import { Button, Col, Modal, Row } from 'antd'
+import dayjs from 'dayjs'
 import { daysBetweenDate, showAmount } from '../../../helpers'
 import { ISubscriptionType } from '../../../shared.types.d'
 
@@ -30,7 +31,7 @@ const ExtendSub = ({
       <div style={{ margin: '16px 0' }}>
         Are you sure you want to extend the due date?
       </div>
-      <Row>
+      <Row className=" mb-2">
         <Col span={6}>
           <span style={{ fontWeight: 'bold' }}>First name</span>
         </Col>
@@ -40,7 +41,7 @@ const ExtendSub = ({
         </Col>
         <Col span={6}>{subInfo?.user?.lastName}</Col>
       </Row>
-      <Row>
+      <Row className=" mb-2">
         <Col span={6}>
           <span style={{ fontWeight: 'bold' }}>Plan</span>
         </Col>
@@ -53,14 +54,14 @@ const ExtendSub = ({
             showAmount(subInfo?.plan?.amount, subInfo?.plan?.currency)}
         </Col>
       </Row>
-      <Row>
+      <Row className=" mb-6">
         <Col span={6}>
           <span style={{ fontWeight: 'bold' }}>Current due date</span>
         </Col>
         <Col span={6}>
-          {new Date(
-            (subInfo?.currentPeriodEnd as number) * 1000
-          ).toDateString()}
+          {dayjs((subInfo?.currentPeriodEnd as number) * 1000).format(
+            'YYYY-MMM-DD'
+          )}
         </Col>
         <Col span={5}>
           <span style={{ fontWeight: 'bold' }}>New due date</span>

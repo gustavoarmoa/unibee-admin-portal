@@ -1,4 +1,5 @@
 import { Button, Col, Modal, Row } from 'antd'
+import dayjs from 'dayjs'
 import { showAmount } from '../../../helpers'
 import { ISubscriptionType } from '../../../shared.types.d'
 
@@ -55,9 +56,9 @@ const ResumeSub = ({
           <span style={{ fontWeight: 'bold' }}>Current due date</span>
         </Col>
         <Col span={6}>
-          {new Date(
-            (subInfo?.currentPeriodEnd as number) * 1000
-          ).toDateString()}
+          {dayjs((subInfo?.currentPeriodEnd as number) * 1000).format(
+            'YYYY-MMM-DD'
+          )}
         </Col>
       </Row>
       <div
