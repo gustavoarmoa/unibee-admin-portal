@@ -403,7 +403,6 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       setSelectedPlan(activeSub?.planId)
     }
   }, [changePlanModal])
-
   return (
     <>
       {!isProduction && (
@@ -421,8 +420,8 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
                 <>
                   <div>No simulation time running.</div>
                   <div>
-                    Only works on active, incomplete, cancelled, expired
-                    subscription.
+                    Only works on pending, active, incomplete, cancelled,
+                    expired subscription.
                   </div>
                 </>
               ) : (
@@ -441,8 +440,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
             <Button
               onClick={toggleSimDateOpen}
               disabled={
-                ![2, 7, 4, 5].includes(
-                  // active, incomplete, cancelled, expired
+                ![1, 2, 4, 5, 7, 8].includes(
                   null != activeSub ? activeSub.status : -1
                 )
               }
