@@ -1,4 +1,4 @@
-import { Button, Col, Modal, Radio, RadioChangeEvent, Row } from 'antd'
+import { Button, Col, Modal, Radio, RadioChangeEvent, Row, Space } from 'antd'
 import dayjs from 'dayjs'
 import { showAmount } from '../../../helpers'
 import { ISubscriptionType } from '../../../shared.types.d'
@@ -84,8 +84,10 @@ const TerminateSub = ({
         value={terminateMode}
         style={{ margin: '18px 0' }}
       >
-        <Radio value={1}>immediately</Radio>
-        <Radio value={2}>end of this cycle</Radio>
+        <Space direction="vertical">
+          <Radio value={1}>immediately</Radio>
+          <Radio value={2}>end of this cycle</Radio>
+        </Space>
       </Radio.Group>
       <div className="mt-6 flex items-center justify-end gap-4">
         <Button onClick={onCancel} disabled={loading}>

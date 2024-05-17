@@ -23,7 +23,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
   const [loading, setLoading] = useState(false)
   const [plans, setPlans] = useState<IPlan[]>([])
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null)
-  const [requirePayment, setRequirePayment] = useState(false)
+  const [requirePayment, setRequirePayment] = useState(true)
   const [includeUnpublished, setIncludeUnpublished] = useState(false)
   const onIncludeChange = (checked: boolean) => {
     if (!checked) {
@@ -97,6 +97,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
       userId: user.id as number
       // trialEnd: sec
     }
+    // requirementPayment is mainly used for internal employees, defaut length is 5yr
     if (!requirePayment) {
       const fiveYearFromNow = new Date(
         new Date().setFullYear(new Date().getFullYear() + 5)
@@ -194,7 +195,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
             <Select
               loading={loading}
               disabled={loading}
-              style={{ width: 240 }}
+              style={{ width: 260 }}
               value={selectedPlan}
               onChange={setSelectedPlan}
               options={plans

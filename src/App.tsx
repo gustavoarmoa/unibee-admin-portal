@@ -53,7 +53,7 @@ import LoginModal from './components/login/LoginModal'
 import NotFound from './components/notFound'
 import Profile from './components/profile'
 import Signup from './components/signup'
-import { getUserProfile, logoutReq } from './requests'
+import { getUserProfile, initializeReq, logoutReq } from './requests'
 
 const { Header, Content, Footer, Sider } = Layout
 
@@ -81,7 +81,7 @@ const App: React.FC = () => {
   const permStore = usePermissionStore()
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
-  const appConfig = useAppConfigStore()
+  const appConfigStore = useAppConfigStore()
   const [openLoginModal, setOpenLoginModal] = useState(false)
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
@@ -141,7 +141,7 @@ const App: React.FC = () => {
     sessionStore.reset()
     profileStore.reset()
     merchantInfoStore.reset()
-    appConfig.reset()
+    appConfigStore.reset()
     permStore.reset()
     localStorage.removeItem('merchantToken')
     localStorage.removeItem('appConfig')
@@ -187,6 +187,34 @@ const App: React.FC = () => {
       setOpenLoginModal(false)
     }
   }, [sessionStore.expired])
+
+  useEffect(() => {
+    // detect relead
+    const init = async () => {
+      const navigationEntries =
+        window.performance.getEntriesByType('navigation')
+      if (
+        navigationEntries.length > 0 &&
+        (navigationEntries[0] as PerformanceNavigationTiming).type === 'reload'
+      ) {
+        console.log('Page was reloaded, begin initializing....')
+        const [initRes, errInit] = await initializeReq()
+        if (null != errInit) {
+          console.log('init err: ', errInit)
+          return
+        }
+        const { appConfig, gateways, merchantInfo } = initRes
+        appConfigStore.setAppConfig(appConfig)
+        appConfigStore.setGateway(gateways)
+        merchantInfoStore.setMerchantInfo(merchantInfo.merchant)
+        permStore.setPerm({
+          role: merchantInfo.merchantMember.role,
+          permissions: merchantInfo.merchantMember.permissions
+        })
+      }
+    }
+    init()
+  }, [])
 
   return (
     <>

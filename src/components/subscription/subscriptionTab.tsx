@@ -410,7 +410,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
         <div
           style={{
             display: showSimDatePicker() ? 'flex' : 'none',
-            width: '540px',
+            width: '568px',
             zIndex: 999
           }}
           className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
@@ -420,7 +420,10 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
               {activeSub?.testClock != null && activeSub?.testClock <= 0 ? (
                 <>
                   <div>No simulation time running.</div>
-                  <div>Only works on active or incomplete subscription.</div>
+                  <div>
+                    Only works on active, incomplete, cancelled, expired
+                    subscription.
+                  </div>
                 </>
               ) : (
                 'current simulation time: '
@@ -438,7 +441,10 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
             <Button
               onClick={toggleSimDateOpen}
               disabled={
-                ![2, 7].includes(null != activeSub ? activeSub.status : -1)
+                ![2, 7, 4, 5].includes(
+                  // active, incomplete, cancelled, expired
+                  null != activeSub ? activeSub.status : -1
+                )
               }
             >
               Advance Time
