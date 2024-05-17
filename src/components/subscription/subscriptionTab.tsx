@@ -438,7 +438,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
             <Button
               onClick={toggleSimDateOpen}
               disabled={
-                ![2, 7].includes(null != activeSub ? activeSub.status : -1)
+                ![1, 2, 4, 5, 7, 8].includes(null != activeSub ? activeSub.status : -1)
               }
             >
               Advance Time
