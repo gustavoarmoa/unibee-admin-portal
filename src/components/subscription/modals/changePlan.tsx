@@ -65,8 +65,8 @@ const ChangePlan = ({
                   </div>
                   {p.publishStatus == 1 && (
                     <div
-                      className="absolute h-4 w-4 "
-                      style={{ right: '10px' }}
+                      className="absolute flex h-4 w-4"
+                      style={{ right: '14px' }}
                     >
                       <HiddenIcon />
                     </div>
@@ -77,8 +77,8 @@ const ChangePlan = ({
                   <span>{p.planName}</span>
                   {p.publishStatus == 1 && (
                     <div
-                      className="absolute h-4 w-4 "
-                      style={{ right: '10px' }}
+                      className="absolute flex h-4 w-4"
+                      style={{ right: '14px' }}
                     >
                       <HiddenIcon />
                     </div>
