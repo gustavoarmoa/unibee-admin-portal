@@ -1,4 +1,5 @@
 import { Button, Divider, Modal, Select, Tag } from 'antd'
+import HiddenIcon from '../../../assets/hidden.svg?react'
 import { IPlan, ISubscriptionType } from '../../../shared.types.d'
 import Plan from '../plan'
 
@@ -51,20 +52,38 @@ const ChangePlan = ({
       <Divider>Choose a new subscription plan</Divider>
       <div className="mx-3 my-6 flex items-center justify-center">
         <Select
-          style={{ width: 240 }}
+          style={{ width: 300 }}
           value={selectedPlanId}
           onChange={setSelectedPlan}
           options={plans.map((p) => ({
             label:
               subInfo?.planId == p.id ? (
-                <div className="flex w-full justify-between">
+                <div className="flex w-full items-center justify-between">
                   <div>{p.planName}</div>
-                  <div>
+                  <div className="mr-3">
                     <Tag color="orange">Current Plan</Tag>
                   </div>
+                  {p.publishStatus == 1 && (
+                    <div
+                      className="absolute h-4 w-4 "
+                      style={{ right: '10px' }}
+                    >
+                      <HiddenIcon />
+                    </div>
+                  )}
                 </div>
               ) : (
-                p.planName
+                <div className="flex items-center">
+                  <span>{p.planName}</span>
+                  {p.publishStatus == 1 && (
+                    <div
+                      className="absolute h-4 w-4 "
+                      style={{ right: '10px' }}
+                    >
+                      <HiddenIcon />
+                    </div>
+                  )}
+                </div>
               ),
             value: p.id
           }))}
