@@ -403,7 +403,6 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       setSelectedPlan(activeSub?.planId)
     }
   }, [changePlanModal])
-
   return (
     <>
       {!isProduction && (
