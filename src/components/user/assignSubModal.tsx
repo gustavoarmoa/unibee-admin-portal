@@ -1,22 +1,13 @@
-import {
-  Button,
-  Col,
-  Divider,
-  message,
-  Modal,
-  Row,
-  Select,
-  Switch,
-  Tag
-} from 'antd'
+import { Button, Col, Divider, message, Modal, Row, Select, Switch } from 'antd'
 import update from 'immutability-helper'
 import React, { useEffect, useState } from 'react'
+import HiddenIcon from '../../assets/hidden.svg?react'
 import {
   createSubscriptionReq,
   getPlanList,
   TPlanListBody
 } from '../../requests'
-import { IPlan, IProfile, ISubscriptionType } from '../../shared.types.d'
+import { IPlan, IProfile } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
 import Plan from '../subscription/plan'
 import PaymentMethodSelector from '../ui/paymentSelector'
@@ -131,7 +122,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
   const fetchPlan = async () => {
     const body: TPlanListBody = {
       type: [1], // get main plan and addon
-      status: [2], // active, inactive, expired, editing, all of them
+      status: [2], // active
       page: 0,
       count: 100
     }
@@ -210,7 +201,23 @@ const Index = ({ user, closeModal, refresh }: Props) => {
                 .filter((p) =>
                   includeUnpublished ? true : p.publishStatus == 2
                 )
-                .map((p) => ({ label: p.planName, value: p.id }))}
+                // .map((p) => ({ label: p.planName, value: p.id }))}
+                .map((p) => ({
+                  value: p.id,
+                  label: (
+                    <div key={p.id} className="flex items-center">
+                      <span>{p.planName}</span>
+                      {p.publishStatus == 1 && (
+                        <div
+                          className="absolute h-4 w-4 "
+                          style={{ right: '10px' }}
+                        >
+                          <HiddenIcon />
+                        </div>
+                      )}
+                    </div>
+                  )
+                }))}
             />
           </div>
 
