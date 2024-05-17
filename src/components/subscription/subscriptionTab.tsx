@@ -29,6 +29,7 @@ import { daysBetweenDate, showAmount } from '../../helpers'
 import {
   createPreviewReq,
   extendDueDateReq,
+  getAppConfigReq,
   getSubDetailWithMore,
   getSubTimelineReq,
   resumeSubReq,
@@ -71,7 +72,7 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
   const [resumeModal, setResumeModal] = useState(false)
   const [activeSub, setActiveSub] = useState<ISubscriptionType | null>(null) // null: when page is loading, no data is ready yet.
   const [endSubMode, setEndSubMode] = useState<1 | 2 | null>(null) // 1: immediate, 2: end of this billing cycole, null: not selected
-  // const [simDate, setSimDate] = useState('');
+  const [isProduction, setIsProduction] = useState(false)
   const [simDateOpen, setSimDateOpen] = useState(false)
   const simDateContainerRef = useRef(null)
   const hideSimDate = () => setSimDateOpen(false)
@@ -86,6 +87,9 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     setChangeSubStatusModal(!changeSubStatusModal)
 
   const onSimDateChange = async (date: Dayjs | null, dateString: string) => {
+    if (isProduction) {
+      return
+    }
     setLoading(true)
     const [_, err] = await setSimDateReq(
       activeSub?.subscriptionId as string,
@@ -382,8 +386,16 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     fetchData() // better to call message.success in fetchData cb(add a cb parameter to fetchData)
   }
 
+  const getAppConfig = async () => {
+    const [res, err] = await getAppConfigReq()
+    if (null != err) {
+      return
+    }
+    setIsProduction(res.isProd)
+  }
   useEffect(() => {
     fetchData()
+    getAppConfig()
   }, [])
 
   useEffect(() => {
@@ -394,71 +406,73 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
 
   return (
     <>
-      <div
-        style={{
-          display: showSimDatePicker() ? 'flex' : 'none',
-          width: '540px',
-          zIndex: 999
-        }}
-        className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
-      >
-        <div>
-          <div className="flex flex-col" style={{ fontSize: '11px' }}>
-            {activeSub?.testClock != null && activeSub?.testClock <= 0 ? (
-              <>
-                <div>No simulation time running.</div>
-                <div>Only works on active or incomplete subscription.</div>
-              </>
-            ) : (
-              'current simulation time: '
-            )}
+      {!isProduction && (
+        <div
+          style={{
+            display: showSimDatePicker() ? 'flex' : 'none',
+            width: '540px',
+            zIndex: 999
+          }}
+          className="fixed right-8 top-2 flex h-12 items-center justify-between rounded-md bg-indigo-500 px-2 py-2 text-white"
+        >
+          <div>
+            <div className="flex flex-col" style={{ fontSize: '11px' }}>
+              {activeSub?.testClock != null && activeSub?.testClock <= 0 ? (
+                <>
+                  <div>No simulation time running.</div>
+                  <div>Only works on active or incomplete subscription.</div>
+                </>
+              ) : (
+                'current simulation time: '
+              )}
+            </div>
+            <span>
+              {activeSub?.testClock && activeSub?.testClock > 0
+                ? dayjs(new Date(activeSub?.testClock * 1000)).format(
+                    'YYYY-MMM-DD HH:mm:ss'
+                  )
+                : ''}
+            </span>
           </div>
-          <span>
-            {activeSub?.testClock && activeSub?.testClock > 0
-              ? dayjs(new Date(activeSub?.testClock * 1000)).format(
-                  'YYYY-MMM-DD HH:mm:ss'
-                )
-              : ''}
-          </span>
-        </div>
-        <div ref={simDateContainerRef}>
-          <Button
-            onClick={toggleSimDateOpen}
-            disabled={
-              ![2, 7].includes(null != activeSub ? activeSub.status : -1)
-            }
-          >
-            Advance Time
-          </Button>
-          <DatePicker
-            value={dayjs(
-              activeSub == null || activeSub.testClock === 0
-                ? new Date()
-                : new Date(activeSub!.testClock! * 1000)
-            )}
-            onChange={onSimDateChange}
-            open={simDateOpen}
-            onBlur={toggleSimDateOpen}
-            disabledDate={(d) =>
-              d.isBefore(
-                null == activeSub ||
-                  null == activeSub.testClock ||
-                  activeSub.testClock <= 0
+          <div ref={simDateContainerRef}>
+            <Button
+              onClick={toggleSimDateOpen}
+              disabled={
+                ![2, 7].includes(null != activeSub ? activeSub.status : -1)
+              }
+            >
+              Advance Time
+            </Button>
+            <DatePicker
+              value={dayjs(
+                activeSub == null || activeSub.testClock === 0
                   ? new Date()
                   : new Date(activeSub!.testClock! * 1000)
-              )
-            }
-            // disabledTime={disabledSimTime}
-            showTime
-            showNow={false}
-            getPopupContainer={(trigger: HTMLElement) =>
-              trigger.parentNode as HTMLElement
-            }
-            style={{ visibility: 'hidden', width: 0, height: 0 }}
-            format={'YYYY-MMM-DD HH:mm:ss'}
-          />
+              )}
+              onChange={onSimDateChange}
+              open={simDateOpen}
+              onBlur={toggleSimDateOpen}
+              disabledDate={(d) =>
+                d.isBefore(
+                  null == activeSub ||
+                    null == activeSub.testClock ||
+                    activeSub.testClock <= 0
+                    ? new Date()
+                    : new Date(activeSub!.testClock! * 1000)
+                )
+              }
+              // disabledTime={disabledSimTime}
+              showTime
+              showNow={false}
+              getPopupContainer={(trigger: HTMLElement) =>
+                trigger.parentNode as HTMLElement
+              }
+              style={{ visibility: 'hidden', width: 0, height: 0 }}
+              format={'YYYY-MMM-DD HH:mm:ss'}
+            />
+          </div>
         </div>
-      </div>
+      )}
       <Spin
         spinning={loading}
         indicator={
