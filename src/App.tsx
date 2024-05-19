@@ -1,8 +1,12 @@
 import {
   DesktopOutlined,
+  IdcardOutlined,
   LogoutOutlined,
   // FileOutlined,
-  PieChartOutlined
+  PieChartOutlined,
+  SettingOutlined,
+  TeamOutlined,
+  TransactionOutlined
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { Layout, Menu, Modal, message, theme } from 'antd'
@@ -101,12 +105,12 @@ const App: React.FC = () => {
     getItem('Discount Code', '/discount-code/list', <DesktopOutlined />),
     getItem('Subscription', '/subscription/list', <PieChartOutlined />),
     getItem('Invoice', '/invoice/list', <PieChartOutlined />),
-    getItem('Transaction', '/transaction/list', <PieChartOutlined />),
-    getItem('User List', '/user/list', <PieChartOutlined />),
-    getItem('Admin List', '/admin/list', <PieChartOutlined />),
+    getItem('Transaction', '/transaction/list', <TransactionOutlined />),
+    getItem('User List', '/user/list', <IdcardOutlined />),
+    getItem('Admin List', '/admin/list', <TeamOutlined />),
     getItem('Analytics', '/analytics', <PieChartOutlined />),
     getItem('My Account', '/my-account', <PieChartOutlined />), // /profile
-    getItem('Configuration', '/configuration', <PieChartOutlined />)
+    getItem('Configuration', '/configuration', <SettingOutlined />)
   ]
 
   /*

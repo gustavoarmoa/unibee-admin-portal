@@ -2,7 +2,8 @@ import {
   CheckCircleOutlined,
   EditOutlined,
   LoadingOutlined,
-  MinusOutlined
+  MinusOutlined,
+  PlusOutlined
 } from '@ant-design/icons'
 import { Button, Space, Table, Tag, Tooltip, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
@@ -201,7 +202,7 @@ const Index = () => {
   return (
     <>
       <div className="my-4 flex justify-end">
-        <Button type="primary" onClick={onNewPlan}>
+        <Button type="primary" onClick={onNewPlan} icon={<PlusOutlined />}>
           New plan
         </Button>
       </div>
@@ -216,14 +217,13 @@ const Index = () => {
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
         onChange={onTableChange}
-        /* onRow={(record, rowIndex) => {
+        onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
               navigate(`${APP_PATH}plan/${record.id}`)
             }
           }
         }}
-        */
       />
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination

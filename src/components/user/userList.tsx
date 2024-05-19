@@ -1,4 +1,8 @@
-import { LoadingOutlined } from '@ant-design/icons'
+import {
+  LoadingOutlined,
+  SearchOutlined,
+  UserAddOutlined
+} from '@ant-design/icons'
 import {
   Button,
   Col,
@@ -137,7 +141,11 @@ const Index = () => {
           />{' '}
         </Col>
         <Col span={2}>
-          <Button type="primary" onClick={toggleNewUserModal}>
+          <Button
+            type="primary"
+            onClick={toggleNewUserModal}
+            icon={<UserAddOutlined />}
+          >
             Add New
           </Button>
         </Col>
@@ -236,6 +244,7 @@ const Search = ({
             <Button
               onClick={goSearch}
               type="primary"
+              icon={<SearchOutlined />}
               loading={searching}
               disabled={searching}
             >
