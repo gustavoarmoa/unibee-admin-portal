@@ -1,9 +1,10 @@
 import {
   CheckCircleOutlined,
+  EditOutlined,
   LoadingOutlined,
   MinusOutlined
 } from '@ant-design/icons'
-import { Button, Space, Table, Tag, message } from 'antd'
+import { Button, Space, Table, Tag, Tooltip, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
@@ -32,98 +33,6 @@ const PLAN_TYPE_FILTER = [
   { text: 'One-time payment', value: 3 }
 ] // main plan or addon
 
-const columns: ColumnsType<IPlan> = [
-  {
-    title: 'Name',
-    dataIndex: 'planName',
-    key: 'planName'
-    // render: (text) => <a>{text}</a>,
-  },
-  {
-    title: 'Description',
-    dataIndex: 'description',
-    key: 'description'
-  },
-  {
-    title: 'Price',
-    dataIndex: 'price',
-    key: 'price',
-    render: (_, p) => {
-      return (
-        <span>
-          {`${Dinero({
-            amount: p.amount,
-            currency: p.currency
-          }).toFormat('$0,0.00')} /${
-            p.intervalCount == 1 ? '' : p.intervalCount
-          }${p.intervalUnit}`}
-        </span>
-      )
-    }
-  },
-  {
-    title: 'Type',
-    dataIndex: 'type',
-    key: 'type',
-    render: (_, plan) => {
-      return plan.type == 1 ? (
-        <span>Main plan</span>
-      ) : plan.type == 2 ? (
-        <span>Add-on</span>
-      ) : (
-        <span>One-time payment</span>
-      )
-    },
-    filters: PLAN_TYPE_FILTER
-    // onFilter: (value, record) => record.status == value,
-  },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    render: (s, plan) => PlanStatus(s), // (_, plan) => STATUS[plan.status],
-    filters: PLAN_STATUS_FILTER
-    // onFilter: (value, record) => record.status == value,
-  },
-  {
-    title: 'Published',
-    dataIndex: 'publishStatus',
-    key: 'publishStatus',
-    render: (publishStatus, plan) =>
-      publishStatus == 2 ? (
-        <CheckCircleOutlined style={{ color: 'green' }} />
-      ) : (
-        <MinusOutlined style={{ color: 'red' }} />
-      )
-  },
-  {
-    title: 'Allow Trial',
-    dataIndex: 'trialDurationTime',
-    key: 'trialDurationTime',
-    render: (trialDurationTime, plan) =>
-      trialDurationTime > 0 ? (
-        <CheckCircleOutlined style={{ color: 'green' }} />
-      ) : (
-        <MinusOutlined style={{ color: 'red' }} />
-      )
-  },
-  {
-    title: 'Billable metrics',
-    dataIndex: 'metricPlanLimits',
-    render: (m, plan) => (null == m || 0 == m.length ? 'No' : m.length)
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: (_, record) => (
-      <Space size="middle">
-        <a>Edit</a>
-        {/* <a>Duplicate</a> */}
-      </Space>
-    )
-  }
-]
-
 type TFilters = {
   type: number[] | null
   status: number[] | null
@@ -138,6 +47,104 @@ const Index = () => {
     type: null,
     status: null
   })
+
+  const goToDetail = (planId: number) => navigate(`${APP_PATH}plan/${planId}`)
+  const columns: ColumnsType<IPlan> = [
+    {
+      title: 'Name',
+      dataIndex: 'planName',
+      key: 'planName'
+      // render: (text) => <a>{text}</a>,
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description'
+    },
+    {
+      title: 'Price',
+      dataIndex: 'price',
+      key: 'price',
+      render: (_, p) => {
+        return (
+          <span>
+            {`${Dinero({
+              amount: p.amount,
+              currency: p.currency
+            }).toFormat('$0,0.00')} /${
+              p.intervalCount == 1 ? '' : p.intervalCount
+            }${p.intervalUnit}`}
+          </span>
+        )
+      }
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      render: (_, plan) => {
+        return plan.type == 1 ? (
+          <span>Main plan</span>
+        ) : plan.type == 2 ? (
+          <span>Add-on</span>
+        ) : (
+          <span>One-time payment</span>
+        )
+      },
+      filters: PLAN_TYPE_FILTER
+      // onFilter: (value, record) => record.status == value,
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (s, plan) => PlanStatus(s), // (_, plan) => STATUS[plan.status],
+      filters: PLAN_STATUS_FILTER
+      // onFilter: (value, record) => record.status == value,
+    },
+    {
+      title: 'Published',
+      dataIndex: 'publishStatus',
+      key: 'publishStatus',
+      render: (publishStatus, plan) =>
+        publishStatus == 2 ? (
+          <CheckCircleOutlined style={{ color: 'green' }} />
+        ) : (
+          <MinusOutlined style={{ color: 'red' }} />
+        )
+    },
+    {
+      title: 'Allow Trial',
+      dataIndex: 'trialDurationTime',
+      key: 'trialDurationTime',
+      render: (trialDurationTime, plan) =>
+        trialDurationTime > 0 ? (
+          <CheckCircleOutlined style={{ color: 'green' }} />
+        ) : (
+          <MinusOutlined style={{ color: 'red' }} />
+        )
+    },
+    {
+      title: 'Billable metrics',
+      dataIndex: 'metricPlanLimits',
+      render: (m, plan) => (null == m || 0 == m.length ? 'No' : m.length)
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle" className="plan-action-btn-wrapper">
+          <Tooltip title="Edit">
+            <Button
+              style={{ border: 'unset' }}
+              onClick={() => goToDetail(record.id)}
+              icon={<EditOutlined />}
+            />
+          </Tooltip>
+        </Space>
+      )
+    }
+  ]
 
   const fetchPlan = async () => {
     setLoading(true)
@@ -209,13 +216,14 @@ const Index = () => {
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
         onChange={onTableChange}
-        onRow={(record, rowIndex) => {
+        /* onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
               navigate(`${APP_PATH}plan/${record.id}`)
             }
           }
         }}
+        */
       />
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
