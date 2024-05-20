@@ -295,6 +295,26 @@ export const saveGatewayKeyReq = async (
   }
 }
 
+export const saveChangellyPubKeyReq = async (
+  gatewayId: number,
+  webhookSecret: string
+) => {
+  try {
+    const res = await request.post('/merchant/gateway/setup_webhook', {
+      gatewayId,
+      webhookSecret
+    })
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const saveVatSenseKeyReq = async (vatKey: string) => {
   const body = {
     IsDefault: true,

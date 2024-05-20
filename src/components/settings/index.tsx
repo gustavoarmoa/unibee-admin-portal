@@ -26,6 +26,7 @@ import { getAppKeysWithMore, getMerchantInfoReq } from '../../requests'
 import '../../shared.css'
 import { TGateway } from '../../shared.types.d'
 import ModalApiKey from './apiKeyModal'
+import ChangellyModal from './changellyModal'
 import PaymentGatewayList from './paymentGatewayList'
 import ModalSendgridKeyModal from './sendGridKeyModal'
 import ModalVATsenseKeyModal from './vatKeyModal'
@@ -209,6 +210,7 @@ const AppConfig = () => {
   const [vatSenseKeyModalOpen, setVatSenseKeyModalOpen] = useState(false)
   const [sendgridKeyModalOpen, setSendgridKeyModalOpen] = useState(false)
   const [wireTransferModalOpen, setWireTransferModalOpen] = useState(false)
+  const [changellyModalOpen, setChangellyModalOpen] = useState(false)
   const [keys, setKeys] = useState({
     openApiKey: '',
     sendGridKey: '',
@@ -217,6 +219,7 @@ const AppConfig = () => {
   const [gatewayList, setGatewayList] = useState<TGateway[]>([])
 
   const toggleKeyModal = () => setApiKeyModalOpen(!apiKeyModalOpen)
+  const toggleChangellyModal = () => setChangellyModalOpen(!changellyModalOpen)
   const toggleSendgridModal = () =>
     setSendgridKeyModalOpen(!sendgridKeyModalOpen)
   const toggleVatSenseKeyModal = () =>
@@ -254,6 +257,11 @@ const AppConfig = () => {
         wireTransfer.minimumAmount /=
           CURRENCY[wireTransfer.currency].stripe_factor
       }
+      const changelly = gateways.find(
+        (g: TGateway) => g.gatewayName == 'changelly'
+      )
+      if (changelly != null) {
+      }
     }
     setGatewayList(gateways ?? [])
   }
@@ -278,6 +286,16 @@ const AppConfig = () => {
           refresh={getAppKeys}
         />
       )}
+      {changellyModalOpen &&
+        gatewayList.find((g) => g.gatewayName == 'changelly') != null && (
+          <ChangellyModal
+            closeModal={toggleChangellyModal}
+            refresh={getAppKeys}
+            gateway={
+              gatewayList.find((g) => g.gatewayName == 'changelly') as TGateway
+            }
+          />
+        )}
 
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>UniBee API Key</Col>
@@ -302,6 +320,38 @@ const AppConfig = () => {
         </Col>
       </Row>
       <PaymentGatewayList loading={loadingKeys} gatewayList={gatewayList} />
+      <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
+        <Col span={4}>
+          <a
+            href="https://app.pay.changelly.com/integrations"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Changelly Webhook key
+          </a>
+        </Col>
+        <Col span={2}>
+          {loadingKeys ? (
+            <LoadingTag />
+          ) : gatewayList.find((g) => g.gatewayName == 'changelly')
+              ?.webhookSecret != '' ? (
+            <SetTag />
+          ) : (
+            <NotSetTag />
+          )}
+        </Col>
+        <Col span={10}>
+          <div className=" text-gray-500">
+            Use this key to secure communication between Changelly and WebHook
+            endpoint.
+          </div>
+        </Col>
+        <Col span={2}>
+          <Button onClick={toggleChangellyModal} disabled={loadingKeys}>
+            Edit
+          </Button>
+        </Col>
+      </Row>
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>Wire Transfer setup</Col>
         <Col span={2}>

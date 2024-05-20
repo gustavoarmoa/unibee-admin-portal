@@ -42,21 +42,12 @@ const Index = ({
 
   const onGatewayClick =
     (gatewayName: 'changelly' | 'stripe' | 'wire_transfer') => () => {
-      let g: TGateway | undefined = gatewayList.find(
+      const g: TGateway = gatewayList.find(
         (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
-      )
-      if (g == undefined) {
-        g = { gatewayName }
-      }
+      ) as TGateway
       setGatewayEdit(g)
       toggleModal()
     }
-
-  /*
-  useEffect(() => {
-    // fetchData()
-  }, [])
-  */
 
   return (
     <div>

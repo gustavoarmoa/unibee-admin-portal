@@ -13,6 +13,8 @@ const NEW_WIRE_TRANSFER_ACC: TGateway = {
   // gatewayId?: number
   // gatewayKey?: string
   gatewayName: 'wire_transfer',
+  webhookEndpointUrl: '',
+  webhookSecret: '',
   // gatewayLogo: string
   // gatewayType?: number
   // createTime?: number
