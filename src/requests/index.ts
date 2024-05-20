@@ -378,6 +378,23 @@ export const getPlanDetail = async (planId: number) => {
   }
 }
 
+export const copyPlanReq = async (planId: number) => {
+  const session = useSessionStore.getState()
+  try {
+    const res = await request.post('/merchant/plan/copy', {
+      planId
+    })
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data.plan, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // 3 calls to get planDetail(with planId), addonList, and metricsList
 // "planId: null" means caller want to create a new plan, so I pass a resolved promise to meet the caller signature.
 export const getPlanDetailWithMore = async (

@@ -1,5 +1,6 @@
 import {
   CheckCircleOutlined,
+  CopyOutlined,
   EditOutlined,
   LoadingOutlined,
   MinusOutlined,
@@ -13,7 +14,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
 import { usePagination } from '../../hooks'
-import { getPlanList } from '../../requests'
+import { copyPlanReq, getPlanList } from '../../requests'
 import '../../shared.css'
 import { IPlan } from '../../shared.types.d'
 import Pagination from '../ui/pagination'
@@ -43,6 +44,7 @@ const Index = () => {
   const { page, onPageChange } = usePagination()
   const [loading, setLoading] = useState(false)
   const [plan, setPlan] = useState<IPlan[]>([])
+  const [copyingPlan, setCopyingPlan] = useState(false)
   const [isLastPage, setIsLastPage] = useState(false)
   const [filters, setFilters] = useState<TFilters>({
     type: null,
@@ -50,6 +52,17 @@ const Index = () => {
   })
 
   const goToDetail = (planId: number) => navigate(`${APP_PATH}plan/${planId}`)
+  const copyPlan = async (planId: number) => {
+    setCopyingPlan(true)
+    const [newPlan, err] = await copyPlanReq(planId)
+    setCopyingPlan(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    console.log('new plan after copy: ', newPlan)
+    goToDetail(newPlan.id)
+  }
   const columns: ColumnsType<IPlan> = [
     {
       title: 'Name',
@@ -137,9 +150,18 @@ const Index = () => {
         <Space size="middle" className="plan-action-btn-wrapper">
           <Tooltip title="Edit">
             <Button
+              disabled={copyingPlan}
               style={{ border: 'unset' }}
               onClick={() => goToDetail(record.id)}
               icon={<EditOutlined />}
+            />
+          </Tooltip>
+          <Tooltip title="Copy">
+            <Button
+              style={{ border: 'unset' }}
+              disabled={copyingPlan}
+              onClick={() => copyPlan(record.id)}
+              icon={<CopyOutlined />}
             />
           </Tooltip>
         </Space>
@@ -202,7 +224,12 @@ const Index = () => {
   return (
     <>
       <div className="my-4 flex justify-end">
-        <Button type="primary" onClick={onNewPlan} icon={<PlusOutlined />}>
+        <Button
+          type="primary"
+          disabled={copyingPlan}
+          onClick={onNewPlan}
+          icon={<PlusOutlined />}
+        >
           New plan
         </Button>
       </div>
@@ -220,6 +247,12 @@ const Index = () => {
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
+              if (
+                event.target instanceof Element &&
+                event.target.closest('.plan-action-btn-wrapper') != null
+              ) {
+                return
+              }
               navigate(`${APP_PATH}plan/${record.id}`)
             }
           }
