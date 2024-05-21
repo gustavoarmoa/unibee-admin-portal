@@ -14,11 +14,8 @@ import React, { useEffect, useState } from 'react'
 import {
   Navigate,
   Route,
-  // BrowserRouter as Router,
   Routes,
   useLocation,
-  // Outlet,
-  // Link,
   useNavigate
 } from 'react-router-dom'
 import {
@@ -42,11 +39,11 @@ import BillableMetricsList from './components/billableMetrics/list'
 import DiscountCodeDetail from './components/discountCode/detail'
 import DiscountCodeList from './components/discountCode/list'
 import PricePlanList from './components/plan/list'
-import Settings from './components/settings'
+import Settings from './components/settings/index'
 import SubscriptionDetail from './components/subscription/detail'
 import SubscriptionList from './components/subscription/list'
-import CustomerDetail from './components/user/userDetail'
-import CustomerList from './components/user/userList'
+import CustomerDetail from './components/user/detail'
+import CustomerList from './components/user/list'
 // import Users from "./components/userList";
 import MerchantUserDetail from './components/merchantUser/userDetail'
 import MerchantUsserList from './components/merchantUser/userList'
@@ -57,7 +54,7 @@ import LoginModal from './components/login/LoginModal'
 import NotFound from './components/notFound'
 import Profile from './components/profile'
 import Signup from './components/signup'
-import { getUserProfile, initializeReq, logoutReq } from './requests'
+import { initializeReq, logoutReq } from './requests'
 
 const { Header, Content, Footer, Sider } = Layout
 

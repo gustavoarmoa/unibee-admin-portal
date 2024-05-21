@@ -6,11 +6,10 @@ import {
 import { Button, Col, Divider, Empty, Popover, Row, Spin, message } from 'antd'
 import dayjs from 'dayjs'
 import React, { CSSProperties, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { showAmount } from '../../helpers'
 import { getSubByUserReq } from '../../requests'
 import { IProfile, ISubscriptionType } from '../../shared.types.d'
-import UserAccountTab from '../subscription/userAccountTab'
 import { SubscriptionStatus } from '../ui/statusTag'
 import ModalAssignSub from './assignSubModal'
 
@@ -22,8 +21,7 @@ const rowStyle: CSSProperties = {
 }
 const colStyle: CSSProperties = { fontWeight: 'bold' }
 
-const Index = () => {
-  const params = useParams()
+const Index = ({ userId }: { userId: number }) => {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
@@ -33,14 +31,8 @@ const Index = () => {
 
   const goToSubDetail = (subId: string) => () =>
     navigate(`/subscription/${subId}`)
-  const goBack = () => navigate(`${APP_PATH}user/list`)
 
   const getUserSub = async () => {
-    const userId = Number(params.userId)
-    if (isNaN(userId) || userId < 0) {
-      message.error('User not found')
-      return
-    }
     setLoading(true)
     const [res, err] = await getSubByUserReq(userId, getUserSub)
     setLoading(false)
@@ -84,6 +76,7 @@ const Index = () => {
         }
         fullscreen
       />
+
       <Divider orientation="left" style={{ margin: '16px 0' }}>
         Current Subscription
       </Divider>
@@ -237,14 +230,6 @@ const Index = () => {
       >
         Assign Subscription
       </Button>
-
-      <UserAccountTab
-        user={userProfile}
-        setUserProfile={setUserProfile}
-        refresh={getUserSub}
-        setRefreshSub={() => {}} // this component is also used in SubscriptionTab which need refresh when user got suspended, but here, we don't need this fn.
-        extraButton={<Button onClick={goBack}>Go Back</Button>}
-      />
     </div>
   )
 }

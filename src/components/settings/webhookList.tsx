@@ -1,4 +1,4 @@
-import { LoadingOutlined } from '@ant-design/icons'
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Popover, Space, Table, Tag, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
@@ -103,6 +103,7 @@ const Index = () => {
   ]
 
   const onNewWebhook = () => {
+    setCurrentWebhookIdx(-1)
     toggleDetailModal()
   }
 
@@ -126,7 +127,9 @@ const Index = () => {
     <div>
       {detailModalOpen && (
         <WebhookDetail
-          detail={webhookList[currentWebhookIdx]}
+          detail={
+            currentWebhookIdx == -1 ? null : webhookList[currentWebhookIdx]
+          }
           closeModal={toggleDetailModal}
           refresh={fetchData}
         />
@@ -137,6 +140,11 @@ const Index = () => {
           endpointId={webhookList[currentWebhookIdx].id}
         />
       )}
+      <div className="my-4 flex justify-end">
+        <Button type="primary" onClick={onNewWebhook} icon={<PlusOutlined />}>
+          New
+        </Button>
+      </div>
       <Table
         columns={columns}
         dataSource={webhookList}
@@ -162,11 +170,6 @@ const Index = () => {
           }
         }}
       />
-      <div className="my-4 flex justify-end">
-        <Button type="primary" onClick={onNewWebhook}>
-          New
-        </Button>
-      </div>
     </div>
   )
 }
