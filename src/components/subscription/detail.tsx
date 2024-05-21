@@ -1,5 +1,5 @@
 import type { DatePickerProps, TabsProps } from 'antd'
-import { Button, Tabs, message } from 'antd'
+import { Button, Divider, Tabs, message } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getUserProfile } from '../../requests'
@@ -18,22 +18,47 @@ const Index = () => {
   const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
   const [userId, setUserId] = useState<number | null>(null) // subscription obj has user account data, and admin can update it in AccountTab.
-  // so the user data on subscription obj might be obsolete,
+  // and the user data on subscription obj might be obsolete,
   // so I use userId from subscription Obj, use this userId to run getUserProfile(userId), even after admin update the user info in AccontTab, re-call getUserProfile
 
+  // when user account is suspended, subscription tab need to be refreshed
+  // current component is their parent, so after fetchUserProfile finish running, it setRefreshSub(true)
+  // <SubscriptionTab /> will get {refreshSub: true}, in its useEffect, do the refresh.
+  const [refreshSub, setRefreshSub] = useState(false)
+
   const [adminNotePushed, setAdminNotePushed] = useState(false)
+
+  const fetchUserProfile = async () => {
+    const [user, err] = await getUserProfile(userId as number, fetchUserProfile)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    setUserProfile(user)
+  }
 
   const tabItems: TabsProps['items'] = [
     {
       key: 'Subscription',
       label: 'Subscription',
-      children: <SubscriptionTab setUserId={setUserId} />
+      children: (
+        <SubscriptionTab
+          setUserId={setUserId}
+          setRefreshSub={setRefreshSub}
+          refreshSub={refreshSub} // in its useEffect, if (refreshSub == true), do the refresh by fetching the subDetail, then setRefreshSub(false)
+        />
+      )
     },
     {
       key: 'Account',
       label: 'Account',
       children: (
-        <UserAccount user={userProfile} setUserProfile={setUserProfile} />
+        <UserAccount
+          user={userProfile}
+          setUserProfile={setUserProfile}
+          refresh={fetchUserProfile} // this is to refresh the user profle page
+          setRefreshSub={setRefreshSub} // after admin suspended a suer, subscriptin tab also need to refresh, just call setRefreshSub(true)
+        />
       )
     },
     {
@@ -48,15 +73,6 @@ const Index = () => {
     }
   ]
   const onTabChange = (key: string) => {}
-
-  const fetchUserProfile = async () => {
-    const [user, err] = await getUserProfile(userId as number, fetchUserProfile)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    setUserProfile(user)
-  }
 
   useEffect(() => {
     if (userId == null) {
@@ -73,6 +89,9 @@ const Index = () => {
         style={{ width: adminNotePushed ? '100%' : '79%' }}
         id="subscription-main-content"
       >
+        <Divider orientation="left" style={{ margin: '16px 0' }}>
+          User Info
+        </Divider>
         <UserInfoSection user={userProfile} />
         <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
         <div className="mt-4 flex items-center justify-center">

@@ -1088,6 +1088,21 @@ export const saveUserProfileReq = async (newProfile: IProfile) => {
   }
 }
 
+// billing admin can also update user profile.
+export const suspendUserReq = async (userId: number) => {
+  try {
+    const res = await request.post(`/merchant/user/suspend_user`, { userId })
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [null, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // not the same as user signup, this is for admin to create the user.
 type TNewUserInfo = {
   externalUserId?: string

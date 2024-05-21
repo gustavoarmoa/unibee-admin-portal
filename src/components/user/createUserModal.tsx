@@ -42,6 +42,7 @@ const Index = ({
         labelCol={{ span: 8 }}
         onFinish={onSave}
         colon={false}
+        disabled={loading}
         // initialValues={}
       >
         <Row>

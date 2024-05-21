@@ -56,7 +56,15 @@ import UpdateSubPreviewModal from './modals/updateSubPreview'
 
 const APP_PATH = import.meta.env.BASE_URL // import.meta.env.VITE_APP_PATH;
 
-const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
+const Index = ({
+  setUserId,
+  setRefreshSub,
+  refreshSub
+}: {
+  setUserId: (userId: number) => void
+  setRefreshSub: React.Dispatch<React.SetStateAction<boolean>>
+  refreshSub: boolean
+}) => {
   const [plans, setPlans] = useState<IPlan[]>([])
   const [selectedPlan, setSelectedPlan] = useState<null | number>(null) // null: not selected
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
@@ -290,6 +298,11 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
     setLoading(true)
     const [detailRes, err] = await getSubDetailWithMore(subId, fetchData)
     setLoading(false)
+    if (refreshSub) {
+      console.log('refreshing sub triggered by parent')
+      setRefreshSub(false)
+    }
+
     if (err != null) {
       message.error(err.message)
       return
@@ -403,6 +416,11 @@ const Index = ({ setUserId }: { setUserId: (userId: number) => void }) => {
       setSelectedPlan(activeSub?.planId)
     }
   }, [changePlanModal])
+
+  useEffect(() => {
+    refreshSub && fetchData()
+  }, [refreshSub])
+
   return (
     <>
       {!isProduction && (

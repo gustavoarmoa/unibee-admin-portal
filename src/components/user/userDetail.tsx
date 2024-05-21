@@ -7,9 +7,8 @@ import { Button, Col, Divider, Empty, Popover, Row, Spin, message } from 'antd'
 import dayjs from 'dayjs'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { SUBSCRIPTION_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
-import { getSubByUserReq, getUserProfile } from '../../requests'
+import { getSubByUserReq } from '../../requests'
 import { IProfile, ISubscriptionType } from '../../shared.types.d'
 import UserAccountTab from '../subscription/userAccountTab'
 import { SubscriptionStatus } from '../ui/statusTag'
@@ -231,7 +230,9 @@ const Index = () => {
 
       <Button
         onClick={toggleAssignSub}
-        disabled={subInfo != null}
+        disabled={
+          subInfo != null || userProfile == null || userProfile?.status == 2
+        } // user has active sub || user not exist || user is suspended
         className=" my-4"
       >
         Assign Subscription
@@ -240,6 +241,8 @@ const Index = () => {
       <UserAccountTab
         user={userProfile}
         setUserProfile={setUserProfile}
+        refresh={getUserSub}
+        setRefreshSub={() => {}} // this component is also used in SubscriptionTab which need refresh when user got suspended, but here, we don't need this fn.
         extraButton={<Button onClick={goBack}>Go Back</Button>}
       />
     </div>

@@ -16,11 +16,13 @@ const WireTrasfer = [<WireIcon />]
 const Index = ({
   selected,
   onSelect,
+  disabled,
   cryptoDisabled
 }: {
   selected: number | undefined
   onSelect: React.ChangeEventHandler<HTMLInputElement>
-  cryptoDisabled: boolean
+  disabled?: boolean
+  cryptoDisabled?: boolean
 }) => {
   const appConfig = useAppConfigStore()
   const gateways = appConfig.gateway
@@ -50,7 +52,7 @@ const Index = ({
             key={g.gatewayId}
             // htmlFor={isCard ? 'card-payment' : 'crypto-payment'}
             htmlFor={payMethod}
-            className={`flex h-12 w-full cursor-pointer items-center justify-between rounded border border-solid ${selected == g.gatewayId ? 'border-blue-500' : 'border-gray-200'} px-2`}
+            className={`flex h-12 w-full ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} items-center justify-between rounded border border-solid ${selected == g.gatewayId ? 'border-blue-500' : 'border-gray-200'} px-2`}
           >
             <div className="flex">
               <input
@@ -61,6 +63,7 @@ const Index = ({
                 value={g.gatewayId}
                 checked={g.gatewayId == selected}
                 onChange={onSelect}
+                disabled={disabled}
               />
               <div className="ml-2 flex justify-between">{g.label}</div>
             </div>

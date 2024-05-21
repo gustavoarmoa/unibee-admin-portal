@@ -188,6 +188,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
             selected={gatewayId}
             onSelect={onGatewayChange}
             cryptoDisabled={true}
+            disabled={loading}
           />
         </div>
         <div className="w-3/6">
@@ -237,6 +238,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
                 <Col span={18}>Require payment</Col>
                 <Col span={6}>
                   <Switch
+                    disabled={loading}
                     checked={requirePayment}
                     onChange={setRequirePayment}
                   />
@@ -246,6 +248,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
                 <Col span={18}>Include unpublished</Col>
                 <Col span={6}>
                   <Switch
+                    disabled={loading}
                     checked={includeUnpublished}
                     onChange={onIncludeChange}
                   />
@@ -270,7 +273,9 @@ const Index = ({ user, closeModal, refresh }: Props) => {
           marginTop: '24px'
         }}
       >
-        <Button onClick={closeModal}>Cancel</Button>
+        <Button onClick={closeModal} disabled={loading}>
+          Cancel
+        </Button>
         <Button
           type="primary"
           onClick={onSubmit}

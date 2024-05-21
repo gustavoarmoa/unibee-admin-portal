@@ -9,13 +9,11 @@ const rowStyle: CSSProperties = {
   color: '#757575'
 }
 const Index = ({ user }: { user: IProfile | null }) => {
-  // useEffect(() => {}, []);
-
   return (
     <div style={{ marginBottom: '24px' }}>
-      <Divider orientation="left" style={{ margin: '16px 0' }}>
+      {/* <Divider orientation="left" style={{ margin: '16px 0' }}>
         User Info
-      </Divider>
+  </Divider> */}
       <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>First Name</span>
