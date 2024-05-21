@@ -183,6 +183,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           rowKey={'id'}
           rowClassName="clickable-tbl-row"
           pagination={false}
+          scroll={{ x: 1400, y: 640 }}
           onRow={(record, rowIndex) => {
             return {
               onClick: (evt) => {

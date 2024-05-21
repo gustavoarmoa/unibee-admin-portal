@@ -173,11 +173,16 @@ const Index = ({ user }: { user: IProfile | null }) => {
     {
       title: 'Action',
       key: 'action',
+      // width: 180,
       render: (
         _,
         invoice // use fn to generate these icons, only show available ones.
       ) => (
-        <Space size="middle" className="invoice-action-btn-wrapper">
+        <Space
+          size="middle"
+          className="invoice-action-btn-wrapper"
+          // style={{ width: '170px' }}
+        >
           <Tooltip title="Edit">
             <Button
               onClick={toggleNewInvoiceModal}
@@ -261,12 +266,6 @@ const Index = ({ user }: { user: IProfile | null }) => {
     }
   }
 
-  /*
-  useEffect(() => {
-    fetchData()
-  }, [])
-  */
-
   useEffect(() => {
     fetchData()
   }, [page])
@@ -301,6 +300,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           rowKey={'id'}
           rowClassName="clickable-tbl-row"
           pagination={false}
+          scroll={{ x: true, y: 640 }}
           onRow={(record, rowIndex) => {
             return {
               onClick: (event) => {
