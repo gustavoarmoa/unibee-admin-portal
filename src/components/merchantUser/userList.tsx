@@ -1,5 +1,14 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Button, Form, Input, Modal, Select, Table, message } from 'antd'
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  Pagination,
+  Select,
+  Table,
+  message
+} from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -9,7 +18,6 @@ import { usePagination } from '../../hooks'
 import { getMerchantUserListReq, inviteMemberReq } from '../../requests'
 import '../../shared.css'
 import { IMerchantUserProfile, IProfile } from '../../shared.types'
-import Pagination from '../ui/pagination'
 
 const APP_PATH = import.meta.env.BASE_URL
 const PAGE_SIZE = 10
@@ -17,7 +25,7 @@ const PAGE_SIZE = 10
 const Index = () => {
   const navigate = useNavigate()
   const { page, onPageChange } = usePagination()
-  const [isLastPage, setIsLastPage] = useState(false)
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<IMerchantUserProfile[]>([])
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
@@ -56,19 +64,15 @@ const Index = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    const [users, err] = await getMerchantUserListReq(fetchData)
+    const [res, err] = await getMerchantUserListReq(fetchData)
     setLoading(false)
     if (err != null) {
       message.error(err.message)
       return
     }
-    if (null == users) {
-      setIsLastPage(true)
-      setUsers([])
-      return
-    }
-    setIsLastPage(users.length < PAGE_SIZE)
-    setUsers(users)
+    const { merchantMembers, total } = res
+    setUsers(merchantMembers ?? [])
+    setTotal(total)
   }
 
   useEffect(() => {
@@ -111,21 +115,17 @@ const Index = () => {
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
-        {/* <Pagination
+        <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          total={total}
           size="small"
           onChange={onPageChange}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
           disabled={loading}
           showSizeChanger={false}
-      /> */}
-        <Pagination
-          current={page + 1}
-          pageSize={PAGE_SIZE}
-          disabled={loading}
-          onChange={onPageChange}
-          isLastPage={isLastPage}
         />
       </div>
     </div>
