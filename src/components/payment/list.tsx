@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Button, Table, message } from 'antd'
+import { Button, Pagination, Table, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
@@ -11,7 +11,7 @@ import { getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { PaymentItem } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
-import Pagination from '../ui/pagination'
+// import Pagination from '../ui/pagination'
 import { PaymentStatus } from '../ui/statusTag'
 import RefundModal from './refundModal'
 
@@ -20,7 +20,7 @@ const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
   const { page, onPageChange } = usePagination()
-  const [isLastPage, setIsLastPage] = useState(false)
+  const [total, setTotal] = useState(0)
   const appConfigStore = useAppConfigStore()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -148,7 +148,7 @@ const Index = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    const [paymentList, err] = await getPaymentTimelineReq(
+    const [res, err] = await getPaymentTimelineReq(
       {
         page,
         count: PAGE_SIZE
@@ -161,13 +161,9 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    if (null == paymentList) {
-      setIsLastPage(true)
-      setPaymentList([])
-      return
-    }
-    setIsLastPage(paymentList.length < PAGE_SIZE)
-    setPaymentList(paymentList)
+    const { paymentTimeLines, total } = res
+    setPaymentList(paymentTimeLines ?? [])
+    setTotal(total)
   }
 
   useEffect(() => {
@@ -212,21 +208,17 @@ const Index = () => {
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
-        {/* <Pagination
+        <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          total={total}
           size="small"
           onChange={onPageChange}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
           disabled={loading}
           showSizeChanger={false}
-      /> */}
-        <Pagination
-          current={page + 1}
-          pageSize={PAGE_SIZE}
-          disabled={loading}
-          onChange={onPageChange}
-          isLastPage={isLastPage}
         />
       </div>
     </div>

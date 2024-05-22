@@ -1,32 +1,13 @@
-import {
-  Button,
-  Checkbox,
-  Col,
-  Input,
-  Pagination,
-  Row,
-  Select,
-  Space,
-  Spin,
-  Table,
-  Tooltip,
-  message
-} from 'antd'
+import { Button, Pagination, Table, message } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
-import {
-  CloseOutlined,
-  DownloadOutlined,
-  EditOutlined,
-  LoadingOutlined,
-  MailOutlined,
-  MoneyCollectOutlined
-} from '@ant-design/icons'
+import { LoadingOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY, INVOICE_STATUS, PAYMENT_TYPE } from '../../constants'
 import { showAmount } from '../../helpers'
+import { usePagination } from '../../hooks'
 import { downloadInvoice, getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, UserInvoice } from '../../shared.types.d'
@@ -65,11 +46,11 @@ const Index = ({
   extraButton?: ReactElement
 }) => {
   const navigate = useNavigate()
+  const { page, onPageChangeNoParams } = usePagination()
   const appConfigStore = useAppConfigStore()
   const [paymentList, setPaymentList] = useState<TPayment[]>([])
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(0) // pagination props
-  // const [newInvoiceModal, setNewInvoiceModal] = useState(false)
+  const [total, setTotal] = useState(0)
 
   const columns: ColumnsType<TPayment> = [
     {
@@ -82,8 +63,6 @@ const Index = ({
       dataIndex: 'totalAmount',
       key: 'totalAmount',
       render: (amt, pay) => showAmount(amt, pay.currency)
-      // render: (title, invoice) => <a>{title}</a>
-      // render: (_, sub) => <a>{sub.plan?.planName}</a>,
     },
     {
       title: 'Type',
@@ -95,20 +74,7 @@ const Index = ({
       title: 'Subscription Id',
       dataIndex: 'subscriptionId',
       key: 'subscriptionId'
-      // render: (amt, invoice) => showAmount(amt, invoice.currency, true)
-      /* render: (subId) => (
-        <span className="btn-subid-in-payment">
-          <Button
-            className="btn-subid-in-payment"
-            onClick={() => navigate(`${APP_PATH}subscription/${subId}`)}
-            type="link"
-          >
-            {subId}
-          </Button>
-        </span>
-      ) */
     },
-    // btn-view-webhook-logs
     {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
@@ -124,7 +90,6 @@ const Index = ({
           </Button>
         </span>
       )
-      // render: (s) => INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
     },
     {
       title: 'Payment gateway',
@@ -132,7 +97,6 @@ const Index = ({
       key: 'gatewayId',
       render: (gateway) =>
         appConfigStore.gateway.find((g) => g.gatewayId == gateway)?.gatewayName
-      // subscriptionId == '' ? 'Admin' : 'System'
     },
     {
       title: 'Status',
@@ -148,16 +112,12 @@ const Index = ({
     }
   ]
 
-  const onPageChange = (page: number, pageSize: number) => {
-    setPage(page - 1)
-  }
-
   const fetchData = async () => {
     if (null == user) {
       return
     }
     setLoading(true)
-    const [invoices, err] = await getPaymentTimelineReq(
+    const [res, err] = await getPaymentTimelineReq(
       { userId: user!.id as number, page, count: PAGE_SIZE },
       fetchData
     )
@@ -166,7 +126,9 @@ const Index = ({
       message.error(err.message)
       return
     }
-    setPaymentList(invoices)
+    const { paymentTimeLines, total } = res
+    setPaymentList(paymentTimeLines ?? [])
+    setTotal(total)
   }
 
   useEffect(() => {
@@ -208,13 +170,16 @@ const Index = ({
           onClick={fetchData}
         ></span>
       </div>
-      <div className="my-4 flex items-center justify-between">
+      <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          total={total}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
           size="small"
-          onChange={onPageChange}
+          onChange={onPageChangeNoParams}
           disabled={loading}
           showSizeChanger={false}
         />
