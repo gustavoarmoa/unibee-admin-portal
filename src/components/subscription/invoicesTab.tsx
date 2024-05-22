@@ -20,7 +20,8 @@ import {
   DownloadOutlined,
   EditOutlined,
   LoadingOutlined,
-  MailOutlined
+  MailOutlined,
+  PlusOutlined
 } from '@ant-design/icons'
 import { CURRENCY, INVOICE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
@@ -44,7 +45,8 @@ const Index = ({
   // const appConfigStore = useAppConfigStore();
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(0) // pagination props
+  const [page, setPage] = useState(0)
+  const [total, setTotal] = useState(0)
   const [newInvoiceModalOpen, setNewInvoiceModalOpen] = useState(false)
   const [invoiceDetailModalOpen, setInvoiceDetailModalOpen] = useState(false)
   const [invoiceIdx, setInvoiceIdx] = useState(-1) // -1: not selected, any action button: (delete, edit,refund) will set this value to the selected invoiceIdx
@@ -249,7 +251,7 @@ const Index = ({
       return
     }
     setLoading(true)
-    const [invoices, err] = await getInvoiceListReq(
+    const [res, err] = await getInvoiceListReq(
       {
         page,
         count: PAGE_SIZE,
@@ -262,13 +264,14 @@ const Index = ({
       message.error(err.message)
       return
     }
-
+    const { invoices, total } = res
     if (invoices != null) {
       normalizeAmt(invoices)
       setInvoiceList(invoices)
     } else {
       setInvoiceList([])
     }
+    setTotal(total)
   }
 
   useEffect(() => {
@@ -299,6 +302,19 @@ const Index = ({
       )}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {/* <Searchbar refresh={fetchData} /> */}
+        <div className="my-4 flex justify-end">
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            onClick={() => {
+              setInvoiceIdx(-1)
+              toggleNewInvoiceModal()
+            }}
+            disabled={user == null}
+          >
+            New Invoice
+          </Button>
+        </div>
         <Table
           columns={columns}
           dataSource={invoiceList}
@@ -331,26 +347,19 @@ const Index = ({
         ></span>
       </div>
       <div className="my-4 flex items-center justify-between">
+        <div className="flex items-center justify-center">{extraButton}</div>
         <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          total={total}
           size="small"
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
         />
-        <div className="flex items-center justify-center">{extraButton}</div>
-        <Button
-          type="primary"
-          onClick={() => {
-            setInvoiceIdx(-1)
-            toggleNewInvoiceModal()
-          }}
-          disabled={user == null}
-        >
-          New Invoice
-        </Button>
       </div>
     </div>
   )

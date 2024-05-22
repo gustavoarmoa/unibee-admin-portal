@@ -1317,7 +1317,7 @@ export const getInvoiceListReq = async (
       session.setSession({ expired: true, refresh: refreshCb })
       throw new ExpiredError('Session expired')
     }
-    return [res.data.data.invoices, null]
+    return [res.data.data, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]

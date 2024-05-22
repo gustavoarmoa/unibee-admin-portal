@@ -5,6 +5,7 @@ import {
   Form,
   FormInstance,
   Input,
+  Pagination,
   Row,
   Select,
   Table,
@@ -21,7 +22,6 @@ import { getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { UserInvoice } from '../../shared.types.d'
 import RefundModal from '../payment/refundModal'
-import Pagination from '../ui/pagination'
 import { InvoiceStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
@@ -29,7 +29,7 @@ const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
   const { page, onPageChange } = usePagination()
-  const [isLastPage, setIsLastPage] = useState(false)
+  const [total, setTotal] = useState(0)
   const navigate = useNavigate()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -141,7 +141,7 @@ const Index = () => {
     searchTerm.amountEnd = amtTo
 
     setLoading(true)
-    const [invoices, err] = await getInvoiceListReq(
+    const [res, err] = await getInvoiceListReq(
       {
         page,
         count: PAGE_SIZE,
@@ -154,13 +154,17 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    if (null == invoices) {
-      setIsLastPage(true)
-      setInvoiceList([])
-      return
+    const { invoices, total } = res
+    setInvoiceList(invoices ?? [])
+    setTotal(total)
+  }
+
+  const goSearch = () => {
+    if (page == 0) {
+      fetchData()
+    } else {
+      onPageChange(1, PAGE_SIZE)
     }
-    setInvoiceList(invoices)
-    setIsLastPage(invoices.length < PAGE_SIZE)
   }
 
   useEffect(() => {
@@ -169,7 +173,12 @@ const Index = () => {
 
   return (
     <div>
-      <Search form={form} goSearch={fetchData} searching={loading} />
+      <Search
+        form={form}
+        goSearch={goSearch}
+        searching={loading}
+        onPageChange={onPageChange}
+      />
       {refundModalOpen && invoiceList[invoiceIdx].refund != null && (
         <RefundModal
           detail={invoiceList[invoiceIdx].refund!}
@@ -205,21 +214,17 @@ const Index = () => {
       />
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
-          current={page + 1}
-          pageSize={PAGE_SIZE}
-          disabled={loading}
-          onChange={onPageChange}
-          isLastPage={isLastPage}
-        />
-        {/* <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          total={total}
           size="small"
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
-      /> */}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
+        />
       </div>
     </div>
   )
@@ -237,17 +242,23 @@ const DEFAULT_TERM = {
 const Search = ({
   form,
   searching,
-  goSearch
+  goSearch,
+  onPageChange
 }: {
   form: FormInstance<any>
   searching: boolean
   goSearch: () => void
+  onPageChange: (page: number, pageSize: number) => void
 }) => {
   const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
     value: Number(s),
     label: INVOICE_STATUS[Number(s)]
   }))
-  const clear = () => form.resetFields()
+  const clear = () => {
+    form.resetFields()
+    onPageChange(1, PAGE_SIZE)
+    goSearch()
+  }
   const watchCurrency = Form.useWatch('currency', form)
   useEffect(() => {
     // just to trigger rerender when currency changed
