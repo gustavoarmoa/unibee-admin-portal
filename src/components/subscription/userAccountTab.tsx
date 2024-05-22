@@ -12,6 +12,7 @@ import {
 import { ReactElement, useEffect, useState } from 'react'
 import { getCountryListReq, saveUserProfileReq } from '../../requests'
 import { Country, IProfile } from '../../shared.types.d'
+import PaymentSelector from '../ui/paymentSelector'
 import { UserStatus } from '../ui/statusTag'
 import SuspendModal from '../user/suspendModal'
 
@@ -33,6 +34,12 @@ const UserAccountTab = ({
   const [loading, setLoading] = useState(false)
   const [suspendModalOpen, setSuspendModalOpen] = useState(false)
   const toggleSuspend = () => setSuspendModalOpen(!suspendModalOpen)
+  const [paymentMethod, setPaymentMethod] = useState<number | undefined>(
+    undefined
+  )
+  const onPaymentMethodChange: React.ChangeEventHandler<HTMLInputElement> = (
+    evt
+  ) => setPaymentMethod(Number(evt.target.value))
 
   const filterOption = (
     input: string,
@@ -110,10 +117,17 @@ const UserAccountTab = ({
           <Form.Item label="Country Name" name="countryName" hidden>
             <Input />
           </Form.Item>
-
           <Divider orientation="left" style={{ margin: '16px 0' }}>
-            General
+            Billing Info
           </Divider>
+          <Row>
+            <Col span={12}>
+              <Form.Item label="Status" name="status">
+                <div>{user && UserStatus(user.status)}</div>{' '}
+              </Form.Item>
+            </Col>
+            <Col span={12}></Col>
+          </Row>
           <Row>
             <Col span={12}>
               <Form.Item
@@ -126,7 +140,7 @@ const UserAccountTab = ({
                   }
                 ]}
               >
-                <Input style={{ width: '240px' }} />
+                <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -140,56 +154,28 @@ const UserAccountTab = ({
                   }
                 ]}
               >
-                <Input style={{ width: '240px' }} />
+                <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
           </Row>
-
           <Row>
             <Col span={12}>
               <Form.Item label="Email" name="email">
-                <Input disabled style={{ width: '240px' }} />
+                <Input disabled style={{ width: '300px' }} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Company name" name="companyName">
-                <Input style={{ width: '240px' }} />
+                <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
           </Row>
-
           <Row>
             <Col span={12}>
               <Form.Item label="VAT number" name="vATNumber">
-                <Input style={{ width: '240px' }} />
+                <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item label="Payment" name="paymentMethod">
-                <Radio.Group>
-                  <Radio value="CreditCard">Credit Card</Radio>
-                  <Radio value="Crypto">Crypto</Radio>
-                  <Radio value="PayPal">PayPal</Radio>
-                  <Radio value="WireTransfer">Wire Transfer</Radio>
-                </Radio.Group>
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row>
-            <Col span={12}>
-              <Form.Item label="Status" name="status">
-                <div>{user && UserStatus(user.status)}</div>{' '}
-              </Form.Item>
-            </Col>
-            <Col span={12}> </Col>
-          </Row>
-
-          <Divider orientation="left" style={{ margin: '16px 0' }}>
-            Contact Info
-          </Divider>
-
-          <Row>
             <Col span={12}>
               <Form.Item
                 label="Country"
@@ -197,12 +183,13 @@ const UserAccountTab = ({
                 rules={[
                   {
                     required: true,
-                    message: 'Please select your first country!'
+                    message: 'Please select your country!'
                   }
                 ]}
               >
                 <Select
                   showSearch
+                  style={{ width: '300px' }}
                   placeholder="Type to search"
                   optionFilterProp="children"
                   // value={country}
@@ -216,9 +203,23 @@ const UserAccountTab = ({
                 />
               </Form.Item>
             </Col>
+          </Row>
+          <Row>
+            <Col span={12}>
+              <Form.Item label="City" name="city">
+                <Input style={{ width: '300px' }} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Post code" name="postCode">
+                <Input style={{ width: '300px' }} />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row>
             <Col span={12}>
               <Form.Item
-                label="Billing address"
+                label="Address"
                 name="address"
                 rules={[
                   {
@@ -227,23 +228,43 @@ const UserAccountTab = ({
                   }
                 ]}
               >
-                <Input />
+                <Input.TextArea rows={4} style={{ width: '300px' }} />
               </Form.Item>
             </Col>
-          </Row>
-
-          <Row>
             <Col span={12}>
               <Form.Item label="Phone number" name="mobile">
-                <Input />
+                <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
           </Row>
-
+          <Row>
+            <Col span={12}>
+              <Form.Item label="Account Type" name="accountType">
+                <Radio.Group>
+                  <Radio value={1}>Individual</Radio>
+                  <Radio value={2}>Business</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+            <Col span={12}></Col>
+          </Row>
+          {/* <Divider orientation="left" style={{ margin: '16px 0' }}>
+            Payment method
+              </Divider> */}
+          <Row>
+            <Col span={12}>
+              <Form.Item label="Payment method" name="paymentMethod">
+                <PaymentSelector
+                  selected={paymentMethod}
+                  onSelect={onPaymentMethodChange}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={12}> </Col>
+          </Row>
           <Divider orientation="left" style={{ margin: '16px 0' }}>
             Social Media Contact
           </Divider>
-
           <Row>
             <Col span={12}>
               <Form.Item label="Telegram" name="telegram">
@@ -256,7 +277,6 @@ const UserAccountTab = ({
               </Form.Item>
             </Col>
           </Row>
-
           <Row>
             <Col span={12}>
               <Form.Item label="WeChat" name="weChat">
@@ -269,7 +289,6 @@ const UserAccountTab = ({
               </Form.Item>
             </Col>
           </Row>
-
           <Row>
             <Col span={12}>
               <Form.Item label="Facebook" name="facebook">
@@ -282,7 +301,6 @@ const UserAccountTab = ({
               </Form.Item>
             </Col>
           </Row>
-
           <Row>
             <Col span={12}>
               <Form.Item label="Other social info" name="otherSocialInfo">
@@ -291,8 +309,7 @@ const UserAccountTab = ({
             </Col>
           </Row>
         </Form>
-        <div className="mx-9 my-9 flex justify-center gap-6">
-          {extraButton}
+        <div className="mx-9 my-9 flex justify-around gap-6">
           <Button
             danger
             onClick={toggleSuspend}
@@ -300,13 +317,16 @@ const UserAccountTab = ({
           >
             Suspend
           </Button>
-          <Button
-            type="primary"
-            onClick={form.submit}
-            disabled={loading || null == user || user.status == 2}
-          >
-            Save
-          </Button>
+          <div className="flex gap-6">
+            {extraButton}
+            <Button
+              type="primary"
+              onClick={form.submit}
+              disabled={loading || null == user || user.status == 2}
+            >
+              Save
+            </Button>
+          </div>
         </div>
       </>
     )

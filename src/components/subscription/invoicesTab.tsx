@@ -7,23 +7,20 @@ import {
   Row,
   Select,
   Space,
-  Spin,
   Table,
   Tooltip,
   message
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import React, { useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
 import {
-  CloseOutlined,
   DollarOutlined,
   DownloadOutlined,
   EditOutlined,
   LoadingOutlined,
-  MailOutlined,
-  MoneyCollectOutlined
+  MailOutlined
 } from '@ant-design/icons'
 import { CURRENCY, INVOICE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
@@ -37,7 +34,13 @@ import NewInvoiceModal from './modals/newInvoice'
 
 const PAGE_SIZE = 10
 
-const Index = ({ user }: { user: IProfile | null }) => {
+const Index = ({
+  user,
+  extraButton
+}: {
+  user: IProfile | null
+  extraButton?: ReactElement
+}) => {
   // const appConfigStore = useAppConfigStore();
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
   const [loading, setLoading] = useState(false)
@@ -140,9 +143,10 @@ const Index = ({ user }: { user: IProfile | null }) => {
       // render: (_, sub) => <a>{sub.plan?.planName}</a>,
     },
     {
-      title: 'Total Amount',
+      title: 'Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
+      width: 100,
       render: (amt, invoice) => showAmount(amt, invoice.currency, true)
     },
     {
@@ -155,6 +159,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
       title: 'Is refund',
       dataIndex: 'refund',
       key: 'refund',
+      width: 100,
       render: (refund, iv) => (refund == null ? 'No' : 'Yes')
     },
     {
@@ -268,7 +273,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
 
   useEffect(() => {
     fetchData()
-  }, [page])
+  }, [page, user])
 
   return (
     <div>
@@ -335,6 +340,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           disabled={loading}
           showSizeChanger={false}
         />
+        <div className="flex items-center justify-center">{extraButton}</div>
         <Button
           type="primary"
           onClick={() => {

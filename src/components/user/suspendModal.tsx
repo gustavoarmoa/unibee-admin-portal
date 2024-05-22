@@ -26,10 +26,9 @@ const Index = ({ user, closeModal, refresh, setRefreshSub }: Props) => {
       return
     }
     setRefreshSub(true) // pass (refreshSub: true) to grandparent, so it can be passed to <subscriptionTab />
-    message.success(`User (${user.firstName} ${user.lastName}) suspended.`)
+    message.success(`User has been suspended.`)
     if (null != refresh) {
       refresh() // refresh the parent
-      console.log('in suspend model, refreshing...')
     }
     closeModal()
   }

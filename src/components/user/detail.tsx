@@ -1,19 +1,21 @@
-import { Empty, Spin, Tabs, TabsProps, message } from 'antd'
-import dayjs from 'dayjs'
+import { Button, Divider, Empty, Spin, Tabs, TabsProps, message } from 'antd'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getSubByUserReq } from '../../requests'
-import { IProfile, ISubscriptionType } from '../../shared.types'
+import { getUserProfile } from '../../requests'
+import { IProfile } from '../../shared.types'
+import UserInfo from '../shared/userInfo'
+import InvoiceTab from '../subscription/invoicesTab'
+import TransactionTab from '../subscription/paymentTab'
 import AccountInfoTab from './accountTab'
 import SubscriptionTab from './subscriptionTab'
 
 const APP_PATH = import.meta.env.BASE_URL
-const rowStyle: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  height: '32px'
+
+const GoBackBtn = () => {
+  const navigate = useNavigate()
+  const goBack = () => navigate(`${APP_PATH}user/list`)
+  return <Button onClick={goBack}>Go back</Button>
 }
-const colStyle: CSSProperties = { fontWeight: 'bold' }
 
 const Index = () => {
   const params = useParams()
@@ -26,82 +28,58 @@ const Index = () => {
       />
     )
   }
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
-  const [subInfo, setSubInfo] = useState<ISubscriptionType | null>(null) // null: when page is loading, or no active sub.
-  const [assignSubModalOpen, setAssignSubModalOpen] = useState(false)
-  const toggleAssignSub = () => setAssignSubModalOpen(!assignSubModalOpen)
 
   const tabItems: TabsProps['items'] = [
     {
       key: 'AccountInfo',
       label: 'Account Info',
-      children: <AccountInfoTab userId={userId} />
+      children: <AccountInfoTab userId={userId} extraButton={<GoBackBtn />} />
     },
     {
       key: 'Subscription',
-      label: 'Subsription',
-      children: <SubscriptionTab userId={userId} />
+      label: 'Subscription',
+      children: <SubscriptionTab userId={userId} extraButton={<GoBackBtn />} />
     },
     {
-      key: 'Invoices',
-      label: 'Invoices',
-      children: <div>invoice</div> // <InvoiceTab user={userProfile} />
+      key: 'Invoice',
+      label: 'Invoice',
+      children: <InvoiceTab user={userProfile} extraButton={<GoBackBtn />} /> // <InvoiceTab user={userProfile} />
     },
     {
-      key: 'Transactions',
-      label: 'Transactions',
-      children: <div>transactions</div> // <PaymentTab user={userProfile} />
+      key: 'Transaction',
+      label: 'Transaction',
+      children: (
+        <TransactionTab user={userProfile} extraButton={<GoBackBtn />} />
+      )
     }
   ]
   const onTabChange = (key: string) => {}
 
-  const goToSubDetail = (subId: string) => () =>
-    navigate(`/subscription/${subId}`)
-  const goBack = () => navigate(`${APP_PATH}user/list`)
-
-  const getUserSub = async () => {
-    const userId = Number(params.userId)
-    if (isNaN(userId) || userId < 0) {
-      message.error('User not found')
-      return
-    }
-    setLoading(true)
-    const [res, err] = await getSubByUserReq(userId, getUserSub)
-    setLoading(false)
+  const fetchUserProfile = async () => {
+    const [user, err] = await getUserProfile(userId as number, fetchUserProfile)
     if (err != null) {
       message.error(err.message)
       return
     }
-    const {
-      user,
-      subscription,
-      plan,
-      gateway,
-      addons,
-      unfinishedSubscriptionPendingUpdate
-    } = res
-    console.log('sub info res: ', res)
-    if (subscription != null) {
-      subscription.plan = plan
-    }
-    setSubInfo(subscription)
     setUserProfile(user)
   }
 
-  // useEffect(() => {}, [])
+  useEffect(() => {
+    fetchUserProfile()
+  }, [])
 
   return (
     <div>
-      {/* <Spin
-        spinning={loading}
-        indicator={
-          <LoadingOutlined style={{ fontSize: 32, color: '#FFF' }} spin />
-        }
-        fullscreen
-      /> */}
-      <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
+      <Divider orientation="left" style={{ margin: '16px 0' }}>
+        Brief Info
+      </Divider>
+      <UserInfo user={userProfile} />
+      <Tabs
+        defaultActiveKey="AccountInfo"
+        items={tabItems}
+        onChange={onTabChange}
+      />
     </div>
   )
 }

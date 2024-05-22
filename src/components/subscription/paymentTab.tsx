@@ -14,7 +14,7 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import React, { useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
 import {
   CloseOutlined,
@@ -57,7 +57,13 @@ type TPayment = {
   createTime: number
 }
 
-const Index = ({ user }: { user: IProfile | null }) => {
+const Index = ({
+  user,
+  extraButton
+}: {
+  user: IProfile | null
+  extraButton?: ReactElement
+}) => {
   const navigate = useNavigate()
   const appConfigStore = useAppConfigStore()
   const [paymentList, setPaymentList] = useState<TPayment[]>([])
@@ -163,15 +169,9 @@ const Index = ({ user }: { user: IProfile | null }) => {
     setPaymentList(invoices)
   }
 
-  /*
   useEffect(() => {
     fetchData()
-  }, [])
-  */
-
-  useEffect(() => {
-    fetchData()
-  }, [page])
+  }, [page, user])
 
   return (
     <div>
@@ -219,6 +219,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           showSizeChanger={false}
         />
       </div>
+      <div className="flex items-center justify-center">{extraButton}</div>
     </div>
   )
 }

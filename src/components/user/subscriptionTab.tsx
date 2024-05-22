@@ -3,31 +3,149 @@ import {
   LoadingOutlined,
   SyncOutlined
 } from '@ant-design/icons'
-import { Button, Col, Divider, Empty, Popover, Row, Spin, message } from 'antd'
+import {
+  Button,
+  Col,
+  Divider,
+  Empty,
+  Pagination,
+  Popover,
+  Row,
+  Spin,
+  message
+} from 'antd'
+import Table, { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import React, { CSSProperties, useEffect, useState } from 'react'
+import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { showAmount } from '../../helpers'
-import { getSubByUserReq } from '../../requests'
-import { IProfile, ISubscriptionType } from '../../shared.types.d'
+import { usePagination } from '../../hooks'
+import { getSubByUserReq, getSubscriptionHistoryReq } from '../../requests'
+import {
+  IProfile,
+  ISubHistoryItem,
+  ISubscriptionType
+} from '../../shared.types.d'
 import { SubscriptionStatus } from '../ui/statusTag'
 import ModalAssignSub from './assignSubModal'
 
-const APP_PATH = import.meta.env.BASE_URL
 const rowStyle: CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   height: '32px'
 }
 const colStyle: CSSProperties = { fontWeight: 'bold' }
+//   extraButton?: ReactElement
+const PAGE_SIZE = 10
 
-const Index = ({ userId }: { userId: number }) => {
+const APP_PATH = import.meta.env.BASE_URL
+
+const Index = ({
+  userId,
+  extraButton
+}: {
+  userId: number
+  extraButton?: ReactElement
+}) => {
   const [loading, setLoading] = useState(false)
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const { page, onPageChange, onPageChangeNoParams } = usePagination()
+  const [total, setTotal] = useState(0)
   const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
   const [subInfo, setSubInfo] = useState<ISubscriptionType | null>(null) // null: when page is loading, or no active sub.
+  const [subHistory, setSubHistory] = useState<ISubHistoryItem[]>([])
   const [assignSubModalOpen, setAssignSubModalOpen] = useState(false)
   const toggleAssignSub = () => setAssignSubModalOpen(!assignSubModalOpen)
+
+  const columns: ColumnsType<ISubHistoryItem> = [
+    {
+      title: 'Item name',
+      dataIndex: 'itemName',
+      key: 'itemName',
+      render: (plan, record) =>
+        record.plan == null ? 'N/A' : record.plan.planName
+    },
+    {
+      title: 'Start',
+      dataIndex: 'periodStart',
+      key: 'periodStart',
+      render: (d) =>
+        d == 0 || d == null ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+    },
+    {
+      title: 'End',
+      dataIndex: 'periodEnd',
+      key: 'periodEnd',
+      render: (d) =>
+        d == 0 || d == null ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status'
+    },
+    {
+      title: 'Subscription Id',
+      dataIndex: 'subscriptionId',
+      key: 'subscriptionId',
+      width: 140,
+      render: (subId) =>
+        subId == '' || subId == null ? (
+          ''
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}subscription/${subId}`)}
+          >
+            {subId}
+          </div>
+        )
+    },
+    {
+      title: 'Created at',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (d, _) =>
+        d === 0 ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+    },
+    {
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId',
+      width: 140,
+      render: (invoiceId) =>
+        invoiceId == '' || invoiceId == null ? (
+          ''
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}invoice/${invoiceId}`)}
+          >
+            {invoiceId}
+          </div>
+        )
+      // render: (status, _) => UserStatus(status)
+    }
+  ]
+
+  const getSubHistory = async () => {
+    setHistoryLoading(true)
+    const [res, err] = await getSubscriptionHistoryReq({
+      page,
+      count: PAGE_SIZE,
+      userId
+    })
+    setHistoryLoading(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    console.log('sub his res: ', res)
+    const { subscriptionTimeLines, total } = res
+    setSubHistory(subscriptionTimeLines ?? [])
+    setTotal(total)
+  }
 
   const goToSubDetail = (subId: string) => () =>
     navigate(`/subscription/${subId}`)
@@ -59,6 +177,10 @@ const Index = ({ userId }: { userId: number }) => {
   useEffect(() => {
     getUserSub()
   }, [])
+
+  useEffect(() => {
+    getSubHistory()
+  }, [page])
 
   return (
     <div>
@@ -203,7 +325,7 @@ const Index = ({ userId }: { userId: number }) => {
               First pay
             </Col>
             <Col span={6}>
-              {subInfo && subInfo.firstPaidTime && (
+              {subInfo && (
                 <span>
                   {subInfo.firstPaidTime == 0 || subInfo.firstPaidTime == null
                     ? 'N/A'
@@ -230,6 +352,43 @@ const Index = ({ userId }: { userId: number }) => {
       >
         Assign Subscription
       </Button>
+
+      <Divider orientation="left" style={{ margin: '16px 0' }}>
+        Subscription and Add-on History
+      </Divider>
+      <Table
+        columns={columns}
+        dataSource={subHistory}
+        rowKey={'id'}
+        rowClassName="clickable-tbl-row"
+        pagination={false}
+        // scroll={{ x: true, y: 640 }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {}
+          }
+        }}
+        loading={{
+          spinning: historyLoading,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+        }}
+      />
+      <div className="mt-6 flex justify-end">
+        <Pagination
+          style={{ marginTop: '16px' }}
+          current={page + 1} // back-end starts with 0, front-end starts with 1
+          pageSize={PAGE_SIZE}
+          total={total}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
+          size="small"
+          onChange={onPageChangeNoParams}
+          disabled={loading}
+          showSizeChanger={false}
+        />
+      </div>
+      <div className="mt-6 flex items-center justify-center">{extraButton}</div>
     </div>
   )
 }
