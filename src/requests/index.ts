@@ -1169,14 +1169,24 @@ export const appSearchReq = async (searchKey: string) => {
   }
 }
 
-export const getDiscountCodeListReq = async (refreshCb: () => void) => {
+type TDiscountCodeQry = {
+  page: number
+  count: number
+}
+export const getDiscountCodeListReq = async (
+  params: TDiscountCodeQry,
+  refreshCb: () => void
+) => {
+  const { page, count } = params // these 2 fields always exist
   try {
-    const res = await request.get(`/merchant/discount/list`)
+    const res = await request.get(
+      `/merchant/discount/list?page=${page}&count=${count}`
+    )
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: refreshCb })
       throw new ExpiredError('Session expired')
     }
-    return [res.data.data.discounts, null]
+    return [res.data.data, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]
