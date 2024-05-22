@@ -9,6 +9,7 @@ import {
   Form,
   FormInstance,
   Input,
+  Pagination,
   Row,
   Table,
   message
@@ -21,7 +22,6 @@ import { usePagination } from '../../hooks'
 import { getUserListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types'
-import Pagination from '../ui/pagination'
 import { SubscriptionStatus, UserStatus } from '../ui/statusTag'
 import CreateUserModal from './createUserModal'
 
@@ -31,10 +31,9 @@ const PAGE_SIZE = 10
 const Index = () => {
   const navigate = useNavigate()
   const { page, onPageChange } = usePagination()
-  const [isLastPage, setIsLastPage] = useState(false)
+  const [total, setTotal] = useState(0)
   const [newUserModalOpen, setNewUserModalOpen] = useState(false)
   const toggleNewUserModal = () => setNewUserModalOpen(!newUserModalOpen)
-
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<IProfile[]>([])
   const [form] = Form.useForm()
@@ -100,7 +99,7 @@ const Index = () => {
   const fetchData = async () => {
     const searchTerm = form.getFieldsValue()
     setLoading(true)
-    const [users, err] = await getUserListReq(
+    const [res, err] = await getUserListReq(
       {
         page,
         count: PAGE_SIZE,
@@ -113,13 +112,19 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    if (null == users) {
-      setIsLastPage(true)
-      setUsers([])
-      return
+    const { userAccounts, total } = res
+    setUsers(userAccounts ?? [])
+    setTotal(total)
+  }
+
+  // search should always start with page 0(it shows ?page=1 on URL)
+  // search result might have fewer records than PAGE_SIZE(only visible on page=1), it will be empty from page=2
+  const goSearch = () => {
+    if (page == 0) {
+      fetchData()
+    } else {
+      onPageChange(1, PAGE_SIZE)
     }
-    setIsLastPage(users.length < PAGE_SIZE)
-    setUsers(users)
   }
 
   useEffect(() => {
@@ -135,9 +140,9 @@ const Index = () => {
         <Col span={22}>
           <Search
             form={form}
-            goSearch={fetchData}
-            searching={loading}
+            goSearch={goSearch}
             onPageChange={onPageChange}
+            searching={loading}
           />{' '}
         </Col>
         <Col span={2}>
@@ -176,21 +181,17 @@ const Index = () => {
         }}
       />
       <div className="mx-0 my-4 flex items-center justify-end">
-        {/* <Pagination
+        <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          total={total}
           size="small"
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
-      /> */}
-        <Pagination
-          current={page + 1}
-          pageSize={PAGE_SIZE}
-          disabled={loading}
-          onChange={onPageChange}
-          isLastPage={isLastPage}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
         />
       </div>
     </div>

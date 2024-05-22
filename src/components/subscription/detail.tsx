@@ -7,8 +7,6 @@ import { IProfile } from '../../shared.types.d'
 import UserInfoSection from '../shared/userInfo'
 import AdminNote from './adminNote'
 import './detail.css'
-import InvoiceTab from './invoicesTab'
-import PaymentTab from './paymentTab'
 import SubscriptionTab from './subscriptionTab'
 import UserAccount from './userAccountTab'
 
@@ -60,7 +58,8 @@ const Index = () => {
           setRefreshSub={setRefreshSub} // after admin suspended a suer, subscriptin tab also need to refresh, just call setRefreshSub(true)
         />
       )
-    },
+    }
+    /*
     {
       key: 'Invoices',
       label: 'Invoices',
@@ -71,6 +70,7 @@ const Index = () => {
       label: 'Payment',
       children: <PaymentTab user={userProfile} />
     }
+    */
   ]
   const onTabChange = (key: string) => {}
 

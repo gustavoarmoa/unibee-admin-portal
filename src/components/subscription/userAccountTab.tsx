@@ -257,6 +257,7 @@ const UserAccountTab = ({
                 <PaymentSelector
                   selected={paymentMethod}
                   onSelect={onPaymentMethodChange}
+                  disabled={user.status == 2}
                 />
               </Form.Item>
             </Col>

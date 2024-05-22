@@ -956,11 +956,11 @@ const SubscriptionInfoSection = ({
       {subInfo?.unfinishedSubscriptionPendingUpdate && (
         <PendingUpdateSection subInfo={subInfo} />
       )}
-      <SubTimeline
+      {/* <SubTimeline
         userId={subInfo?.userId}
         plans={plans}
         testClock={subInfo?.testClock}
-      />
+    /> */}
     </>
   )
 }
@@ -1091,6 +1091,7 @@ const PendingUpdateSection = ({ subInfo }: { subInfo: ISubscriptionType }) => {
 }
 
 // -------------
+/*
 type SubTimeline = {
   currency: string
   id: number
@@ -1171,12 +1172,6 @@ const SubTimeline = ({
     setPage(page - 1)
   }
 
-  /*
-  useEffect(() => {
-    fetchTimeline()
-  }, [page])
-  */
-
   useEffect(() => {
     fetchTimeline()
   }, [userId, page])
@@ -1223,3 +1218,4 @@ const SubTimeline = ({
     </>
   )
 }
+*/

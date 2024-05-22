@@ -49,7 +49,7 @@ const Index = ({
 }) => {
   const [loading, setLoading] = useState(false)
   const [historyLoading, setHistoryLoading] = useState(false)
-  const { page, onPageChange, onPageChangeNoParams } = usePagination()
+  const { page, onPageChangeNoParams } = usePagination()
   const [total, setTotal] = useState(0)
   const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
@@ -64,7 +64,16 @@ const Index = ({
       dataIndex: 'itemName',
       key: 'itemName',
       render: (plan, record) =>
-        record.plan == null ? 'N/A' : record.plan.planName
+        record.plan == null ? (
+          'N/A'
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}plan/${record.plan.id}`)}
+          >
+            {record.plan.planName}
+          </div>
+        )
     },
     {
       title: 'Start',
@@ -81,9 +90,41 @@ const Index = ({
         d == 0 || d == null ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status'
+      title: 'Addons',
+      dataIndex: 'addons',
+      key: 'addons',
+      render: (addons) =>
+        addons == null ? (
+          'N/A'
+        ) : (
+          <Popover
+            placement="top"
+            title="Addon breakdown"
+            content={
+              <div style={{ width: '280px' }}>
+                {addons.map((a: any) => (
+                  <Row key={a.id}>
+                    <Col span={10} className=" font-bold text-gray-500">
+                      {a.addonPlan.planName}
+                    </Col>
+                    <Col span={14}>
+                      {showAmount(a.addonPlan.amount, a.addonPlan.currency)} ×{' '}
+                      {a.quantity} ={' '}
+                      {showAmount(
+                        a.addonPlan.amount * a.quantity,
+                        a.addonPlan.currency
+                      )}
+                    </Col>
+                  </Row>
+                ))}
+              </div>
+            }
+          >
+            <span style={{ marginLeft: '8px', cursor: 'pointer' }}>
+              {addons.length}
+            </span>
+          </Popover>
+        )
     },
     {
       title: 'Subscription Id',
@@ -359,7 +400,7 @@ const Index = ({
       <Table
         columns={columns}
         dataSource={subHistory}
-        rowKey={'id'}
+        rowKey={'uniqueId'}
         rowClassName="clickable-tbl-row"
         pagination={false}
         // scroll={{ x: true, y: 640 }}
