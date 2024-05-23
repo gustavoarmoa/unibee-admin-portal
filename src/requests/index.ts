@@ -371,7 +371,7 @@ export const getPlanList = async (
       session.setSession({ expired: true, refresh: refreshCb })
       throw new ExpiredError('Session expired')
     }
-    return [res.data.data.plans, null]
+    return [res.data.data, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]
@@ -432,7 +432,7 @@ export const getPlanDetailWithMore = async (
     [metricsList, errMetrics]
   ] = await Promise.all([
     planDetailRes,
-    getPlanList({ type: [2, 3], status: [2], page: 0, count: 100 }, null), // type: [2,3] -> [addon, one-time-pay], status: 2 -> active
+    getPlanList({ type: [2, 3], status: [2], page: 0, count: 150 }, null), // type: [2,3] -> [addon, one-time-pay], status: 2 -> active
     getMetricsListReq(null)
   ])
   const err = errDetail || addonErr || errMetrics
@@ -654,7 +654,7 @@ export const getSubDetailWithMore = async (
           type: [1], // main plan
           status: [2], // active
           page: 0,
-          count: 100
+          count: 150
         },
         null
       )
@@ -1218,7 +1218,7 @@ export const getDiscountCodeDetailWithMore = async (
         type: [1], // main plan
         status: [2], // active
         page: 0,
-        count: 100
+        count: 150
       },
       null
     )

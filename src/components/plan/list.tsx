@@ -6,7 +6,7 @@ import {
   MinusOutlined,
   PlusOutlined
 } from '@ant-design/icons'
-import { Button, Space, Table, Tag, Tooltip, message } from 'antd'
+import { Button, Pagination, Space, Table, Tooltip, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
@@ -17,7 +17,6 @@ import { usePagination } from '../../hooks'
 import { copyPlanReq, getPlanList } from '../../requests'
 import '../../shared.css'
 import { IPlan } from '../../shared.types.d'
-import Pagination from '../ui/pagination'
 import { PlanStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
@@ -42,6 +41,7 @@ type TFilters = {
 const Index = () => {
   const navigate = useNavigate()
   const { page, onPageChange } = usePagination()
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [plan, setPlan] = useState<IPlan[]>([])
   const [copyingPlan, setCopyingPlan] = useState(false)
@@ -187,18 +187,16 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    if (planList == null) {
-      setIsLastPage(true)
-      setPlan([])
-      return
-    }
+    const { plans, total } = planList
+    setTotal(total)
     setPlan(
-      planList.map((p: any) => ({
-        ...p.plan,
-        metricPlanLimits: p.metricPlanLimits
-      }))
+      plans == null
+        ? []
+        : plans.map((p: any) => ({
+            ...p.plan,
+            metricPlanLimits: p.metricPlanLimits
+          }))
     )
-    setIsLastPage(planList.length < PAGE_SIZE)
   }
 
   const onTableChange: TableProps<IPlan>['onChange'] = (
@@ -207,6 +205,7 @@ const Index = () => {
     sorter,
     extra
   ) => {
+    onPageChange(1, PAGE_SIZE)
     // console.log('params', pagination, filters, sorter, extra)
     setFilters(filters as TFilters)
   }
@@ -260,22 +259,18 @@ const Index = () => {
       />
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
-          current={page + 1}
-          pageSize={PAGE_SIZE}
-          disabled={loading}
-          onChange={onPageChange}
-          isLastPage={isLastPage}
-        />
-        {/*  <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          // total={500}
+          total={total}
           size="small"
           showTotal={() => null}
           onChange={onPageChange}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
           disabled={loading}
           showSizeChanger={false}
-      /> */}
+        />
       </div>
     </>
   )

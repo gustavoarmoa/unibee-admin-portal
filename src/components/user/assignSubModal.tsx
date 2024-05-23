@@ -122,32 +122,28 @@ const Index = ({ user, closeModal, refresh }: Props) => {
 
   const fetchPlan = async () => {
     const body: TPlanListBody = {
-      type: [1], // get main plan and addon
+      type: [1], // main plan
       status: [2], // active
       page: 0,
-      count: 100
+      count: 150
     }
-    /*
-    if (!includeUnpublished) {
-      body.publishStatus = 2 // 1-UnPublished，2-Published
-    }
-    */
+
     setLoading(true)
-    const [planList, err] = await getPlanList(body, fetchPlan)
+    const [res, err] = await getPlanList(body, fetchPlan)
     setLoading(false)
 
     if (err != null) {
       message.error(err.message)
       return
     }
-    if (planList == null) {
-      return
-    }
+    const { plans, total } = res
     setPlans(
-      planList.map((p: any) => ({
-        ...p.plan,
-        metricPlanLimits: p.metricPlanLimits
-      }))
+      plans == null
+        ? []
+        : plans.map((p: any) => ({
+            ...p.plan,
+            metricPlanLimits: p.metricPlanLimits
+          }))
     )
   }
 

@@ -31,7 +31,6 @@ import {
   extendDueDateReq,
   getAppConfigReq,
   getSubDetailWithMore,
-  getSubTimelineReq,
   resumeSubReq,
   setSimDateReq,
   terminateSubReq,
@@ -346,9 +345,9 @@ const Index = ({
     setUserId(user.id)
 
     let plans: IPlan[] =
-      planList == null
+      planList.plans == null
         ? []
-        : planList.map((p: any) => ({
+        : planList.plans.map((p: any) => ({
             ...p.plan,
             addons: p.addons
           }))

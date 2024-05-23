@@ -88,14 +88,15 @@ const Index = () => {
     // console.log('code/plan: ', discount, '//', planList)
 
     // if discount.currency is EUR, and discountType == 2(fixed amt), then filter the planList to contain only euro plans
-    let plans = planList == null ? [] : planList.map((p: any) => p.plan)
+    let plans =
+      planList.plans == null ? [] : planList.plans.map((p: any) => p.plan)
     if (discount.discountType == 2) {
       // fixed amt
       plans = plans.filter((p: IPlan) => p.currency == discount.currency)
     }
     setPlanList(plans)
     planListRef.current =
-      planList == null ? [] : planList.map((p: any) => p.plan)
+      planList.plans == null ? [] : planList.plans.map((p: any) => p.plan)
 
     discount.validityRange = [
       dayjs(discount.startTime * 1000),
@@ -114,12 +115,12 @@ const Index = () => {
   // for creating new code, there is no codeDetail to fetch.
   const fetchPlans = async () => {
     setLoading(true)
-    const [planList, err] = await getPlanList(
+    const [res, err] = await getPlanList(
       {
         type: [1], // main plan
         status: [2], // active
         page: 0,
-        count: 100
+        count: 200
       },
       fetchPlans
     )
@@ -128,15 +129,15 @@ const Index = () => {
       message.error(err.message)
       return
     }
+    const { plans, total } = res
     // if NEW_CODE.currency is EUR, and discountType == 2(fixed amt), then filter the planList to contain only euro plans
-    let plans = planList == null ? [] : planList.map((p: any) => p.plan)
+    let planList = plans == null ? [] : plans.map((p: any) => p.plan)
     if (NEW_CODE.discountType == 2) {
       // fixed amt
-      plans = plans.filter((p: IPlan) => p.currency == NEW_CODE.currency)
+      planList = planList.filter((p: IPlan) => p.currency == NEW_CODE.currency)
     }
-    setPlanList(plans)
-    planListRef.current =
-      planList == null ? [] : planList.map((p: any) => p.plan)
+    setPlanList(planList)
+    planListRef.current = plans == null ? [] : plans.map((p: any) => p.plan)
   }
 
   const onSave = async () => {
