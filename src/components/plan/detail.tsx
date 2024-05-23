@@ -365,13 +365,6 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     formDisabled =
       planDetail.plan.status == 2 && planDetail.plan.publishStatus == 2 // plan active && published
 
-    console.log(
-      'planDetail.plan.status == 2 && planDetail.plan.publishStatus == 1 ',
-      planDetail.plan.status == 2,
-      '///',
-      planDetail.plan.publishStatus == 1
-    )
-
     // plan obj and addon obj are at the same level in planDetailRes.data.data obj
     // but I want to put addonIds obj as a props of the local plan obj.
     planDetail.plan.amount = getAmount(
