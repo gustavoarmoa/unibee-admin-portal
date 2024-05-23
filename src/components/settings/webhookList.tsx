@@ -1,5 +1,11 @@
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Popover, Space, Table, Tag, message } from 'antd'
+import {
+  EditOutlined,
+  LoadingOutlined,
+  PlusOutlined,
+  ProfileOutlined,
+  ReconciliationOutlined
+} from '@ant-design/icons'
+import { Button, Popover, Space, Table, Tag, Tooltip, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
@@ -22,6 +28,11 @@ const Index = () => {
   const toggleDetailModal = () => setDetailModalOpen(!detailModalOpen)
   const toggleLogModal = () => setLogModalOpen(!logModalOpen)
   const [currentWebhookIdx, setCurrentWebhookIdx] = useState(-1)
+
+  const onNewWebhook = () => {
+    setCurrentWebhookIdx(-1)
+    toggleDetailModal()
+  }
 
   const columns: ColumnsType<TWebhook> = [
     {
@@ -46,7 +57,6 @@ const Index = () => {
       render: (evt, webhook) => (
         <Popover
           placement="top"
-          // title="Addon breakdown"
           content={
             <Space size={[0, 8]} wrap style={{ width: '380px' }}>
               {evt.map((e: string) => (
@@ -83,29 +93,40 @@ const Index = () => {
       render: (d, plan) => dayjs(new Date(d * 1000)).format('YYYY-MMM-DD')
     },
     {
-      title: 'Action',
+      title: (
+        <>
+          <span>Action</span>
+          <Tooltip title="New">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              onClick={onNewWebhook}
+              icon={<PlusOutlined />}
+            ></Button>
+          </Tooltip>
+        </>
+      ),
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <a>Edit</a>{' '}
-          <span
-            className="btn-view-webhook-logs"
-            onClick={(evt) => {
-              setCurrentWebhookIdx(record.id)
-              toggleLogModal()
-            }}
-          >
-            <a className="btn-view-webhook-logs">View logs</a>
-          </span>
+          <Tooltip title="Edit">
+            <Button
+              className="btn-edit-webhook"
+              style={{ border: 'unset' }}
+              icon={<EditOutlined />}
+            />
+          </Tooltip>
+          <Tooltip title="View logs">
+            <Button
+              className="btn-view-webhook-logs"
+              style={{ border: 'unset' }}
+              icon={<ProfileOutlined />}
+            />
+          </Tooltip>
         </Space>
       )
     }
   ]
-
-  const onNewWebhook = () => {
-    setCurrentWebhookIdx(-1)
-    toggleDetailModal()
-  }
 
   const fetchData = async () => {
     setLoading(true)
@@ -115,7 +136,6 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    console.log('getting webhooks res: ', endpointList)
     setWebhookList(endpointList)
   }
 
@@ -140,11 +160,6 @@ const Index = () => {
           endpointId={webhookList[currentWebhookIdx].id}
         />
       )}
-      <div className="my-4 flex justify-end">
-        <Button type="primary" onClick={onNewWebhook} icon={<PlusOutlined />}>
-          New
-        </Button>
-      </div>
       <Table
         columns={columns}
         dataSource={webhookList}
@@ -160,12 +175,13 @@ const Index = () => {
             onClick: (evt) => {
               setCurrentWebhookIdx(rowIndex as number)
               if (
-                evt.target instanceof HTMLElement &&
-                evt.target.classList.contains('btn-view-webhook-logs')
+                evt.target instanceof Element &&
+                evt.target.closest('.btn-edit-webhook') != null
               ) {
-                return
+                toggleDetailModal()
+              } else {
+                toggleLogModal()
               }
-              toggleDetailModal()
             }
           }
         }}

@@ -1,5 +1,15 @@
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Col, Form, Input, Modal, Row, Select, message } from 'antd'
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Row,
+  Select,
+  message
+} from 'antd'
 import React, { useEffect, useState } from 'react'
 import { ramdonString, urlRegx } from '../../helpers'
 import {
@@ -33,7 +43,7 @@ const Index = ({
     }
     message.success('Webhook saved')
     refresh()
-    setTimeout(closeModal, 1500)
+    closeModal()
   }
 
   const onDelete = async () => {
@@ -186,9 +196,17 @@ const Index = ({
         {detail == null ? (
           <span></span>
         ) : (
-          <Button danger onClick={onDelete} disabled={submitting}>
-            Delete
-          </Button>
+          <Popconfirm
+            title="Deletion Confirm"
+            description="Are you sure to delete this webhook?"
+            onConfirm={onDelete}
+            showCancel={false}
+            okText="Yes"
+          >
+            <Button danger disabled={submitting}>
+              Delete
+            </Button>
+          </Popconfirm>
         )}
         <div>
           <Button onClick={closeModal} disabled={submitting}>

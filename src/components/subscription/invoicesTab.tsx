@@ -178,7 +178,23 @@ const Index = ({
       render: (d, invoice) => dayjs(d).format('YYYY-MMM-DD')
     },
     {
-      title: 'Action',
+      title: (
+        <>
+          <span>Action</span>
+          <Tooltip title="New invoice">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              onClick={() => {
+                setInvoiceIdx(-1)
+                toggleNewInvoiceModal()
+              }}
+              icon={<PlusOutlined />}
+              disabled={user == null}
+            />
+          </Tooltip>
+        </>
+      ),
       key: 'action',
       // width: 180,
       render: (
@@ -302,7 +318,7 @@ const Index = ({
       )}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {/* <Searchbar refresh={fetchData} /> */}
-        <div className="my-4 flex justify-end">
+        {/* <div className="my-4 flex justify-end">
           <Button
             icon={<PlusOutlined />}
             type="primary"
@@ -314,7 +330,7 @@ const Index = ({
           >
             New Invoice
           </Button>
-        </div>
+          </div> */}
         <Table
           columns={columns}
           dataSource={invoiceList}
