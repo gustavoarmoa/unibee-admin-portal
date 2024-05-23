@@ -1,5 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Table, message } from 'antd'
+import { Pagination, Table, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
@@ -10,7 +10,6 @@ import { usePagination } from '../../hooks'
 import { getSublist } from '../../requests'
 import '../../shared.css'
 import { ISubscriptionType } from '../../shared.types.d'
-import Pagination from '../ui/pagination'
 import { SubscriptionStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -94,7 +93,7 @@ const columns: ColumnsType<ISubscriptionType> = [
 
 const Index = () => {
   const { page, onPageChange } = usePagination()
-  const [isLastPage, setIsLastPage] = useState(false)
+  const [total, setTotal] = useState(0)
   const [subList, setSubList] = useState<ISubscriptionType[]>([])
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -102,7 +101,7 @@ const Index = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    const [subscriptions, err] = await getSublist(
+    const [res, err] = await getSublist(
       {
         page: page as number,
         count: PAGE_SIZE,
@@ -115,32 +114,29 @@ const Index = () => {
       message.error(err.message)
       return
     }
-
+    const { subscriptions, total } = res
     if (subscriptions == null) {
-      setIsLastPage(true)
       setSubList([])
+      setTotal(0)
       return
     }
-    setIsLastPage(subscriptions.length < PAGE_SIZE)
 
-    const list: ISubscriptionType[] =
-      subscriptions == null
-        ? []
-        : subscriptions.map((s: any) => {
-            return {
-              ...s.subscription,
-              plan: s.plan,
-              addons:
-                s.addons == null
-                  ? []
-                  : s.addons.map((a: any) => ({
-                      ...a.addonPlan,
-                      quantity: a.quantity
-                    })),
-              user: s.user
-            }
-          })
+    const list: ISubscriptionType[] = subscriptions.map((s: any) => {
+      return {
+        ...s.subscription,
+        plan: s.plan,
+        addons:
+          s.addons == null
+            ? []
+            : s.addons.map((a: any) => ({
+                ...a.addonPlan,
+                quantity: a.quantity
+              })),
+        user: s.user
+      }
+    })
     setSubList(list)
+    setTotal(total)
   }
 
   const onTableChange: TableProps<ISubscriptionType>['onChange'] = (
@@ -150,6 +146,7 @@ const Index = () => {
     extra
   ) => {
     // console.log('params', pagination, filters, sorter, extra);
+    onPageChange(1, PAGE_SIZE)
     if (filters.status == null) {
       setStatusFilter([])
       return
@@ -187,21 +184,17 @@ const Index = () => {
 
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
-          current={page + 1}
-          pageSize={PAGE_SIZE}
-          disabled={loading}
-          onChange={onPageChange}
-          isLastPage={isLastPage}
-        />
-        {/* <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          total={total}
           size="small"
           onChange={onPageChange}
           disabled={loading}
           showSizeChanger={false}
-      /> */}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
+        />
       </div>
     </div>
   )
