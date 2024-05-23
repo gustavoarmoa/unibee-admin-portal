@@ -59,9 +59,15 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    console.log('new plan after copy: ', newPlan)
     goToDetail(newPlan.id)
   }
+
+  const onNewPlan = () => {
+    // setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
+    onPageChange(1, 100)
+    navigate(`${APP_PATH}plan/new`)
+  }
+
   const columns: ColumnsType<IPlan> = [
     {
       title: 'Name',
@@ -143,7 +149,21 @@ const Index = () => {
       render: (m, plan) => (null == m || 0 == m.length ? 'No' : m.length)
     },
     {
-      title: 'Action',
+      title: (
+        <>
+          <span>Action</span>
+          <Tooltip title="New plan">
+            <Button
+              // type="primary"
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={copyingPlan}
+              onClick={onNewPlan}
+              icon={<PlusOutlined />}
+            ></Button>
+          </Tooltip>
+        </>
+      ),
       key: 'action',
       render: (_, record) => (
         <Space size="middle" className="plan-action-btn-wrapper">
@@ -208,19 +228,13 @@ const Index = () => {
     setFilters(filters as TFilters)
   }
 
-  const onNewPlan = () => {
-    // setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
-    onPageChange(1, 100)
-    navigate(`${APP_PATH}plan/new`)
-  }
-
   useEffect(() => {
     fetchPlan()
   }, [filters, page])
 
   return (
     <>
-      <div className="my-4 flex justify-end">
+      {/* <div className="my-4 flex justify-end">
         <Button
           type="primary"
           disabled={copyingPlan}
@@ -229,7 +243,7 @@ const Index = () => {
         >
           New plan
         </Button>
-      </div>
+  </div> */}
       <Table
         columns={columns}
         dataSource={plan}

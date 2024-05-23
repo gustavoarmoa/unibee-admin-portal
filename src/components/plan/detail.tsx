@@ -347,7 +347,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     const onetimeAddons = addons.filter((p: any) => p.type == 3)
     setAddons(regularAddons)
     setSelectOnetime(onetimeAddons)
-    setMetricsList(metricsList == null ? [] : metricsList)
+    setMetricsList(
+      metricsList.merchantMetrics == null ? [] : metricsList.merchantMetrics
+    )
     if (isNew) {
       return
     }
