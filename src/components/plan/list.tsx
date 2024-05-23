@@ -45,7 +45,6 @@ const Index = () => {
   const [loading, setLoading] = useState(false)
   const [plan, setPlan] = useState<IPlan[]>([])
   const [copyingPlan, setCopyingPlan] = useState(false)
-  const [isLastPage, setIsLastPage] = useState(false)
   const [filters, setFilters] = useState<TFilters>({
     type: null,
     status: null
@@ -182,7 +181,6 @@ const Index = () => {
       fetchPlan
     )
     setLoading(false)
-
     if (err != null) {
       message.error(err.message)
       return
@@ -263,7 +261,6 @@ const Index = () => {
           pageSize={PAGE_SIZE}
           total={total}
           size="small"
-          showTotal={() => null}
           onChange={onPageChange}
           showTotal={(total, range) =>
             `${range[0]}-${range[1]} of ${total} items`

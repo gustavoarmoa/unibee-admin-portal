@@ -183,7 +183,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
           <PaymentMethodSelector
             selected={gatewayId}
             onSelect={onGatewayChange}
-            cryptoDisabled={true}
+            // cryptoDisabled={true}
             disabled={loading}
           />
         </div>
@@ -199,7 +199,6 @@ const Index = ({ user, closeModal, refresh }: Props) => {
                 .filter((p) =>
                   includeUnpublished ? true : p.publishStatus == 2
                 )
-                // .map((p) => ({ label: p.planName, value: p.id }))}
                 .map((p) => ({
                   value: p.id,
                   label: (

@@ -7,11 +7,10 @@ import {
   Popconfirm,
   Select,
   Spin,
-  Tag,
   message
 } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
-import React, { ReactElement, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY } from '../../constants'
 import {
@@ -142,7 +141,6 @@ const Index = () => {
 
   const onSave = async () => {
     const body = form.getFieldsValue()
-    // console.log('form val: ', body)
     const code = JSON.parse(JSON.stringify(body))
     const r = form.getFieldValue('validityRange') as [Dayjs, Dayjs]
     code.startTime = r[0].unix()

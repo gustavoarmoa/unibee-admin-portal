@@ -1,17 +1,12 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Button, Space, Table, message } from 'antd'
+import { Button, Pagination, Space, Table, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  METRICS_AGGREGATE_TYPE,
-  METRICS_TYPE,
-  PLAN_STATUS
-} from '../../constants'
+import { METRICS_AGGREGATE_TYPE, METRICS_TYPE } from '../../constants'
 import { getMetricsListReq } from '../../requests'
 import { IBillableMetrics } from '../../shared.types.d'
-import Pagination from '../ui/pagination'
 
 import { usePagination } from '../../hooks'
 import '../../shared.css'
@@ -80,28 +75,22 @@ const columns: ColumnsType<IBillableMetrics> = [
 
 const Index = () => {
   const navigate = useNavigate()
+  const [total, setTotal] = useState(0)
   const { page, onPageChange } = usePagination()
-  const [isLastPage, setIsLastPage] = useState(false)
   const [loading, setLoading] = useState(false)
   const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([])
-  // const [page, setPage] = useState(0) // pagination props
-  // const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
 
   const fetchMetricsList = async () => {
     setLoading(true)
-    const [list, err] = await getMetricsListReq(fetchMetricsList)
+    const [res, err] = await getMetricsListReq(fetchMetricsList)
     setLoading(false)
     if (err != null) {
       message.error((err as Error).message)
       return
     }
-    if (null == list) {
-      setMetricsList([])
-      setIsLastPage(true)
-      return
-    }
-    setIsLastPage(list.length < PAGE_SIZE)
-    setMetricsList(list)
+    const { merchantMetrics, total } = res
+    setMetricsList(merchantMetrics ?? [])
+    setTotal(total)
   }
 
   const onTableChange: TableProps<IBillableMetrics>['onChange'] = (
@@ -158,29 +147,20 @@ const Index = () => {
       />
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
-          current={page + 1}
-          pageSize={PAGE_SIZE}
-          disabled={loading}
-          onChange={onPageChange}
-          isLastPage={isLastPage}
-        />
-        {/* <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
           pageSize={PAGE_SIZE}
-          total={500}
+          total={total}
           size="small"
           onChange={onPageChange}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
           disabled={loading}
           showSizeChanger={false}
-      /> */}
+        />
       </div>
     </>
   )
 }
 
 export default Index
-/*
-  navigate(`${APP_PATH}profile/subscription`, {
-        state: { from: 'login' },
-      });
-*/
