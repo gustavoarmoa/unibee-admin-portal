@@ -695,6 +695,30 @@ export const getSubscriptionHistoryReq = async ({
   }
 }
 
+export const getOneTimePaymentHistoryReq = async ({
+  userId,
+  page,
+  count
+}: {
+  userId: number
+  page: number
+  count: number
+}) => {
+  try {
+    const res = await request.get(
+      `/merchant/payment/item/list?userId=${userId}&page=${page}&count=${count}`
+    )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null] // backend has no meaningful return value
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // new user has choosen a sub plan, but not paid yet, before the payment due date, user and admin can cancel it.
 // this fn is for this purpose only, this call only work for sub.status == created.
 // it's not the same as terminate an active sub,

@@ -34,12 +34,9 @@ const UserAccountTab = ({
   const [loading, setLoading] = useState(false)
   const [suspendModalOpen, setSuspendModalOpen] = useState(false)
   const toggleSuspend = () => setSuspendModalOpen(!suspendModalOpen)
-  const [paymentMethod, setPaymentMethod] = useState<number | undefined>(
-    undefined
-  )
-  const onPaymentMethodChange: React.ChangeEventHandler<HTMLInputElement> = (
-    evt
-  ) => setPaymentMethod(Number(evt.target.value))
+  const [gatewayId, setGatewayId] = useState<number | undefined>(undefined)
+  const onGatewayChange: React.ChangeEventHandler<HTMLInputElement> = (evt) =>
+    setGatewayId(Number(evt.target.value))
 
   const filterOption = (
     input: string,
@@ -48,8 +45,13 @@ const UserAccountTab = ({
 
   const onSave = async () => {
     const userProfile = form.getFieldsValue()
+    const body = JSON.parse(JSON.stringify(form.getFieldsValue()))
+    if (gatewayId != undefined) {
+      body.gatewayId = gatewayId
+    }
+    // return
     setLoading(true)
-    const [_, err] = await saveUserProfileReq(userProfile)
+    const [_, err] = await saveUserProfileReq(body)
     setLoading(false)
     if (err != null) {
       message.error(err.message)
@@ -75,9 +77,12 @@ const UserAccountTab = ({
         }))
       )
     }
-
     fetchData()
   }, [])
+
+  useEffect(() => {
+    if (user != null) setGatewayId(user.gatewayId)
+  }, [user])
 
   const countryCode = Form.useWatch('countryCode', form)
   useEffect(() => {
@@ -106,7 +111,7 @@ const UserAccountTab = ({
           labelCol={{ span: 7 }}
           onFinish={onSave}
           initialValues={user}
-          disabled={user.status == 2} // suspended
+          disabled={loading || user.status == 2} // suspended
         >
           <Form.Item label="id" name="id" hidden>
             <Input disabled />
@@ -239,7 +244,7 @@ const UserAccountTab = ({
           </Row>
           <Row>
             <Col span={12}>
-              <Form.Item label="Account Type" name="accountType">
+              <Form.Item label="Account Type" name="type">
                 <Radio.Group>
                   <Radio value={1}>Individual</Radio>
                   <Radio value={2}>Business</Radio>
@@ -253,11 +258,11 @@ const UserAccountTab = ({
               </Divider> */}
           <Row>
             <Col span={12}>
-              <Form.Item label="Payment method" name="paymentMethod">
+              <Form.Item label="Payment method">
                 <PaymentSelector
-                  selected={paymentMethod}
-                  onSelect={onPaymentMethodChange}
-                  disabled={user.status == 2}
+                  selected={gatewayId}
+                  onSelect={onGatewayChange}
+                  disabled={loading || user.status == 2}
                 />
               </Form.Item>
             </Col>

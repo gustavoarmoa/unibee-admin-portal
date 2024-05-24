@@ -17,7 +17,9 @@ interface IProfile {
   status: number // 0-Active, 2-Frozen
   phone: string
   mobile: string
-  paymentMethod: string
+  paymentMethod: string // for card payment, this is the stripe paymentId, used for auto recurring payment
+  gatewayId?: number // after a successful payment, the payment gateway is saved as default. This is null for newly registered user.
+  gateway?: TGateway // ditto.
   linkedIn: string
   telegram: string
   tikTok: string
@@ -178,6 +180,25 @@ interface ISubHistoryItem {
   addons: { quantity: number; addonPlan: IPlan }[]
   gatewayId: number
   createTime: number
+}
+
+interface IOneTimeHistoryItem {
+  id: number
+  bizType: number
+  merchantId: number
+  userId: number
+  subscriptionId: string
+  invoiceId: string
+  uniqueId: string
+  currency: string
+  amount: number
+  unitAmount: number
+  quantity: number
+  paymentId: string
+  status: number
+  createTime: number
+  description: string
+  name: string
 }
 
 interface IPreview {
@@ -398,6 +419,7 @@ export type {
   IAppConfig,
   IBillableMetrics,
   IMerchantUserProfile,
+  IOneTimeHistoryItem,
   IPlan,
   IPreview,
   IProfile,

@@ -20,8 +20,13 @@ import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { getSubByUserReq, getSubscriptionHistoryReq } from '../../requests'
 import {
+  getOneTimePaymentHistoryReq,
+  getSubByUserReq,
+  getSubscriptionHistoryReq
+} from '../../requests'
+import {
+  IOneTimeHistoryItem,
   IProfile,
   ISubHistoryItem,
   ISubscriptionType
@@ -40,6 +45,125 @@ const PAGE_SIZE = 10
 
 const APP_PATH = import.meta.env.BASE_URL
 
+const OneTimeHistory = ({ userId }: { userId: number }) => {
+  const [loading, setLoading] = useState(false)
+  const { page, onPageChangeNoParams } = usePagination()
+  const [total, setTotal] = useState(0)
+  const [onetimeHistory, setOneTimeHistory] = useState<IOneTimeHistoryItem[]>(
+    []
+  )
+  const navigate = useNavigate()
+
+  const getOneTimeHistory = async () => {
+    setLoading(true)
+    const [res, err] = await getOneTimePaymentHistoryReq({
+      page,
+      count: PAGE_SIZE,
+      userId
+    })
+    setLoading(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    console.log('onetime his res: ', res)
+    const { paymentItems, total } = res
+    setOneTimeHistory(paymentItems ?? [])
+    setTotal(total)
+  }
+
+  const columns: ColumnsType<IOneTimeHistoryItem> = [
+    {
+      title: 'Item name',
+      dataIndex: 'name',
+      key: 'name'
+    },
+    {
+      title: 'createTime',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (d) =>
+        d == 0 || d == null ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status'
+    },
+    {
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId'
+    },
+    {
+      title: 'Subscription Id',
+      dataIndex: 'subscriptionId',
+      key: 'subscriptionId',
+      width: 140,
+      render: (subId) =>
+        subId == '' || subId == null ? (
+          ''
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}subscription/${subId}`)}
+          >
+            {subId}
+          </div>
+        )
+    },
+    {
+      title: 'Payment Id',
+      dataIndex: 'paymentId',
+      key: 'paymentId'
+    }
+  ]
+
+  useEffect(() => {
+    getOneTimeHistory()
+  }, [page])
+
+  return (
+    <>
+      <Divider orientation="left" style={{ margin: '16px 0' }}>
+        One-time Purchase History
+      </Divider>
+      <Table
+        columns={columns}
+        dataSource={onetimeHistory}
+        rowKey={'uniqueId'}
+        rowClassName="clickable-tbl-row"
+        pagination={false}
+        // scroll={{ x: true, y: 640 }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {}
+          }
+        }}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+        }}
+      />
+      <div className="mt-6 flex justify-end">
+        <Pagination
+          style={{ marginTop: '16px' }}
+          current={page + 1} // back-end starts with 0, front-end starts with 1
+          pageSize={PAGE_SIZE}
+          total={total}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
+          size="small"
+          onChange={onPageChangeNoParams}
+          disabled={loading}
+          showSizeChanger={false}
+        />
+      </div>
+    </>
+  )
+}
+
 const Index = ({
   userId,
   extraButton
@@ -55,6 +179,7 @@ const Index = ({
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
   const [subInfo, setSubInfo] = useState<ISubscriptionType | null>(null) // null: when page is loading, or no active sub.
   const [subHistory, setSubHistory] = useState<ISubHistoryItem[]>([])
+
   const [assignSubModalOpen, setAssignSubModalOpen] = useState(false)
   const toggleAssignSub = () => setAssignSubModalOpen(!assignSubModalOpen)
 
@@ -429,6 +554,8 @@ const Index = ({
           showSizeChanger={false}
         />
       </div>
+
+      <OneTimeHistory userId={userId} />
       <div className="mt-6 flex items-center justify-center">{extraButton}</div>
     </div>
   )
