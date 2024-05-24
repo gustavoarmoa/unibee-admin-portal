@@ -25,8 +25,7 @@ const Index = () => {
   // current component is their parent, so after fetchUserProfile finish running, it setRefreshSub(true)
   // <SubscriptionTab /> will get {refreshSub: true}, in its useEffect, do the refresh.
   const [refreshSub, setRefreshSub] = useState(false)
-
-  const [adminNotePushed, setAdminNotePushed] = useState(false)
+  const [adminNotePushed, setAdminNotePushed] = useState(true)
 
   const fetchUserProfile = async () => {
     const [user, err] = await getUserProfile(userId as number, fetchUserProfile)

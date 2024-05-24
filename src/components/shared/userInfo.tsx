@@ -1,6 +1,7 @@
 import { Col, Divider, Row } from 'antd'
 import { CSSProperties } from 'react'
 import { IProfile } from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
 
 const rowStyle: CSSProperties = {
   display: 'flex',
@@ -9,6 +10,7 @@ const rowStyle: CSSProperties = {
   color: '#757575'
 }
 const Index = ({ user }: { user: IProfile | null }) => {
+  const appConfig = useAppConfigStore()
   return (
     <div style={{ marginBottom: '24px' }}>
       {/* <Divider orientation="left" style={{ margin: '16px 0' }}>
@@ -50,7 +52,12 @@ const Index = ({ user }: { user: IProfile | null }) => {
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>Payment Method</span>
         </Col>
-        <Col span={6}>{user?.paymentMethod}</Col>
+        <Col span={6}>
+          {
+            appConfig.gateway.find((g) => g.gatewayId == user?.gatewayId)
+              ?.gatewayName
+          }
+        </Col>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>VAT Number</span>
         </Col>
