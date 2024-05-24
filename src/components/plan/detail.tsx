@@ -24,6 +24,7 @@ import {
   currencyDecimalValidate,
   isValidMap,
   ramdonString,
+  showAmount,
   toFixedNumber
 } from '../../helpers'
 import {
@@ -124,8 +125,10 @@ const Index = () => {
   ) // plan obj is used for Form's initialValue, any changes is handled by Form itself, not updated here.
   // it's better to use useRef to save plan obj.
   const [addons, setAddons] = useState<IPlan[]>([]) // all the active addons we have (addon has the same structure as Plan).
+  // selectAddons is used for options in "addon <Select />"", its option items will change based on other props(currency, intervalUnit/Count, etc)
+  // addons variable is all the active addons we have, use this do some filtering, then save the result in selectAddons
   const [selectAddons, setSelectAddons] = useState<IPlan[]>([]) // addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
-  const [selectOnetime, setSelectOnetime] = useState<IPlan[]>([]) // one-time payment addon list in <Select /> for the current main plan, this list will change based on different plan props(interval count/unit/currency)
+  const [selectOnetime, setSelectOnetime] = useState<IPlan[]>([]) // one-time payment addon list in <Select /> for the current main plan, this list will change based on different plan currency
   // one plan can have many regular addons, but only ONE one-time payment addon, but backend support multiple.
   const [metricsList, setMetricsList] = useState<IBillableMetrics[]>([]) // all the billable metrics, not used for edit, but used in <Select /> for user to choose.
   const [selectedMetrics, setSelectedMetrics] = useState<TMetricsItem[]>([
@@ -140,7 +143,7 @@ const Index = () => {
 
   const itvCountValue = Form.useWatch('intervalCount', form)
   const itvCountUnit = Form.useWatch('intervalUnit', form)
-  const addonCurrency = Form.useWatch('currency', form)
+  const planCurrency = Form.useWatch('currency', form)
   const planTypeWatch = Form.useWatch('type', form)
   const enableTrialWatch = Form.useWatch('enableTrial', form)
 
@@ -184,15 +187,18 @@ const Index = () => {
       (a) =>
         a.intervalCount == itvCountValue &&
         a.intervalUnit == itvCountUnit &&
-        a.currency == addonCurrency
+        a.currency == planCurrency
     )
     setSelectAddons(newAddons)
-    // 为何 one time addon没有更新.
-    // 且: 这3个values一旦有变, 除了addon, onetime addon的Select有变, 当前他们已经选中的也要clear
-    // 做的好的话, 展示不clear, 但onSave时, 提示error(如果有的addon不在<Select />列表中)
+
+    const newOnetimeAddons = addons.filter((a) => a.currency == planCurrency)
+    setSelectOnetime(newOnetimeAddons)
+
+    // 这3个values一旦有变, 除了addon, onetime addon的Select有变, 当前他们已经选中的也要clear
+    // 做的好的话, 暂时不clear, 但onSave时, 提示error(如果有的addon不在<Select />列表中)
     // when editing addon, don't do anything in this effect.
     // once changed, I'm gonna clear the selected addons,
-  }, [itvCountUnit, itvCountValue, addonCurrency])
+  }, [itvCountUnit, itvCountValue, planCurrency])
 
   const onSave = async (values: any) => {
     const f = JSON.parse(JSON.stringify(values))
@@ -264,8 +270,6 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     f.metricLimits = m
 
     console.log('saving...: ', f)
-
-    // return
 
     setLoading(true)
     const [updatedPlan, err] = await savePlan(f, isNew)
@@ -346,11 +350,21 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     const regularAddons = addons.filter((p: any) => p.type == 2)
     const onetimeAddons = addons.filter((p: any) => p.type == 3)
     setAddons(regularAddons)
-    setSelectOnetime(onetimeAddons)
     setMetricsList(
       metricsList.merchantMetrics == null ? [] : metricsList.merchantMetrics
     )
     if (isNew) {
+      setSelectAddons(
+        regularAddons.filter(
+          (a: any) =>
+            a.currency == NEW_PLAN.currency &&
+            a.intervalUnit == NEW_PLAN.intervalUnit &&
+            a.intervalCount == NEW_PLAN.intervalCount
+        )
+      )
+      setSelectOnetime(
+        onetimeAddons.filter((a) => a.currency == NEW_PLAN.currency)
+      )
       return
     }
     // for editing existing plan, we continue with planDetailRes
@@ -435,6 +449,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
           a.currency == planDetail.plan.currency
       )
     )
+    setSelectOnetime(
+      onetimeAddons.filter((a: any) => a.currency == planDetail.plan.currency)
+    )
   }
 
   // used only when editing an existing plan
@@ -510,15 +527,6 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
   useEffect(() => {
     fetchData()
   }, [])
-
-  console.log(
-    'disableAfterActive/savable/formdisabled: ',
-    disableAfterActive.current,
-    '//',
-    savable,
-    '//',
-    formDisabled
-  )
 
   return (
     <div>
@@ -721,7 +729,32 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
           </Form.Item>
 
           {plan.type == 1 && (
-            <Form.Item label="Add-ons" name="addonIds">
+            <Form.Item
+              label="Add-ons"
+              name="addonIds"
+              dependencies={['currency', 'intervalCount', 'intervalUnit']}
+              rules={[
+                {
+                  required: false,
+                  message: ''
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (value == null || value.length == 0) {
+                      return Promise.resolve()
+                    }
+                    for (const addonId of value) {
+                      if (
+                        selectAddons.findIndex((a) => a.id == addonId) == -1
+                      ) {
+                        return Promise.reject('Addon not found!')
+                      }
+                    }
+                    return Promise.resolve()
+                  }
+                })
+              ]}
+            >
               <Select
                 mode="multiple"
                 allowClear
@@ -730,7 +763,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                 } // you cannot add addon to another addon (or another one time payment)
                 style={{ width: '100%' }}
                 options={selectAddons.map((a) => ({
-                  label: a.planName,
+                  label: `${a.planName} (${showAmount(a.amount, a.currency)}/${a.intervalCount == 1 ? '' : a.intervalCount}${a.intervalUnit})`,
                   value: a.id
                 }))}
               />
@@ -738,15 +771,41 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
           )}
 
           {plan.type == 1 && (
-            <Form.Item label="One-time payment add-on" name="onetimeAddonIds">
+            <Form.Item
+              label="One-time payment add-on"
+              name="onetimeAddonIds"
+              dependencies={['currency']}
+              rules={[
+                {
+                  required: false,
+                  message: ''
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (value == null || value.length == 0) {
+                      return Promise.resolve()
+                    }
+                    for (const addonId of value) {
+                      if (
+                        selectOnetime.findIndex((a) => a.id == addonId) == -1
+                      ) {
+                        return Promise.reject('Addon not found!')
+                      }
+                    }
+                    return Promise.resolve()
+                  }
+                })
+              ]}
+            >
               <Select
+                mode="multiple"
                 allowClear
                 disabled={
                   planTypeWatch == 2 || planTypeWatch == 3 || formDisabled
                 } // you cannot add one-time payment addon to another addon (or another one time payment)
                 style={{ width: '100%' }}
                 options={selectOnetime.map((a) => ({
-                  label: a.planName,
+                  label: `${a.planName} (${showAmount(a.amount, a.currency)})`,
                   value: a.id
                 }))}
               />
