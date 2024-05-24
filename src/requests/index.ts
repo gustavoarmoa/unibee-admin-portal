@@ -1131,7 +1131,7 @@ export const saveUserProfileReq = async (newProfile: IProfile) => {
       session.setSession({ expired: true, refresh: null })
       throw new ExpiredError('Session expired')
     }
-    return [null, null] // this call has no meaningful result to return
+    return [res.data.data, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]

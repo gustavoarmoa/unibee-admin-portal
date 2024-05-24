@@ -44,21 +44,21 @@ const UserAccountTab = ({
   ) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
 
   const onSave = async () => {
-    const userProfile = form.getFieldsValue()
     const body = JSON.parse(JSON.stringify(form.getFieldsValue()))
     if (gatewayId != undefined) {
       body.gatewayId = gatewayId
     }
     // return
     setLoading(true)
-    const [_, err] = await saveUserProfileReq(body)
+    const [res, err] = await saveUserProfileReq(body)
     setLoading(false)
     if (err != null) {
       message.error(err.message)
       return
     }
+    const { user } = res
     message.success('User Info Saved')
-    setUserProfile(userProfile)
+    setUserProfile(user)
   }
 
   useEffect(() => {
