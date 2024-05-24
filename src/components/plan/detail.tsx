@@ -363,7 +363,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
         )
       )
       setSelectOnetime(
-        onetimeAddons.filter((a) => a.currency == NEW_PLAN.currency)
+        onetimeAddons.filter((a: any) => a.currency == NEW_PLAN.currency)
       )
       return
     }
