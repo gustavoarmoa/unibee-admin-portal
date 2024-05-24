@@ -772,7 +772,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
 
           {plan.type == 1 && (
             <Form.Item
-              label="One-time payment add-on"
+              label="One-time-payment add-on"
               name="onetimeAddonIds"
               dependencies={['currency']}
               rules={[
