@@ -12,9 +12,12 @@ import {
 import { ReactElement, useEffect, useState } from 'react'
 import { getCountryListReq, saveUserProfileReq } from '../../requests'
 import { Country, IProfile } from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
 import PaymentSelector from '../ui/paymentSelector'
 import { UserStatus } from '../ui/statusTag'
+import PaymentCardList from '../user/paymentCards'
 import SuspendModal from '../user/suspendModal'
+import './userAccountTab.css'
 
 const UserAccountTab = ({
   user,
@@ -29,6 +32,7 @@ const UserAccountTab = ({
   setRefreshSub: (val: boolean) => void
   extraButton?: ReactElement
 }) => {
+  const appConfigStore = useAppConfigStore()
   const [form] = Form.useForm()
   const [countryList, setCountryList] = useState<Country[]>([])
   const [loading, setLoading] = useState(false)
@@ -93,6 +97,11 @@ const UserAccountTab = ({
         countryList.find((c) => c.code == countryCode)!.name
       )
   }, [countryCode])
+
+  const isCardPaymentSelected =
+    appConfigStore.gateway.find(
+      (g) => g.gatewayId == gatewayId && g.gatewayName == 'stripe'
+    ) != null
 
   return (
     user != null && (
@@ -266,7 +275,36 @@ const UserAccountTab = ({
                 />
               </Form.Item>
             </Col>
-            <Col span={12}> </Col>
+            <Col span={12}>
+              <div
+                style={{
+                  visibility: isCardPaymentSelected ? 'visible' : 'hidden',
+                  position: 'relative',
+                  display: 'flex',
+                  width: '100%',
+                  height: '100%'
+                }}
+              >
+                <div className="triangle-left" />
+                <div
+                  style={{
+                    left: '6px',
+                    width: '90%',
+                    borderRadius: '6px',
+                    padding: '8px',
+                    background: '#f5f5f5',
+                    position: 'relative'
+                    // border: '1px solid #eee',
+                  }}
+                >
+                  <PaymentCardList
+                    userId={user.id as number}
+                    gatewayId={gatewayId}
+                    defaultPaymentId={user.paymentMethod}
+                  />
+                </div>
+              </div>
+            </Col>
           </Row>
           <Divider orientation="left" style={{ margin: '16px 0' }}>
             Social Media Contact

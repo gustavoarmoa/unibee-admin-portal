@@ -175,10 +175,11 @@ const Index = () => {
 
   useEffect(() => {
     if (!isNew && plan?.status != 1) {
-      // 1: editing, 2: active
+      // status: 1 editing, 2 active, even we can edit active plan, but these 3 keys fields are not editable.
+      // editing existing plan && not editing
       return
     }
-    if (!isNew && plan?.type == 2) {
+    if (!isNew && (plan?.type == 2 || plan?.type == 3)) {
       // 1: main plan, 2: addon, 3: one-time payment
       return
     }
@@ -193,11 +194,6 @@ const Index = () => {
 
     const newOnetimeAddons = addons.filter((a) => a.currency == planCurrency)
     setSelectOnetime(newOnetimeAddons)
-
-    // 这3个values一旦有变, 除了addon, onetime addon的Select有变, 当前他们已经选中的也要clear
-    // 做的好的话, 暂时不clear, 但onSave时, 提示error(如果有的addon不在<Select />列表中)
-    // when editing addon, don't do anything in this effect.
-    // once changed, I'm gonna clear the selected addons,
   }, [itvCountUnit, itvCountValue, planCurrency])
 
   const onSave = async (values: any) => {

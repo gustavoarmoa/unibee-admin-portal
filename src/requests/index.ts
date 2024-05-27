@@ -1138,6 +1138,30 @@ export const saveUserProfileReq = async (newProfile: IProfile) => {
   }
 }
 
+// for bank card user, get a list of cards
+export const getUserPaymentMethodListReq = async ({
+  userId,
+  gatewayId
+}: {
+  userId: number
+  gatewayId: number
+}) => {
+  const session = useSessionStore.getState()
+  try {
+    const res = await request.get(
+      `/merchant/payment/method_list?gatewayId=${gatewayId}&userId=${userId}`
+    )
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data.methodList, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // billing admin can also update user profile.
 export const suspendUserReq = async (userId: number) => {
   try {

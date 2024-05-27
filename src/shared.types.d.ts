@@ -77,7 +77,7 @@ interface IPlan {
   id: number
   planName: string
   description: string
-  type: number // 1: main plan, 2: add-on
+  type: number // 1: main plan, 2: add-on, 3: one-time addon
   currency: Currency
   intervalCount: number
   intervalUnit: string
