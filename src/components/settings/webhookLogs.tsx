@@ -92,6 +92,12 @@ const Index = ({
 
   const columns: ColumnsType<TWebhookLogs> = [
     {
+      title: 'Id',
+      dataIndex: 'id',
+      key: 'id',
+      width: 80
+    },
+    {
       title: 'Url',
       dataIndex: 'webhookUrl',
       key: 'webhookUrl',
