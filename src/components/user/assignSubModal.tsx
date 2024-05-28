@@ -240,7 +240,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
                 </Col>
               </Row>
               <Row>
-                <Col span={18}>Include unpublished</Col>
+                <Col span={18}>Include unpublished plans</Col>
                 <Col span={6}>
                   <Switch
                     disabled={loading}
