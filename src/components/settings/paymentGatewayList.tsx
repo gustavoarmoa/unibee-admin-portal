@@ -43,10 +43,12 @@ const Index = ({
     gatewayList.find((g) => g.gatewayName.toLowerCase() == name.toLowerCase())
 
   const onGatewayClick = (gatewayName: 'changelly' | 'stripe') => () => {
-    const g: TGateway = gatewayList.find(
+    const g = gatewayList.find(
       (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
-    ) as TGateway
-    setGatewayEdit(g)
+    )
+    setGatewayEdit(
+      g ?? { gatewayName, webhookEndpointUrl: '', webhookSecret: '' }
+    )
     toggleModal()
   }
 
