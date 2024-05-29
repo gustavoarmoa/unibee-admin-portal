@@ -183,7 +183,6 @@ const Index = ({ user, closeModal, refresh }: Props) => {
           <PaymentMethodSelector
             selected={gatewayId}
             onSelect={onGatewayChange}
-            // cryptoDisabled={true}
             disabled={loading}
           />
         </div>

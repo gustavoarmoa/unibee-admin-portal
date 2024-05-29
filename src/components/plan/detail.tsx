@@ -606,7 +606,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               className="relative ml-2 text-xs text-gray-400"
               style={{ top: '-45px', left: '336px', width: '340px' }}
             >
-              Unpublish to enable form editing after activation.
+              Unpublish to enable plan editing after activation.
             </div>
           )}
 

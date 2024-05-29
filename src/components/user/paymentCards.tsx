@@ -16,8 +16,9 @@ interface Props {
   userId: number
   gatewayId: number | undefined
   defaultPaymentId: string
+  readonly: boolean
 }
-const Index = ({ userId, gatewayId, defaultPaymentId }: Props) => {
+const Index = ({ userId, gatewayId, defaultPaymentId, readonly }: Props) => {
   const [loading, setLoading] = useState(false)
   const [cards, setCards] = useState<TCard[]>([])
   const [defaultPaymentMethodId, setDefaultPaymentMethod] =
@@ -83,7 +84,7 @@ const Index = ({ userId, gatewayId, defaultPaymentId }: Props) => {
                 height: '42px',
                 display: 'flex',
                 alignItems: 'center',
-                cursor: 'pointer',
+                cursor: readonly ? 'not-allowed' : 'pointer',
                 fontWeight: defaultPaymentMethodId == c.id ? 'bold' : 'unset'
               }}
             >

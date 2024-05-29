@@ -16,13 +16,11 @@ const WireTrasfer = [<WireIcon />]
 const Index = ({
   selected,
   onSelect,
-  disabled,
-  cryptoDisabled
+  disabled
 }: {
   selected: number | undefined
   onSelect: React.ChangeEventHandler<HTMLInputElement>
   disabled?: boolean
-  cryptoDisabled?: boolean
 }) => {
   const appConfig = useAppConfigStore()
   const gateways = appConfig.gateway

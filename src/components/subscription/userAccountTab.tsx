@@ -298,6 +298,7 @@ const UserAccountTab = ({
                   }}
                 >
                   <PaymentCardList
+                    readonly={true}
                     userId={user.id as number}
                     gatewayId={gatewayId}
                     defaultPaymentId={user.paymentMethod}
