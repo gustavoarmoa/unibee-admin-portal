@@ -25,6 +25,7 @@ import { CURRENCY } from '../../constants'
 import { getAppKeysWithMore, getMerchantInfoReq } from '../../requests'
 import '../../shared.css'
 import { TGateway } from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
 import ModalApiKey from './apiKeyModal'
 import ChangellyModal from './changellyModal'
 import PaymentGatewayList from './paymentGatewayList'
@@ -205,6 +206,7 @@ const LoadingTag = () => (
 )
 
 const AppConfig = () => {
+  const appConfigStore = useAppConfigStore()
   const [loadingKeys, setLoadingKeys] = useState(false)
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
   const [vatSenseKeyModalOpen, setVatSenseKeyModalOpen] = useState(false)
@@ -230,6 +232,7 @@ const AppConfig = () => {
   const getAppKeys = async () => {
     setLoadingKeys(true)
     const [res, err] = await getAppKeysWithMore(getAppKeys)
+    console.log('get app keys res: ', res)
     setLoadingKeys(false)
     if (null != err) {
       message.error(err.message)
@@ -250,6 +253,8 @@ const AppConfig = () => {
     }
     setKeys(k)
     if (gateways != null) {
+      // after some gateway setup, local store need to be updated.
+      appConfigStore.setGateway(gateways)
       const wireTransfer = gateways.find(
         (g: TGateway) => g.gatewayName == 'wire_transfer'
       )
@@ -319,7 +324,11 @@ const AppConfig = () => {
           </Button>
         </Col>
       </Row>
-      <PaymentGatewayList loading={loadingKeys} gatewayList={gatewayList} />
+      <PaymentGatewayList
+        loading={loadingKeys}
+        gatewayList={gatewayList}
+        refresh={getAppKeys}
+      />
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>
           <a

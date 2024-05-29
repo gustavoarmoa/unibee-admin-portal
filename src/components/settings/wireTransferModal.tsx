@@ -1,4 +1,3 @@
-import { CopyOutlined, LoadingOutlined } from '@ant-design/icons'
 import { Button, Form, Input, Modal, Select, Spin, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { CURRENCY } from '../../constants'

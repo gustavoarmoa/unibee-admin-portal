@@ -106,7 +106,7 @@ const App: React.FC = () => {
     getItem('User List', '/user/list', <IdcardOutlined />),
     getItem('Admin List', '/admin/list', <TeamOutlined />),
     getItem('Analytics', '/analytics', <PieChartOutlined />),
-    getItem('My Account', '/my-account', <PieChartOutlined />), // /profile
+    getItem('My Account', '/my-account', <IdcardOutlined />),
     getItem('Configuration', '/configuration', <SettingOutlined />)
   ]
 

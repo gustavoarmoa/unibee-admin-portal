@@ -1,17 +1,15 @@
-import { CopyOutlined, LoadingOutlined } from '@ant-design/icons'
 import { Button, Col, Input, Modal, Row, Spin, message } from 'antd'
-// import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-// import { useCopyContent } from '../../hooks'
 import { saveGatewayKeyReq } from '../../requests'
 import { TGateway } from '../../shared.types'
 const { TextArea } = Input
 
 interface IProps {
   closeModal: () => void
+  refresh: () => void
   gatewayDetail: TGateway | undefined
 }
-const Index = ({ closeModal, gatewayDetail }: IProps) => {
+const Index = ({ closeModal, gatewayDetail, refresh }: IProps) => {
   const isNew = gatewayDetail?.gatewayId == null
   const [loading, setLoading] = useState(false)
   const [pubKey, setPubKey] = useState(
@@ -53,6 +51,7 @@ const Index = ({ closeModal, gatewayDetail }: IProps) => {
       return
     }
     message.success(`${gatewayDetail?.gatewayName} keys saved`)
+    refresh()
     closeModal()
   }
 

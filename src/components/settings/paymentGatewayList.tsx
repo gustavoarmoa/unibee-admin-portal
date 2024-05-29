@@ -25,10 +25,12 @@ const LoadingTag = () => (
 
 const Index = ({
   loading,
-  gatewayList
+  gatewayList,
+  refresh
 }: {
   loading: boolean
   gatewayList: TGateway[]
+  refresh: () => void
 }) => {
   // const appConfigStore = useAppConfigStore();
   // const [gatewayList, setGatewayList] = useState<TGateway[]>([])
@@ -40,19 +42,22 @@ const Index = ({
   const gatewayDetail = (name: string) =>
     gatewayList.find((g) => g.gatewayName.toLowerCase() == name.toLowerCase())
 
-  const onGatewayClick =
-    (gatewayName: 'changelly' | 'stripe' | 'wire_transfer') => () => {
-      const g: TGateway = gatewayList.find(
-        (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
-      ) as TGateway
-      setGatewayEdit(g)
-      toggleModal()
-    }
+  const onGatewayClick = (gatewayName: 'changelly' | 'stripe') => () => {
+    const g: TGateway = gatewayList.find(
+      (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
+    ) as TGateway
+    setGatewayEdit(g)
+    toggleModal()
+  }
 
   return (
     <div>
       {gatewayModalOpen && (
-        <GatewayModal closeModal={toggleModal} gatewayDetail={gatewayEdit} />
+        <GatewayModal
+          closeModal={toggleModal}
+          gatewayDetail={gatewayEdit}
+          refresh={refresh}
+        />
       )}
       <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>
