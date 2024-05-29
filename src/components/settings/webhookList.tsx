@@ -13,11 +13,14 @@ import { getWebhookListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, TWebhook } from '../../shared.types.d'
 // import { useAppConfigStore } from '../../stores';
+import { useNavigate } from 'react-router-dom'
 import WebhookDetail from './webhookDetail'
 import WebhookLogs from './webhookLogs'
 
+const APP_PATH = import.meta.env.BASE_URL
+
 const Index = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate()
   // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0) // pagination props
@@ -154,12 +157,12 @@ const Index = () => {
           refresh={fetchData}
         />
       )}
-      {logModalOpen && (
+      {/* logModalOpen && (
         <WebhookLogs
           closeModal={toggleLogModal}
           endpointId={webhookList[currentWebhookIdx].id}
         />
-      )}
+      ) */}
       <Table
         columns={columns}
         dataSource={webhookList}
@@ -180,7 +183,10 @@ const Index = () => {
               ) {
                 toggleDetailModal()
               } else {
-                toggleLogModal()
+                // toggleLogModal()
+                navigate(
+                  `${APP_PATH}configuration/webhook-logs/${webhookList[rowIndex as number].id}`
+                )
               }
             }
           }

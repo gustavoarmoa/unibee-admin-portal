@@ -45,14 +45,14 @@ import SubscriptionList from './components/subscription/list'
 import CustomerDetail from './components/user/detail'
 import CustomerList from './components/user/list'
 // import Users from "./components/userList";
-import MerchantUserDetail from './components/merchantUser/userDetail'
-import MerchantUsserList from './components/merchantUser/userList'
-
 import AppSearch from './components/appSearch'
 import Login from './components/login'
 import LoginModal from './components/login/LoginModal'
+import MerchantUserDetail from './components/merchantUser/userDetail'
+import MerchantUserList from './components/merchantUser/userList'
 import NotFound from './components/notFound'
 import Profile from './components/profile'
+import WebhookLogs from './components/settings/webhookLogs'
 import Signup from './components/signup'
 import { initializeReq, logoutReq } from './requests'
 
@@ -171,6 +171,9 @@ const App: React.FC = () => {
       setActiveMenuItem(['/discount-code/list'])
     } else if (pathItems[0] == 'billable-metric') {
       setActiveMenuItem(['/billable-metric/list'])
+    } else if (pathItems[0] == 'configuration') {
+      // WebhookLogs
+      setActiveMenuItem(['/configuration'])
     } else {
       setActiveMenuItem(['/' + pathItems[0]])
     }
@@ -298,12 +301,16 @@ const App: React.FC = () => {
                   />
                   <Route path={`${APP_PATH}my-account`} Component={Profile} />
                   <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
-                  {/* <Route path={`${APP_PATH}invoice`} Component={Invoices} /> */}
+
                   <Route
                     path={`${APP_PATH}configuration`}
                     Component={Settings}
                   />
-                  {/* <Route path={`${APP_PATH}users`} Component={Users} /> */}
+                  <Route
+                    path={`${APP_PATH}configuration/webhook-logs/:id`}
+                    element={<WebhookLogs />}
+                  />
+
                   <Route
                     path={`${APP_PATH}subscription`}
                     Component={OutletPage}
@@ -351,7 +358,7 @@ const App: React.FC = () => {
                     <Route path=":userId" element={<CustomerDetail />} />
                   </Route>
                   <Route path={`${APP_PATH}admin`} Component={OutletPage}>
-                    <Route path="list" element={<MerchantUsserList />} />
+                    <Route path="list" element={<MerchantUserList />} />
                     <Route path=":adminId" element={<MerchantUserDetail />} />
                   </Route>
 

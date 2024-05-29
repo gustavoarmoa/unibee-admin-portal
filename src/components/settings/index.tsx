@@ -21,6 +21,7 @@ import dayjs from 'dayjs'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
+import { useSearchParams } from 'react-router-dom'
 import { CURRENCY } from '../../constants'
 import { getAppKeysWithMore, getMerchantInfoReq } from '../../requests'
 import '../../shared.css'
@@ -146,9 +147,13 @@ const role: Record<TRoles, TPermission> = {
 // role: App Owner, Admin, Power User, Customer Support, Finance,
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get('tab') ?? 'appConfig'
+  )
   const tabItems: TabsProps['items'] = [
     {
-      key: 'AppConfig',
+      key: 'appConfig',
       label: 'App Config',
       children: <AppConfig />
     },
@@ -174,16 +179,13 @@ const Index = () => {
     }
   ]
   const onTabChange = (key: string) => {
-    // console.log(key);
+    setActiveTab(key)
+    setSearchParams({ tab: key })
   }
 
   return (
     <div style={{ width: '100%' }}>
-      <Tabs
-        defaultActiveKey="AppConfig"
-        items={tabItems}
-        onChange={onTabChange}
-      />
+      <Tabs activeKey={activeTab} items={tabItems} onChange={onTabChange} />
     </div>
   )
 }

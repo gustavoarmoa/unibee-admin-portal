@@ -1844,3 +1844,18 @@ export const getWebhookLogs = async (
     return [null, e]
   }
 }
+
+export const resendWebhookEvt = async (logId: number) => {
+  const session = useSessionStore.getState()
+  try {
+    const res = await request.post(`/merchant/webhook/resend`, { logId })
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}

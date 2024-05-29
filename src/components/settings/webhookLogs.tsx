@@ -1,26 +1,35 @@
-import { CopyOutlined, LoadingOutlined } from '@ant-design/icons'
-import { Button, Modal, Pagination, Popover, Table, message } from 'antd'
+import { CopyOutlined, LoadingOutlined, SendOutlined } from '@ant-design/icons'
+import {
+  Button,
+  Modal,
+  Pagination,
+  Popover,
+  Space,
+  Table,
+  Tooltip,
+  message
+} from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
 import { useCopyContent } from '../../hooks'
-import { getWebhookLogs } from '../../requests'
+import { getWebhookLogs, resendWebhookEvt } from '../../requests'
 import { TWebhookLogs } from '../../shared.types.d'
 SyntaxHighlighter.registerLanguage('json', json)
 
+const APP_PATH = import.meta.env.BASE_URL
 const PAGE_SIZE = 10
 
-const Index = ({
-  closeModal,
-  endpointId
-}: {
-  closeModal: () => void
-  endpointId: number
-}) => {
+const Index = () => {
+  const navigate = useNavigate()
+  const params = useParams()
+  const endpointId = Number(params.id)
   const [loading, setLoading] = useState(false)
+  const [resending, setResending] = useState(false)
   const [logs, setLogs] = useState<TWebhookLogs[]>([])
   const [page, setPage] = useState(0)
   const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
@@ -31,6 +40,18 @@ const Index = ({
       return
     }
     message.success('Copied')
+  }
+
+  const resend = (logId: number) => async () => {
+    setResending(true)
+    const [resendRes, err] = await resendWebhookEvt(logId)
+    setResending(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success('Event resent')
+    fetchData()
   }
 
   const renderJson = (text: string) => {
@@ -101,11 +122,11 @@ const Index = ({
       title: 'Url',
       dataIndex: 'webhookUrl',
       key: 'webhookUrl',
-      width: 80,
+      // width: 100,
       render: (text) => (
         <div
           style={{
-            width: '80px',
+            width: '100px',
             height: '60px',
             overflow: 'hidden'
             // whiteSpace: 'nowrap',
@@ -119,11 +140,11 @@ const Index = ({
       title: 'Event',
       dataIndex: 'webhookEvent',
       key: 'webhookEvent',
-      width: 80,
+      // width: 120,
       render: (text) => (
         <div
           style={{
-            width: '80px',
+            width: '120px',
             height: '60px',
             overflow: 'hidden'
             // whiteSpace: 'nowrap',
@@ -137,11 +158,11 @@ const Index = ({
       title: 'Request Id',
       dataIndex: 'requestId',
       key: 'requestId',
-      width: 80,
+      // width: 120,
       render: (text) => (
         <div
           style={{
-            width: '80px',
+            width: '120px',
             height: '60px',
             overflow: 'hidden'
             // whiteSpace: 'nowrap',
@@ -155,34 +176,57 @@ const Index = ({
       title: 'Request Body',
       dataIndex: 'body',
       key: 'body',
-      width: 80,
+      width: 140,
       render: (text) => renderJson(text)
     },
     {
       title: 'Response',
       dataIndex: 'response',
       key: 'response',
-      width: 80,
+      width: 120,
       render: (text) => renderJson(text)
     },
     {
       title: 'mamo',
       dataIndex: 'mamo',
       key: 'mamo',
-      width: 80,
+      width: 120,
       render: (text) => renderJson(text)
     },
     {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      width: 80,
+      width: 120,
       render: (d, plan) =>
-        dayjs(new Date(d * 1000)).format('YYYY-MMM-DD HH:MM:ss')
+        dayjs(new Date(d * 1000)).format('YYYY-MMM-DD, HH:MM:ss')
+    },
+    {
+      title: 'Action',
+      dataIndex: 'action',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle">
+          <Tooltip title="Resend">
+            <Button
+              disabled={resending}
+              style={{ border: 'unset' }}
+              onClick={resend(record.id)}
+              icon={<SendOutlined />}
+            />
+          </Tooltip>
+        </Space>
+      )
     }
   ]
 
+  const goBack = () => navigate(`${APP_PATH}configuration?tab=webhook`)
+
   const fetchData = async () => {
+    if (isNaN(endpointId)) {
+      message.error('Invalid endpoint Id')
+      return
+    }
     setLoading(true)
     const [endpointLogList, err] = await getWebhookLogs(
       { endpointId, page, count: PAGE_SIZE },
@@ -198,20 +242,10 @@ const Index = ({
 
   useEffect(() => {
     fetchData()
-  }, [])
-
-  useEffect(() => {
-    fetchData()
   }, [page])
 
   return (
-    <Modal
-      open={true}
-      footer={null}
-      title="Webhook Logs"
-      closeIcon={null}
-      width={1024}
-    >
+    <>
       <Table
         columns={columns}
         dataSource={logs}
@@ -223,25 +257,21 @@ const Index = ({
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
       />
-      <div className="mx-0 my-4 flex items-center justify-end">
-        <Pagination
-          current={page + 1} // back-end starts with 0, front-end starts with 1
-          pageSize={PAGE_SIZE}
-          total={500}
-          size="small"
-          onChange={onPageChange}
-          disabled={loading}
-          showSizeChanger={false}
-        />
-      </div>
-      <div className="my-6 flex items-center justify-end">
-        <div>
-          <Button onClick={closeModal} type="primary">
-            Close
-          </Button>
+      <div className="flex w-full justify-end">
+        <div className="mx-0 my-4 flex w-3/6 items-center justify-between ">
+          <Button onClick={goBack}>Go Back</Button>
+          <Pagination
+            current={page + 1} // back-end starts with 0, front-end starts with 1
+            pageSize={PAGE_SIZE}
+            total={500}
+            size="small"
+            onChange={onPageChange}
+            disabled={loading}
+            showSizeChanger={false}
+          />
         </div>
       </div>
-    </Modal>
+    </>
   )
 }
 
