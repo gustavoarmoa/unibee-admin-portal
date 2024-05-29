@@ -211,10 +211,10 @@ trialDemand?: 'paymentMethod' | '' | boolean // backend requires this field to b
 cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
     */
     if (!f.enableTrial) {
-      f.trialAmount = 0
-      f.trialDurationTime = 0
-      f.trialDemand = ''
-      f.cancelAtTrialEnd = 0
+      f.trialAmount = 0 // if trialEnabled is false, these 4 field values have no meaning, ....
+      f.trialDurationTime = 0 // but I still need to reset them to default, ...
+      f.trialDemand = f.trialDemand ? 'paymentMethod' : '' // to keep the UI consistent with user input
+      f.cancelAtTrialEnd = f.cancelAtTrialEnd ? 0 : 1
     } else {
       f.trialAmount = Number(f.trialAmount)
       f.trialAmount *= CURRENCY[f.currency].stripe_factor
@@ -418,8 +418,10 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       planDetail.plan.enableTrial = false
       planDetail.plan.trialAmount = 0
       planDetail.plan.trialDurationTime = 0
-      planDetail.plan.trialDemand = false
-      planDetail.plan.cancelAtTrialEnd = false
+      planDetail.plan.trialDemand =
+        planDetail.plan.trialDemand == 'paymentMethod' ? true : false
+      planDetail.plan.cancelAtTrialEnd =
+        planDetail.plan.cancelAtTrialEnd == 1 ? false : true
     }
 
     setPlan(planDetail.plan)
