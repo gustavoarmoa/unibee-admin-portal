@@ -4,7 +4,8 @@ import {
   EditOutlined,
   LoadingOutlined,
   MinusOutlined,
-  PlusOutlined
+  PlusOutlined,
+  SyncOutlined
 } from '@ant-design/icons'
 import { Button, Pagination, Space, Table, Tooltip, message } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
@@ -66,6 +67,35 @@ const Index = () => {
     // setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
     onPageChange(1, 100)
     navigate(`${APP_PATH}plan/new`)
+  }
+
+  const fetchPlan = async () => {
+    setLoading(true)
+    const [planList, err] = await getPlanList(
+      {
+        // type: undefined, // get main plan and addon
+        // status: undefined, // active, inactive, expired, editing, all of them
+        ...filters,
+        page: page,
+        count: PAGE_SIZE
+      },
+      fetchPlan
+    )
+    setLoading(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    const { plans, total } = planList
+    setTotal(total)
+    setPlan(
+      plans == null
+        ? []
+        : plans.map((p: any) => ({
+            ...p.plan,
+            metricPlanLimits: p.metricPlanLimits
+          }))
+    )
   }
 
   const columns: ColumnsType<IPlan> = [
@@ -162,6 +192,15 @@ const Index = () => {
               icon={<PlusOutlined />}
             ></Button>
           </Tooltip>
+          <Tooltip title="Refresh">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading}
+              onClick={fetchPlan}
+              icon={<SyncOutlined />}
+            ></Button>
+          </Tooltip>
         </>
       ),
       key: 'action',
@@ -187,35 +226,6 @@ const Index = () => {
       )
     }
   ]
-
-  const fetchPlan = async () => {
-    setLoading(true)
-    const [planList, err] = await getPlanList(
-      {
-        // type: undefined, // get main plan and addon
-        // status: undefined, // active, inactive, expired, editing, all of them
-        ...filters,
-        page: page,
-        count: PAGE_SIZE
-      },
-      fetchPlan
-    )
-    setLoading(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    const { plans, total } = planList
-    setTotal(total)
-    setPlan(
-      plans == null
-        ? []
-        : plans.map((p: any) => ({
-            ...p.plan,
-            metricPlanLimits: p.metricPlanLimits
-          }))
-    )
-  }
 
   const onTableChange: TableProps<IPlan>['onChange'] = (
     pagination,
