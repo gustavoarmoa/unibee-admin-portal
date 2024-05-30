@@ -449,42 +449,44 @@ const Index = () => {
             />
           </Form.Item>
 
-          <Form.Item
-            label="Cycle Limit"
-            name="cycleLimit"
-            rules={[
-              {
-                required: watchBillingType != 1,
-                message: 'Please input your cycleLimit!'
-              },
-              ({ getFieldValue }) => ({
-                validator(rule, value) {
-                  const num = Number(value)
-                  if (!Number.isInteger(num)) {
-                    return Promise.reject(
-                      'Please input a valid cycle limit number between 0 ~ 1000.'
-                    )
+          <Form.Item label="Cycle Limit">
+            <Form.Item
+              noStyle
+              name="cycleLimit"
+              rules={[
+                {
+                  required: watchBillingType != 1,
+                  message: 'Please input your cycleLimit!'
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    const num = Number(value)
+                    if (!Number.isInteger(num)) {
+                      return Promise.reject(
+                        'Please input a valid cycle limit number between 0 ~ 1000.'
+                      )
+                    }
+                    if (isNaN(num) || num < 0 || num > 999) {
+                      return Promise.reject(
+                        'Please input a valid cycle limit number between 0 ~ 1000.'
+                      )
+                    }
+                    return Promise.resolve()
                   }
-                  if (isNaN(num) || num < 0 || num > 999) {
-                    return Promise.reject(
-                      'Please input a valid cycle limit number between 0 ~ 1000.'
-                    )
-                  }
-                  return Promise.resolve()
-                }
-              })
-            ]}
-          >
-            <Input style={{ width: 180 }} disabled={watchBillingType == 1} />
-            {/* 1: one-time use */}
+                })
+              ]}
+            >
+              <Input style={{ width: 180 }} disabled={watchBillingType == 1} />
+              {/* 1: one-time use */}
+            </Form.Item>
+            <span
+              className="ml-2 text-xs text-gray-400"
+              // style={{ top: '-45px', left: '340px', width: '620px' }}
+            >
+              How many billing cycles this discount code can be applied on a
+              recurring subscription (0 means no-limit).
+            </span>
           </Form.Item>
-          <div
-            className="relative ml-2 text-xs text-gray-400"
-            style={{ top: '-45px', left: '340px', width: '620px' }}
-          >
-            How many billing cycles this discount code can be applied on a
-            recurring subscription (0 means no-limit).
-          </div>
 
           <Form.Item
             label="Valid Date Range"

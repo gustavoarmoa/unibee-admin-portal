@@ -86,7 +86,7 @@ const Index = () => {
       title: 'Updated at',
       dataIndex: 'gmtModify',
       key: 'gmtModify',
-      render: (d, metrics) => dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d, metrics) => dayjs(d * 1000).format('YYYY-MMM-DD, HH:MM:ss')
     },
     {
       title: (

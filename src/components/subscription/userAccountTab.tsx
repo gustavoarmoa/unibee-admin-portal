@@ -254,7 +254,7 @@ const UserAccountTab = ({
           <Row>
             <Col span={12}>
               <Form.Item label="Account Type" name="type">
-                <Radio.Group>
+                <Radio.Group disabled>
                   <Radio value={1}>Individual</Radio>
                   <Radio value={2}>Business</Radio>
                 </Radio.Group>

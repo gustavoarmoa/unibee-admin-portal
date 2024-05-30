@@ -85,6 +85,7 @@ const Index = ({
             className="btn-invoiceid-in-payment"
             onClick={() => navigate(`${APP_PATH}invoice/${ivId}`)}
             type="link"
+            style={{ padding: 0 }}
           >
             {ivId}
           </Button>

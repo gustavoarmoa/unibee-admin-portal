@@ -40,16 +40,16 @@ const Index = () => {
 
   const columns: ColumnsType<IProfile> = [
     {
-      title: 'First Name',
+      title: 'Name',
       dataIndex: 'firstName',
-      key: 'firstName'
-      // render: (text) => <a>{text}</a>,
+      key: 'userName',
+      render: (firstName, user) => `${user.firstName} ${user.lastName}`
     },
-    {
+    /* {
       title: 'Last Name',
       dataIndex: 'lastName',
       key: 'lastName'
-    },
+    }, */
     {
       title: 'Email',
       dataIndex: 'email',

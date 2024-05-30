@@ -814,54 +814,54 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             <Switch />
           </Form.Item>
 
-          <Form.Item
-            label="Trial Price"
-            name="trialAmount"
-            dependencies={['amount', 'currency']}
-            rules={[
-              {
-                required: enableTrialWatch,
-                message: 'Please input your trial price!'
-              },
-              ({ getFieldValue }) => ({
-                validator(rule, value) {
-                  if (!enableTrialWatch) {
+          <Form.Item label="Trial Price">
+            <Form.Item
+              name="trialAmount"
+              noStyle
+              dependencies={['amount', 'currency']}
+              rules={[
+                {
+                  required: enableTrialWatch,
+                  message: 'Please input your trial price!'
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    if (!enableTrialWatch) {
+                      return Promise.resolve()
+                    }
+                    const num = Number(value)
+                    const planPrice = Number(getFieldValue('amount'))
+                    if (isNaN(planPrice)) {
+                      return Promise.reject('Invalid plan price')
+                    }
+                    if (isNaN(num) || num < 0 || num >= planPrice) {
+                      return Promise.reject(
+                        `Please input a valid price (>= 0 and < plan price ${getFieldValue('amount')}).`
+                      )
+                    }
+                    if (
+                      !currencyDecimalValidate(num, getFieldValue('currency'))
+                    ) {
+                      return Promise.reject('Please input a valid price')
+                    }
                     return Promise.resolve()
                   }
-                  const num = Number(value)
-                  const planPrice = Number(getFieldValue('amount'))
-                  if (isNaN(planPrice)) {
-                    return Promise.reject('Invalid plan price')
-                  }
-                  if (isNaN(num) || num < 0 || num >= planPrice) {
-                    return Promise.reject(
-                      `Please input a valid price (>= 0 and < plan price ${getFieldValue('amount')}).`
-                    )
-                  }
-                  if (
-                    !currencyDecimalValidate(num, getFieldValue('currency'))
-                  ) {
-                    return Promise.reject('Please input a valid price')
-                  }
-                  return Promise.resolve()
+                })
+              ]}
+            >
+              <Input
+                disabled={!enableTrialWatch || formDisabled}
+                style={{ width: 180 }}
+                prefix={
+                  CURRENCY[form.getFieldValue('currency') ?? plan.currency]
+                    .symbol
                 }
-              })
-            ]}
-          >
-            <Input
-              disabled={!enableTrialWatch || formDisabled}
-              style={{ width: 180 }}
-              prefix={
-                CURRENCY[form.getFieldValue('currency') ?? plan.currency].symbol
-              }
-            />
+              />
+            </Form.Item>
+            <span className="ml-2 text-xs text-gray-400">
+              For free trial, input 0.
+            </span>
           </Form.Item>
-          <div
-            className="relative ml-2 text-xs text-gray-400"
-            style={{ top: '-45px', left: '376px', width: '140px' }}
-          >
-            For free trial, input 0.
-          </div>
 
           <Form.Item
             label="Trial length"
@@ -892,16 +892,18 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             />
           </Form.Item>
 
-          <Form.Item label="Trial requires bank card info" name="trialDemand">
-            <Switch disabled={!enableTrialWatch || formDisabled} />
+          <Form.Item label="Trial requires bank card info">
+            <Form.Item name="trialDemand" noStyle>
+              <Switch disabled={!enableTrialWatch || formDisabled} />
+            </Form.Item>
+            <span
+              className=" ml-2 text-xs text-gray-400"
+              // style={{ top: '-45px', left: '240px', width: '600px' }}
+            >
+              When enabled, users can only use bank card payment (no Crypto or
+              wire transfer) for their first purchase.
+            </span>
           </Form.Item>
-          <div
-            className="relative ml-2 text-xs text-gray-400"
-            style={{ top: '-45px', left: '240px', width: '600px' }}
-          >
-            When enabled, users can only use bank card payment (no Crypto or
-            wire transfer) for their first purchase.
-          </div>
 
           <Form.Item label="Auto renew after trial end" name="cancelAtTrialEnd">
             <Switch disabled={!enableTrialWatch || formDisabled} />
