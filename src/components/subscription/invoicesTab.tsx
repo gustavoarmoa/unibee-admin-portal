@@ -342,7 +342,7 @@ const Index = ({
           rowKey={'id'}
           rowClassName="clickable-tbl-row"
           pagination={false}
-          scroll={{ x: 960, y: 640 }}
+          scroll={{ x: 'max-content', y: 640 }}
           onRow={(record, rowIndex) => {
             return {
               onClick: (event) => {
