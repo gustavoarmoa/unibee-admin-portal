@@ -31,7 +31,7 @@ import {
   ISubHistoryItem,
   ISubscriptionType
 } from '../../shared.types.d'
-import { SubscriptionStatus } from '../ui/statusTag'
+import { PaymentStatus, SubscriptionStatus } from '../ui/statusTag'
 import ModalAssignSub from './assignSubModal'
 
 const rowStyle: CSSProperties = {
@@ -88,7 +88,8 @@ const OneTimeHistory = ({ userId }: { userId: number }) => {
     {
       title: 'Status',
       dataIndex: 'status',
-      key: 'status'
+      key: 'status',
+      render: (status) => PaymentStatus(status)
     },
     {
       title: 'Invoice Id',
@@ -193,7 +194,7 @@ const Index = ({
           'N/A'
         ) : (
           <div
-            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            className=" w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
             onClick={() => navigate(`${APP_PATH}plan/${record.plan.id}`)}
           >
             {record.plan.planName}
@@ -443,8 +444,8 @@ const Index = ({
                   title="Addon breakdown"
                   content={
                     <div style={{ width: '280px' }}>
-                      {subInfo?.addons.map((a) => (
-                        <Row key={a.id}>
+                      {subInfo?.addons.map((a, idx) => (
+                        <Row key={idx}>
                           <Col span={10}>{a.planName}</Col>
                           <Col span={14}>
                             {showAmount(a.amount, a.currency)} × {a.quantity} ={' '}

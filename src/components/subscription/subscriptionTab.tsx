@@ -705,8 +705,8 @@ const SubscriptionInfoSection = ({
               title="Addon breakdown"
               content={
                 <div style={{ width: '280px' }}>
-                  {subInfo?.addons.map((a) => (
-                    <Row key={a.id}>
+                  {subInfo?.addons.map((a, idx) => (
+                    <Row key={idx}>
                       <Col span={10} className=" font-bold text-gray-500">
                         {a.planName}
                       </Col>
