@@ -125,12 +125,6 @@ const UserAccountTab = ({
           <Form.Item label="id" name="id" hidden>
             <Input disabled />
           </Form.Item>
-          <Form.Item label="countryName" name="countryName" hidden>
-            <Input disabled />
-          </Form.Item>
-          <Form.Item label="Country Name" name="countryName" hidden>
-            <Input />
-          </Form.Item>
           <Divider orientation="left" style={{ margin: '16px 0' }}>
             Billing Info
           </Divider>
@@ -140,7 +134,14 @@ const UserAccountTab = ({
                 <div>{user && UserStatus(user.status)}</div>{' '}
               </Form.Item>
             </Col>
-            <Col span={12}></Col>
+            <Col span={12}>
+              <Form.Item label="Account Type" name="type">
+                <Radio.Group disabled>
+                  <Radio value={1}>Individual</Radio>
+                  <Radio value={2}>Business</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
           </Row>
           <Row>
             <Col span={12}>
@@ -179,18 +180,6 @@ const UserAccountTab = ({
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Company name" name="companyName">
-                <Input style={{ width: '300px' }} />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={12}>
-              <Form.Item label="VAT number" name="vATNumber">
-                <Input style={{ width: '300px' }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
               <Form.Item
                 label="Country"
                 name="countryCode"
@@ -206,9 +195,6 @@ const UserAccountTab = ({
                   style={{ width: '300px' }}
                   placeholder="Type to search"
                   optionFilterProp="children"
-                  // value={country}
-                  // onChange={onCountryChange}
-                  // onSearch={onSearch}
                   filterOption={filterOption}
                   options={countryList.map((c) => ({
                     label: c.name,
@@ -220,12 +206,30 @@ const UserAccountTab = ({
           </Row>
           <Row>
             <Col span={12}>
-              <Form.Item label="City" name="city">
+              <Form.Item
+                label="City"
+                name="city"
+                rules={[
+                  {
+                    required: user.type == 2, // biz user
+                    message: 'Please input your city!'
+                  }
+                ]}
+              >
                 <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Post code" name="postCode">
+              <Form.Item
+                label="Zip code"
+                name="zipCode"
+                rules={[
+                  {
+                    required: user.type == 2, // biz user
+                    message: 'Please input your ZIP code!'
+                  }
+                ]}
+              >
                 <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
@@ -233,7 +237,7 @@ const UserAccountTab = ({
           <Row>
             <Col span={12}>
               <Form.Item
-                label="Address"
+                label="Billing address"
                 name="address"
                 rules={[
                   {
@@ -246,22 +250,42 @@ const UserAccountTab = ({
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Phone number" name="mobile">
+              <Form.Item
+                label="Company name"
+                name="companyName"
+                rules={[
+                  {
+                    required: user.type == 2, // biz user
+                    message: 'Please input your company name!'
+                  }
+                ]}
+              >
                 <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
           </Row>
           <Row>
             <Col span={12}>
-              <Form.Item label="Account Type" name="type">
-                <Radio.Group disabled>
-                  <Radio value={1}>Individual</Radio>
-                  <Radio value={2}>Business</Radio>
-                </Radio.Group>
+              <Form.Item
+                label="VAT number"
+                name="vATNumber"
+                rules={[
+                  {
+                    required: user.type == 2, // biz user
+                    message: 'Please input your VAT number!'
+                  }
+                ]}
+              >
+                <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
-            <Col span={12}></Col>
+            <Col span={12}>
+              <Form.Item label="Phone number" name="mobile">
+                <Input style={{ width: '300px' }} />
+              </Form.Item>
+            </Col>
           </Row>
+
           {/* <Divider orientation="left" style={{ margin: '16px 0' }}>
             Payment method
               </Divider> */}
