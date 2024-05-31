@@ -88,6 +88,15 @@ const columns: ColumnsType<ISubscriptionType> = [
     render: (_, sub) => (
       <span>{`${sub.user != null ? sub.user.firstName + ' ' + sub.user.lastName : ''}`}</span>
     )
+  },
+  {
+    title: 'Email',
+    dataIndex: 'userEmail',
+    key: 'userEmail',
+    render: (_, sub) =>
+      sub.user != null ? (
+        <a href={`mailto:${sub.user.email}`}>{sub.user.email}</a>
+      ) : null
   }
 ]
 

@@ -131,7 +131,7 @@ const Index = () => {
         )
     },
     {
-      title: 'Payment gateway',
+      title: 'Gateway',
       dataIndex: 'gatewayId',
       key: 'gatewayId',
       render: (gateway) =>

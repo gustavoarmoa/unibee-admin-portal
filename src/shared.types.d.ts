@@ -338,6 +338,11 @@ interface UserInvoice {
   periodStart: number
   periodEnd: number
   paymentId: string
+  payment?: {
+    paidTime: number
+    paymentAmount: number
+    paymentId: string
+  }
   refundId: string
   refund?: TRefund //
   userAccount: IProfile

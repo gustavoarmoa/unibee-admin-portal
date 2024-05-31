@@ -140,8 +140,8 @@ const Index = ({
     {
       title: 'Title',
       dataIndex: 'invoiceName',
-      key: 'invoiceName',
-      render: (title, invoice) => <a>{title}</a>
+      key: 'invoiceName'
+      // render: (title, invoice) => <a>{title}</a>
       // render: (_, sub) => <a>{sub.plan?.planName}</a>,
     },
     {
@@ -156,6 +156,21 @@ const Index = ({
       dataIndex: 'status',
       key: 'status',
       render: (s) => InvoiceStatus(s) // INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
+    },
+    {
+      title: 'Paid date',
+      dataIndex: 'payment',
+      key: 'payment',
+      render: (payment) =>
+        payment == null || payment.paidTime == 0
+          ? 'N/A'
+          : dayjs(payment.paidTime * 1000).format('YYYY-MM-DD HH:MM:ss')
+    },
+    {
+      title: 'Gateway',
+      dataIndex: 'gateway',
+      key: 'gateway',
+      render: (g) => (g == null ? null : g.gatewayName)
     },
     {
       title: 'Is refund',
@@ -327,7 +342,7 @@ const Index = ({
           rowKey={'id'}
           rowClassName="clickable-tbl-row"
           pagination={false}
-          scroll={{ x: true, y: 640 }}
+          scroll={{ x: 960, y: 640 }}
           onRow={(record, rowIndex) => {
             return {
               onClick: (event) => {

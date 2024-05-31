@@ -66,6 +66,21 @@ const Index = () => {
       render: (s, iv) => <span> {InvoiceStatus(s)}</span>
     },
     {
+      title: 'Paid date',
+      dataIndex: 'payment',
+      key: 'payment',
+      render: (payment) =>
+        payment == null || payment.paidTime == 0
+          ? 'N/A'
+          : dayjs(payment.paidTime * 1000).format('YYYY-MM-DD HH:MM:ss')
+    },
+    {
+      title: 'Gateway',
+      dataIndex: 'gateway',
+      key: 'gateway',
+      render: (g, iv) => (g == null ? null : g.gatewayName)
+    },
+    {
       title: 'Is refund',
       dataIndex: 'refund',
       key: 'refund',
@@ -93,25 +108,32 @@ const Index = () => {
       title: 'Issue date',
       dataIndex: 'periodStart',
       key: 'periodStart',
-      render: (d, plan) =>
-        d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'),
+      render: (d) => (d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD')),
       sorter: (a, b) => a.periodStart - b.periodStart
     },
     {
       title: 'End',
       dataIndex: 'periodEnd',
       key: 'periodEnd',
-      render: (d, plan) =>
-        d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD'),
+      render: (d) => (d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD')),
       sorter: (a, b) => a.periodEnd - b.periodEnd
     },
     {
       title: 'User',
       dataIndex: 'userAccount',
       key: 'userAccount',
-      render: (u, plan) => (
-        <span>{`${plan.userAccount.firstName} ${plan.userAccount.lastName}`}</span>
+      render: (u, iv) => (
+        <span>{`${iv.userAccount.firstName} ${iv.userAccount.lastName}`}</span>
       )
+    },
+    {
+      title: 'Email',
+      dataIndex: 'userAccount',
+      key: 'userEmail',
+      render: (u, iv) =>
+        iv.userAccount == null ? null : (
+          <a href={`mailto:${iv.userAccount.email}`}> {iv.userAccount.email}</a>
+        )
     }
   ]
 

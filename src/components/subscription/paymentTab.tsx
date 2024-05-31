@@ -59,7 +59,7 @@ const Index = ({
       key: 'transactionId'
     },
     {
-      title: 'Total Amount',
+      title: 'Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
       render: (amt, pay) => showAmount(amt, pay.currency)
@@ -93,7 +93,7 @@ const Index = ({
       )
     },
     {
-      title: 'Payment gateway',
+      title: 'Gateway',
       dataIndex: 'gatewayId',
       key: 'gatewayId',
       render: (gateway) =>

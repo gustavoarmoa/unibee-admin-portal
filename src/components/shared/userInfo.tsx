@@ -31,7 +31,7 @@ const Index = ({ user }: { user: IProfile | null }) => {
           <span style={{ fontWeight: 'bold' }}>Email</span>
         </Col>
         <Col span={6}>
-          <a href={user?.email}>{user?.email} </a>
+          <a href={`mailto:${user?.email}`}>{user?.email} </a>
         </Col>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>Phone</span>
