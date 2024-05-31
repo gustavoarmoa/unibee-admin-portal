@@ -156,7 +156,7 @@ const Index = () => {
                 })
               ]}
             >
-              <label htmlFor="comapnyLogoURL" style={{ cursor: 'pointer' }}>
+              <label htmlFor="companyLogoURL" style={{ cursor: 'pointer' }}>
                 {logoUrl == '' ? (
                   <div style={{ width: '48px', height: '48px' }}>
                     <Skeleton.Image
@@ -173,8 +173,8 @@ const Index = () => {
               type="file"
               accept="image/png, image/gif, image/jpeg"
               onChange={onFileUplaod}
-              id="comapnyLogoURL"
-              name="comapnyLogoURL"
+              id="companyLogoURL"
+              name="companyLogoURL"
               style={{ display: 'none' }}
             />
 
