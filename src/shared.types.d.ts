@@ -396,7 +396,7 @@ type TWebhookLogs = {
 type TGateway = {
   gatewayId?: number
   gatewayKey?: string
-  gatewayName: 'changelly' | 'stripe' | 'wire_transfer'
+  gatewayName: 'paypal' | 'changelly' | 'stripe' | 'wire_transfer'
   // gatewayLogo: string
   gatewayType?: number
   webhookEndpointUrl: string

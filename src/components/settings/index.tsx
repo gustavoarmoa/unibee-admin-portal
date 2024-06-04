@@ -209,7 +209,7 @@ const LoadingTag = () => (
 
 const AppConfig = () => {
   const appConfigStore = useAppConfigStore()
-  const [loadingKeys, setLoadingKeys] = useState(false)
+  const [loadingKeys, setLoadingKeys] = useState(true)
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
   const [vatSenseKeyModalOpen, setVatSenseKeyModalOpen] = useState(false)
   const [sendgridKeyModalOpen, setSendgridKeyModalOpen] = useState(false)

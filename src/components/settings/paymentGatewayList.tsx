@@ -23,6 +23,27 @@ const LoadingTag = () => (
   <Tag icon={<SyncOutlined spin />} color="#2db7f5"></Tag>
 )
 
+const GATEWAYS: {
+  name: 'stripe' | 'paypal' | 'changelly'
+  url: string
+  description: string
+}[] = [
+  {
+    name: 'stripe',
+    url: 'http://www.stripe.com',
+    description: 'Use public and private keys to secure the bank card payment.'
+  },
+  {
+    name: 'paypal',
+    url: 'https://developer.paypal.com/dashboard/applications',
+    description: 'Use ClientId and Secret to secure the payment.'
+  },
+  {
+    name: 'changelly',
+    url: 'http://www.changelly.com',
+    description: 'Use public and private keys to secure the crypto payment.'
+  }
+]
 const Index = ({
   loading,
   gatewayList,
@@ -42,15 +63,16 @@ const Index = ({
   const gatewayDetail = (name: string) =>
     gatewayList.find((g) => g.gatewayName.toLowerCase() == name.toLowerCase())
 
-  const onGatewayClick = (gatewayName: 'changelly' | 'stripe') => () => {
-    const g = gatewayList.find(
-      (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
-    )
-    setGatewayEdit(
-      g ?? { gatewayName, webhookEndpointUrl: '', webhookSecret: '' }
-    )
-    toggleModal()
-  }
+  const onGatewayClick =
+    (gatewayName: 'changelly' | 'stripe' | 'paypal') => () => {
+      const g = gatewayList.find(
+        (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
+      )
+      setGatewayEdit(
+        g ?? { gatewayName, webhookEndpointUrl: '', webhookSecret: '' }
+      )
+      toggleModal()
+    }
 
   return (
     <div>
@@ -61,7 +83,37 @@ const Index = ({
           refresh={refresh}
         />
       )}
-      <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
+      {GATEWAYS.map((g) => (
+        <Row key={g.name} gutter={[16, 32]} style={{ marginBottom: '16px' }}>
+          <Col span={4}>
+            <a href={g.url} target="_blank" rel="noreferrer">
+              {g.name.charAt(0).toUpperCase() + g.name.slice(1)}
+            </a>
+          </Col>
+          <Col span={2}>
+            {loading ? (
+              <LoadingTag />
+            ) : gatewayDetail(g.name) != null ? (
+              <SetTag />
+            ) : (
+              <NotSetTag />
+            )}
+          </Col>
+          <Col span={10}>
+            <div className=" text-gray-500">{g.description}</div>
+          </Col>
+          <Col span={2}>
+            <Button
+              onClick={onGatewayClick(g.name)}
+              disabled={loading}
+              loading={loading}
+            >
+              {gatewayDetail(g.name) == null ? 'Setup' : 'Edit'}
+            </Button>
+          </Col>
+        </Row>
+      ))}
+      {/* <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>
           <a href="http://www.stripe.com" target="_blank" rel="noreferrer">
             Stripe
@@ -90,9 +142,9 @@ const Index = ({
             {gatewayDetail('stripe') == null ? 'Setup' : 'Edit'}
           </Button>
         </Col>
-      </Row>
+        </Row> */}
 
-      <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
+      {/* <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
         <Col span={4}>
           <a href="http://www.changelly.com" target="_blank" rel="noreferrer">
             Changelly
@@ -121,7 +173,7 @@ const Index = ({
             {gatewayDetail('changelly') == null ? 'Setup' : 'Edit'}
           </Button>
         </Col>
-      </Row>
+        </Row> */}
     </div>
   )
 }

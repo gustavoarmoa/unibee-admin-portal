@@ -9,12 +9,14 @@ import {
   Row,
   Select,
   Table,
+  Tooltip,
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import RefundIcon from '../../assets/refund.svg?react'
 import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
@@ -49,12 +51,22 @@ const Index = () => {
       title: 'Total Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
+      width: 160,
       render: (amt, iv) => (
-        <div>
-          <span>{showAmount(amt, iv.currency)}</span>
-          <span
-            style={{ fontSize: '11px', color: '#757575' }}
-          >{` (tax: ${showAmount(iv.taxAmount, iv.currency)})`}</span>
+        <div className=" flex items-center">
+          <div className={iv.refund == null ? '' : ' text-red-500'}>
+            {showAmount(amt, iv.currency)}
+          </div>
+          {iv.refund == null && (
+            <div className=" text-xs text-gray-500">{` (tax: ${showAmount(iv.taxAmount, iv.currency)})`}</div>
+          )}
+          {iv.refund != null && (
+            <Tooltip title="Refund">
+              <div className="btn-refund-modal-wrapper ml-1 flex">
+                <RefundIcon />
+              </div>
+            </Tooltip>
+          )}
         </div>
       ),
       sorter: (a, b) => a.totalAmount - b.totalAmount
@@ -81,6 +93,7 @@ const Index = () => {
       render: (g, iv) => (g == null ? null : g.gatewayName)
     },
     {
+      /*
       title: 'Is refund',
       dataIndex: 'refund',
       key: 'refund',
@@ -97,6 +110,7 @@ const Index = () => {
             Yes
           </Button>
         )
+      */
     },
     {
       title: 'Payment Type',

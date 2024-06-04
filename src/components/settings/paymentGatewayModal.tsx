@@ -66,7 +66,11 @@ const Index = ({ closeModal, gatewayDetail, refresh }: IProps) => {
       >
         <div className="my-6  w-full ">
           <Row gutter={[16, 32]} style={{ marginBottom: '12px' }}>
-            <Col span={4}>Public Key</Col>
+            <Col span={4}>
+              {gatewayDetail?.gatewayName == 'paypal'
+                ? 'Client Id'
+                : 'Public Key'}
+            </Col>
             <Col span={20}>
               <TextArea
                 rows={4}
@@ -76,7 +80,9 @@ const Index = ({ closeModal, gatewayDetail, refresh }: IProps) => {
             </Col>
           </Row>
           <Row gutter={[16, 32]} style={{ marginBottom: '12px' }}>
-            <Col span={4}>Private key</Col>
+            <Col span={4}>
+              {gatewayDetail?.gatewayName == 'paypal' ? 'Secret' : 'Privat Key'}
+            </Col>
             <Col span={20}>
               <TextArea
                 rows={4}
@@ -89,8 +95,11 @@ const Index = ({ closeModal, gatewayDetail, refresh }: IProps) => {
             <Col span={4}></Col>
             <Col span={20}>
               <div className=" text-xs text-gray-400">
-                For security reason, your Private Key won't show up here after
-                submit.
+                For security reason, your{' '}
+                {gatewayDetail?.gatewayName == 'paypal'
+                  ? 'Secret'
+                  : 'Private Key'}{' '}
+                won't show up here after submit.
               </div>
             </Col>
           </Row>
