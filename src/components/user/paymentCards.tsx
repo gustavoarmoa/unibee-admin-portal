@@ -1,5 +1,5 @@
 import { LoadingOutlined, SyncOutlined } from '@ant-design/icons'
-import { Col, Row, Spin, Tooltip, message } from 'antd'
+import { Col, Empty, Row, Spin, Tooltip, message } from 'antd'
 import { useEffect, useState } from 'react'
 import { getUserPaymentMethodListReq } from '../../requests'
 
@@ -75,6 +75,13 @@ const Index = ({ userId, gatewayId, defaultPaymentId, readonly }: Props) => {
       <div className="flex w-full flex-col">
         {loading ? (
           <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
+        ) : cards.length == 0 ? (
+          <div>
+            <Empty
+              description="No cards"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          </div>
         ) : (
           cards.map((c) => (
             <Row
