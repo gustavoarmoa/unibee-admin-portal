@@ -125,7 +125,7 @@ const Index = ({
           <Col span={2}></Col>
         </Row>
 
-        <Row>
+        <Row style={{ maxHeight: '600px', overflowY: 'auto' }}>
           <Col span={4}>Events</Col>
           <Col span={18}>
             <Form.List name="events">
