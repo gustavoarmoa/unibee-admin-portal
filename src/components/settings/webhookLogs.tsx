@@ -1,4 +1,9 @@
-import { CopyOutlined, LoadingOutlined, SendOutlined } from '@ant-design/icons'
+import {
+  CopyOutlined,
+  LoadingOutlined,
+  SendOutlined,
+  SyncOutlined
+} from '@ant-design/icons'
 import {
   Button,
   Modal,
@@ -42,6 +47,26 @@ const Index = () => {
     message.success('Copied')
   }
 
+  const fetchData = async () => {
+    if (isNaN(endpointId)) {
+      message.error('Invalid endpoint Id')
+      return
+    }
+    setLoading(true)
+    const [res, err] = await getWebhookLogs(
+      { endpointId, page, count: PAGE_SIZE },
+      fetchData
+    )
+    setLoading(false)
+    const { endpointLogList, total } = res
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    setTotal(total)
+    setLogs(endpointLogList ?? [])
+  }
+
   const resend = (logId: number) => async () => {
     setResending(true)
     const [resendRes, err] = await resendWebhookEvt(logId)
@@ -51,7 +76,7 @@ const Index = () => {
       return
     }
     message.success('Event resent')
-    fetchData()
+    // fetchData() // resend won't create a new log record, no need to refresh
   }
 
   const renderJson = (text: string) => {
@@ -202,7 +227,20 @@ const Index = () => {
         dayjs(new Date(d * 1000)).format('YYYY-MMM-DD, HH:MM:ss')
     },
     {
-      title: 'Action',
+      title: (
+        <>
+          <span>Actions</span>
+          <Tooltip title="Refresh">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading}
+              onClick={fetchData}
+              icon={<SyncOutlined />}
+            ></Button>
+          </Tooltip>
+        </>
+      ),
       dataIndex: 'action',
       key: 'action',
       render: (_, record) => (
@@ -221,26 +259,6 @@ const Index = () => {
   ]
 
   const goBack = () => navigate(`${APP_PATH}configuration?tab=webhook`)
-
-  const fetchData = async () => {
-    if (isNaN(endpointId)) {
-      message.error('Invalid endpoint Id')
-      return
-    }
-    setLoading(true)
-    const [res, err] = await getWebhookLogs(
-      { endpointId, page, count: PAGE_SIZE },
-      fetchData
-    )
-    setLoading(false)
-    const { endpointLogList, total } = res
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    setTotal(total)
-    setLogs(endpointLogList ?? [])
-  }
 
   useEffect(() => {
     fetchData()

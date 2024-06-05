@@ -207,7 +207,7 @@ const Index = ({
       render: (payment) =>
         payment == null || payment.paidTime == 0
           ? 'N/A'
-          : dayjs(payment.paidTime * 1000).format('YYYY-MM-DD HH:MM:ss')
+          : dayjs(payment.paidTime * 1000).format('YYYY-MMM-DD HH:MM:ss')
     },
     {
       title: 'Gateway',
