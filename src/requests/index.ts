@@ -1838,7 +1838,7 @@ export const getWebhookLogs = async (
       session.setSession({ expired: true, refresh: refreshCb })
       throw new ExpiredError('Session expired')
     }
-    return [res.data.data.endpointLogList ?? [], null]
+    return [res.data.data, null]
   } catch (err) {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]

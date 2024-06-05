@@ -16,7 +16,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
-import { useCopyContent } from '../../hooks'
+import { useCopyContent, usePagination } from '../../hooks'
 import { getWebhookLogs, resendWebhookEvt } from '../../requests'
 import { TWebhookLogs } from '../../shared.types.d'
 SyntaxHighlighter.registerLanguage('json', json)
@@ -27,12 +27,12 @@ const PAGE_SIZE = 10
 const Index = () => {
   const navigate = useNavigate()
   const params = useParams()
+  const { page, onPageChange } = usePagination()
+  const [total, setTotal] = useState(0)
   const endpointId = Number(params.id)
   const [loading, setLoading] = useState(false)
   const [resending, setResending] = useState(false)
   const [logs, setLogs] = useState<TWebhookLogs[]>([])
-  const [page, setPage] = useState(0)
-  const onPageChange = (page: number, pageSize: number) => setPage(page - 1)
   const copyContent = (text: string) => async () => {
     const err = await useCopyContent(text)
     if (null != err) {
@@ -228,16 +228,18 @@ const Index = () => {
       return
     }
     setLoading(true)
-    const [endpointLogList, err] = await getWebhookLogs(
+    const [res, err] = await getWebhookLogs(
       { endpointId, page, count: PAGE_SIZE },
       fetchData
     )
     setLoading(false)
+    const { endpointLogList, total } = res
     if (err != null) {
       message.error(err.message)
       return
     }
-    setLogs(endpointLogList)
+    setTotal(total)
+    setLogs(endpointLogList ?? [])
   }
 
   useEffect(() => {
@@ -263,11 +265,14 @@ const Index = () => {
           <Pagination
             current={page + 1} // back-end starts with 0, front-end starts with 1
             pageSize={PAGE_SIZE}
-            total={500}
+            total={total}
             size="small"
             onChange={onPageChange}
             disabled={loading}
             showSizeChanger={false}
+            showTotal={(total, range) =>
+              `${range[0]}-${range[1]} of ${total} items`
+            }
           />
         </div>
       </div>
