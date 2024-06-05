@@ -181,7 +181,7 @@ const Index = () => {
     {
       title: (
         <>
-          <span>Action</span>
+          <span>Actions</span>
           <Tooltip title="New plan">
             <Button
               // type="primary"

@@ -264,7 +264,9 @@ const Index = ({
       message.error(err.message)
       return
     }
-    message.success('Refunded.') // does user get refund immeidately? or there is a pending process
+    message.success('Refund request created.') // does user get refund immeidately? or there is a pending process
+    // for stripe/paypal, most of times, refund will be done immediately
+    // for crypto/wire_transfer, refund invoice is in processig status, admin has to mark them as paid.
     closeModal()
     refresh()
   }

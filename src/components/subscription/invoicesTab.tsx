@@ -21,8 +21,10 @@ import {
   EditOutlined,
   LoadingOutlined,
   MailOutlined,
-  PlusOutlined
+  PlusOutlined,
+  SyncOutlined
 } from '@ant-design/icons'
+import { useNavigate } from 'react-router-dom'
 import { CURRENCY, INVOICE_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
 import { downloadInvoice, getInvoiceListReq } from '../../requests'
@@ -34,6 +36,7 @@ import InvoiceDetailModal from './modals/invoiceDetail'
 import NewInvoiceModal from './modals/newInvoice'
 
 const PAGE_SIZE = 10
+const APP_PATH = import.meta.env.BASE_URL
 
 const Index = ({
   user,
@@ -43,6 +46,7 @@ const Index = ({
   extraButton?: ReactElement
 }) => {
   // const appConfigStore = useAppConfigStore();
+  const navigate = useNavigate()
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0)
@@ -94,13 +98,14 @@ const Index = ({
     }
     if (iv == null) {
       // creating a new invoice
-      console.log('create a new invoice...')
       p.creatable = true
       p.editable = true
       p.savable = true
       p.publishable = true
       return p
     }
+
+    // subscriptionId exist or not makes a difference???
     if (iv.subscriptionId == null || iv.subscriptionId == '') {
       // manually created invoice
       switch (iv.status) {
@@ -116,7 +121,7 @@ const Index = ({
         case 3: // user has paid
           p.downloadable = true
           p.sendable = true
-          p.refundable = true
+          p.refundable = iv.refund == null // you cannot refund a refund
           break
       }
       return p
@@ -126,23 +131,61 @@ const Index = ({
       // system generated invoice, not admin manually generated
       p.sendable = true
       p.downloadable = true
-      p.refundable = true
+      if (iv.status == 3) {
+        p.refundable = iv.refund == null // you cannot refund a refund
+      }
     }
     return p
+  }
+
+  const fetchData = async () => {
+    if (user == null) {
+      return
+    }
+    setLoading(true)
+    const [res, err] = await getInvoiceListReq(
+      {
+        page,
+        count: PAGE_SIZE,
+        userId: user!.id as number
+      },
+      fetchData
+    )
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    const { invoices, total } = res
+    if (invoices != null) {
+      normalizeAmt(invoices)
+      setInvoiceList(invoices)
+    } else {
+      setInvoiceList([])
+    }
+    setTotal(total)
   }
 
   const columns: ColumnsType<UserInvoice> = [
     {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
-      key: 'invoiceId'
+      key: 'invoiceId',
+      render: (ivId) => (
+        <Button
+          onClick={() => navigate(`${APP_PATH}invoice/${ivId}`)}
+          type="link"
+          style={{ padding: 0 }}
+          className="btn-invoiceid-wrapper"
+        >
+          {ivId}
+        </Button>
+      )
     },
     {
       title: 'Title',
       dataIndex: 'invoiceName',
       key: 'invoiceName'
-      // render: (title, invoice) => <a>{title}</a>
-      // render: (_, sub) => <a>{sub.plan?.planName}</a>,
     },
     {
       title: 'Amount',
@@ -195,7 +238,7 @@ const Index = ({
     {
       title: (
         <>
-          <span>Action</span>
+          <span>Actions</span>
           <Tooltip title="New invoice">
             <Button
               size="small"
@@ -208,6 +251,15 @@ const Index = ({
               disabled={user == null}
             />
           </Tooltip>
+          <Tooltip title="Refresh">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading}
+              onClick={fetchData}
+              icon={<SyncOutlined />}
+            ></Button>
+          </Tooltip>
         </>
       ),
       key: 'action',
@@ -217,7 +269,7 @@ const Index = ({
         invoice // use fn to generate these icons, only show available ones.
       ) => (
         <Space
-          size="middle"
+          size="small"
           className="invoice-action-btn-wrapper"
           // style={{ width: '170px' }}
         >
@@ -265,34 +317,6 @@ const Index = ({
 
   const onPageChange = (page: number, pageSize: number) => {
     setPage(page - 1)
-  }
-
-  const fetchData = async () => {
-    if (user == null) {
-      return
-    }
-    setLoading(true)
-    const [res, err] = await getInvoiceListReq(
-      {
-        page,
-        count: PAGE_SIZE,
-        userId: user!.id as number
-      },
-      fetchData
-    )
-    setLoading(false)
-    if (null != err) {
-      message.error(err.message)
-      return
-    }
-    const { invoices, total } = res
-    if (invoices != null) {
-      normalizeAmt(invoices)
-      setInvoiceList(invoices)
-    } else {
-      setInvoiceList([])
-    }
-    setTotal(total)
   }
 
   useEffect(() => {

@@ -15,6 +15,7 @@ import RefundModal from '../payment/refundModal'
 import InvoiceDetailModal from '../subscription/modals/invoiceDetail'
 import { InvoiceStatus } from '../ui/statusTag'
 import MarkAsPaidModal from './markAsPaidModal'
+import MarkAsRefundedModal from './markAsRefundedModal'
 // import InvoiceItemsModal from '../subscription/modals/newInvoice' // obsolete
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
@@ -33,10 +34,13 @@ const Index = () => {
   //   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
   const [showInvoiceItems, setShowInvoiceItems] = useState(false)
   const toggleInvoiceItems = () => setShowInvoiceItems(!showInvoiceItems)
-  const [refundModalOpen, setRefundModalOpen] = useState(false)
+  const [refundModalOpen, setRefundModalOpen] = useState(false) // show refund detail
   const toggleRefundModal = () => setRefundModalOpen(!refundModalOpen)
   const [markPaidModalOpen, setMarkPaidModalOpen] = useState(false)
   const toggleMarkPaidModal = () => setMarkPaidModalOpen(!markPaidModalOpen)
+  const [markRefundedModalOpen, setMarkRefundedModalOpen] = useState(false)
+  const toggleMarkRefundedModal = () =>
+    setMarkRefundedModalOpen(!markRefundedModalOpen)
 
   const goBack = () => navigate(`${APP_PATH}invoice/list`)
   const goToUser = (userId: number) => () =>
@@ -67,6 +71,10 @@ const Index = () => {
     fetchData()
   }, [])
 
+  const isWireTransfer = invoiceDetail?.gateway.gatewayName == 'wire_transfer'
+  const isCrypto = invoiceDetail?.gateway.gatewayName == 'changelly'
+  const isRefund = invoiceDetail?.refund != null
+
   return (
     <div>
       <Spin
@@ -93,6 +101,14 @@ const Index = () => {
       {invoiceDetail && markPaidModalOpen && (
         <MarkAsPaidModal
           closeModal={toggleMarkPaidModal}
+          refresh={fetchData}
+          invoiceId={invoiceDetail.invoiceId}
+        />
+      )}
+
+      {invoiceDetail && markRefundedModalOpen && (
+        <MarkAsRefundedModal
+          closeModal={toggleMarkRefundedModal}
           refresh={fetchData}
           invoiceId={invoiceDetail.invoiceId}
         />
@@ -130,20 +146,25 @@ const Index = () => {
           Status
         </Col>
         <Col span={6}>
-          {/* <span
-                style={{ cursor: 'pointer', margin: '0 8px' }}
-                onClick={toggleMarkPaidModal}
-          ></span>*/}
           {invoiceDetail != null && InvoiceStatus(invoiceDetail.status)}
-          {invoiceDetail != null && invoiceDetail.status == 2 && (
-            <Button
-              onClick={toggleMarkPaidModal}
-              type="link"
-              style={{ padding: 0 }}
-            >
-              Mark as Paid
-            </Button>
-          )}
+          {/* 
+            status == 2 (processing) is used mainly for wire-transfer payment/refund, crypto refund,
+            in which cases, payment/refund status updates are not provided by 3rd party API,
+            admin have to check them offline, then update their status manully.
+          */}
+          {invoiceDetail != null &&
+            invoiceDetail.status == 2 &&
+            (isWireTransfer || isCrypto) && (
+              <Button
+                onClick={
+                  isRefund ? toggleMarkRefundedModal : toggleMarkPaidModal
+                }
+                type="link"
+                style={{ padding: 0 }}
+              >
+                {isRefund ? 'Mark as Refunded' : 'Mark as Paid'}
+              </Button>
+            )}
         </Col>
       </Row>
       <Row style={rowStyle} gutter={[16, 16]}>

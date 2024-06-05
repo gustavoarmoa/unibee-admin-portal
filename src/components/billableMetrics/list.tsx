@@ -91,7 +91,7 @@ const Index = () => {
     {
       title: (
         <>
-          <span>Action</span>
+          <span>Actions</span>
           <Tooltip title="New billable metric">
             <Button
               // type="primary"

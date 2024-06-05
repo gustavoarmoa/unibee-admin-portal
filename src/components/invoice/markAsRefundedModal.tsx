@@ -1,7 +1,7 @@
 // import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Form, Input, message, Modal, Row } from 'antd'
 import React, { useState } from 'react'
-import { markInvoiceAsPaidReq } from '../../requests'
+import { markRefundAsSucceedReq } from '../../requests'
 
 const { TextArea } = Input
 
@@ -17,10 +17,9 @@ const Index = ({ closeModal, refresh, invoiceId }: Props) => {
 
   const onConfirm = async () => {
     setLoading(true)
-    const [res, err] = await markInvoiceAsPaidReq(
+    const [res, err] = await markRefundAsSucceedReq(
       invoiceId,
-      form.getFieldValue('reason'),
-      form.getFieldValue('TransferNumber')
+      form.getFieldValue('reason')
     )
     setLoading(false)
     if (null != err) {
@@ -33,38 +32,26 @@ const Index = ({ closeModal, refresh, invoiceId }: Props) => {
 
   return (
     <Modal
-      title="Invoice Paid Confirm"
+      title="Refunded Confirm"
       open={true}
-      width={'620px'}
+      width={'682px'}
       footer={null}
       closeIcon={null}
     >
       <div style={{ height: '12px' }}></div>
       <p>
-        Are you sure you have received the payment and want to mark this invoice
-        as <span className=" text-red-600">PAID</span>?{' '}
+        Are you sure you have refunded user's payment, and want to mark refund
+        status as <span className=" text-red-600">SUCCEEDED</span> ?
       </p>
       <Form
         form={form}
         onFinish={onConfirm}
-        labelCol={{ flex: '130px' }}
+        labelCol={{ flex: '80px' }}
         wrapperCol={{ flex: 1 }}
         colon={false}
         disabled={loading}
         style={{ marginTop: '18px' }}
       >
-        <Form.Item
-          label="Transfer Number"
-          name="TransferNumber"
-          rules={[
-            {
-              required: true,
-              message: 'Please input the Transfer Number!'
-            }
-          ]}
-        >
-          <Input />
-        </Form.Item>
         <Form.Item
           label="Comment"
           name="reason"
@@ -94,7 +81,7 @@ const Index = ({ closeModal, refresh, invoiceId }: Props) => {
             disabled={loading}
             loading={loading}
           >
-            Mark as Paid
+            Mark as Refunded
           </Button>
         </div>
       </div>

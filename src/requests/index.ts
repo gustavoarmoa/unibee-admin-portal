@@ -1403,6 +1403,8 @@ export const getInvoiceDetailReq = async (
   }
 }
 
+// wire-transfer is totally offline, we can only rely on admin to do manual offline check payment status,
+// then mark invoice as Paid.
 export const markInvoiceAsPaidReq = async (
   invoiceId: string,
   reason: string,
@@ -1417,6 +1419,30 @@ export const markInvoiceAsPaidReq = async (
         TransferNumber
       }
     )
+
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+// if wire-transfer payment need to be refunded, refund status also need to be marked manually.
+// Same goes to Crypto. Many crypto gateway has no refund API, so admin need to manually refund the crypto, check its status,
+// then manually mark refund as suceeded.
+export const markRefundAsSucceedReq = async (
+  invoiceId: string,
+  reason: string
+) => {
+  try {
+    const res = await request.post(`/merchant/invoice/mark_refund_success`, {
+      invoiceId,
+      reason
+    })
 
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
