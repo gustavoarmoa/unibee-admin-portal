@@ -17,8 +17,15 @@ interface Props {
   gatewayId: number | undefined
   defaultPaymentId: string
   readonly: boolean
+  refreshUserProfile: null | (() => void)
 }
-const Index = ({ userId, gatewayId, defaultPaymentId, readonly }: Props) => {
+const Index = ({
+  userId,
+  gatewayId,
+  defaultPaymentId,
+  readonly,
+  refreshUserProfile
+}: Props) => {
   const [loading, setLoading] = useState(false)
   const [cards, setCards] = useState<TCard[]>([])
   const [defaultPaymentMethodId, setDefaultPaymentMethod] =
@@ -48,11 +55,23 @@ const Index = ({ userId, gatewayId, defaultPaymentId, readonly }: Props) => {
             expiredAt: m.data.expYear + '-' + m.data.expMonth
           }))
     setCards(cards)
+    // on user portal, user might have updated paymentId, after we refresh the page, we need to update paymentId in local state
+    if (defaultPaymentId != defaultPaymentMethodId) {
+      setDefaultPaymentMethod(defaultPaymentId)
+    }
   }
 
+  const refresh = () => {
+    if (refreshUserProfile != null) {
+      refreshUserProfile()
+      fetchCards()
+    }
+  }
+
+  // defaultPaymentId is passed from parent
   useEffect(() => {
     fetchCards()
-  }, [gatewayId])
+  }, [gatewayId, defaultPaymentId])
 
   return (
     <>
@@ -65,7 +84,7 @@ const Index = ({ userId, gatewayId, defaultPaymentId, readonly }: Props) => {
         <Col span={2}>
           <div className="flex justify-evenly gap-2">
             <Tooltip title="Refresh">
-              <span className=" cursor-pointer" onClick={fetchCards}>
+              <span className=" cursor-pointer" onClick={refresh}>
                 <SyncOutlined />
               </span>
             </Tooltip>

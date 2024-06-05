@@ -423,7 +423,7 @@ const Index = ({
         </Col>
         <Col span={4}>
           <div style={{ fontWeight: 'bold' }}>Amount</div>
-          <div style={{ fontWeight: 'bold' }}>(exclude Tax)</div>
+          {/* <div style={{ fontWeight: 'bold' }}>(exclude Tax)</div> */}
         </Col>
         <Col span={1}></Col>
         <Col span={3}>

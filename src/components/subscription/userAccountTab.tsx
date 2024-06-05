@@ -325,6 +325,7 @@ const UserAccountTab = ({
                     readonly={true}
                     userId={user.id as number}
                     gatewayId={gatewayId}
+                    refreshUserProfile={refresh}
                     defaultPaymentId={user.paymentMethod}
                   />
                 </div>
