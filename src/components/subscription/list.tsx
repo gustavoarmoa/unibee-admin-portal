@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SUBSCRIPTION_STATUS } from '../../constants'
-import { showAmount } from '../../helpers'
+import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { getSublist } from '../../requests'
 import '../../shared.css'
@@ -72,14 +72,16 @@ const columns: ColumnsType<ISubscriptionType> = [
     dataIndex: 'currentPeriodStart',
     key: 'currentPeriodStart',
     render: (_, sub) =>
-      dayjs(sub.currentPeriodStart * 1000).format('YYYY-MMM-DD HH:MM')
+      // (sub.currentPeriodStart * 1000).format('YYYY-MMM-DD HH:MM')
+      formatDate(sub.currentPeriodStart, true)
   },
   {
     title: 'End',
     dataIndex: 'currentPeriodEnd',
     key: 'currentPeriodEnd',
     render: (_, sub) =>
-      dayjs(sub.currentPeriodEnd * 1000).format('YYYY-MMM-DD HH:MM')
+      // dayjs(sub.currentPeriodEnd * 1000).format('YYYY-MMM-DD HH:MM')
+      formatDate(sub.currentPeriodEnd, true)
   },
   {
     title: 'User',

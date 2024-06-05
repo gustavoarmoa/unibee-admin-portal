@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import passwordValidator from 'password-validator'
 import { CURRENCY } from '../constants'
 
@@ -44,6 +45,14 @@ export const daysBetweenDate = (
     d2 = new Date(end).getTime()
   // console.log("d1/d2: ", d1, "//", d2);
   return Math.ceil(Math.abs((d1 - d2) / (1000 * 60 * 60 * 24)))
+}
+
+export const formatDate = (d: number, showTime?: boolean) => {
+  const timeFormat = showTime ? ' HH:mm:ss' : ''
+  const result = dayjs(d * 1000)
+  return result.year() == dayjs().year()
+    ? result.format(`MMM-DD ${timeFormat}`)
+    : result.format(`YYYY-MMM-DD ${timeFormat}`)
 }
 
 export const currencyDecimalValidate = (val: number, currency: string) => {

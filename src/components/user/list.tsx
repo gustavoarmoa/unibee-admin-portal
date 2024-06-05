@@ -18,6 +18,7 @@ import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { getUserListReq } from '../../requests'
 import '../../shared.css'
@@ -85,8 +86,7 @@ const Index = () => {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, plan) =>
-        d === 0 ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d, plan) => (d === 0 ? 'N/A' : formatDate(d)) // dayjs(d * 1000).format('YYYY-MMM-DD')
     },
     {
       title: 'Status',

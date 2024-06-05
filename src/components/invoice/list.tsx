@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import RefundIcon from '../../assets/refund.svg?react'
 import { CURRENCY, INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../../constants'
-import { showAmount } from '../../helpers'
+import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { getInvoiceListReq } from '../../requests'
 import '../../shared.css'
@@ -84,7 +84,7 @@ const Index = () => {
       render: (payment) =>
         payment == null || payment.paidTime == 0
           ? 'N/A'
-          : dayjs(payment.paidTime * 1000).format('YYYY-MM-DD HH:MM:ss')
+          : formatDate(payment.paidTime, true) // dayjs(payment.paidTime * 1000).format('YYYY-MM-DD HH:MM:ss')
     },
     {
       title: 'Gateway',
@@ -122,14 +122,14 @@ const Index = () => {
       title: 'Issue date',
       dataIndex: 'periodStart',
       key: 'periodStart',
-      render: (d) => (d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD')),
+      render: (d) => (d == 0 ? '' : formatDate(d)), // (d * 1000).format('YYYY-MMM-DD')),
       sorter: (a, b) => a.periodStart - b.periodStart
     },
     {
       title: 'End',
       dataIndex: 'periodEnd',
       key: 'periodEnd',
-      render: (d) => (d == 0 ? '' : dayjs(d * 1000).format('YYYY-MMM-DD')),
+      render: (d) => (d == 0 ? '' : formatDate(d)), // dayjs(d * 1000).format('YYYY-MMM-DD')),
       sorter: (a, b) => a.periodEnd - b.periodEnd
     },
     {

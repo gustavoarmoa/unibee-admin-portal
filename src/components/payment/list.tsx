@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PAYMENT_TYPE } from '../../constants'
-import { showAmount } from '../../helpers'
+import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
@@ -142,7 +142,7 @@ const Index = () => {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d) => dayjs(d * 1000).format('YYYY-MMM-DD, HH:MM:ss')
+      render: (d) => formatDate(d, true) // dayjs(d * 1000).format('YYYY-MMM-DD, HH:MM:ss')
     }
   ]
 

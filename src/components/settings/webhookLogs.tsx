@@ -21,6 +21,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
+import { formatDate } from '../../helpers'
 import { useCopyContent, usePagination } from '../../hooks'
 import { getWebhookLogs, resendWebhookEvt } from '../../requests'
 import { TWebhookLogs } from '../../shared.types.d'
@@ -224,7 +225,8 @@ const Index = () => {
       key: 'createTime',
       width: 120,
       render: (d, plan) =>
-        dayjs(new Date(d * 1000)).format('YYYY-MMM-DD, HH:MM:ss')
+        // dayjs(new Date(d * 1000)).format('YYYY-MMM-DD, HH:MM:ss')
+        formatDate(d, true)
     },
     {
       title: (

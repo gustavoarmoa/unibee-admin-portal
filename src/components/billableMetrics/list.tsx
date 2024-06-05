@@ -8,6 +8,7 @@ import { METRICS_AGGREGATE_TYPE, METRICS_TYPE } from '../../constants'
 import { getMetricsListReq } from '../../requests'
 import { IBillableMetrics } from '../../shared.types.d'
 
+import { formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
 import '../../shared.css'
 
@@ -86,7 +87,7 @@ const Index = () => {
       title: 'Updated at',
       dataIndex: 'gmtModify',
       key: 'gmtModify',
-      render: (d, metrics) => dayjs(d * 1000).format('YYYY-MMM-DD, HH:MM:ss')
+      render: (d, metrics) => formatDate(d, true) // dayjs(d * 1000).format('YYYY-MMM-DD, HH:MM:ss')
     },
     {
       title: (
@@ -94,7 +95,6 @@ const Index = () => {
           <span>Actions</span>
           <Tooltip title="New billable metric">
             <Button
-              // type="primary"
               size="small"
               style={{ marginLeft: '8px' }}
               onClick={onNewMetrics}
@@ -113,7 +113,7 @@ const Index = () => {
         </>
       ),
       key: 'action',
-      width: 142,
+      width: 150,
       render: (_, record) => (
         <Space size="middle">
           <a>Edit</a>

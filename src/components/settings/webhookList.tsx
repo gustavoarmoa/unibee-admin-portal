@@ -2,20 +2,18 @@ import {
   EditOutlined,
   LoadingOutlined,
   PlusOutlined,
-  ProfileOutlined,
-  ReconciliationOutlined
+  ProfileOutlined
 } from '@ant-design/icons'
 import { Button, Popover, Space, Table, Tag, Tooltip, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { formatDate } from '../../helpers'
 import { getWebhookListReq } from '../../requests'
 import '../../shared.css'
-import { IProfile, TWebhook } from '../../shared.types.d'
-// import { useAppConfigStore } from '../../stores';
-import { useNavigate } from 'react-router-dom'
+import { TWebhook } from '../../shared.types.d'
 import WebhookDetail from './webhookDetail'
-import WebhookLogs from './webhookLogs'
 
 const APP_PATH = import.meta.env.BASE_URL
 
@@ -85,15 +83,13 @@ const Index = () => {
       title: 'Modified at',
       dataIndex: 'gmtModify',
       key: 'gmtModify',
-      render: (d, plan) => (
-        <span>{dayjs(new Date(d * 1000)).format('YYYY-MMM-DD')}</span>
-      )
+      render: (d, plan) => formatDate(d)
     },
     {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, plan) => dayjs(new Date(d * 1000)).format('YYYY-MMM-DD')
+      render: (d, plan) => formatDate(d) // dayjs(new Date(d * 1000)).format('YYYY-MMM-DD')
     },
     {
       title: (
