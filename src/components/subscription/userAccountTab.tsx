@@ -269,12 +269,12 @@ const UserAccountTab = ({
               <Form.Item
                 label="VAT number"
                 name="vATNumber"
-                rules={[
+                /* rules={[
                   {
                     required: user.type == 2, // biz user
                     message: 'Please input your VAT number!'
                   }
-                ]}
+                ]} */
               >
                 <Input style={{ width: '300px' }} />
               </Form.Item>
@@ -393,6 +393,7 @@ const UserAccountTab = ({
               type="primary"
               onClick={form.submit}
               disabled={loading || null == user || user.status == 2}
+              loading={loading}
             >
               Save
             </Button>
