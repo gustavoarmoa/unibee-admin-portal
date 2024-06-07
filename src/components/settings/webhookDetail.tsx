@@ -111,7 +111,14 @@ const Index = ({
                 },
                 ({ getFieldValue }) => ({
                   validator(rule, value) {
-                    if (urlRegx.test(value)) {
+                    // if (urlRegx.test(value)) {
+                    // return Promise.resolve()
+                    // }
+                    const lowCase = value.toLowerCase()
+                    if (
+                      lowCase.startsWith('http://') ||
+                      lowCase.startsWith('https://')
+                    ) {
                       return Promise.resolve()
                     }
                     return Promise.reject('Please input a valid URL')

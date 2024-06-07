@@ -14,6 +14,7 @@ import Dinero, { Currency } from 'dinero.js'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
+import { formatPlanPrice } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { copyPlanReq, getPlanList } from '../../requests'
 import '../../shared.css'
@@ -115,16 +116,7 @@ const Index = () => {
       dataIndex: 'price',
       key: 'price',
       render: (_, p) => {
-        return (
-          <span>
-            {`${Dinero({
-              amount: p.amount,
-              currency: p.currency
-            }).toFormat('$0,0.00')} /${
-              p.intervalCount == 1 ? '' : p.intervalCount
-            }${p.intervalUnit}`}
-          </span>
-        )
+        return <span>{formatPlanPrice(p)}</span>
       }
     },
     {

@@ -24,7 +24,6 @@ const TerminateSub = ({
 }: Props) => {
   // select immediate or end of this billing cycle
   const onEndSubModeChange = (e: RadioChangeEvent) => {
-    console.log('radio checked', e.target.value)
     setTerminateMode(e.target.value)
   }
   return (

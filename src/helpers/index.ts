@@ -1,6 +1,8 @@
 import dayjs from 'dayjs'
+import Dinero from 'dinero.js'
 import passwordValidator from 'password-validator'
 import { CURRENCY } from '../constants'
+import { IPlan } from '../shared.types'
 
 export const passwordSchema = new passwordValidator()
 passwordSchema
@@ -64,6 +66,20 @@ export const currencyDecimalValidate = (val: number, currency: string) => {
     return true
   }
   return CURRENCY[currency]!.decimal_places! >= decimalCnt
+}
+
+export const formatPlanPrice = (plan: IPlan) => {
+  const amount = Dinero({
+    amount: plan.amount,
+    currency: plan.currency
+  }).toFormat('$0,0.00')
+  if (plan.type == 1 || plan.type == 2) {
+    // 1: main plan, 2: add-on, 3: one-time addon
+    const itv = `/${plan.intervalCount == 1 ? '' : plan.intervalCount} ${plan.intervalUnit}`
+    return `${amount}${itv}`
+  } else {
+    return amount
+  }
 }
 
 export const toFixedNumber = (num: number, digits: number, base?: number) => {
