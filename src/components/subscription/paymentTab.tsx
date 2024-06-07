@@ -6,7 +6,7 @@ import React, { ReactElement, useEffect, useState } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY, INVOICE_STATUS, PAYMENT_TYPE } from '../../constants'
-import { showAmount } from '../../helpers'
+import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { downloadInvoice, getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
@@ -109,7 +109,7 @@ const Index = ({
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, invoice) => dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d, invoice) => formatDate(d)
     }
   ]
 

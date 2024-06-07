@@ -104,11 +104,6 @@ const Index = ({
 
   return (
     <div>
-      {/* <div className="flex h-8 items-center justify-center">
-        {isActive ? (
-          <span style={{ color: 'orange' }}>Current Subscription</span>
-        ) : null}
-        </div> */}
       <div
         onClick={() => setSelectedPlan(plan.id)}
         className="flex h-80 w-64 cursor-pointer flex-col items-center justify-center gap-6 rounded-md px-2 py-2"

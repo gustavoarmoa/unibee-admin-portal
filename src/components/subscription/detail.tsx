@@ -1,7 +1,7 @@
 import type { DatePickerProps, TabsProps } from 'antd'
 import { Button, Divider, Tabs, message } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getUserProfile } from '../../requests'
 import { IProfile } from '../../shared.types.d'
 import UserInfoSection from '../shared/userInfo'
@@ -15,6 +15,10 @@ import UserAccount from './userAccountTab'
 const APP_PATH = import.meta.env.BASE_URL // import.meta.env.VITE_APP_PATH;
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get('tab') ?? 'subscription'
+  )
   const navigate = useNavigate()
   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
   const [userId, setUserId] = useState<number | null>(null) // subscription obj has user account data, and admin can update it in AccountTab.
@@ -27,6 +31,11 @@ const Index = () => {
   const [refreshSub, setRefreshSub] = useState(false)
   const [adminNotePushed, setAdminNotePushed] = useState(true)
 
+  const onTabChange = (key: string) => {
+    setActiveTab(key)
+    setSearchParams({ tab: key })
+  }
+
   const fetchUserProfile = async () => {
     const [user, err] = await getUserProfile(userId as number, fetchUserProfile)
     if (err != null) {
@@ -38,7 +47,7 @@ const Index = () => {
 
   const tabItems: TabsProps['items'] = [
     {
-      key: 'Subscription',
+      key: 'subscription',
       label: 'Subscription',
       children: (
         <SubscriptionTab
@@ -49,7 +58,7 @@ const Index = () => {
       )
     },
     {
-      key: 'Account',
+      key: 'account',
       label: 'Account',
       children: (
         <UserAccount
@@ -61,17 +70,16 @@ const Index = () => {
       )
     },
     {
-      key: 'Invoices',
+      key: 'invoices',
       label: 'Invoices',
       children: <InvoiceTab user={userProfile} />
     },
     {
-      key: 'Payment',
+      key: 'payment',
       label: 'Payment',
       children: <PaymentTab user={userProfile} />
     }
   ]
-  const onTabChange = (key: string) => {}
 
   useEffect(() => {
     if (userId == null) {
@@ -92,7 +100,11 @@ const Index = () => {
           User Info
         </Divider>
         <UserInfoSection user={userProfile} />
-        <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} />
+        <Tabs
+          defaultActiveKey={'subscription'}
+          items={tabItems}
+          onChange={() => {}}
+        />
         <div className="mt-4 flex items-center justify-center">
           <Button onClick={() => navigate(`${APP_PATH}subscription/list`)}>
             Go Back

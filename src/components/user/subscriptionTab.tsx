@@ -12,13 +12,14 @@ import {
   Popover,
   Row,
   Spin,
+  Tooltip,
   message
 } from 'antd'
 import Table, { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { showAmount } from '../../helpers'
+import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import {
   getOneTimePaymentHistoryReq,
@@ -79,11 +80,15 @@ const OneTimeHistory = ({ userId }: { userId: number }) => {
       key: 'name'
     },
     {
-      title: 'createTime',
+      title: 'Quantity',
+      dataIndex: 'quantity',
+      key: 'quantity'
+    },
+    {
+      title: 'created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d) =>
-        d == 0 || d == null ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d) => (d == 0 || d == null ? 'N/A' : formatDate(d))
     },
     {
       title: 'Status',
@@ -94,7 +99,18 @@ const OneTimeHistory = ({ userId }: { userId: number }) => {
     {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
-      key: 'invoiceId'
+      key: 'invoiceId',
+      render: (ivId) =>
+        ivId == '' || ivId == null ? (
+          ''
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}invoice/${ivId}`)}
+          >
+            {ivId}
+          </div>
+        )
     },
     {
       title: 'Subscription Id',
@@ -205,15 +221,13 @@ const Index = ({
       title: 'Start',
       dataIndex: 'periodStart',
       key: 'periodStart',
-      render: (d) =>
-        d == 0 || d == null ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d) => (d == 0 || d == null ? 'N/A' : formatDate(d))
     },
     {
       title: 'End',
       dataIndex: 'periodEnd',
       key: 'periodEnd',
-      render: (d) =>
-        d == 0 || d == null ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d) => (d == 0 || d == null ? 'N/A' : formatDate(d))
     },
     {
       title: 'Addons',
@@ -273,8 +287,7 @@ const Index = ({
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, _) =>
-        d === 0 ? 'N/A' : dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d, _) => (d === 0 ? 'N/A' : formatDate(d))
     },
     {
       title: 'Invoice Id',
@@ -392,12 +405,14 @@ const Index = ({
             </Col>
             <Col span={6}>
               {SubscriptionStatus(subInfo.status)}
-              <span
-                style={{ cursor: 'pointer', marginLeft: '8px' }}
-                onClick={getUserSub}
-              >
-                <SyncOutlined />
-              </span>
+              <Tooltip title="Refresh">
+                <span
+                  style={{ cursor: 'pointer', marginLeft: '8px' }}
+                  onClick={getUserSub}
+                >
+                  <SyncOutlined />
+                </span>
+              </Tooltip>
             </Col>
             <Col span={4} style={colStyle}>
               Subscription Id

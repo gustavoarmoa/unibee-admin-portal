@@ -1,6 +1,6 @@
 import { Button, Divider, Empty, Spin, Tabs, TabsProps, message } from 'antd'
 import React, { CSSProperties, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getUserProfile } from '../../requests'
 import { IProfile } from '../../shared.types'
 import UserInfo from '../shared/userInfo'
@@ -18,6 +18,10 @@ const GoBackBtn = () => {
 }
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get('tab') ?? 'account'
+  )
   const params = useParams()
   const userId = Number(params.userId)
   if (isNaN(userId)) {
@@ -32,29 +36,32 @@ const Index = () => {
 
   const tabItems: TabsProps['items'] = [
     {
-      key: 'AccountInfo',
+      key: 'account',
       label: 'Account Info',
       children: <AccountInfoTab userId={userId} extraButton={<GoBackBtn />} />
     },
     {
-      key: 'Subscription',
+      key: 'subscription',
       label: 'Subscription',
       children: <SubscriptionTab userId={userId} extraButton={<GoBackBtn />} />
     },
     {
-      key: 'Invoice',
+      key: 'invoice',
       label: 'Invoice',
       children: <InvoiceTab user={userProfile} extraButton={<GoBackBtn />} /> // <InvoiceTab user={userProfile} />
     },
     {
-      key: 'Transaction',
+      key: 'transaction',
       label: 'Transaction',
       children: (
         <TransactionTab user={userProfile} extraButton={<GoBackBtn />} />
       )
     }
   ]
-  const onTabChange = (key: string) => {}
+  const onTabChange = (key: string) => {
+    setActiveTab(key)
+    setSearchParams({ tab: key })
+  }
 
   const fetchUserProfile = async () => {
     const [user, err] = await getUserProfile(userId as number, fetchUserProfile)
@@ -75,11 +82,7 @@ const Index = () => {
         Brief Info
       </Divider>
       <UserInfo user={userProfile} />
-      <Tabs
-        defaultActiveKey="AccountInfo"
-        items={tabItems}
-        onChange={onTabChange}
-      />
+      <Tabs activeKey={activeTab} items={tabItems} onChange={onTabChange} />
     </div>
   )
 }

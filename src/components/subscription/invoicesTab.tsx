@@ -26,7 +26,7 @@ import {
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY, INVOICE_STATUS } from '../../constants'
-import { showAmount } from '../../helpers'
+import { formatDate, showAmount } from '../../helpers'
 import { downloadInvoice, getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
@@ -207,7 +207,7 @@ const Index = ({
       render: (payment) =>
         payment == null || payment.paidTime == 0
           ? 'N/A'
-          : dayjs(payment.paidTime * 1000).format('YYYY-MMM-DD HH:MM:ss')
+          : formatDate(payment.paidTime, true)
     },
     {
       title: 'Gateway',
@@ -230,11 +230,14 @@ const Index = ({
         subscriptionId == '' ? 'Admin' : 'System'
     },
     {
+      /*
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
       render: (d, invoice) => dayjs(d).format('YYYY-MMM-DD')
+  */
     },
+    // no createTime field
     {
       title: (
         <>
