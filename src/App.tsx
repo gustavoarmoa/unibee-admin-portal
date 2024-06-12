@@ -193,7 +193,7 @@ const App: React.FC = () => {
   }, [sessionStore.expired])
 
   useEffect(() => {
-    // detect relead
+    // detect reload
     const init = async () => {
       const navigationEntries =
         window.performance.getEntriesByType('navigation')

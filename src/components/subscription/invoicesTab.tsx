@@ -17,6 +17,7 @@ import dayjs from 'dayjs'
 import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
 import {
+  CheckCircleOutlined,
   DollarOutlined,
   DownloadOutlined,
   EditOutlined,
@@ -34,6 +35,8 @@ import { getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
+import MarkAsPaidModal from '../invoice/markAsPaidModal'
+import MarkAsRefundedModal from '../invoice/markAsRefundedModal'
 import RefundInfoModal from '../payment/refundModal'
 import { InvoiceStatus } from '../ui/statusTag'
 import InvoiceDetailModal from './modals/invoiceDetail'
@@ -72,6 +75,12 @@ const Index = ({
   const toggleRefundInfoModal = () =>
     setRefundInfoModalOpen(!refundInfoModalOpen)
 
+  const [markPaidModalOpen, setMarkPaidModalOpen] = useState(false)
+  const toggleMarkPaidModal = () => setMarkPaidModalOpen(!markPaidModalOpen)
+  const [markRefundedModalOpen, setMarkRefundedModalOpen] = useState(false)
+  const toggleMarkRefundedModal = () =>
+    setMarkRefundedModalOpen(!markRefundedModalOpen)
+
   const toggleNewInvoiceModal = () => {
     if (newInvoiceModalOpen) {
       setInvoiceIdx(-1)
@@ -100,7 +109,7 @@ const Index = ({
     */
 
   const getPermission = (iv: UserInvoice | null): TInvoicePerm => {
-    const p = {
+    const p: TInvoicePerm = {
       editable: false,
       creatable: false, // create a new invoice
       savable: false, // save it after creation
@@ -109,7 +118,9 @@ const Index = ({
       revokable: false,
       refundable: false,
       downloadable: false,
-      sendable: false
+      sendable: false,
+      asPaidMarkable: false,
+      asRefundedMarkable: false
     }
     if (iv == null) {
       // creating a new invoice
@@ -120,7 +131,12 @@ const Index = ({
       return p
     }
 
+    const isWireTransfer = iv.gateway.gatewayName == 'wire_transfer'
+    const isCrypto = iv.gateway.gatewayName == 'changelly'
+    const isRefund = iv.refund != null
+
     // subscriptionId exist or not makes a difference???
+    // what if invoice is for one-time payment?
     if (iv.subscriptionId == null || iv.subscriptionId == '') {
       // manually created invoice
       switch (iv.status) {
@@ -131,6 +147,12 @@ const Index = ({
           p.publishable = true
           break
         case 2: // processing mode, user has received the invoice mail with payment link, but hasn't paid yet.
+          /*
+          if (isWireTransfer || isCrypto) {
+            p.asRefundedMarkable = isRefund
+            p.asPaidMarkable = !isRefund
+          }
+            */
           p.revokable = true
           break
         case 3: // user has paid
@@ -148,6 +170,12 @@ const Index = ({
       p.downloadable = true
       if (iv.status == 3) {
         p.refundable = iv.refund == null // you cannot refund a refund
+      }
+      if (iv.status == 2) {
+        if (isWireTransfer || isCrypto) {
+          p.asRefundedMarkable = isRefund
+          p.asPaidMarkable = !isRefund
+        }
       }
     }
     return p
@@ -187,7 +215,6 @@ const Index = ({
     }
 
     setLoading(true)
-    // const body: TGetInvoicesReq = { page, count: PAGE_SIZE }
     const [res, err] = await getInvoiceListReq(searchTerm, fetchData)
     setLoading(false)
     if (null != err) {
@@ -358,14 +385,6 @@ const Index = ({
               disabled={!getPermission(invoice).editable}
             />
           </Tooltip>
-          <Tooltip title="Send invoice">
-            <Button
-              onClick={toggleNewInvoiceModal}
-              icon={<MailOutlined />}
-              style={{ border: 'unset' }}
-              disabled={!getPermission(invoice).sendable}
-            />
-          </Tooltip>
           <Tooltip title="Create Refund Invoice">
             <Button
               onClick={refund}
@@ -374,9 +393,37 @@ const Index = ({
               disabled={!getPermission(invoice).refundable}
             />
           </Tooltip>
-          <Tooltip title="Download Invoice">
+          {getPermission(invoice).asPaidMarkable ? (
+            <Tooltip title="Mark invoice as PAID">
+              <Button
+                onClick={toggleMarkPaidModal}
+                icon={<CheckCircleOutlined />}
+                style={{ border: 'unset' }}
+              />
+            </Tooltip>
+          ) : null}
+
+          {getPermission(invoice).asRefundedMarkable ? (
+            <Tooltip title="Mark invoice as Refunded">
+              <Button
+                onClick={toggleMarkRefundedModal}
+                icon={<CheckCircleOutlined />}
+                style={{ border: 'unset' }}
+              />
+            </Tooltip>
+          ) : null}
+
+          <Tooltip title="Send invoice">
             <Button
               onClick={toggleNewInvoiceModal}
+              icon={<MailOutlined />}
+              style={{ border: 'unset' }}
+              disabled={!getPermission(invoice).sendable}
+            />
+          </Tooltip>
+          <Tooltip title="Download Invoice">
+            <Button
+              // onClick={toggleNewInvoiceModal}
               icon={<DownloadOutlined />}
               style={{ border: 'unset' }}
               disabled={!getPermission(invoice).downloadable}
@@ -403,6 +450,21 @@ const Index = ({
           detail={invoiceList[invoiceIdx].refund!}
           closeModal={toggleRefundInfoModal}
           ignoreAmtFactor={true}
+        />
+      )}
+      {markPaidModalOpen && (
+        <MarkAsPaidModal
+          closeModal={toggleMarkPaidModal}
+          refresh={fetchData}
+          invoiceId={invoiceList[invoiceIdx].invoiceId}
+        />
+      )}
+
+      {markRefundedModalOpen && (
+        <MarkAsRefundedModal
+          closeModal={toggleMarkRefundedModal}
+          refresh={fetchData}
+          invoiceId={invoiceList[invoiceIdx].invoiceId}
         />
       )}
       {newInvoiceModalOpen && (

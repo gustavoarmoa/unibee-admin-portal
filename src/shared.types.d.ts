@@ -360,6 +360,8 @@ type TInvoicePerm = {
   refundable: boolean // in list view, can I cilck the refund icon
   downloadable: boolean // download invoice, true: for all system-generated invoice, and amdin manually generated(only after publish)
   sendable: boolean // send invoice via email, ditto
+  asRefundedMarkable?: boolean
+  asPaidMarkable?: boolean
 }
 
 type TAdminNote = {
