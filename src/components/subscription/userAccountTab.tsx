@@ -26,7 +26,7 @@ const UserAccountTab = ({
   extraButton,
   setRefreshSub
 }: {
-  user: IProfile | null
+  user: IProfile | undefined
   setUserProfile: (u: IProfile) => void
   refresh: null | (() => void)
   setRefreshSub: (val: boolean) => void

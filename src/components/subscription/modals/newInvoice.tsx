@@ -34,7 +34,7 @@ const newPlaceholderItem = (): InvoiceItem => ({
 })
 
 interface Props {
-  user: IProfile | null
+  user: IProfile | undefined
   isOpen: boolean
   detail: UserInvoice | null // null means new user, no data available
   permission: TInvoicePerm

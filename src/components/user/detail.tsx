@@ -32,7 +32,9 @@ const Index = () => {
       />
     )
   }
-  const [userProfile, setUserProfile] = useState<IProfile | null>(null)
+  const [userProfile, setUserProfile] = useState<IProfile | undefined>(
+    undefined
+  )
 
   const tabItems: TabsProps['items'] = [
     {
@@ -48,7 +50,14 @@ const Index = () => {
     {
       key: 'invoice',
       label: 'Invoice',
-      children: <InvoiceTab user={userProfile} extraButton={<GoBackBtn />} /> // <InvoiceTab user={userProfile} />
+      children: (
+        <InvoiceTab
+          user={userProfile}
+          embeddingMode={true}
+          extraButton={<GoBackBtn />}
+          enableSearch={false}
+        />
+      ) // <InvoiceTab user={userProfile} />
     },
     {
       key: 'transaction',

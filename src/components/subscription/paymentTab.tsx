@@ -42,7 +42,7 @@ const Index = ({
   user,
   extraButton
 }: {
-  user: IProfile | null
+  user: IProfile | undefined
   extraButton?: ReactElement
 }) => {
   const navigate = useNavigate()

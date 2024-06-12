@@ -9,7 +9,7 @@ const rowStyle: CSSProperties = {
   height: '24px',
   color: '#757575'
 }
-const Index = ({ user }: { user: IProfile | null }) => {
+const Index = ({ user }: { user: IProfile | undefined }) => {
   const appConfig = useAppConfigStore()
   return (
     <div style={{ marginBottom: '24px' }}>

@@ -1354,7 +1354,7 @@ export const toggleDiscountCodeActivateReq = async (
   }
 }
 // ----------
-type TGetInvoicesReq = {
+export type TGetInvoicesReq = {
   userId?: number
   page: number
   count: number

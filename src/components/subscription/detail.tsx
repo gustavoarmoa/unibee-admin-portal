@@ -20,7 +20,9 @@ const Index = () => {
     searchParams.get('tab') ?? 'subscription'
   )
   const navigate = useNavigate()
-  const [userProfile, setUserProfile] = useState<IProfile | null>(null)
+  const [userProfile, setUserProfile] = useState<IProfile | undefined>(
+    undefined
+  )
   const [userId, setUserId] = useState<number | null>(null) // subscription obj has user account data, and admin can update it in AccountTab.
   // and the user data on subscription obj might be obsolete,
   // so I use userId from subscription Obj, use this userId to run getUserProfile(userId), even after admin update the user info in AccontTab, re-call getUserProfile
@@ -72,7 +74,13 @@ const Index = () => {
     {
       key: 'invoices',
       label: 'Invoices',
-      children: <InvoiceTab user={userProfile} />
+      children: (
+        <InvoiceTab
+          user={userProfile}
+          embeddingMode={true}
+          enableSearch={false}
+        />
+      )
     },
     {
       key: 'payment',

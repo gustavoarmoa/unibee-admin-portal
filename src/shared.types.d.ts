@@ -64,6 +64,7 @@ interface IAppConfig {
   gateway: {
     gatewayId: number
     gatewayName: string
+    label: string // front-end use only
     gatewayLogo: string
     gatewayType: number
   }[]

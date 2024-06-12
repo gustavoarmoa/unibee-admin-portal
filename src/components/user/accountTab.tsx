@@ -21,7 +21,9 @@ const Index = ({
 }) => {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const [userProfile, setUserProfile] = useState<IProfile | null>(null)
+  const [userProfile, setUserProfile] = useState<IProfile | undefined>(
+    undefined
+  )
 
   const getUserDetail = async () => {
     setLoading(true)

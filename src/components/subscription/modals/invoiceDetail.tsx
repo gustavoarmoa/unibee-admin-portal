@@ -6,7 +6,7 @@ import { ramdonString, showAmount } from '../../../helpers'
 import { IProfile, InvoiceItem, UserInvoice } from '../../../shared.types'
 
 interface Props {
-  user: IProfile | null
+  user: IProfile | undefined
   detail: UserInvoice
   closeModal: () => void
 }
