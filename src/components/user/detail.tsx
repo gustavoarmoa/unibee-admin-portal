@@ -49,7 +49,7 @@ const Index = () => {
     },
     {
       key: 'invoice',
-      label: 'Invoice',
+      label: 'Invoices',
       children: (
         <InvoiceTab
           user={userProfile}
@@ -61,9 +61,13 @@ const Index = () => {
     },
     {
       key: 'transaction',
-      label: 'Transaction',
+      label: 'Transactions',
       children: (
-        <TransactionTab user={userProfile} extraButton={<GoBackBtn />} />
+        <TransactionTab
+          user={userProfile}
+          extraButton={<GoBackBtn />}
+          embeddingMode={true}
+        />
       )
     }
   ]

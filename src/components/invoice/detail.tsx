@@ -7,7 +7,7 @@ import { Button, Col, Row, Spin, Tooltip, message } from 'antd'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { INVOICE_STATUS } from '../../constants'
-import { showAmount } from '../../helpers'
+import { getInvoicePermission, showAmount } from '../../helpers'
 import { getInvoiceDetailReq } from '../../requests'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
@@ -74,6 +74,7 @@ const Index = () => {
   const isWireTransfer = invoiceDetail?.gateway.gatewayName == 'wire_transfer'
   const isCrypto = invoiceDetail?.gateway.gatewayName == 'changelly'
   const isRefund = invoiceDetail?.refund != null
+  const perm = getInvoicePermission(invoiceDetail)
 
   return (
     <div>
@@ -152,7 +153,7 @@ const Index = () => {
             in which cases, payment/refund status updates are not provided by 3rd party API,
             admin have to check them offline, then update their status manully.
           */}
-          {invoiceDetail != null &&
+          {/* invoiceDetail != null &&
             invoiceDetail.status == 2 &&
             (isWireTransfer || isCrypto) && (
               <Button
@@ -164,7 +165,20 @@ const Index = () => {
               >
                 {isRefund ? 'Mark as Refunded' : 'Mark as Paid'}
               </Button>
-            )}
+            ) */}
+          {(perm.asPaidMarkable || perm.asRefundedMarkable) && ( // these 2 are exclusive, one is true, the other is false
+            <Button
+              onClick={
+                perm.asRefundedMarkable
+                  ? toggleMarkRefundedModal
+                  : toggleMarkPaidModal
+              }
+              type="link"
+              style={{ padding: 0 }}
+            >
+              {isRefund ? 'Mark as Refunded' : 'Mark as Paid'}
+            </Button>
+          )}
         </Col>
       </Row>
       <Row style={rowStyle} gutter={[16, 16]}>

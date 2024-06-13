@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import Dinero from 'dinero.js'
 import passwordValidator from 'password-validator'
 import { CURRENCY } from '../constants'
-import { IPlan } from '../shared.types'
+import { IPlan, TInvoicePerm, UserInvoice } from '../shared.types'
 
 export const passwordSchema = new passwordValidator()
 passwordSchema
@@ -80,6 +80,89 @@ export const formatPlanPrice = (plan: IPlan) => {
   } else {
     return amount
   }
+}
+
+/*
+  0: "Initiating", // this status only exist for a very short period, users/admin won't even know it exist
+  1: "Pending", // admin manually create an invoice, ready for edit, but not published yet, users won't see it, won't receive email
+  // in pending, admin can also delete the invoice
+  2: "Pocessing", // admin has published the invoice, user will receive a mail with payment link
+  3: "Paid", // user paid the invoice
+  4: "Failed", // user not pay the invoice before it get expired
+  5: "Cancelled", // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
+    */
+export const getInvoicePermission = (iv: UserInvoice | null): TInvoicePerm => {
+  const p: TInvoicePerm = {
+    editable: false,
+    creatable: false, // create a new invoice
+    savable: false, // save it after creation
+    deletable: false, // delete before publish as nothing happened
+    publishable: false, // publish it, so user could receive it
+    revokable: false,
+    refundable: false,
+    downloadable: false,
+    sendable: false,
+    asPaidMarkable: false, // asPaid and asRefunded are exclusive to each other, they can be both FALSE, or one TRUE, one FALSE
+    asRefundedMarkable: false // but not both TRUE
+  }
+  if (iv == null) {
+    // creating a new invoice
+    p.creatable = true
+    p.editable = true
+    p.savable = true
+    p.publishable = true
+    return p
+  }
+
+  const isWireTransfer = iv.gateway.gatewayName == 'wire_transfer'
+  const isCrypto = iv.gateway.gatewayName == 'changelly'
+  const isRefund = iv.refund != null
+
+  // subscriptionId exist or not makes a difference???
+  // what if invoice is for one-time payment?
+  if (iv.subscriptionId == null || iv.subscriptionId == '') {
+    // manually created invoice
+    switch (iv.status) {
+      case 1: // pending, aka edit mode
+        p.editable = true
+        p.creatable = true
+        p.deletable = true
+        p.publishable = true
+        break
+      case 2: // processing mode, user has received the invoice mail with payment link, but hasn't paid yet.
+        // ??????????
+        /*
+        if (isWireTransfer || isCrypto) {
+          p.asRefundedMarkable = isRefund
+          p.asPaidMarkable = !isRefund
+        }
+          */
+        p.revokable = true
+        break
+      case 3: // user has paid
+        p.downloadable = true
+        p.sendable = true
+        p.refundable = iv.refund == null // you cannot refund a refund
+        break
+    }
+    return p
+  }
+
+  if (iv.subscriptionId != '') {
+    // system generated invoice, not admin manually generated
+    p.sendable = true
+    p.downloadable = true
+    if (iv.status == 3) {
+      p.refundable = iv.refund == null // you cannot refund a refund
+    }
+    if (iv.status == 2) {
+      if (isWireTransfer || isCrypto) {
+        p.asRefundedMarkable = isRefund
+        p.asPaidMarkable = !isRefund
+      }
+    }
+  }
+  return p
 }
 
 export const toFixedNumber = (num: number, digits: number, base?: number) => {

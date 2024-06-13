@@ -84,8 +84,8 @@ const Index = () => {
     },
     {
       key: 'payment',
-      label: 'Payment',
-      children: <PaymentTab user={userProfile} />
+      label: 'Transactions',
+      children: <PaymentTab user={userProfile} embeddingMode={true} />
     }
   ]
 
