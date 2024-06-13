@@ -69,7 +69,12 @@ const Index = ({
         (g) => g.gatewayName.toLowerCase() == gatewayName.toLowerCase()
       )
       setGatewayEdit(
-        g ?? { gatewayName, webhookEndpointUrl: '', webhookSecret: '' }
+        g ?? {
+          gatewayName,
+          webhookEndpointUrl: '',
+          webhookSecret: '',
+          displayName: ''
+        }
       )
       toggleModal()
     }

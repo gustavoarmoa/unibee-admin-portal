@@ -184,11 +184,6 @@ const Index = ({
       )
     },
     {
-      title: 'Title',
-      dataIndex: 'invoiceName',
-      key: 'invoiceName'
-    },
-    {
       title: 'Amount',
       dataIndex: 'totalAmount',
       key: 'totalAmount',
@@ -230,21 +225,21 @@ const Index = ({
       title: 'Gateway',
       dataIndex: 'gateway',
       key: 'gateway',
-      render: (g) => (g == null ? null : g.gatewayName)
+      render: (g) => (g == null ? null : g.displayName)
     },
     {
-      title: 'Is refund',
+      title: 'Type',
       dataIndex: 'refund',
       key: 'refund',
       width: 100,
-      render: (refund, iv) => (refund == null ? 'No' : 'Yes')
+      render: (refund, iv) => (refund == null ? 'Invoice' : 'Credit Note')
     },
     {
       title: 'Created by',
-      dataIndex: 'subscriptionId',
-      key: 'subscriptionId',
-      render: (subscriptionId, invoice) =>
-        subscriptionId == '' ? 'Admin' : 'System'
+      dataIndex: 'createFrom',
+      key: 'createFrom'
+      /* render: (subscriptionId, invoice) =>
+        subscriptionId == '' ? 'Admin' : 'System' */
     },
     {
       title: 'User',
@@ -266,6 +261,11 @@ const Index = ({
         iv.userAccount == null ? null : (
           <a href={`mailto:${iv.userAccount.email}`}> {iv.userAccount.email}</a>
         )
+    },
+    {
+      title: 'Title',
+      dataIndex: 'invoiceName',
+      key: 'invoiceName'
     },
     {
       title: (

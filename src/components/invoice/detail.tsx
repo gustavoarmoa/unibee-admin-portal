@@ -147,7 +147,8 @@ const Index = () => {
           Status
         </Col>
         <Col span={6}>
-          {invoiceDetail != null && InvoiceStatus(invoiceDetail.status)}
+          {invoiceDetail != null &&
+            InvoiceStatus(invoiceDetail.status, invoiceDetail?.refund != null)}
           {/* 
             status == 2 (processing) is used mainly for wire-transfer payment/refund, crypto refund,
             in which cases, payment/refund status updates are not provided by 3rd party API,
@@ -210,16 +211,18 @@ const Index = () => {
         </Col>
       </Row>
 
-      <Row style={rowStyle} gutter={[16, 16]}>
-        <Col span={4} style={colStyle}>
-          Payment type
-        </Col>
-        <Col span={6}>
-          {invoiceDetail?.subscription != null ? 'Recurring' : 'One-time'}
-        </Col>
-        <Col span={4} style={colStyle}></Col>
-        <Col span={6}></Col>
-      </Row>
+      {invoiceDetail?.refund == null && (
+        <Row style={rowStyle} gutter={[16, 16]}>
+          <Col span={4} style={colStyle}>
+            Payment type
+          </Col>
+          <Col span={6}>
+            {invoiceDetail?.subscription != null ? 'Recurring' : 'One-time'}
+          </Col>
+          <Col span={4} style={colStyle}></Col>
+          <Col span={6}></Col>
+        </Row>
+      )}
 
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
@@ -257,7 +260,7 @@ const Index = () => {
         <Col span={4} style={colStyle}>
           Payment Gateway
         </Col>
-        <Col span={6}>{invoiceDetail?.gateway.gatewayName}</Col>
+        <Col span={6}>{invoiceDetail?.gateway.displayName}</Col>
         <Col span={4} style={colStyle}>
           User Name
         </Col>

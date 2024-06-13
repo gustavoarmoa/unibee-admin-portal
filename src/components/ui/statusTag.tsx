@@ -29,7 +29,7 @@ const IV_STATUS: { [key: number]: ReactElement } = {
   5: <Tag color="purple">{INVOICE_STATUS[5]}</Tag> // 5: cancellled
 }
 const InvoiceStatus = (statusId: number, isRefund?: boolean) =>
-  statusId == 3 && isRefund ? (
+  statusId == 3 && isRefund ? ( // status == 3 means invoice Paid, for refund invoice, description should be Refunded
     <Tag color="#87d068">Refunded</Tag>
   ) : (
     IV_STATUS[statusId]

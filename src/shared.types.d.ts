@@ -61,13 +61,7 @@ interface IAppConfig {
   isProd: boolean
   supportTimeZone: string[]
   supportCurrency: { Currency: string; Symbol: string; Scale: number }[]
-  gateway: {
-    gatewayId: number
-    gatewayName: string
-    displayName: string
-    gatewayLogo: string
-    gatewayType: number
-  }[]
+  gateway: TGateway[]
 }
 
 interface IAddon extends IPlan {
@@ -310,6 +304,7 @@ interface UserInvoice {
   gatewayInvoiceId: string
   uniqueId: string
   createTime: number
+  createFrom: string
   originAmount?: number
   discountAmount?: number
   discount?: DiscountCode
@@ -325,7 +320,7 @@ interface UserInvoice {
   data: string
   isDeleted: number
   link: string
-  gateway: { gatewayId: number; gatewayName: string }
+  gateway: TGateway
   gatewayId: number
   gatewayStatus: string
   gatewayPaymentId: string
@@ -400,6 +395,7 @@ type TGateway = {
   gatewayId?: number
   gatewayKey?: string
   gatewayName: 'paypal' | 'changelly' | 'stripe' | 'wire_transfer'
+  displayName?: string
   // gatewayLogo: string
   gatewayType?: number
   webhookEndpointUrl: string

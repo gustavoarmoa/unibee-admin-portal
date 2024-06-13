@@ -55,7 +55,7 @@ const Index = ({ user }: { user: IProfile | undefined }) => {
         <Col span={6}>
           {
             appConfig.gateway.find((g) => g.gatewayId == user?.gatewayId)
-              ?.gatewayName
+              ?.displayName
           }
         </Col>
         <Col span={4}>
