@@ -216,10 +216,14 @@ const Index = ({
       title: 'Paid date',
       dataIndex: 'payment',
       key: 'payment',
-      render: (payment) =>
-        payment == null || payment.paidTime == 0
-          ? '―'
-          : formatDate(payment.paidTime, true)
+      render: (payment, iv) =>
+        iv.refund == null
+          ? payment == null || payment.paidTime == 0
+            ? '―'
+            : formatDate(payment.paidTime, true)
+          : iv.refund.refundTime == 0
+            ? '―'
+            : formatDate(iv.refund.refundTime, true)
     },
     {
       title: 'Gateway',
@@ -237,7 +241,8 @@ const Index = ({
     {
       title: 'Created by',
       dataIndex: 'createFrom',
-      key: 'createFrom'
+      key: 'createFrom',
+      render: (by, _) => (by != 'Admin' ? 'System' : 'Admin')
       /* render: (subscriptionId, invoice) =>
         subscriptionId == '' ? 'Admin' : 'System' */
     },
