@@ -11,13 +11,13 @@ import {
   message
 } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { ramdonString, urlRegx } from '../../helpers'
+import { ramdonString, urlRegx } from '../../../helpers'
 import {
   deleteWebhookReq,
   getEventListReq,
   saveWebhookReq
-} from '../../requests'
-import { TWebhook } from '../../shared.types.d'
+} from '../../../requests'
+import { TWebhook } from '../../../shared.types'
 
 const Index = ({
   closeModal,

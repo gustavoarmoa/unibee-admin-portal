@@ -3,7 +3,8 @@ import { Button, Col, Input, Modal, Row, Spin, message } from 'antd'
 // import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 // import { useCopyContent } from '../../hooks'
-import { saveSendGridKeyReq } from '../../requests'
+import { saveGatewayKeyReq, saveVatSenseKeyReq } from '../../../requests'
+import { TGateway } from '../../../shared.types'
 const { TextArea } = Input
 
 interface IProps {
@@ -22,20 +23,20 @@ const Index = ({ closeModal }: IProps) => {
       return
     }
     setLoading(true)
-    const [res, err] = await saveSendGridKeyReq(apiKey)
+    const [res, err] = await saveVatSenseKeyReq(apiKey)
     setLoading(false)
     if (err != null) {
       message.error(err.message)
       return
     }
-    message.success(`Sendgrid API key saved`)
+    message.success(`VATsense API key saved`)
     closeModal()
   }
 
   return (
     <div style={{ margin: '32px 0' }}>
       <Modal
-        title={`Sendgrid API key setup`}
+        title={`VAT sense API key setup`}
         width={'640px'}
         open={true}
         footer={null}
@@ -56,8 +57,8 @@ const Index = ({ closeModal }: IProps) => {
               </div>
               <div>
                 Apply your key on&nbsp;&nbsp;
-                <a href="https://sendgrid.com" target="_blank" rel="noreferrer">
-                  https://sendgrid.com
+                <a href="https://vatsense.com" target="_blank" rel="noreferrer">
+                  https://vatsense.com
                 </a>
               </div>
             </Col>

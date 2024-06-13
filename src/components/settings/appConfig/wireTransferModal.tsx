@@ -1,12 +1,12 @@
 import { Button, Form, Input, Modal, Select, Spin, message } from 'antd'
 import { useEffect, useState } from 'react'
-import { CURRENCY } from '../../constants'
-import { currencyDecimalValidate } from '../../helpers'
+import { CURRENCY } from '../../../constants'
+import { currencyDecimalValidate } from '../../../helpers'
 import {
   createWireTransferAccountReq,
   updateWireTransferAccountReq
-} from '../../requests'
-import { TGateway } from '../../shared.types'
+} from '../../../requests'
+import { TGateway } from '../../../shared.types'
 
 const NEW_WIRE_TRANSFER_ACC: TGateway = {
   // gatewayId?: number

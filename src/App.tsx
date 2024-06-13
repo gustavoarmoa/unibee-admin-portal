@@ -2,14 +2,13 @@ import {
   DesktopOutlined,
   IdcardOutlined,
   LogoutOutlined,
-  // FileOutlined,
   PieChartOutlined,
   SettingOutlined,
   TeamOutlined,
   TransactionOutlined
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { Layout, Menu, Modal, message, theme } from 'antd'
+import { Layout, Menu, message, theme } from 'antd'
 import React, { useEffect, useState } from 'react'
 import {
   Navigate,
@@ -52,7 +51,7 @@ import MerchantUserDetail from './components/merchantUser/userDetail'
 import MerchantUserList from './components/merchantUser/userList'
 import NotFound from './components/notFound'
 import Profile from './components/profile'
-import WebhookLogs from './components/settings/webhookLogs'
+import WebhookLogs from './components/settings/webHooks/webhookLogs'
 import Signup from './components/signup'
 import { initializeReq, logoutReq } from './requests'
 

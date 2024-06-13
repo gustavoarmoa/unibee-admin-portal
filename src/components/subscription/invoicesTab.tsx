@@ -243,8 +243,6 @@ const Index = ({
       dataIndex: 'createFrom',
       key: 'createFrom',
       render: (by, _) => (by != 'Admin' ? 'System' : 'Admin')
-      /* render: (subscriptionId, invoice) =>
-        subscriptionId == '' ? 'Admin' : 'System' */
     },
     {
       title: 'User',

@@ -187,7 +187,9 @@ const Index = () => {
           Invoice Items
         </Col>
         <Col span={6}>
-          <Button onClick={toggleInvoiceItems}>Show Detail</Button>
+          <Button size="small" onClick={toggleInvoiceItems}>
+            Show Detail
+          </Button>
         </Col>
         <Col span={4} style={colStyle}>
           Refund
@@ -205,7 +207,9 @@ const Index = () => {
                 )}
               </span>
               &nbsp;&nbsp;
-              <Button onClick={toggleRefundModal}>Show Detail</Button>
+              <Button size="small" onClick={toggleRefundModal}>
+                Show Detail
+              </Button>
             </>
           )}
         </Col>

@@ -6,7 +6,6 @@ import {
 } from '@ant-design/icons'
 import {
   Button,
-  Modal,
   Pagination,
   Popover,
   Space,
@@ -15,16 +14,15 @@ import {
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
-import { formatDate } from '../../helpers'
-import { useCopyContent, usePagination } from '../../hooks'
-import { getWebhookLogs, resendWebhookEvt } from '../../requests'
-import { TWebhookLogs } from '../../shared.types.d'
+import { formatDate } from '../../../helpers'
+import { useCopyContent, usePagination } from '../../../hooks'
+import { getWebhookLogs, resendWebhookEvt } from '../../../requests'
+import { TWebhookLogs } from '../../../shared.types'
 SyntaxHighlighter.registerLanguage('json', json)
 
 const APP_PATH = import.meta.env.BASE_URL

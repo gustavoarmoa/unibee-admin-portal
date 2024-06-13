@@ -1,8 +1,8 @@
 import { CopyOutlined, LoadingOutlined } from '@ant-design/icons'
 import { Button, Modal, Spin, message } from 'antd'
 import { useEffect, useState } from 'react'
-import { useCopyContent } from '../../hooks'
-import { generateApiKeyReq } from '../../requests'
+import { useCopyContent } from '../../../hooks'
+import { generateApiKeyReq } from '../../../requests'
 
 interface IProps {
   closeModal: () => void

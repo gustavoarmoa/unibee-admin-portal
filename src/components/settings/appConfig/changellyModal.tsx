@@ -1,9 +1,9 @@
 import { CopyOutlined } from '@ant-design/icons'
 import { Button, Col, Input, Modal, Row, Spin, message } from 'antd'
 import { useState } from 'react'
-import { useCopyContent } from '../../hooks'
-import { saveChangellyPubKeyReq } from '../../requests'
-import { TGateway } from '../../shared.types'
+import { useCopyContent } from '../../../hooks'
+import { saveChangellyPubKeyReq } from '../../../requests'
+import { TGateway } from '../../../shared.types'
 const { TextArea } = Input
 
 interface IProps {

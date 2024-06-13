@@ -1,7 +1,7 @@
 import { Button, Col, Input, Modal, Row, Spin, message } from 'antd'
 import { useEffect, useState } from 'react'
-import { saveGatewayKeyReq } from '../../requests'
-import { TGateway } from '../../shared.types'
+import { saveGatewayKeyReq } from '../../../requests'
+import { TGateway } from '../../../shared.types'
 const { TextArea } = Input
 
 interface IProps {

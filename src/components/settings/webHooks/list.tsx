@@ -6,14 +6,13 @@ import {
 } from '@ant-design/icons'
 import { Button, Popover, Space, Table, Tag, Tooltip, message } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { formatDate } from '../../helpers'
-import { getWebhookListReq } from '../../requests'
-import '../../shared.css'
-import { TWebhook } from '../../shared.types.d'
-import WebhookDetail from './webhookDetail'
+import { formatDate } from '../../../helpers'
+import { getWebhookListReq } from '../../../requests'
+import { TWebhook } from '../../../shared.types'
+// import '../../shared.css'
+import WebhookDetail from './detail'
 
 const APP_PATH = import.meta.env.BASE_URL
 
@@ -153,12 +152,6 @@ const Index = () => {
           refresh={fetchData}
         />
       )}
-      {/* logModalOpen && (
-        <WebhookLogs
-          closeModal={toggleLogModal}
-          endpointId={webhookList[currentWebhookIdx].id}
-        />
-      ) */}
       <Table
         columns={columns}
         dataSource={webhookList}
