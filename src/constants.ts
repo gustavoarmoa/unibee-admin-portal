@@ -104,3 +104,29 @@ export const REFUND_STATUS: { [key: number]: string } = {
   30: 'Failed',
   40: 'Cancelled'
 }
+
+const PERMISSIONS = {
+  plan: { order: 0, group: 'plan', permissions: ['access'] },
+  'billable-metric': {
+    order: 1,
+    group: 'billable-metric',
+    permissions: ['access']
+  },
+  'discount-code': {
+    order: 2,
+    group: 'discount-code',
+    permissions: ['access']
+  },
+  subscription: { order: 3, group: 'subscription', permissions: ['access'] },
+  invoice: { order: 4, group: 'invoice', permissions: ['access'] },
+  transaction: { order: 5, group: 'transaction', permissions: ['access'] },
+  user: { order: 6, group: 'user', permissions: ['access'] },
+  admin: { order: 7, group: 'admin', permissions: ['access'] },
+  analytics: { order: 8, group: 'analytics', permissions: ['access'] },
+  'my-account': { order: 9, group: 'my-account', permissions: ['access'] },
+  configuration: { order: 10, group: 'configuration', permissions: ['access'] }
+}
+
+export const PERMISSION_LIST = Object.entries(PERMISSIONS)
+  .map(([k, v]) => v)
+  .sort((a, b) => a.order - b.order)

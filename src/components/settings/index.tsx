@@ -22,17 +22,17 @@ const Index = () => {
     },
     {
       key: 'emailTemplate',
-      label: 'Email Template',
+      label: 'Email Templates',
       children: <EmailTemplates />
     },
     {
       key: 'invoiceTemplate',
-      label: 'Invoice Template',
+      label: 'Invoice Templates',
       children: 'invoice template'
     },
     {
       key: 'permission',
-      label: 'Permission and Roles',
+      label: 'Admin Permission',
       children: <Permissions />
     },
     {

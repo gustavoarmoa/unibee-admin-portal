@@ -1,4 +1,6 @@
 import { Button, Checkbox, Col, Divider, Row } from 'antd'
+import { useState } from 'react'
+import { PERMISSION_LIST } from '../../../constants'
 
 type TPermission = {
   appConfig: { read: boolean; write: boolean }
@@ -109,13 +111,21 @@ const role: Record<TRoles, TPermission> = {
   }
 }
 
-const Index = () => (
-  <div style={{ width: 'calc(100vw - 300px)', overflowX: 'auto' }}>
-    <Row
-      // gutter={[32, 32]}
-      className="my-6 flex items-center justify-between text-center"
-    >
-      <Col span={2} style={{ fontWeight: 'bold' }}>
+const Index = () => {
+  const [loading, setLoading] = useState(false)
+  const onAddNewRole = () => {}
+  return (
+    <div style={{ width: 'calc(100vw - 300px)', overflowX: 'auto' }}>
+      <Row
+        // gutter={[32, 32]}
+        className="my-6 flex items-center justify-between text-center"
+      >
+        {PERMISSION_LIST.map((p, idx) => (
+          <Col key={idx} span={2} style={{ fontWeight: 'bold' }}>
+            {p.group}
+          </Col>
+        ))}
+        {/* <Col span={2} style={{ fontWeight: 'bold' }}>
         Roles
       </Col>
       <Col span={2} style={{ fontWeight: 'bold' }}>
@@ -144,177 +154,178 @@ const Index = () => (
       </Col>
       <Col span={2} style={{ fontWeight: 'bold' }}>
         Analytics
-      </Col>
-    </Row>
-    <div
-      style={{
-        height: 'calc(100vh - 410px)',
-        overflowY: 'auto',
-        marginBottom: '16px'
-      }}
-    >
-      {roles.map((r) => (
-        <div key={r}>
-          <Row
-            className="flex content-center justify-between"
-            // gutter={[32, 128]}
-          >
-            <Col span={2}>{r}</Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].appConfig.read}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].appConfig.write}
-              >
-                Write
-              </Checkbox>
-            </Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].emailTemplate.read}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].emailTemplate.write}
-              >
-                Write
-              </Checkbox>
-            </Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].invoiceTemplate.read}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].invoiceTemplate.write}
-              >
-                Write
-              </Checkbox>
-            </Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].plan.read}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].plan.write}
-              >
-                Write
-              </Checkbox>
-            </Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].subscription.read}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].subscription.write}
-              >
-                Write
-              </Checkbox>
-            </Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].invoice.read}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].invoice.write}
-              >
-                Write
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].invoice.generate}
-              >
-                Generate
-              </Checkbox>
-            </Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].accountData.write}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].accountData.read}
-              >
-                Write
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].accountData.invite}
-              >
-                Invite
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].accountData.permissionSetting}
-              >
-                set Permission
-              </Checkbox>
-            </Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].customerData.read}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].customerData.write}
-              >
-                Write
-              </Checkbox>
-            </Col>
-            <Col span={2}>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].analytic.read}
-              >
-                Read
-              </Checkbox>
-              <Checkbox
-                disabled={r == 'Owner'}
-                defaultChecked={role[r].analytic.export}
-              >
-                Export
-              </Checkbox>
-            </Col>
-          </Row>
-          <Divider />
-        </div>
-      ))}
+      </Col> */}
+      </Row>
+
+      <div
+        style={{
+          height: 'calc(100vh - 410px)',
+          overflowY: 'auto',
+          marginBottom: '16px'
+        }}
+      >
+        {roles.map((r) => (
+          <div key={r}>
+            <Row
+              className="flex content-center justify-between"
+              // gutter={[32, 128]}
+            >
+              <Col span={2}>{r}</Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].appConfig.read}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].appConfig.write}
+                >
+                  Write
+                </Checkbox>
+              </Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].emailTemplate.read}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].emailTemplate.write}
+                >
+                  Write
+                </Checkbox>
+              </Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].invoiceTemplate.read}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].invoiceTemplate.write}
+                >
+                  Write
+                </Checkbox>
+              </Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].plan.read}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].plan.write}
+                >
+                  Write
+                </Checkbox>
+              </Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].subscription.read}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].subscription.write}
+                >
+                  Write
+                </Checkbox>
+              </Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].invoice.read}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].invoice.write}
+                >
+                  Write
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].invoice.generate}
+                >
+                  Generate
+                </Checkbox>
+              </Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].accountData.write}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].accountData.read}
+                >
+                  Write
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].accountData.invite}
+                >
+                  Invite
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].accountData.permissionSetting}
+                >
+                  set Permission
+                </Checkbox>
+              </Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].customerData.read}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].customerData.write}
+                >
+                  Write
+                </Checkbox>
+              </Col>
+              <Col span={2}>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].analytic.read}
+                >
+                  Read
+                </Checkbox>
+                <Checkbox
+                  disabled={r == 'Owner'}
+                  defaultChecked={role[r].analytic.export}
+                >
+                  Export
+                </Checkbox>
+              </Col>
+            </Row>
+            <Divider />
+          </div>
+        ))}
+      </div>
+      <div className="my-2 flex justify-end gap-4">
+        <Button>Apply Change</Button>
+        <Button onClick={onAddNewRole}>Add New Role</Button>
+      </div>
     </div>
-    <div className="my-2 flex justify-end gap-4">
-      <Button>Apply Change</Button>
-      <Button>Add New Role</Button>
-      <Button type="primary">Apply Change</Button>
-    </div>
-  </div>
-)
+  )
+}
 
 export default Index

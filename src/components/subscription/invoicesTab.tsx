@@ -194,7 +194,7 @@ const Index = ({
             {showAmount(amt, iv.currency, true)}
           </div>
           {iv.refund == null && (
-            <div className=" text-xs text-gray-500">{` (tax: ${showAmount(iv.taxAmount, iv.currency)})`}</div>
+            <div className=" text-xs text-gray-500">{` (tax: ${showAmount(iv.taxAmount, iv.currency, true)})`}</div>
           )}
           {iv.refund != null && (
             <Tooltip title="Refund info">
@@ -216,6 +216,7 @@ const Index = ({
       title: 'Paid date',
       dataIndex: 'payment',
       key: 'payment',
+      width: 140,
       render: (payment, iv) =>
         iv.refund == null
           ? payment == null || payment.paidTime == 0
