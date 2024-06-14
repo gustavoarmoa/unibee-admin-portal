@@ -1,22 +1,23 @@
 import {
-  DeleteOutlined,
   LoadingOutlined,
   MinusOutlined,
   PlusOutlined,
   SaveOutlined,
   SyncOutlined
 } from '@ant-design/icons'
-import { Button, Space, Switch, Tooltip, message } from 'antd'
+import { Button, Input, Space, Switch, Tooltip, message } from 'antd'
 import Table, { ColumnsType } from 'antd/es/table'
 import update from 'immutability-helper'
-import { useEffect, useState } from 'react'
+import { ChangeEventHandler, useEffect, useState } from 'react'
 import { PERMISSION_LIST } from '../../../constants'
+import { ramdonString } from '../../../helpers'
 import { getRoleListReq, saveRoleReq } from '../../../requests'
 import { TRole } from '../../../shared.types'
 
 const Index = () => {
   const [loading, setLoading] = useState(false)
   const [roles, setRoles] = useState<TRole[]>([])
+  const [errLocalId, setErrLocalId] = useState('')
 
   const fetchRoles = async () => {
     setLoading(true)
@@ -27,16 +28,39 @@ const Index = () => {
       return
     }
     const { merchantRoles, total } = res
+    merchantRoles.forEach((r: TRole) => (r.localId = r.id + ''))
     setRoles(merchantRoles)
     console.log('roles res: ', res)
   }
 
   const onSave = (r: TRole) => async () => {
+    console.log('saving....: ', r)
+    if (r.role == null || r.role.trim() == '') {
+      message.error('Role name must not be empty')
+      setErrLocalId(r.localId)
+      return
+    }
+    if (roles.filter((role) => role.role.trim() == r.role.trim()).length > 1) {
+      message.error(`Role name "${r.role}" already exist`)
+      setErrLocalId(r.localId)
+      return
+    }
+    if (
+      r.permissions == null ||
+      r.permissions.length == 0 ||
+      r.permissions.every((p) => p.permissions.length == 0)
+    ) {
+      message.error('Each role must have at least one permission')
+      setErrLocalId(r.localId)
+      return
+    }
+    // return
+    setErrLocalId('')
     const role = JSON.parse(JSON.stringify(r))
     delete role.createTime
     delete role.id
+    delete role.localId
     delete role.merchantId
-    console.log('role saving...: ', role)
     setLoading(true)
     const [res, err] = await saveRoleReq(role, r.id == null)
     setLoading(false)
@@ -44,66 +68,100 @@ const Index = () => {
       message.error(err.message)
       return
     }
+
+    message.success('Role saved')
+  }
+
+  const onNewRole = () => {
+    const newRole: TRole = {
+      localId: ramdonString(8),
+      role: '',
+      permissions: []
+    }
+    setRoles(update(roles, { $push: [newRole] }))
   }
 
   const onDelete = async () => {}
 
-  const onRoleNameChange = () => {}
-
-  const onPermChange = (role: string, group: string) => (checked: boolean) => {
-    console.log('role/grp: ', role, '//', group, '//', checked)
-    const rowIdx = roles.findIndex((r) => r.role == role)
-    console.log('rowIdx: ', rowIdx)
-    if (rowIdx == -1) {
-      return
-    }
-    const colIdx =
-      roles[rowIdx].permissions == null
-        ? -1
-        : roles[rowIdx].permissions.findIndex((p) => p.group == group)
-    console.log('colIdx: ', colIdx)
-    let newRoles = roles
-    if (colIdx == -1) {
-      if (newRoles[rowIdx].permissions == null) {
-        newRoles = update(newRoles, { [rowIdx]: { permissions: { $set: [] } } })
+  const onRoleNameChange =
+    (localId: string): ChangeEventHandler<HTMLInputElement> =>
+    (evt) => {
+      const idx = roles.findIndex((r) => r.localId == localId)
+      if (idx == -1) {
+        return
       }
-      newRoles = update(newRoles, {
-        [rowIdx]: {
-          permissions: {
-            $push: [{ group, permissions: checked ? ['access'] : [] }]
-          }
-        }
-      })
-    } else {
-      newRoles = update(newRoles, {
-        [rowIdx]: {
-          permissions: {
-            [colIdx]: { permissions: { $set: checked ? ['access'] : [] } }
-          }
-        }
-      })
+      setRoles(update(roles, { [idx]: { role: { $set: evt.target.value } } }))
     }
-    console.log('new roles: ', newRoles)
-    setRoles(newRoles)
-  }
+
+  const onPermChange =
+    (localId: string, group: string) => (checked: boolean) => {
+      console.log('localId/grp: ', localId, '//', group, '//', checked)
+      const rowIdx = roles.findIndex((r) => r.localId == localId)
+      console.log('rowIdx: ', rowIdx)
+      if (rowIdx == -1) {
+        return
+      }
+      const colIdx =
+        roles[rowIdx].permissions == null
+          ? -1
+          : roles[rowIdx].permissions.findIndex((p) => p.group == group)
+      console.log('colIdx: ', colIdx)
+      let newRoles = roles
+      if (colIdx == -1) {
+        if (newRoles[rowIdx].permissions == null) {
+          newRoles = update(newRoles, {
+            [rowIdx]: { permissions: { $set: [] } }
+          })
+        }
+        newRoles = update(newRoles, {
+          [rowIdx]: {
+            permissions: {
+              $push: [{ group, permissions: checked ? ['access'] : [] }]
+            }
+          }
+        })
+      } else {
+        newRoles = update(newRoles, {
+          [rowIdx]: {
+            permissions: {
+              [colIdx]: { permissions: { $set: checked ? ['access'] : [] } }
+            }
+          }
+        })
+      }
+      console.log('new roles: ', newRoles)
+      setRoles(newRoles)
+    }
 
   const columns: ColumnsType<TRole> = [
-    { title: 'Role', dataIndex: 'role', key: 'role', fixed: 'left' },
+    {
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      fixed: 'left',
+      width: 150,
+      render: (_, record) => (
+        <Input
+          width={120}
+          disabled={loading}
+          value={record.role}
+          onChange={onRoleNameChange(record.localId)}
+          status={record.localId == errLocalId ? 'error' : ''}
+        />
+      )
+    },
     ...PERMISSION_LIST.map((p) => ({
       title: p.group,
       dataIndex: 'permissions',
       key: p.group,
-      render: (perm: any, record: any) => {
-        // console.log('perm/record: ', perm, '//', record)
-        /* if (perm == null) {
-          return <Switch size="small" checked={false} />
-        } */
+      render: (perm: any, record: TRole) => {
         const g =
           perm == null ? undefined : perm.find((pm: any) => pm.group == p.group)
         return (
           <Switch
             size="small"
-            onChange={onPermChange(record.role, p.group)}
+            disabled={loading}
+            onChange={onPermChange(record.localId, p.group)}
             checked={
               g != null && g.permissions != null && g.permissions.length > 0
             }
@@ -119,12 +177,9 @@ const Index = () => {
             <Button
               size="small"
               style={{ marginLeft: '8px' }}
-              onClick={() => {
-                /// setInvoiceIdx(-1)
-                // toggleNewInvoiceModal()
-              }}
+              onClick={onNewRole}
               icon={<PlusOutlined />}
-              // disabled={user == null}
+              disabled={loading}
             />
           </Tooltip>
           <Tooltip title="Refresh">
@@ -152,7 +207,7 @@ const Index = () => {
               onClick={onSave(role)}
               icon={<SaveOutlined />}
               style={{ border: 'unset' }}
-              // disabled={!getInvoicePermission(invoice).editable}
+              disabled={loading}
             />
           </Tooltip>
           <Tooltip title="Remove">
@@ -160,7 +215,7 @@ const Index = () => {
               // onClick={refund}
               icon={<MinusOutlined />}
               style={{ border: 'unset' }}
-              // disabled={!getInvoicePermission(invoice).refundable}
+              disabled={loading}
             />
           </Tooltip>
         </Space>
@@ -176,14 +231,14 @@ const Index = () => {
       <Table
         columns={columns}
         dataSource={roles}
-        rowKey={'id'}
+        rowKey={'localId'}
         rowClassName="clickable-tbl-row"
         pagination={false}
         loading={{
           spinning: loading,
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
-        scroll={{ x: 1600, y: 800 }}
+        scroll={{ x: 1600 }}
         // onChange={onTableChange}
         /* onRow={(record, rowIndex) => {
           return {

@@ -414,6 +414,7 @@ type TGateway = {
 
 export type TRole = {
   id?: number
+  localId: string
   createTime?: number
   merchantId?: number
   role: string
