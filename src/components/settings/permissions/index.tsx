@@ -58,7 +58,6 @@ const Index = () => {
     setErrLocalId('')
     const role = JSON.parse(JSON.stringify(r))
     delete role.createTime
-    delete role.id
     delete role.localId
     delete role.merchantId
     setLoading(true)
@@ -68,7 +67,6 @@ const Index = () => {
       message.error(err.message)
       return
     }
-
     message.success('Role saved')
   }
 
@@ -159,7 +157,7 @@ const Index = () => {
           perm == null ? undefined : perm.find((pm: any) => pm.group == p.group)
         return (
           <Switch
-            size="small"
+            // size="small"
             disabled={loading}
             onChange={onPermChange(record.localId, p.group)}
             checked={
