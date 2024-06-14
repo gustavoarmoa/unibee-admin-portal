@@ -5,7 +5,8 @@ import {
   DiscountCode,
   ExpiredError,
   IProfile,
-  TMerchantInfo
+  TMerchantInfo,
+  TRole
 } from '../shared.types.d'
 import { useMerchantInfoStore, useSessionStore } from '../stores'
 import { request } from './client'
@@ -1886,9 +1887,27 @@ export const resendWebhookEvt = async (logId: number) => {
   }
 }
 
-export const addNewRoleReq = async () => {
+export const getRoleListReq = async (refreshCb: null | (() => void)) => {
+  const session = useSessionStore.getState()
   try {
-    const res = await request.post(`/merchant/webhook/resend`, {})
+    const res = await request.get(`/merchant/role/list`)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: refreshCb })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const saveRoleReq = async (role: TRole, isNew: boolean) => {
+  try {
+    const res = await request.post(
+      `/merchant/role/${isNew ? 'new' : 'edit'}`,
+      role
+    )
     if (res.data.code == 61) {
       session.setSession({ expired: true, refresh: null })
       throw new ExpiredError('Session expired')

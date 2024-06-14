@@ -1,330 +1,209 @@
-import { Button, Checkbox, Col, Divider, Row } from 'antd'
-import { useState } from 'react'
+import {
+  DeleteOutlined,
+  LoadingOutlined,
+  MinusOutlined,
+  PlusOutlined,
+  SaveOutlined,
+  SyncOutlined
+} from '@ant-design/icons'
+import { Button, Space, Switch, Tooltip, message } from 'antd'
+import Table, { ColumnsType } from 'antd/es/table'
+import update from 'immutability-helper'
+import { useEffect, useState } from 'react'
 import { PERMISSION_LIST } from '../../../constants'
-
-type TPermission = {
-  appConfig: { read: boolean; write: boolean }
-  emailTemplate: { read: boolean; write: boolean }
-  invoiceTemplate: { read: boolean; write: boolean }
-  plan: { read: boolean; write: boolean }
-  subscription: { read: boolean; write: boolean }
-  invoice: { read: boolean; write: boolean; generate: boolean }
-  accountData: {
-    read: boolean
-    write: boolean
-    invite: boolean
-    permissionSetting: boolean
-  }
-  customerData: { read: boolean; write: boolean }
-  analytic: { read: boolean; export: boolean }
-}
-
-const roles = [
-  'Owner',
-  'Admin',
-  'Power User',
-  'Finance',
-  'Customer Support'
-] as const // to mark it readonly
-type TRoles = (typeof roles)[number] // APP Owner | Admin | *** |
-
-const role: Record<TRoles, TPermission> = {
-  Owner: {
-    appConfig: { read: true, write: true },
-    emailTemplate: { read: true, write: true },
-    invoiceTemplate: { read: true, write: true },
-    plan: { read: true, write: true },
-    subscription: { read: true, write: true },
-    invoice: { read: true, write: true, generate: true },
-    accountData: {
-      read: true,
-      write: true,
-      invite: true,
-      permissionSetting: true
-    },
-    customerData: { read: true, write: true },
-    analytic: { read: true, export: true }
-  },
-  Admin: {
-    appConfig: { read: true, write: true },
-    emailTemplate: { read: true, write: true },
-    invoiceTemplate: { read: true, write: true },
-    plan: { read: true, write: true },
-    subscription: { read: true, write: true },
-    invoice: { read: true, write: true, generate: true },
-    accountData: {
-      read: true,
-      write: true,
-      invite: false,
-      permissionSetting: true
-    },
-    customerData: { read: true, write: true },
-    analytic: { read: true, export: true }
-  },
-  'Power User': {
-    appConfig: { read: false, write: false },
-    emailTemplate: { read: true, write: true },
-    invoiceTemplate: { read: true, write: true },
-    plan: { read: true, write: true },
-    subscription: { read: true, write: true },
-    invoice: { read: true, write: true, generate: true },
-    accountData: {
-      read: true,
-      write: true,
-      invite: true,
-      permissionSetting: true
-    },
-    customerData: { read: true, write: true },
-    analytic: { read: true, export: false }
-  },
-  Finance: {
-    appConfig: { read: false, write: false },
-    emailTemplate: { read: true, write: false },
-    invoiceTemplate: { read: true, write: false },
-    plan: { read: true, write: false },
-    subscription: { read: true, write: false },
-    invoice: { read: true, write: true, generate: true },
-    accountData: {
-      read: false,
-      write: false,
-      invite: false,
-      permissionSetting: false
-    },
-    customerData: { read: true, write: false },
-    analytic: { read: true, export: true }
-  },
-  'Customer Support': {
-    appConfig: { read: false, write: false },
-    emailTemplate: { read: true, write: false },
-    invoiceTemplate: { read: true, write: false },
-    plan: { read: true, write: false },
-    subscription: { read: true, write: false },
-    invoice: { read: true, write: false, generate: true },
-    accountData: {
-      read: false,
-      write: false,
-      invite: false,
-      permissionSetting: false
-    },
-    customerData: { read: true, write: false },
-    analytic: { read: false, export: false }
-  }
-}
+import { getRoleListReq, saveRoleReq } from '../../../requests'
+import { TRole } from '../../../shared.types'
 
 const Index = () => {
   const [loading, setLoading] = useState(false)
-  const onAddNewRole = () => {}
-  return (
-    <div style={{ width: 'calc(100vw - 300px)', overflowX: 'auto' }}>
-      <Row
-        // gutter={[32, 32]}
-        className="my-6 flex items-center justify-between text-center"
-      >
-        {PERMISSION_LIST.map((p, idx) => (
-          <Col key={idx} span={2} style={{ fontWeight: 'bold' }}>
-            {p.group}
-          </Col>
-        ))}
-        {/* <Col span={2} style={{ fontWeight: 'bold' }}>
-        Roles
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        App Config
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        Email template
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        Invoice Template
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        Plans
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        Subscription
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        Invoice
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        Account
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        Customer
-      </Col>
-      <Col span={2} style={{ fontWeight: 'bold' }}>
-        Analytics
-      </Col> */}
-      </Row>
+  const [roles, setRoles] = useState<TRole[]>([])
 
-      <div
-        style={{
-          height: 'calc(100vh - 410px)',
-          overflowY: 'auto',
-          marginBottom: '16px'
+  const fetchRoles = async () => {
+    setLoading(true)
+    const [res, err] = await getRoleListReq(fetchRoles)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    const { merchantRoles, total } = res
+    setRoles(merchantRoles)
+    console.log('roles res: ', res)
+  }
+
+  const onSave = (r: TRole) => async () => {
+    const role = JSON.parse(JSON.stringify(r))
+    delete role.createTime
+    delete role.id
+    delete role.merchantId
+    console.log('role saving...: ', role)
+    setLoading(true)
+    const [res, err] = await saveRoleReq(role, r.id == null)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+  }
+
+  const onDelete = async () => {}
+
+  const onRoleNameChange = () => {}
+
+  const onPermChange = (role: string, group: string) => (checked: boolean) => {
+    console.log('role/grp: ', role, '//', group, '//', checked)
+    const rowIdx = roles.findIndex((r) => r.role == role)
+    console.log('rowIdx: ', rowIdx)
+    if (rowIdx == -1) {
+      return
+    }
+    const colIdx =
+      roles[rowIdx].permissions == null
+        ? -1
+        : roles[rowIdx].permissions.findIndex((p) => p.group == group)
+    console.log('colIdx: ', colIdx)
+    let newRoles = roles
+    if (colIdx == -1) {
+      if (newRoles[rowIdx].permissions == null) {
+        newRoles = update(newRoles, { [rowIdx]: { permissions: { $set: [] } } })
+      }
+      newRoles = update(newRoles, {
+        [rowIdx]: {
+          permissions: {
+            $push: [{ group, permissions: checked ? ['access'] : [] }]
+          }
+        }
+      })
+    } else {
+      newRoles = update(newRoles, {
+        [rowIdx]: {
+          permissions: {
+            [colIdx]: { permissions: { $set: checked ? ['access'] : [] } }
+          }
+        }
+      })
+    }
+    console.log('new roles: ', newRoles)
+    setRoles(newRoles)
+  }
+
+  const columns: ColumnsType<TRole> = [
+    { title: 'Role', dataIndex: 'role', key: 'role', fixed: 'left' },
+    ...PERMISSION_LIST.map((p) => ({
+      title: p.group,
+      dataIndex: 'permissions',
+      key: p.group,
+      render: (perm: any, record: any) => {
+        // console.log('perm/record: ', perm, '//', record)
+        /* if (perm == null) {
+          return <Switch size="small" checked={false} />
+        } */
+        const g =
+          perm == null ? undefined : perm.find((pm: any) => pm.group == p.group)
+        return (
+          <Switch
+            size="small"
+            onChange={onPermChange(record.role, p.group)}
+            checked={
+              g != null && g.permissions != null && g.permissions.length > 0
+            }
+          />
+        )
+      }
+    })),
+    {
+      title: (
+        <>
+          <span>Actions</span>
+          <Tooltip title="New role">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              onClick={() => {
+                /// setInvoiceIdx(-1)
+                // toggleNewInvoiceModal()
+              }}
+              icon={<PlusOutlined />}
+              // disabled={user == null}
+            />
+          </Tooltip>
+          <Tooltip title="Refresh">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading}
+              onClick={fetchRoles}
+              icon={<SyncOutlined />}
+            ></Button>
+          </Tooltip>
+        </>
+      ),
+      width: 150,
+      fixed: 'right',
+      key: 'actions',
+      render: (_, role) => (
+        <Space
+          size="small"
+          className="invoice-action-btn-wrapper"
+          // style={{ width: '170px' }}
+        >
+          <Tooltip title="Save">
+            <Button
+              onClick={onSave(role)}
+              icon={<SaveOutlined />}
+              style={{ border: 'unset' }}
+              // disabled={!getInvoicePermission(invoice).editable}
+            />
+          </Tooltip>
+          <Tooltip title="Remove">
+            <Button
+              // onClick={refund}
+              icon={<MinusOutlined />}
+              style={{ border: 'unset' }}
+              // disabled={!getInvoicePermission(invoice).refundable}
+            />
+          </Tooltip>
+        </Space>
+      )
+    }
+  ]
+
+  useEffect(() => {
+    fetchRoles()
+  }, [])
+  return (
+    <>
+      <Table
+        columns={columns}
+        dataSource={roles}
+        rowKey={'id'}
+        rowClassName="clickable-tbl-row"
+        pagination={false}
+        loading={{
+          spinning: loading,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
-      >
-        {roles.map((r) => (
-          <div key={r}>
-            <Row
-              className="flex content-center justify-between"
-              // gutter={[32, 128]}
-            >
-              <Col span={2}>{r}</Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].appConfig.read}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].appConfig.write}
-                >
-                  Write
-                </Checkbox>
-              </Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].emailTemplate.read}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].emailTemplate.write}
-                >
-                  Write
-                </Checkbox>
-              </Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].invoiceTemplate.read}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].invoiceTemplate.write}
-                >
-                  Write
-                </Checkbox>
-              </Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].plan.read}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].plan.write}
-                >
-                  Write
-                </Checkbox>
-              </Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].subscription.read}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].subscription.write}
-                >
-                  Write
-                </Checkbox>
-              </Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].invoice.read}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].invoice.write}
-                >
-                  Write
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].invoice.generate}
-                >
-                  Generate
-                </Checkbox>
-              </Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].accountData.write}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].accountData.read}
-                >
-                  Write
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].accountData.invite}
-                >
-                  Invite
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].accountData.permissionSetting}
-                >
-                  set Permission
-                </Checkbox>
-              </Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].customerData.read}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].customerData.write}
-                >
-                  Write
-                </Checkbox>
-              </Col>
-              <Col span={2}>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].analytic.read}
-                >
-                  Read
-                </Checkbox>
-                <Checkbox
-                  disabled={r == 'Owner'}
-                  defaultChecked={role[r].analytic.export}
-                >
-                  Export
-                </Checkbox>
-              </Col>
-            </Row>
-            <Divider />
-          </div>
-        ))}
-      </div>
-      <div className="my-2 flex justify-end gap-4">
+        scroll={{ x: 1600, y: 800 }}
+        // onChange={onTableChange}
+        /* onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {
+              if (
+                event.target instanceof Element &&
+                event.target.closest('.plan-action-btn-wrapper') != null
+              ) {
+                return
+              }
+              navigate(`${APP_PATH}plan/${record.id}`)
+            }
+          }
+        }} */
+      />
+      {/* <div className="my-2 flex justify-end gap-4">
         <Button>Apply Change</Button>
         <Button onClick={onAddNewRole}>Add New Role</Button>
-      </div>
-    </div>
+      </div> */}
+    </>
   )
 }
 

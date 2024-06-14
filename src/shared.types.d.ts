@@ -412,6 +412,14 @@ type TGateway = {
   }
 }
 
+export type TRole = {
+  id?: number
+  createTime?: number
+  merchantId?: number
+  role: string
+  permissions: { group: string; permissions: string[] }[]
+}
+
 export class ExpiredError extends Error {
   constructor(m: string) {
     super(m)

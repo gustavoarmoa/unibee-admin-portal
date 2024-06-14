@@ -300,6 +300,7 @@ const Index = ({
       ),
       key: 'action',
       // width: 180,
+      // fixed: 'right',
       render: (
         _,
         invoice // use fn to generate these icons, only show available ones.

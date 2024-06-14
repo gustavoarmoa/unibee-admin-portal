@@ -236,16 +236,6 @@ const Index = () => {
 
   return (
     <>
-      {/* <div className="my-4 flex justify-end">
-        <Button
-          type="primary"
-          disabled={copyingPlan}
-          onClick={onNewPlan}
-          icon={<PlusOutlined />}
-        >
-          New plan
-        </Button>
-  </div> */}
       <Table
         columns={columns}
         dataSource={plan}
