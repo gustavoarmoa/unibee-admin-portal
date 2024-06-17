@@ -40,7 +40,13 @@ const Index = () => {
     IMerchantUserProfile | undefined
   >(undefined) // user to be edited in Modal
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
-  const toggleInviteModal = () => setInviteModalOpen(!inviteModalOpen)
+  const toggleInviteModal = () => {
+    if (inviteModalOpen) {
+      // before closing the modal, set user = null, otherwise, clicking 'invite' button will the previous active user data
+      setActiveUser(undefined)
+    }
+    setInviteModalOpen(!inviteModalOpen)
+  }
 
   const columns: ColumnsType<IMerchantUserProfile> = [
     {
@@ -174,7 +180,7 @@ const Index = () => {
 
 export default Index
 
-// used to invite new users and edit existing user's roles
+// this Modal is used to invite new users and edit existing user's roles
 const InviteModal = ({
   closeModal,
   refresh,
@@ -190,9 +196,7 @@ const InviteModal = ({
   const isNew = userData == undefined
 
   const onConfirm = async () => {
-    // return
     const body: any = form.getFieldsValue()
-    console.log('form body: ', body)
     setLoading(true)
     if (isNew) {
       const [res, err] = await inviteMemberReq(body)
@@ -231,15 +235,12 @@ const InviteModal = ({
       return
     }
     const { merchantRoles, total } = res
-    console.log('roles: ', res)
     setRoles(merchantRoles ?? [])
   }
 
   useEffect(() => {
     getRoleList()
   }, [])
-
-  console.log('active u: ', userData)
 
   return (
     <Modal
@@ -268,7 +269,11 @@ const InviteModal = ({
               }
         }
       >
-        {!isNew && <Form.Item name="id" label="User Id" hidden></Form.Item>}
+        {!isNew && (
+          <Form.Item name="id" label="User Id" hidden>
+            <Input />
+          </Form.Item>
+        )}
 
         <Form.Item
           label="First name"
@@ -280,7 +285,7 @@ const InviteModal = ({
             }
           ]}
         >
-          <Input />
+          <Input disabled={!isNew || loading} />
         </Form.Item>
         <Form.Item
           label="Last name"
@@ -292,7 +297,7 @@ const InviteModal = ({
             }
           ]}
         >
-          <Input />
+          <Input disabled={!isNew || loading} />
         </Form.Item>
         <Form.Item
           label="Email"
@@ -312,7 +317,7 @@ const InviteModal = ({
             })
           ]}
         >
-          <Input />
+          <Input disabled={!isNew || loading} />
         </Form.Item>
         <Form.Item
           label="Roles"
@@ -326,6 +331,7 @@ const InviteModal = ({
         >
           <Select
             mode="multiple"
+            disabled={loading}
             style={{ width: '100%' }}
             options={roles.map((r) => ({
               label: r.role,
