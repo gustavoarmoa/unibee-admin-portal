@@ -15,9 +15,13 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { emailValidate, formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { getMerchantUserListReq, inviteMemberReq } from '../../requests'
+import {
+  getMerchantUserListReq,
+  getRoleListReq,
+  inviteMemberReq
+} from '../../requests'
 import '../../shared.css'
-import { IMerchantUserProfile, IProfile } from '../../shared.types'
+import { IMerchantUserProfile, IProfile, TRole } from '../../shared.types'
 
 const APP_PATH = import.meta.env.BASE_URL
 const PAGE_SIZE = 10
@@ -142,8 +146,11 @@ const InviteModal = ({
 }) => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [roles, setRoles] = useState<TRole[]>([])
+
   const onConfirm = async () => {
     console.log('fields val: ', form.getFieldsValue())
+    // return
     setLoading(true)
     const [res, err] = await inviteMemberReq(form.getFieldsValue())
     setLoading(false)
@@ -158,6 +165,23 @@ const InviteModal = ({
     closeModal()
     refresh()
   }
+
+  const getRoleList = async () => {
+    setLoading(true)
+    const [res, err] = await getRoleListReq(getRoleList)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    const { merchantRoles, total } = res
+    console.log('roles: ', res)
+    setRoles(merchantRoles ?? [])
+  }
+
+  useEffect(() => {
+    getRoleList()
+  }, [])
 
   return (
     <Modal
@@ -176,7 +200,7 @@ const InviteModal = ({
           firstName: '',
           lastName: '',
           email: '',
-          role: 'Customer Support'
+          role: []
         }}
       >
         <Form.Item
@@ -224,24 +248,22 @@ const InviteModal = ({
           <Input />
         </Form.Item>
         <Form.Item
-          label="Role"
-          name="role"
+          label="Roles"
+          name="roleIds"
           rules={[
             {
               required: true,
-              message: "Please input invitee's role!"
+              message: 'Please select at least one role!'
             }
           ]}
         >
           <Select
-            style={{ width: 180 }}
-            options={[
-              { value: 'Owner', label: 'Owner' },
-              { value: 'Admin', label: 'Admin' },
-              { value: 'Power User', label: 'Power User' },
-              { value: 'Finance', label: 'Finance' },
-              { value: 'Customer Support', label: 'Customer Support' }
-            ]}
+            mode="multiple"
+            style={{ width: '100%' }}
+            options={roles.map((r) => ({
+              label: r.role,
+              value: r.id as number
+            }))}
           />
         </Form.Item>
       </Form>

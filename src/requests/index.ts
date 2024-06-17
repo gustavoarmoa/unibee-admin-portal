@@ -1675,14 +1675,14 @@ export const inviteMemberReq = async ({
   email,
   firstName,
   lastName,
-  role
+  roleIds
 }: {
   email: string
   firstName: string
   lastName: string
-  role: string
+  roleIds: number[]
 }) => {
-  const body = { email, firstName, lastName, role }
+  const body = { email, firstName, lastName, roleIds }
   try {
     const res = await request.post('/merchant/member/new_member', body)
     if (res.data.code == 61) {
