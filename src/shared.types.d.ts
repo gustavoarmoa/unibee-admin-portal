@@ -36,7 +36,7 @@ interface IMerchantUserProfile {
   firstName: string
   lastName: string
   id: number
-  role: string
+  MemberRoles: TRole[]
   merchantId: number
 }
 

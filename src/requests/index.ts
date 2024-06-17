@@ -1696,6 +1696,27 @@ export const inviteMemberReq = async ({
   }
 }
 
+export const updateMemberRolesReq = async ({
+  memberId,
+  roleIds
+}: {
+  memberId: number
+  roleIds: number[]
+}) => {
+  const body = { memberId, roleIds }
+  try {
+    const res = await request.post('/merchant/member/update_member_role', body)
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const getPaymentGatewayListReq = async () => {
   try {
     const res = await request.get(`/merchant/gateway/list`)

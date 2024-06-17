@@ -5,8 +5,11 @@ import {
   Input,
   Modal,
   Pagination,
+  Popover,
   Select,
+  Space,
   Table,
+  Tag,
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
@@ -18,7 +21,8 @@ import { usePagination } from '../../hooks'
 import {
   getMerchantUserListReq,
   getRoleListReq,
-  inviteMemberReq
+  inviteMemberReq,
+  updateMemberRolesReq
 } from '../../requests'
 import '../../shared.css'
 import { IMerchantUserProfile, IProfile, TRole } from '../../shared.types'
@@ -32,6 +36,9 @@ const Index = () => {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<IMerchantUserProfile[]>([])
+  const [activeUser, setActiveUser] = useState<
+    IMerchantUserProfile | undefined
+  >(undefined) // user to be edited in Modal
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const toggleInviteModal = () => setInviteModalOpen(!inviteModalOpen)
 
@@ -48,9 +55,33 @@ const Index = () => {
       key: 'lastName'
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role'
+      title: 'Roles',
+      dataIndex: 'MemberRoles',
+      key: 'MemberRoles',
+      render: (roles, user) => (
+        <Popover
+          placement="top"
+          content={
+            <Space size={[0, 8]} wrap>
+              {roles.map((role: TRole) => (
+                <Tag key={role.id as number}>{role.role}</Tag>
+              ))}
+            </Space>
+          }
+        >
+          <div
+            className="btn-merchant-user-roles"
+            style={{
+              width: '18px',
+              height: '24px',
+              cursor: 'pointer',
+              color: '#1677ff'
+            }}
+          >
+            {roles.length}
+          </div>
+        </Popover>
+      )
     },
     {
       title: 'Email',
@@ -85,7 +116,11 @@ const Index = () => {
   return (
     <div>
       {inviteModalOpen && (
-        <InviteModal closeModal={toggleInviteModal} refresh={fetchData} />
+        <InviteModal
+          closeModal={toggleInviteModal}
+          refresh={fetchData}
+          userData={activeUser}
+        />
       )}
       {/* <Search form={form} goSearch={fetchData} searching={loading} /> */}
       <div className="my-2 flex justify-end">
@@ -108,11 +143,13 @@ const Index = () => {
             onClick: (evt) => {
               if (
                 evt.target instanceof HTMLElement &&
-                evt.target.classList.contains('btn-user-with-subid')
+                evt.target.classList.contains('btn-merchant-user-roles')
               ) {
+                setActiveUser(user)
+                toggleInviteModal()
                 return
               }
-              navigate(`${APP_PATH}admin/${user.id}`)
+              // navigate(`${APP_PATH}admin/${user.id}`)
             }
           }
         }}
@@ -137,30 +174,49 @@ const Index = () => {
 
 export default Index
 
+// used to invite new users and edit existing user's roles
 const InviteModal = ({
   closeModal,
-  refresh
+  refresh,
+  userData
 }: {
   closeModal: () => void
   refresh: () => void
+  userData: IMerchantUserProfile | undefined
 }) => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [roles, setRoles] = useState<TRole[]>([])
+  const isNew = userData == undefined
 
   const onConfirm = async () => {
-    console.log('fields val: ', form.getFieldsValue())
     // return
+    const body: any = form.getFieldsValue()
+    console.log('form body: ', body)
     setLoading(true)
-    const [res, err] = await inviteMemberReq(form.getFieldsValue())
-    setLoading(false)
-    console.log('invite res: ', res)
-    if (null != err) {
-      message.error(err.message)
-      return
+    if (isNew) {
+      const [res, err] = await inviteMemberReq(body)
+      setLoading(false)
+      if (null != err) {
+        message.error(err.message)
+        return
+      }
+    } else {
+      const [res, err] = await updateMemberRolesReq({
+        memberId: body.id,
+        roleIds: body.roleIds
+      })
+      setLoading(false)
+      if (null != err) {
+        message.error(err.message)
+        return
+      }
     }
+
     message.success(
-      `An invitation email has been sent to ${form.getFieldValue('email')}`
+      isNew
+        ? `An invitation email has been sent to ${form.getFieldValue('email')}`
+        : 'New roles saved'
     )
     closeModal()
     refresh()
@@ -183,6 +239,8 @@ const InviteModal = ({
     getRoleList()
   }, [])
 
+  console.log('active u: ', userData)
+
   return (
     <Modal
       title={'Invite team member'}
@@ -196,13 +254,22 @@ const InviteModal = ({
         wrapperCol={{ span: 18 }}
         form={form}
         onFinish={onConfirm}
-        initialValues={{
-          firstName: '',
-          lastName: '',
-          email: '',
-          role: []
-        }}
+        initialValues={
+          !isNew
+            ? {
+                ...userData,
+                roleIds: userData.MemberRoles.map((r: TRole) => r.id as number)
+              }
+            : {
+                firstName: '',
+                lastName: '',
+                email: '',
+                role: []
+              }
+        }
       >
+        {!isNew && <Form.Item name="id" label="User Id" hidden></Form.Item>}
+
         <Form.Item
           label="First name"
           name="firstName"
