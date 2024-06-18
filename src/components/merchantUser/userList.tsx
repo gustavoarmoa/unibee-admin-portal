@@ -1,4 +1,4 @@
-import { LoadingOutlined } from '@ant-design/icons'
+import { LoadingOutlined, SyncOutlined } from '@ant-design/icons'
 import {
   Button,
   Form,
@@ -10,6 +10,7 @@ import {
   Space,
   Table,
   Tag,
+  Tooltip,
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
@@ -26,12 +27,14 @@ import {
 } from '../../requests'
 import '../../shared.css'
 import { IMerchantUserProfile, IProfile, TRole } from '../../shared.types'
+import { useProfileStore } from '../../stores'
 
 const APP_PATH = import.meta.env.BASE_URL
 const PAGE_SIZE = 10
 
 const Index = () => {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
+  const profileStore = useProfileStore()
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -46,6 +49,19 @@ const Index = () => {
       setActiveUser(undefined)
     }
     setInviteModalOpen(!inviteModalOpen)
+  }
+
+  const fetchData = async () => {
+    setLoading(true)
+    const [res, err] = await getMerchantUserListReq(fetchData)
+    setLoading(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    const { merchantMembers, total } = res
+    setUsers(merchantMembers ?? [])
+    setTotal(total)
   }
 
   const columns: ColumnsType<IMerchantUserProfile> = [
@@ -99,21 +115,26 @@ const Index = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       render: (d, plan) => (d === 0 ? 'N/A' : formatDate(d)) // dayjs(d * 1000).format('YYYY-MMM-DD')
+    },
+    {
+      title: (
+        <>
+          {/* <span>Actions</span> */}
+          <Tooltip title="Refresh">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading}
+              onClick={fetchData}
+              icon={<SyncOutlined />}
+            ></Button>
+          </Tooltip>
+        </>
+      ),
+      width: 40,
+      key: 'action'
     }
   ]
-
-  const fetchData = async () => {
-    setLoading(true)
-    const [res, err] = await getMerchantUserListReq(fetchData)
-    setLoading(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    const { merchantMembers, total } = res
-    setUsers(merchantMembers ?? [])
-    setTotal(total)
-  }
 
   useEffect(() => {
     fetchData()
@@ -129,11 +150,13 @@ const Index = () => {
         />
       )}
       {/* <Search form={form} goSearch={fetchData} searching={loading} /> */}
-      <div className="my-2 flex justify-end">
-        <Button type="primary" onClick={toggleInviteModal}>
-          Invite
-        </Button>
-      </div>
+      {profileStore.isOwner && (
+        <div className="my-2 flex justify-end">
+          <Button type="primary" onClick={toggleInviteModal}>
+            Invite
+          </Button>
+        </div>
+      )}
       <Table
         columns={columns}
         dataSource={users}

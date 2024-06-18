@@ -95,7 +95,7 @@ const App: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG }
   } = theme.useToken()
 
-  const items: MenuItem[] = [
+  let items: MenuItem[] = [
     getItem('Plan', '/plan/list', <DesktopOutlined />),
     getItem('Billable Metric', '/billable-metric/list', <DesktopOutlined />),
     getItem('Discount Code', '/discount-code/list', <DesktopOutlined />),
@@ -108,6 +108,41 @@ const App: React.FC = () => {
     getItem('My Account', '/my-account', <IdcardOutlined />),
     getItem('Configuration', '/configuration', <SettingOutlined />)
   ]
+
+  console.log(
+    'roles/isOwner: ',
+    profileStore.MemberRoles,
+    '//',
+    profileStore.isOwner
+  )
+
+  const accessiblePages: string[] = []
+  profileStore.MemberRoles.forEach((r) =>
+    r.permissions.forEach(
+      (p) => p.permissions.length > 0 && accessiblePages.push(p.group)
+    )
+  )
+  console.log('accessible pages: ', accessiblePages)
+
+  if (!profileStore.isOwner) {
+    items = items.filter(
+      (i) =>
+        accessiblePages.findIndex(
+          (a) => a == (i?.key as string).split('/')[1]
+        ) != -1
+    )
+  }
+  console.log('menu items: ', items)
+  const defaultPage = () => {
+    if (profileStore.isOwner) {
+      return 'subscription'
+    }
+    if (accessiblePages.findIndex((p) => p == 'subscription') != -1) {
+      return 'subscription'
+    } else {
+      return accessiblePages[0]
+    }
+  }
 
   /*
   if (permStore.role == 'Customer Support') {
@@ -124,6 +159,158 @@ const App: React.FC = () => {
     )
   }
   */
+
+  /*
+      <Route
+        path={APP_PATH}
+        element={<Navigate to={`${APP_PATH}subscription/list`} />} // default page after login
+      />
+      */
+  const routes = [
+    {
+      page: 'my-account',
+      route: <Route path={`${APP_PATH}my-account`} Component={Profile} />
+    },
+    {
+      page: 'analytics',
+      route: <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
+    },
+    {
+      page: 'configuration',
+      route: <Route path={`${APP_PATH}configuration`} Component={Settings} />
+    },
+    {
+      page: 'configuration',
+      route: (
+        <Route
+          path={`${APP_PATH}configuration/webhook-logs/:id`}
+          element={<WebhookLogs />}
+        />
+      )
+    },
+    {
+      page: 'subscription',
+      route: (
+        <Route
+          path={`${APP_PATH}subscription`}
+          element={<SubscriptionList />}
+        />
+      )
+    },
+    {
+      page: 'subscription',
+      route: (
+        <Route path={`${APP_PATH}subscription`} Component={OutletPage}>
+          <Route path="list" element={<SubscriptionList />} />
+          <Route path=":subscriptionId" element={<SubscriptionDetail />} />
+        </Route>
+      )
+    },
+    {
+      page: 'plan',
+      route: <Route path={`${APP_PATH}/plan`} element={<PricePlanList />} />
+    },
+    {
+      page: 'plan',
+      route: (
+        <Route path={`${APP_PATH}plan`} Component={OutletPage}>
+          <Route path="list" element={<PricePlanList />} />
+          <Route path="new" element={<PlanDetail />} />
+          <Route path=":planId" element={<PlanDetail />} />
+        </Route>
+      )
+    },
+    {
+      page: 'billable-metric',
+      route: (
+        <Route
+          path={`${APP_PATH}billable-metric`}
+          element={<BillableMetricsList />}
+        />
+      )
+    },
+    {
+      page: 'billable-metric',
+      route: (
+        <Route path={`${APP_PATH}billable-metric`} Component={OutletPage}>
+          <Route path="list" element={<BillableMetricsList />} />
+          <Route path="new" element={<BillableMetricsDetail />} />
+          <Route path=":metricsId" element={<BillableMetricsDetail />} />
+        </Route>
+      )
+    },
+    {
+      page: 'discount-code',
+      route: (
+        <Route
+          path={`${APP_PATH}discount-code`}
+          element={<DiscountCodeList />}
+        />
+      )
+    },
+    {
+      page: 'discount-code',
+      route: (
+        <Route path={`${APP_PATH}discount-code`} Component={OutletPage}>
+          <Route path="list" element={<DiscountCodeList />} />
+          <Route path="new" element={<DiscountCodeDetail />} />
+          <Route path=":discountCodeId" element={<DiscountCodeDetail />} />
+        </Route>
+      )
+    },
+    {
+      page: 'user',
+      route: <Route path={`${APP_PATH}user`} element={<CustomerList />} />
+    },
+    {
+      page: 'user',
+      route: (
+        <Route path={`${APP_PATH}user`} Component={OutletPage}>
+          <Route path="list" element={<CustomerList />} />
+          <Route path=":userId" element={<CustomerDetail />} />
+        </Route>
+      )
+    },
+    {
+      page: 'admin',
+      route: <Route path={`${APP_PATH}admin`} element={<MerchantUserList />} />
+    },
+    {
+      page: 'admin',
+      route: (
+        <Route path={`${APP_PATH}admin`} Component={OutletPage}>
+          <Route path="list" element={<MerchantUserList />} />
+          <Route path=":adminId" element={<MerchantUserDetail />} />
+        </Route>
+      )
+    },
+    {
+      page: 'invoice',
+      route: <Route path={`${APP_PATH}invoice`} element={<InvoiceList />} />
+    },
+    {
+      page: 'invoice',
+      route: (
+        <Route path={`${APP_PATH}invoice`} Component={OutletPage}>
+          <Route path="list" element={<InvoiceList />} />
+          <Route path=":invoiceId" element={<InvoiceDetail />} />
+        </Route>
+      )
+    },
+    {
+      page: 'transaction',
+      route: <Route path={`${APP_PATH}transaction`} element={<PaymentList />} />
+    },
+    {
+      page: 'transaction',
+      route: (
+        <Route path={`${APP_PATH}transaction`} Component={OutletPage}>
+          <Route path="list" element={<PaymentList />} />
+          <Route path=":paymentId" element={<PaymentDetail />} />
+        </Route>
+      )
+    }
+  ]
 
   const navigate = useNavigate()
 
@@ -265,6 +452,15 @@ const App: React.FC = () => {
               <div className="flex flex-col items-center">
                 <div className="text-xs">{profileStore.email}</div>
                 <div>{`${profileStore.firstName} ${profileStore.lastName}`}</div>
+                <div className=" text-xs text-gray-400">
+                  {profileStore.isOwner
+                    ? 'Owner'
+                    : profileStore.MemberRoles.map((r) => (
+                        <div key={r.role} className=" flex justify-center">
+                          {r.role}
+                        </div>
+                      ))}
+                </div>
               </div>
               <div onClick={logout} className=" my-4 cursor-pointer">
                 <LogoutOutlined />
@@ -296,79 +492,15 @@ const App: React.FC = () => {
                   <Route path="*" Component={NotFound} />
                   <Route
                     path={APP_PATH}
-                    element={<Navigate to={`${APP_PATH}subscription/list`} />} // default page after login
+                    element={<Navigate to={`${APP_PATH}${defaultPage()}`} />} // default page after login
                   />
-                  <Route path={`${APP_PATH}my-account`} Component={Profile} />
-                  <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
-
-                  <Route
-                    path={`${APP_PATH}configuration`}
-                    Component={Settings}
-                  />
-                  <Route
-                    path={`${APP_PATH}configuration/webhook-logs/:id`}
-                    element={<WebhookLogs />}
-                  />
-
-                  <Route
-                    path={`${APP_PATH}subscription`}
-                    Component={OutletPage}
-                  >
-                    <Route path="list" element={<SubscriptionList />} />
-                    <Route
-                      path=":subscriptionId"
-                      element={<SubscriptionDetail />}
-                    />
-                  </Route>
-
-                  <Route path={`${APP_PATH}plan`} Component={OutletPage}>
-                    <Route path="list" element={<PricePlanList />} />
-                    <Route path="new" element={<PlanDetail />} />
-                    {/* <Route path="new" element={<PlanNew />} /> */}
-                    <Route path=":planId" element={<PlanDetail />} />
-                  </Route>
-
-                  <Route
-                    path={`${APP_PATH}billable-metric`}
-                    Component={OutletPage}
-                  >
-                    <Route path="list" element={<BillableMetricsList />} />
-                    <Route path="new" element={<BillableMetricsDetail />} />
-                    <Route
-                      path=":metricsId"
-                      element={<BillableMetricsDetail />}
-                    />
-                  </Route>
-
-                  <Route
-                    path={`${APP_PATH}discount-code`}
-                    Component={OutletPage}
-                  >
-                    <Route path="list" element={<DiscountCodeList />} />
-                    <Route path="new" element={<DiscountCodeDetail />} />
-                    <Route
-                      path=":discountCodeId"
-                      element={<DiscountCodeDetail />}
-                    />
-                  </Route>
-
-                  <Route path={`${APP_PATH}user`} Component={OutletPage}>
-                    <Route path="list" element={<CustomerList />} />
-                    <Route path=":userId" element={<CustomerDetail />} />
-                  </Route>
-                  <Route path={`${APP_PATH}admin`} Component={OutletPage}>
-                    <Route path="list" element={<MerchantUserList />} />
-                    <Route path=":adminId" element={<MerchantUserDetail />} />
-                  </Route>
-
-                  <Route path={`${APP_PATH}invoice`} Component={OutletPage}>
-                    <Route path="list" element={<InvoiceList />} />
-                    <Route path=":invoiceId" element={<InvoiceDetail />} />
-                  </Route>
-                  <Route path={`${APP_PATH}transaction`} Component={OutletPage}>
-                    <Route path="list" element={<PaymentList />} />
-                    <Route path=":paymentId" element={<PaymentDetail />} />
-                  </Route>
+                  {routes
+                    .filter((r) =>
+                      profileStore.isOwner
+                        ? true
+                        : accessiblePages.findIndex((p) => p == r.page) != -1
+                    )
+                    .map((r) => r.route)}
                 </Routes>
               </div>
             </Content>

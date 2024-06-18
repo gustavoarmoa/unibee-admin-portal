@@ -9,6 +9,9 @@ interface IProfile {
   countryName: string
   companyName: string
   email: string
+  MemberRoles: TRole[]
+  isOwner: boolean
+  merchantId: number
   createTime: number
   facebook: string
   firstName: string
@@ -38,6 +41,7 @@ interface IMerchantUserProfile {
   id: number
   MemberRoles: TRole[]
   merchantId: number
+  isOwner: boolean
 }
 
 type TMerchantInfo = {

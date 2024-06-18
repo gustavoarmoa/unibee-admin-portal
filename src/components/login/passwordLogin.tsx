@@ -104,7 +104,7 @@ const Index = ({
       message.success('Login succeeded')
     } else {
       sessionStore.setSession({ expired: false, refresh: null })
-      navigate(`${APP_PATH}subscription/list`)
+      navigate(`${APP_PATH}`)
     }
   }
 
