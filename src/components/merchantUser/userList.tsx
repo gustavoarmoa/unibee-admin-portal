@@ -1,4 +1,11 @@
-import { LoadingOutlined, SyncOutlined } from '@ant-design/icons'
+import {
+  LoadingOutlined,
+  ProfileOutlined,
+  SyncOutlined,
+  UserAddOutlined,
+  UserDeleteOutlined,
+  UsergroupDeleteOutlined
+} from '@ant-design/icons'
 import {
   Button,
   Form,
@@ -106,6 +113,11 @@ const Index = () => {
       )
     },
     {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status'
+    },
+    {
       title: 'Email',
       dataIndex: 'email',
       key: 'email'
@@ -119,7 +131,17 @@ const Index = () => {
     {
       title: (
         <>
-          {/* <span>Actions</span> */}
+          <span>Actions</span>
+          {profileStore.isOwner && (
+            <Tooltip title="Invite member">
+              <Button
+                // disabled={copyingPlan}
+                style={{ border: 'unset' }}
+                onClick={toggleInviteModal}
+                icon={<UserAddOutlined />}
+              />
+            </Tooltip>
+          )}
           <Tooltip title="Refresh">
             <Button
               size="small"
@@ -131,8 +153,30 @@ const Index = () => {
           </Tooltip>
         </>
       ),
-      width: 40,
-      key: 'action'
+      width: 164,
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle" className="member-action-btn-wrapper">
+          <Tooltip title="View activities logs">
+            <Button
+              disabled={loading}
+              style={{ border: 'unset' }}
+              // onClick={() => goToDetail(record.id)}
+              icon={<ProfileOutlined />}
+            />
+          </Tooltip>
+          {profileStore.isOwner && (
+            <Tooltip title="Suspend">
+              <Button
+                style={{ border: 'unset' }}
+                disabled={loading}
+                // onClick={() => copyPlan(record.id)}
+                icon={<UserDeleteOutlined />}
+              />
+            </Tooltip>
+          )}
+        </Space>
+      )
     }
   ]
 
@@ -150,13 +194,13 @@ const Index = () => {
         />
       )}
       {/* <Search form={form} goSearch={fetchData} searching={loading} /> */}
-      {profileStore.isOwner && (
+      {/* profileStore.isOwner && (
         <div className="my-2 flex justify-end">
           <Button type="primary" onClick={toggleInviteModal}>
             Invite
           </Button>
         </div>
-      )}
+      ) */}
       <Table
         columns={columns}
         dataSource={users}
@@ -170,6 +214,9 @@ const Index = () => {
         onRow={(user, rowIndex) => {
           return {
             onClick: (evt) => {
+              if (!profileStore.isOwner) {
+                return
+              }
               if (
                 evt.target instanceof HTMLElement &&
                 evt.target.classList.contains('btn-merchant-user-roles')
