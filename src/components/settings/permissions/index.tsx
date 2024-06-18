@@ -149,7 +149,7 @@ const Index = () => {
       )
     },
     ...PERMISSION_LIST.map((p) => ({
-      title: p.group,
+      title: p.label,
       dataIndex: 'permissions',
       key: p.group,
       render: (perm: any, record: TRole) => {
@@ -236,7 +236,7 @@ const Index = () => {
           spinning: loading,
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
-        scroll={{ x: 1600 }}
+        scroll={{ x: 1680 }}
         // onChange={onTableChange}
         /* onRow={(record, rowIndex) => {
           return {

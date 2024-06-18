@@ -106,25 +106,62 @@ export const REFUND_STATUS: { [key: number]: string } = {
 }
 
 const PERMISSIONS = {
-  plan: { order: 0, group: 'plan', permissions: ['access'] },
+  plan: { order: 0, group: 'plan', label: 'Plan', permissions: ['access'] },
   'billable-metric': {
     order: 1,
+    label: 'Billable metrics',
     group: 'billable-metric',
     permissions: ['access']
   },
   'discount-code': {
     order: 2,
     group: 'discount-code',
+    label: 'Discount code',
     permissions: ['access']
   },
-  subscription: { order: 3, group: 'subscription', permissions: ['access'] },
-  invoice: { order: 4, group: 'invoice', permissions: ['access'] },
-  transaction: { order: 5, group: 'transaction', permissions: ['access'] },
-  user: { order: 6, group: 'user', permissions: ['access'] },
-  admin: { order: 7, group: 'admin', permissions: ['access'] },
-  analytics: { order: 8, group: 'analytics', permissions: ['access'] },
-  'my-account': { order: 9, group: 'my-account', permissions: ['access'] },
-  configuration: { order: 10, group: 'configuration', permissions: ['access'] }
+  subscription: {
+    order: 3,
+    group: 'subscription',
+    label: 'Subscriptions',
+    permissions: ['access']
+  },
+  invoice: {
+    order: 4,
+    group: 'invoice',
+    label: 'Invoices',
+    permissions: ['access']
+  },
+  transaction: {
+    order: 5,
+    group: 'transaction',
+    label: 'Transactions',
+    permissions: ['access']
+  },
+  user: {
+    order: 6,
+    group: 'user',
+    label: 'Customers',
+    permissions: ['access']
+  },
+  admin: { order: 7, group: 'admin', label: 'Admins', permissions: ['access'] },
+  analytics: {
+    order: 8,
+    group: 'analytics',
+    label: 'Analytics',
+    permissions: ['access']
+  },
+  'my-account': {
+    order: 9,
+    group: 'my-account',
+    label: 'My account',
+    permissions: ['access']
+  },
+  configuration: {
+    order: 10,
+    group: 'configuration',
+    label: 'Configuration',
+    permissions: ['access']
+  }
 }
 
 export const PERMISSION_LIST = Object.entries(PERMISSIONS)
