@@ -115,7 +115,7 @@ const PERMISSIONS = {
   },
   'billable-metric': {
     order: 1,
-    label: 'Billable metrics',
+    label: 'Billable Metric',
     width: '150',
     group: 'billable-metric',
     permissions: ['access']
@@ -123,42 +123,42 @@ const PERMISSIONS = {
   'discount-code': {
     order: 2,
     group: 'discount-code',
-    label: 'Discount code',
+    label: 'Discount Code',
     width: '120',
     permissions: ['access']
   },
   subscription: {
     order: 3,
     group: 'subscription',
-    label: 'Subscriptions',
+    label: 'Subscription',
     width: '100',
     permissions: ['access']
   },
   invoice: {
     order: 4,
     group: 'invoice',
-    label: 'Invoices',
+    label: 'Invoice',
     width: '100',
     permissions: ['access']
   },
   transaction: {
     order: 5,
     group: 'transaction',
-    label: 'Transactions',
+    label: 'Transaction',
     width: '100',
     permissions: ['access']
   },
   user: {
     order: 6,
     group: 'user',
-    label: 'Customers',
+    label: 'User List',
     width: '100',
     permissions: ['access']
   },
   admin: {
     order: 7,
     group: 'admin',
-    label: 'Admins',
+    label: 'Admin List',
     width: '100',
     permissions: ['access']
   },
@@ -172,7 +172,7 @@ const PERMISSIONS = {
   'my-account': {
     order: 9,
     group: 'my-account',
-    label: 'My account',
+    label: 'My Account',
     width: '100',
     permissions: ['access']
   },
