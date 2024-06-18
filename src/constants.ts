@@ -106,10 +106,17 @@ export const REFUND_STATUS: { [key: number]: string } = {
 }
 
 const PERMISSIONS = {
-  plan: { order: 0, group: 'plan', label: 'Plan', permissions: ['access'] },
+  plan: {
+    order: 0,
+    group: 'plan',
+    label: 'Plan',
+    width: '100',
+    permissions: ['access']
+  },
   'billable-metric': {
     order: 1,
     label: 'Billable metrics',
+    width: '150',
     group: 'billable-metric',
     permissions: ['access']
   },
@@ -117,49 +124,63 @@ const PERMISSIONS = {
     order: 2,
     group: 'discount-code',
     label: 'Discount code',
+    width: '120',
     permissions: ['access']
   },
   subscription: {
     order: 3,
     group: 'subscription',
     label: 'Subscriptions',
+    width: '100',
     permissions: ['access']
   },
   invoice: {
     order: 4,
     group: 'invoice',
     label: 'Invoices',
+    width: '100',
     permissions: ['access']
   },
   transaction: {
     order: 5,
     group: 'transaction',
     label: 'Transactions',
+    width: '100',
     permissions: ['access']
   },
   user: {
     order: 6,
     group: 'user',
     label: 'Customers',
+    width: '100',
     permissions: ['access']
   },
-  admin: { order: 7, group: 'admin', label: 'Admins', permissions: ['access'] },
+  admin: {
+    order: 7,
+    group: 'admin',
+    label: 'Admins',
+    width: '100',
+    permissions: ['access']
+  },
   analytics: {
     order: 8,
     group: 'analytics',
     label: 'Analytics',
+    width: '100',
     permissions: ['access']
   },
   'my-account': {
     order: 9,
     group: 'my-account',
     label: 'My account',
+    width: '100',
     permissions: ['access']
   },
   configuration: {
     order: 10,
     group: 'configuration',
     label: 'Configuration',
+    width: '100',
     permissions: ['access']
   }
 }

@@ -5,14 +5,32 @@ import {
   SaveOutlined,
   SyncOutlined
 } from '@ant-design/icons'
-import { Button, Input, Space, Switch, Tooltip, message } from 'antd'
+import {
+  Button,
+  Input,
+  Popconfirm,
+  Space,
+  Switch,
+  Tooltip,
+  message
+} from 'antd'
 import Table, { ColumnsType } from 'antd/es/table'
 import update from 'immutability-helper'
 import { ChangeEventHandler, useEffect, useState } from 'react'
 import { PERMISSION_LIST } from '../../../constants'
 import { ramdonString } from '../../../helpers'
-import { getRoleListReq, saveRoleReq } from '../../../requests'
+import { deleteRoleReq, getRoleListReq, saveRoleReq } from '../../../requests'
 import { TRole } from '../../../shared.types'
+
+const OWNER_ROLE: TRole = {
+  localId: ramdonString(8),
+  id: -1,
+  role: 'Owner',
+  permissions: PERMISSION_LIST.map((p) => ({
+    group: p.group,
+    permissions: p.permissions
+  }))
+}
 
 const Index = () => {
   const [loading, setLoading] = useState(false)
@@ -29,6 +47,7 @@ const Index = () => {
     }
     const { merchantRoles, total } = res
     merchantRoles.forEach((r: TRole) => (r.localId = r.id + ''))
+    merchantRoles.unshift(OWNER_ROLE)
     setRoles(merchantRoles)
     console.log('roles res: ', res)
   }
@@ -40,7 +59,11 @@ const Index = () => {
       setErrLocalId(r.localId)
       return
     }
-    if (roles.filter((role) => role.role.trim() == r.role.trim()).length > 1) {
+    if (
+      roles.filter(
+        (role) => role.role.trim().toLowerCase() == r.role.trim().toLowerCase()
+      ).length > 1
+    ) {
       message.error(`Role name "${r.role}" already exist`)
       setErrLocalId(r.localId)
       return
@@ -67,7 +90,7 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    message.success('Role saved')
+    message.success(`Role (${r.role}) saved`)
   }
 
   const onNewRole = () => {
@@ -79,7 +102,17 @@ const Index = () => {
     setRoles(update(roles, { $push: [newRole] }))
   }
 
-  const onDelete = async () => {}
+  const onDelete = (id: number) => async () => {
+    setLoading(true)
+    const [res, err] = await deleteRoleReq(id)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success(`${roles.find((r) => r.id == id)?.role} deleted`)
+    fetchRoles()
+  }
 
   const onRoleNameChange =
     (localId: string): ChangeEventHandler<HTMLInputElement> =>
@@ -138,27 +171,31 @@ const Index = () => {
       key: 'role',
       fixed: 'left',
       width: 150,
-      render: (_, record) => (
-        <Input
-          width={120}
-          disabled={loading}
-          value={record.role}
-          onChange={onRoleNameChange(record.localId)}
-          status={record.localId == errLocalId ? 'error' : ''}
-        />
-      )
+      render: (r, record) =>
+        r == 'Owner' ? (
+          <span>{r}</span>
+        ) : (
+          <Input
+            width={120}
+            disabled={loading}
+            value={record.role}
+            onChange={onRoleNameChange(record.localId)}
+            status={record.localId == errLocalId ? 'error' : ''}
+          />
+        )
     },
     ...PERMISSION_LIST.map((p) => ({
       title: p.label,
       dataIndex: 'permissions',
       key: p.group,
+      with: p.width,
       render: (perm: any, record: TRole) => {
         const g =
           perm == null ? undefined : perm.find((pm: any) => pm.group == p.group)
         return (
           <Switch
             // size="small"
-            disabled={loading}
+            disabled={loading || record.role == 'Owner'}
             onChange={onPermChange(record.localId, p.group)}
             checked={
               g != null && g.permissions != null && g.permissions.length > 0
@@ -194,30 +231,39 @@ const Index = () => {
       width: 150,
       fixed: 'right',
       key: 'actions',
-      render: (_, role) => (
-        <Space
-          size="small"
-          className="invoice-action-btn-wrapper"
-          // style={{ width: '170px' }}
-        >
-          <Tooltip title="Save">
-            <Button
-              onClick={onSave(role)}
-              icon={<SaveOutlined />}
-              style={{ border: 'unset' }}
-              disabled={loading}
-            />
-          </Tooltip>
-          <Tooltip title="Remove">
-            <Button
-              // onClick={refund}
-              icon={<MinusOutlined />}
-              style={{ border: 'unset' }}
-              disabled={loading}
-            />
-          </Tooltip>
-        </Space>
-      )
+      render: (_, role) =>
+        role.role == 'Owner' ? null : (
+          <Space
+            size="small"
+            className="invoice-action-btn-wrapper"
+            // style={{ width: '170px' }}
+          >
+            <Tooltip title="Save">
+              <Button
+                onClick={onSave(role)}
+                icon={<SaveOutlined />}
+                style={{ border: 'unset' }}
+                disabled={loading}
+              />
+            </Tooltip>
+            <Tooltip title="Remove">
+              <Popconfirm
+                title="Deletion Confirm"
+                description="Are you sure to delete this role?"
+                onConfirm={onDelete(role.id as number)}
+                showCancel={false}
+                okText="Yes"
+              >
+                <Button
+                  // onClick={onDelete(role.id as number)}
+                  icon={<MinusOutlined />}
+                  style={{ border: 'unset' }}
+                  disabled={loading}
+                />
+              </Popconfirm>
+            </Tooltip>
+          </Space>
+        )
     }
   ]
 

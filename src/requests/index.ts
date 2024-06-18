@@ -1939,3 +1939,17 @@ export const saveRoleReq = async (role: TRole, isNew: boolean) => {
     return [null, e]
   }
 }
+
+export const deleteRoleReq = async (id: number) => {
+  try {
+    const res = await request.post(`/merchant/role/delete`, { id })
+    if (res.data.code == 61) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError('Session expired')
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
