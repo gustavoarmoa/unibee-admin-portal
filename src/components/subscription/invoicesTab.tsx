@@ -207,6 +207,13 @@ const Index = ({
       )
     },
     {
+      title: 'Type',
+      dataIndex: 'refund',
+      key: 'refund',
+      width: 100,
+      render: (refund, iv) => (refund == null ? 'Invoice' : 'Credit Note')
+    },
+    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
@@ -232,13 +239,7 @@ const Index = ({
       key: 'gateway',
       render: (g) => (g == null ? null : g.displayName)
     },
-    {
-      title: 'Type',
-      dataIndex: 'refund',
-      key: 'refund',
-      width: 100,
-      render: (refund, iv) => (refund == null ? 'Invoice' : 'Credit Note')
-    },
+
     {
       title: 'Created by',
       dataIndex: 'createFrom',

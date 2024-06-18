@@ -114,7 +114,7 @@ const Index = () => {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, plan) => (d === 0 ? 'N/A' : formatDate(d)) // dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d, plan) => (d === 0 ? '―' : formatDate(d)) // dayjs(d * 1000).format('YYYY-MMM-DD')
     },
     {
       title: (
@@ -267,7 +267,7 @@ const InviteModal = ({
 
   return (
     <Modal
-      title={'Invite team member'}
+      title={`${isNew ? 'Invite team member' : 'Edit team member roles'}`}
       width={'640px'}
       open={true}
       footer={null}
@@ -277,6 +277,7 @@ const InviteModal = ({
         labelCol={{ span: 6 }}
         wrapperCol={{ span: 18 }}
         form={form}
+        style={{ margin: '24px 0' }}
         onFinish={onConfirm}
         initialValues={
           !isNew
@@ -374,7 +375,7 @@ const InviteModal = ({
           loading={loading}
           disabled={loading}
         >
-          OK
+          {`${isNew ? 'Invite' : 'OK'}`}
         </Button>
       </div>
     </Modal>

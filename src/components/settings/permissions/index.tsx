@@ -24,7 +24,7 @@ import { TRole } from '../../../shared.types'
 
 const OWNER_ROLE: TRole = {
   localId: ramdonString(8),
-  id: -1,
+  id: -1, // this is locally defined, not from backend, just to prevent name conflict, and notify users there is a builtin owner role.
   role: 'Owner',
   permissions: PERMISSION_LIST.map((p) => ({
     group: p.group,
@@ -38,6 +38,7 @@ const Index = () => {
   const [errLocalId, setErrLocalId] = useState('')
 
   const fetchRoles = async () => {
+    setErrLocalId('')
     setLoading(true)
     const [res, err] = await getRoleListReq(fetchRoles)
     setLoading(false)
@@ -172,7 +173,7 @@ const Index = () => {
       fixed: 'left',
       width: 150,
       render: (r, record) =>
-        r == 'Owner' ? (
+        record.id == -1 ? ( // this is Owner
           <span>{r}</span>
         ) : (
           <Input
@@ -195,7 +196,7 @@ const Index = () => {
         return (
           <Switch
             // size="small"
-            disabled={loading || record.role == 'Owner'}
+            disabled={loading || record.id == -1} // Owner.id == -1 (locally defined, not from backend)
             onChange={onPermChange(record.localId, p.group)}
             checked={
               g != null && g.permissions != null && g.permissions.length > 0
@@ -232,7 +233,7 @@ const Index = () => {
       fixed: 'right',
       key: 'actions',
       render: (_, role) =>
-        role.role == 'Owner' ? null : (
+        role.id == -1 ? null : (
           <Space
             size="small"
             className="invoice-action-btn-wrapper"

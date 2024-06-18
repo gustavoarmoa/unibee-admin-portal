@@ -207,12 +207,12 @@ export const getGatewayListReq = async () => {
   }
 }
 
-export const getMerchantInfoReq = async () => {
+export const getMerchantInfoReq = async (refreshCb?: () => void) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/get`)
     if (res.data.code == 61) {
-      session.setSession({ expired: true, refresh: null })
+      session.setSession({ expired: true, refresh: refreshCb ?? null })
       throw new ExpiredError('Session expired')
     }
     return [res.data.data, null]

@@ -35,7 +35,7 @@ const Index = () => {
 
   const getInfo = async () => {
     setLoading(true)
-    const [merchantInfo, err] = await getMerchantInfoReq()
+    const [merchantInfo, err] = await getMerchantInfoReq(getInfo)
     setLoading(false)
     if (err != null) {
       message.error(err.message)

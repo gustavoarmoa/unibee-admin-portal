@@ -88,7 +88,7 @@ const OneTimeHistory = ({ userId }: { userId: number }) => {
       title: 'created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d) => (d == 0 || d == null ? 'N/A' : formatDate(d))
+      render: (d) => (d == 0 || d == null ? '―' : formatDate(d))
     },
     {
       title: 'Status',
@@ -207,7 +207,7 @@ const Index = ({
       key: 'itemName',
       render: (plan, record) =>
         record.plan == null ? (
-          'N/A'
+          '―'
         ) : (
           <div
             className=" w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
@@ -221,13 +221,13 @@ const Index = ({
       title: 'Start',
       dataIndex: 'periodStart',
       key: 'periodStart',
-      render: (d) => (d == 0 || d == null ? 'N/A' : formatDate(d))
+      render: (d) => (d == 0 || d == null ? '―' : formatDate(d))
     },
     {
       title: 'End',
       dataIndex: 'periodEnd',
       key: 'periodEnd',
-      render: (d) => (d == 0 || d == null ? 'N/A' : formatDate(d))
+      render: (d) => (d == 0 || d == null ? '―' : formatDate(d))
     },
     {
       title: 'Addons',
@@ -235,7 +235,7 @@ const Index = ({
       key: 'addons',
       render: (addons) =>
         addons == null ? (
-          'N/A'
+          '―'
         ) : (
           <Popover
             placement="top"
