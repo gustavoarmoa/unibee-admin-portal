@@ -42,6 +42,7 @@ interface IMerchantUserProfile {
   MemberRoles: TRole[]
   merchantId: number
   isOwner: boolean
+  status: number // 0-Active, 2-Suspended
 }
 
 type TMerchantInfo = {
@@ -423,6 +424,21 @@ export type TRole = {
   merchantId?: number
   role: string
   permissions: { group: string; permissions: string[] }[]
+}
+
+export type TActivityLogs = {
+  id: number
+  merchantId: number
+  memberId: number
+  optTarget: string
+  optContent: string
+  createTime: number
+  subscriptionId: string
+  userId: number
+  invoiceId: string
+  planId: number
+  discountCode: string
+  member: IMerchantUserProfile[]
 }
 
 export class ExpiredError extends Error {

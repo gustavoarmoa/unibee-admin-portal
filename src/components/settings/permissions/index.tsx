@@ -50,7 +50,6 @@ const Index = () => {
     merchantRoles.forEach((r: TRole) => (r.localId = r.id + ''))
     merchantRoles.unshift(OWNER_ROLE)
     setRoles(merchantRoles)
-    console.log('roles res: ', res)
   }
 
   const onSave = (r: TRole) => async () => {
@@ -283,7 +282,7 @@ const Index = () => {
           spinning: loading,
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
-        scroll={{ x: 1680 }}
+        scroll={{ x: 1820 }}
         // onChange={onTableChange}
         /* onRow={(record, rowIndex) => {
           return {

@@ -117,13 +117,13 @@ const PERMISSIONS = {
     order: 0,
     group: 'plan',
     label: 'Plan',
-    width: '100',
+    width: 100,
     permissions: ['access']
   },
   'billable-metric': {
     order: 1,
     label: 'Billable Metric',
-    width: '150',
+    width: 150,
     group: 'billable-metric',
     permissions: ['access']
   },
@@ -131,63 +131,70 @@ const PERMISSIONS = {
     order: 2,
     group: 'discount-code',
     label: 'Discount Code',
-    width: '120',
+    width: 120,
     permissions: ['access']
   },
   subscription: {
     order: 3,
     group: 'subscription',
     label: 'Subscription',
-    width: '100',
+    width: 150,
     permissions: ['access']
   },
   invoice: {
     order: 4,
     group: 'invoice',
     label: 'Invoice',
-    width: '100',
+    width: 100,
     permissions: ['access']
   },
   transaction: {
     order: 5,
     group: 'transaction',
     label: 'Transaction',
-    width: '100',
+    width: 100,
     permissions: ['access']
   },
   user: {
     order: 6,
     group: 'user',
     label: 'User List',
-    width: '100',
+    width: 100,
     permissions: ['access']
   },
   admin: {
     order: 7,
     group: 'admin',
     label: 'Admin List',
-    width: '100',
+    width: 100,
     permissions: ['access']
   },
   analytics: {
     order: 8,
     group: 'analytics',
     label: 'Analytics',
-    width: '100',
+    width: 100,
     permissions: ['access']
   },
   'my-account': {
     order: 9,
     group: 'my-account',
     label: 'My Account',
-    width: '100',
+    width: 100,
+    permissions: ['access']
+  },
+  'activity-logs': {
+    order: 10,
+    group: 'activity-logs',
+    label: 'Activity Logs',
+    width: 100,
     permissions: ['access']
   },
   configuration: {
-    order: 10,
+    order: 11,
     group: 'configuration',
     label: 'Configuration',
-    width: '100',
+    width: 100,
     permissions: ['access']
   }
 }

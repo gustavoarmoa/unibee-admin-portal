@@ -3,6 +3,7 @@ import {
   IdcardOutlined,
   LogoutOutlined,
   PieChartOutlined,
+  ProfileOutlined,
   SettingOutlined,
   TeamOutlined,
   TransactionOutlined
@@ -44,6 +45,7 @@ import SubscriptionList from './components/subscription/list'
 import CustomerDetail from './components/user/detail'
 import CustomerList from './components/user/list'
 // import Users from "./components/userList";
+import ActivityLogs from './components/activityLogs'
 import AppSearch from './components/appSearch'
 import Login from './components/login'
 import LoginModal from './components/login/LoginModal'
@@ -106,7 +108,8 @@ const App: React.FC = () => {
     getItem('Admin List', '/admin/list', <TeamOutlined />),
     getItem('Analytics', '/analytics', <PieChartOutlined />),
     getItem('My Account', '/my-account', <IdcardOutlined />),
-    getItem('Configuration', '/configuration', <SettingOutlined />)
+    getItem('Configuration', '/configuration', <SettingOutlined />),
+    getItem('Activity Logs', '/activity-logs', <ProfileOutlined />)
   ]
 
   const accessiblePages: string[] = []
@@ -136,238 +139,6 @@ const App: React.FC = () => {
       return accessiblePages[0]
     }
   }
-
-  /*
-  if (permStore.role == 'Customer Support') {
-    items = items.filter(
-      (i) =>
-        i?.key != '/plan/list' &&
-        i?.key != '/discount-code/list' &&
-        i?.key != '/billable-metric/list' &&
-        i?.key != '/discount-code/list' &&
-        i?.key != '/admin/list' &&
-        i?.key != '/analytics' &&
-        i?.key != '/settings' &&
-        i?.key != '/profile'
-    )
-  }
-  */
-
-  /*
-      <Route
-        path={APP_PATH}
-        element={<Navigate to={`${APP_PATH}subscription/list`} />} // default page after login
-      />
-      */
-  const routes = [
-    {
-      page: 'my-account',
-      route: (
-        <Route
-          key="my-account"
-          path={`${APP_PATH}my-account`}
-          Component={Profile}
-        />
-      )
-    },
-    {
-      page: 'analytics',
-      route: (
-        <Route
-          key="analytics"
-          path={`${APP_PATH}analytics`}
-          Component={Dashboard}
-        />
-      )
-    },
-    {
-      page: 'configuration',
-      route: (
-        <Route
-          key="configuration"
-          path={`${APP_PATH}configuration`}
-          Component={Settings}
-        />
-      )
-    },
-    {
-      page: 'configuration',
-      route: (
-        <Route
-          key="configuration-webhook-logs"
-          path={`${APP_PATH}configuration/webhook-logs/:id`}
-          element={<WebhookLogs />}
-        />
-      )
-    },
-    {
-      page: 'subscription',
-      route: (
-        <Route
-          key="subscription-top"
-          path={`${APP_PATH}subscription`}
-          element={<SubscriptionList />}
-        />
-      )
-    },
-    {
-      page: 'subscription',
-      route: (
-        <Route
-          key="subscription"
-          path={`${APP_PATH}subscription`}
-          Component={OutletPage}
-        >
-          <Route path="list" element={<SubscriptionList />} />
-          <Route path=":subscriptionId" element={<SubscriptionDetail />} />
-        </Route>
-      )
-    },
-    {
-      page: 'plan',
-      route: (
-        <Route
-          key="plan-top"
-          path={`${APP_PATH}/plan`}
-          element={<PricePlanList />}
-        />
-      )
-    },
-    {
-      page: 'plan',
-      route: (
-        <Route key="plan" path={`${APP_PATH}plan`} Component={OutletPage}>
-          <Route path="list" element={<PricePlanList />} />
-          <Route path="new" element={<PlanDetail />} />
-          <Route path=":planId" element={<PlanDetail />} />
-        </Route>
-      )
-    },
-    {
-      page: 'billable-metric',
-      route: (
-        <Route
-          key="billable-metric-top"
-          path={`${APP_PATH}billable-metric`}
-          element={<BillableMetricsList />}
-        />
-      )
-    },
-    {
-      page: 'billable-metric',
-      route: (
-        <Route
-          key="billable-metric"
-          path={`${APP_PATH}billable-metric`}
-          Component={OutletPage}
-        >
-          <Route path="list" element={<BillableMetricsList />} />
-          <Route path="new" element={<BillableMetricsDetail />} />
-          <Route path=":metricsId" element={<BillableMetricsDetail />} />
-        </Route>
-      )
-    },
-    {
-      page: 'discount-code',
-      route: (
-        <Route
-          key="discount-code-top"
-          path={`${APP_PATH}discount-code`}
-          element={<DiscountCodeList />}
-        />
-      )
-    },
-    {
-      page: 'discount-code',
-      route: (
-        <Route
-          key="discount-code"
-          path={`${APP_PATH}discount-code`}
-          Component={OutletPage}
-        >
-          <Route path="list" element={<DiscountCodeList />} />
-          <Route path="new" element={<DiscountCodeDetail />} />
-          <Route path=":discountCodeId" element={<DiscountCodeDetail />} />
-        </Route>
-      )
-    },
-    {
-      page: 'user',
-      route: (
-        <Route
-          key="user-top"
-          path={`${APP_PATH}user`}
-          element={<CustomerList />}
-        />
-      )
-    },
-    {
-      page: 'user',
-      route: (
-        <Route key="user" path={`${APP_PATH}user`} Component={OutletPage}>
-          <Route path="list" element={<CustomerList />} />
-          <Route path=":userId" element={<CustomerDetail />} />
-        </Route>
-      )
-    },
-    {
-      page: 'admin',
-      route: (
-        <Route
-          key="admin-top"
-          path={`${APP_PATH}admin`}
-          element={<MerchantUserList />}
-        />
-      )
-    },
-    {
-      page: 'admin',
-      route: (
-        <Route key="admin" path={`${APP_PATH}admin`} Component={OutletPage}>
-          <Route path="list" element={<MerchantUserList />} />
-          <Route path=":adminId" element={<MerchantUserDetail />} />
-        </Route>
-      )
-    },
-    {
-      page: 'invoice',
-      route: (
-        <Route
-          key="invoice-top"
-          path={`${APP_PATH}invoice`}
-          element={<InvoiceList />}
-        />
-      )
-    },
-    {
-      page: 'invoice',
-      route: (
-        <Route key="invoice" path={`${APP_PATH}invoice`} Component={OutletPage}>
-          <Route path="list" element={<InvoiceList />} />
-          <Route path=":invoiceId" element={<InvoiceDetail />} />
-        </Route>
-      )
-    },
-    {
-      page: 'transaction',
-      route: (
-        <Route
-          key="tx-top"
-          path={`${APP_PATH}transaction`}
-          element={<PaymentList />}
-        />
-      )
-    },
-    {
-      page: 'transaction',
-      route: (
-        <Route key="tx" path={`${APP_PATH}transaction`} Component={OutletPage}>
-          <Route path="list" element={<PaymentList />} />
-          <Route path=":paymentId" element={<PaymentDetail />} />
-        </Route>
-      )
-    }
-  ]
 
   const navigate = useNavigate()
 
@@ -415,8 +186,9 @@ const App: React.FC = () => {
     } else if (pathItems[0] == 'billable-metric') {
       setActiveMenuItem(['/billable-metric/list'])
     } else if (pathItems[0] == 'configuration') {
-      // WebhookLogs
       setActiveMenuItem(['/configuration'])
+    } else if (pathItems[0] == 'activity-logs') {
+      setActiveMenuItem(['/activity-logs'])
     } else {
       setActiveMenuItem(['/' + pathItems[0]])
     }
@@ -551,7 +323,7 @@ const App: React.FC = () => {
                     path={APP_PATH}
                     element={<Navigate to={`${APP_PATH}${defaultPage()}`} />} // default page after login
                   />
-                  {routes
+                  {app_routes
                     .filter((r) =>
                       profileStore.isOwner
                         ? true
@@ -570,3 +342,223 @@ const App: React.FC = () => {
 }
 
 export default App
+
+const app_routes = [
+  {
+    page: 'my-account',
+    route: (
+      <Route
+        key="my-account"
+        path={`${APP_PATH}my-account`}
+        Component={Profile}
+      />
+    )
+  },
+  {
+    page: 'analytics',
+    route: (
+      <Route
+        key="analytics"
+        path={`${APP_PATH}analytics`}
+        Component={Dashboard}
+      />
+    )
+  },
+  {
+    page: 'configuration',
+    route: (
+      <Route
+        key="configuration"
+        path={`${APP_PATH}configuration`}
+        Component={Settings}
+      />
+    )
+  },
+  {
+    page: 'configuration',
+    route: (
+      <Route
+        key="configuration-webhook-logs"
+        path={`${APP_PATH}configuration/webhook-logs/:id`}
+        element={<WebhookLogs />}
+      />
+    )
+  },
+  {
+    page: 'subscription',
+    route: (
+      <Route
+        key="subscription-top"
+        path={`${APP_PATH}subscription`}
+        element={<SubscriptionList />}
+      />
+    )
+  },
+  {
+    page: 'subscription',
+    route: (
+      <Route
+        key="subscription"
+        path={`${APP_PATH}subscription`}
+        Component={OutletPage}
+      >
+        <Route path="list" element={<SubscriptionList />} />
+        <Route path=":subscriptionId" element={<SubscriptionDetail />} />
+      </Route>
+    )
+  },
+  {
+    page: 'plan',
+    route: (
+      <Route
+        key="plan-top"
+        path={`${APP_PATH}/plan`}
+        element={<PricePlanList />}
+      />
+    )
+  },
+  {
+    page: 'plan',
+    route: (
+      <Route key="plan" path={`${APP_PATH}plan`} Component={OutletPage}>
+        <Route path="list" element={<PricePlanList />} />
+        <Route path="new" element={<PlanDetail />} />
+        <Route path=":planId" element={<PlanDetail />} />
+      </Route>
+    )
+  },
+  {
+    page: 'billable-metric',
+    route: (
+      <Route
+        key="billable-metric-top"
+        path={`${APP_PATH}billable-metric`}
+        element={<BillableMetricsList />}
+      />
+    )
+  },
+  {
+    page: 'billable-metric',
+    route: (
+      <Route
+        key="billable-metric"
+        path={`${APP_PATH}billable-metric`}
+        Component={OutletPage}
+      >
+        <Route path="list" element={<BillableMetricsList />} />
+        <Route path="new" element={<BillableMetricsDetail />} />
+        <Route path=":metricsId" element={<BillableMetricsDetail />} />
+      </Route>
+    )
+  },
+  {
+    page: 'discount-code',
+    route: (
+      <Route
+        key="discount-code-top"
+        path={`${APP_PATH}discount-code`}
+        element={<DiscountCodeList />}
+      />
+    )
+  },
+  {
+    page: 'discount-code',
+    route: (
+      <Route
+        key="discount-code"
+        path={`${APP_PATH}discount-code`}
+        Component={OutletPage}
+      >
+        <Route path="list" element={<DiscountCodeList />} />
+        <Route path="new" element={<DiscountCodeDetail />} />
+        <Route path=":discountCodeId" element={<DiscountCodeDetail />} />
+      </Route>
+    )
+  },
+  {
+    page: 'user',
+    route: (
+      <Route
+        key="user-top"
+        path={`${APP_PATH}user`}
+        element={<CustomerList />}
+      />
+    )
+  },
+  {
+    page: 'user',
+    route: (
+      <Route key="user" path={`${APP_PATH}user`} Component={OutletPage}>
+        <Route path="list" element={<CustomerList />} />
+        <Route path=":userId" element={<CustomerDetail />} />
+      </Route>
+    )
+  },
+  {
+    page: 'admin',
+    route: (
+      <Route
+        key="admin-top"
+        path={`${APP_PATH}admin`}
+        element={<MerchantUserList />}
+      />
+    )
+  },
+  {
+    page: 'admin',
+    route: (
+      <Route key="admin" path={`${APP_PATH}admin`} Component={OutletPage}>
+        <Route path="list" element={<MerchantUserList />} />
+        <Route path=":adminId" element={<MerchantUserDetail />} />
+      </Route>
+    )
+  },
+  {
+    page: 'invoice',
+    route: (
+      <Route
+        key="invoice-top"
+        path={`${APP_PATH}invoice`}
+        element={<InvoiceList />}
+      />
+    )
+  },
+  {
+    page: 'invoice',
+    route: (
+      <Route key="invoice" path={`${APP_PATH}invoice`} Component={OutletPage}>
+        <Route path="list" element={<InvoiceList />} />
+        <Route path=":invoiceId" element={<InvoiceDetail />} />
+      </Route>
+    )
+  },
+  {
+    page: 'transaction',
+    route: (
+      <Route
+        key="tx-top"
+        path={`${APP_PATH}transaction`}
+        element={<PaymentList />}
+      />
+    )
+  },
+  {
+    page: 'transaction',
+    route: (
+      <Route key="tx" path={`${APP_PATH}transaction`} Component={OutletPage}>
+        <Route path="list" element={<PaymentList />} />
+        <Route path=":paymentId" element={<PaymentDetail />} />
+      </Route>
+    )
+  },
+  {
+    page: 'activity-logs',
+    route: (
+      <Route
+        key="activity-logs"
+        path={`${APP_PATH}activity-logs`}
+        element={<ActivityLogs />}
+      />
+    )
+  }
+]
