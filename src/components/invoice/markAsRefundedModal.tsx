@@ -9,9 +9,15 @@ interface Props {
   invoiceId: string
   closeModal: () => void
   refresh: () => void
+  setDelayingPreview?: (v: boolean) => void
 }
 
-const Index = ({ closeModal, refresh, invoiceId }: Props) => {
+const Index = ({
+  closeModal,
+  refresh,
+  invoiceId,
+  setDelayingPreview
+}: Props) => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
 
@@ -25,6 +31,9 @@ const Index = ({ closeModal, refresh, invoiceId }: Props) => {
     if (null != err) {
       message.error(err.message)
       return
+    }
+    if (setDelayingPreview) {
+      setDelayingPreview(true)
     }
     refresh()
     closeModal()

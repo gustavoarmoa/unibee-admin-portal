@@ -4,7 +4,13 @@ import {
   LoadingOutlined
 } from '@ant-design/icons'
 import { Button, Col, Row, Spin, Tooltip, message } from 'antd'
-import React, { CSSProperties, useEffect, useState } from 'react'
+import React, {
+  CSSProperties,
+  forwardRef,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { INVOICE_STATUS } from '../../constants'
 import { getInvoicePermission, showAmount } from '../../helpers'
@@ -26,6 +32,11 @@ const rowStyle: CSSProperties = {
   height: '32px'
 }
 const colStyle: CSSProperties = { fontWeight: 'bold' }
+const previewWrapperStyle: CSSProperties = {
+  height: 'calc(100vh - 460px)',
+  width: '100%',
+  marginTop: '24px'
+}
 
 const Index = () => {
   const navigate = useNavigate()
@@ -41,6 +52,11 @@ const Index = () => {
   const [markRefundedModalOpen, setMarkRefundedModalOpen] = useState(false)
   const toggleMarkRefundedModal = () =>
     setMarkRefundedModalOpen(!markRefundedModalOpen)
+
+  // for wire-transfer or crypto payment, markAsPaid and markAsRefunded will refresh current component after success.
+  // new invoice pdf file will be regenerated, but old pdf file might be cached, causing pdf show 'processing', but invoice status show 'refunded'
+  // I have to deley 2.5s after refresh, then show the pdf file.
+  const [delayingPreview, setDelayingPreview] = useState(false)
 
   const goBack = () => navigate(`${APP_PATH}invoice/list`)
   const goToUser = (userId: number) => () =>
@@ -60,6 +76,7 @@ const Index = () => {
     setLoading(false)
     if (null != err) {
       message.error(err.message)
+      setDelayingPreview(false)
       return
     }
     const { invoice } = res
@@ -67,17 +84,27 @@ const Index = () => {
     setInvoiceDetail(invoice)
   }
 
+  if (delayingPreview && !loading) {
+    setTimeout(() => setDelayingPreview(false), 2500)
+  }
+
   useEffect(() => {
     fetchData()
   }, [])
 
-  const isWireTransfer = invoiceDetail?.gateway.gatewayName == 'wire_transfer'
-  const isCrypto = invoiceDetail?.gateway.gatewayName == 'changelly'
   const isRefund = invoiceDetail?.refund != null
   const perm = getInvoicePermission(invoiceDetail)
-
   return (
     <div>
+      {/* <Button
+        onClick={() => {
+          setDelayingPreview(true)
+          fetchData()
+        }}
+      >
+        test deayling pdf previw
+      </Button> */}{' '}
+      {/* test dealying feature */}
       <Spin
         spinning={loading}
         indicator={
@@ -104,17 +131,17 @@ const Index = () => {
           closeModal={toggleMarkPaidModal}
           refresh={fetchData}
           invoiceId={invoiceDetail.invoiceId}
+          setDelayingPreview={setDelayingPreview}
         />
       )}
-
       {invoiceDetail && markRefundedModalOpen && (
         <MarkAsRefundedModal
           closeModal={toggleMarkRefundedModal}
           refresh={fetchData}
           invoiceId={invoiceDetail.invoiceId}
+          setDelayingPreview={setDelayingPreview}
         />
       )}
-
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
           Invoice Id
@@ -214,7 +241,6 @@ const Index = () => {
           )}
         </Col>
       </Row>
-
       {invoiceDetail?.refund == null && (
         <Row style={rowStyle} gutter={[16, 16]}>
           <Col span={4} style={colStyle}>
@@ -227,7 +253,6 @@ const Index = () => {
           <Col span={6}></Col>
         </Row>
       )}
-
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
           Discount Amount
@@ -259,7 +284,6 @@ const Index = () => {
           )}
         </Col>
       </Row>
-
       <Row style={rowStyle} gutter={[16, 16]}>
         <Col span={4} style={colStyle}>
           Payment Gateway
@@ -278,21 +302,24 @@ const Index = () => {
           </span>
         </Col>
       </Row>
-
       {/* <UserInfo user={userProfile} /> */}
       {/* <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} /> */}
-
       {invoiceDetail == null ||
       invoiceDetail.sendPdf == null ||
-      invoiceDetail.sendPdf == '' ? null : (
+      invoiceDetail.sendPdf == '' ||
+      loading ? null : delayingPreview ? (
+        <div style={previewWrapperStyle}>
+          <Spin indicator={<LoadingOutlined spin />} size="large">
+            <div className="flex items-center justify-center">
+              Invoice file loading
+            </div>
+          </Spin>
+        </div>
+      ) : (
         <object
           data={invoiceDetail.sendPdf}
           type="application/pdf"
-          style={{
-            height: 'calc(100vh - 460px)',
-            width: '100%',
-            marginTop: '24px'
-          }}
+          style={previewWrapperStyle}
         >
           <p>
             <a href={invoiceDetail.sendPdf}>Download invoice</a>

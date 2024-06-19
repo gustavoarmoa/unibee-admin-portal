@@ -115,7 +115,7 @@ const App: React.FC = () => {
       (p) => p.permissions.length > 0 && accessiblePages.push(p.group)
     )
   )
-  console.log('accessible pages: ', accessiblePages)
+  // console.log('accessible pages: ', accessiblePages)
 
   if (!profileStore.isOwner) {
     items = items.filter(
@@ -162,20 +162,39 @@ const App: React.FC = () => {
   const routes = [
     {
       page: 'my-account',
-      route: <Route path={`${APP_PATH}my-account`} Component={Profile} />
+      route: (
+        <Route
+          key="my-account"
+          path={`${APP_PATH}my-account`}
+          Component={Profile}
+        />
+      )
     },
     {
       page: 'analytics',
-      route: <Route path={`${APP_PATH}analytics`} Component={Dashboard} />
-    },
-    {
-      page: 'configuration',
-      route: <Route path={`${APP_PATH}configuration`} Component={Settings} />
+      route: (
+        <Route
+          key="analytics"
+          path={`${APP_PATH}analytics`}
+          Component={Dashboard}
+        />
+      )
     },
     {
       page: 'configuration',
       route: (
         <Route
+          key="configuration"
+          path={`${APP_PATH}configuration`}
+          Component={Settings}
+        />
+      )
+    },
+    {
+      page: 'configuration',
+      route: (
+        <Route
+          key="configuration-webhook-logs"
           path={`${APP_PATH}configuration/webhook-logs/:id`}
           element={<WebhookLogs />}
         />
@@ -185,6 +204,7 @@ const App: React.FC = () => {
       page: 'subscription',
       route: (
         <Route
+          key="subscription-top"
           path={`${APP_PATH}subscription`}
           element={<SubscriptionList />}
         />
@@ -193,7 +213,11 @@ const App: React.FC = () => {
     {
       page: 'subscription',
       route: (
-        <Route path={`${APP_PATH}subscription`} Component={OutletPage}>
+        <Route
+          key="subscription"
+          path={`${APP_PATH}subscription`}
+          Component={OutletPage}
+        >
           <Route path="list" element={<SubscriptionList />} />
           <Route path=":subscriptionId" element={<SubscriptionDetail />} />
         </Route>
@@ -201,12 +225,18 @@ const App: React.FC = () => {
     },
     {
       page: 'plan',
-      route: <Route path={`${APP_PATH}/plan`} element={<PricePlanList />} />
+      route: (
+        <Route
+          key="plan-top"
+          path={`${APP_PATH}/plan`}
+          element={<PricePlanList />}
+        />
+      )
     },
     {
       page: 'plan',
       route: (
-        <Route path={`${APP_PATH}plan`} Component={OutletPage}>
+        <Route key="plan" path={`${APP_PATH}plan`} Component={OutletPage}>
           <Route path="list" element={<PricePlanList />} />
           <Route path="new" element={<PlanDetail />} />
           <Route path=":planId" element={<PlanDetail />} />
@@ -217,6 +247,7 @@ const App: React.FC = () => {
       page: 'billable-metric',
       route: (
         <Route
+          key="billable-metric-top"
           path={`${APP_PATH}billable-metric`}
           element={<BillableMetricsList />}
         />
@@ -225,7 +256,11 @@ const App: React.FC = () => {
     {
       page: 'billable-metric',
       route: (
-        <Route path={`${APP_PATH}billable-metric`} Component={OutletPage}>
+        <Route
+          key="billable-metric"
+          path={`${APP_PATH}billable-metric`}
+          Component={OutletPage}
+        >
           <Route path="list" element={<BillableMetricsList />} />
           <Route path="new" element={<BillableMetricsDetail />} />
           <Route path=":metricsId" element={<BillableMetricsDetail />} />
@@ -236,6 +271,7 @@ const App: React.FC = () => {
       page: 'discount-code',
       route: (
         <Route
+          key="discount-code-top"
           path={`${APP_PATH}discount-code`}
           element={<DiscountCodeList />}
         />
@@ -244,7 +280,11 @@ const App: React.FC = () => {
     {
       page: 'discount-code',
       route: (
-        <Route path={`${APP_PATH}discount-code`} Component={OutletPage}>
+        <Route
+          key="discount-code"
+          path={`${APP_PATH}discount-code`}
+          Component={OutletPage}
+        >
           <Route path="list" element={<DiscountCodeList />} />
           <Route path="new" element={<DiscountCodeDetail />} />
           <Route path=":discountCodeId" element={<DiscountCodeDetail />} />
@@ -253,12 +293,18 @@ const App: React.FC = () => {
     },
     {
       page: 'user',
-      route: <Route path={`${APP_PATH}user`} element={<CustomerList />} />
+      route: (
+        <Route
+          key="user-top"
+          path={`${APP_PATH}user`}
+          element={<CustomerList />}
+        />
+      )
     },
     {
       page: 'user',
       route: (
-        <Route path={`${APP_PATH}user`} Component={OutletPage}>
+        <Route key="user" path={`${APP_PATH}user`} Component={OutletPage}>
           <Route path="list" element={<CustomerList />} />
           <Route path=":userId" element={<CustomerDetail />} />
         </Route>
@@ -266,12 +312,18 @@ const App: React.FC = () => {
     },
     {
       page: 'admin',
-      route: <Route path={`${APP_PATH}admin`} element={<MerchantUserList />} />
+      route: (
+        <Route
+          key="admin-top"
+          path={`${APP_PATH}admin`}
+          element={<MerchantUserList />}
+        />
+      )
     },
     {
       page: 'admin',
       route: (
-        <Route path={`${APP_PATH}admin`} Component={OutletPage}>
+        <Route key="admin" path={`${APP_PATH}admin`} Component={OutletPage}>
           <Route path="list" element={<MerchantUserList />} />
           <Route path=":adminId" element={<MerchantUserDetail />} />
         </Route>
@@ -279,12 +331,18 @@ const App: React.FC = () => {
     },
     {
       page: 'invoice',
-      route: <Route path={`${APP_PATH}invoice`} element={<InvoiceList />} />
+      route: (
+        <Route
+          key="invoice-top"
+          path={`${APP_PATH}invoice`}
+          element={<InvoiceList />}
+        />
+      )
     },
     {
       page: 'invoice',
       route: (
-        <Route path={`${APP_PATH}invoice`} Component={OutletPage}>
+        <Route key="invoice" path={`${APP_PATH}invoice`} Component={OutletPage}>
           <Route path="list" element={<InvoiceList />} />
           <Route path=":invoiceId" element={<InvoiceDetail />} />
         </Route>
@@ -292,12 +350,18 @@ const App: React.FC = () => {
     },
     {
       page: 'transaction',
-      route: <Route path={`${APP_PATH}transaction`} element={<PaymentList />} />
+      route: (
+        <Route
+          key="tx-top"
+          path={`${APP_PATH}transaction`}
+          element={<PaymentList />}
+        />
+      )
     },
     {
       page: 'transaction',
       route: (
-        <Route path={`${APP_PATH}transaction`} Component={OutletPage}>
+        <Route key="tx" path={`${APP_PATH}transaction`} Component={OutletPage}>
           <Route path="list" element={<PaymentList />} />
           <Route path=":paymentId" element={<PaymentDetail />} />
         </Route>

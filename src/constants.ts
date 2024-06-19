@@ -22,6 +22,13 @@ export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
   8: 'Processing' // user claimed they have wired the transfer(this status if for wire only), but we're checking
 }
 
+export const SUBSCRIPTION_HISTORY_STATUS: { [key: number]: string } = {
+  1: 'Processing',
+  2: 'Finished',
+  3: 'Cancelled',
+  4: 'Expired'
+}
+
 export const USER_STATUS: { [key: number]: string } = {
   0: 'Active',
   2: 'Suspended'

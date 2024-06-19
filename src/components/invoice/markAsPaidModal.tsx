@@ -1,5 +1,5 @@
 // import { EditFilled, MinusOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Col, Form, Input, message, Modal, Row } from 'antd'
+import { Button, Form, Input, message, Modal } from 'antd'
 import React, { useState } from 'react'
 import { markInvoiceAsPaidReq } from '../../requests'
 
@@ -9,9 +9,15 @@ interface Props {
   invoiceId: string
   closeModal: () => void
   refresh: () => void
+  setDelayingPreview?: (v: boolean) => void
 }
 
-const Index = ({ closeModal, refresh, invoiceId }: Props) => {
+const Index = ({
+  invoiceId,
+  closeModal,
+  refresh,
+  setDelayingPreview
+}: Props) => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
 
@@ -26,6 +32,9 @@ const Index = ({ closeModal, refresh, invoiceId }: Props) => {
     if (null != err) {
       message.error(err.message)
       return
+    }
+    if (setDelayingPreview != null) {
+      setDelayingPreview(true)
     }
     refresh()
     closeModal()

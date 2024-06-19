@@ -6,6 +6,7 @@ import {
   INVOICE_STATUS,
   PAYMENT_STATUS,
   PLAN_STATUS,
+  SUBSCRIPTION_HISTORY_STATUS,
   SUBSCRIPTION_STATUS,
   USER_STATUS
 } from '../../constants'
@@ -19,6 +20,14 @@ const SUB_STATUS: { [key: number]: ReactElement } = {
   8: <Tag color="blue">{SUBSCRIPTION_STATUS[8]}</Tag> // 8: processing
 }
 const SubscriptionStatus = (statusId: number) => SUB_STATUS[statusId]
+
+const SUB_HISTORY_STATUS: { [key: number]: ReactElement } = {
+  1: <Tag color="blue">{SUBSCRIPTION_HISTORY_STATUS[1]}</Tag>, // 1: processing
+  2: <Tag color="#87d068">{SUBSCRIPTION_HISTORY_STATUS[2]}</Tag>, // 2: finished
+  3: <Tag color="purple">{SUBSCRIPTION_HISTORY_STATUS[3]}</Tag>, // 3: cancelled
+  4: <Tag color="red">{SUBSCRIPTION_HISTORY_STATUS[4]}</Tag> // 4: expired
+}
+const SubHistoryStatus = (statusId: number) => SUB_HISTORY_STATUS[statusId]
 
 const IV_STATUS: { [key: number]: ReactElement } = {
   0: <span>Initiating</span>, // this status only exist for a very short period, users/admin won't even know it exist
@@ -70,6 +79,7 @@ export {
   InvoiceStatus,
   PaymentStatus,
   PlanStatus,
+  SubHistoryStatus,
   SubscriptionStatus,
   UserStatus
 }

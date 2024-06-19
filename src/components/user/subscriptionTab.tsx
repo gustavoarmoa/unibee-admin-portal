@@ -32,7 +32,11 @@ import {
   ISubHistoryItem,
   ISubscriptionType
 } from '../../shared.types.d'
-import { PaymentStatus, SubscriptionStatus } from '../ui/statusTag'
+import {
+  PaymentStatus,
+  SubHistoryStatus,
+  SubscriptionStatus
+} from '../ui/statusTag'
 import ModalAssignSub from './assignSubModal'
 
 const rowStyle: CSSProperties = {
@@ -202,7 +206,7 @@ const Index = ({
 
   const columns: ColumnsType<ISubHistoryItem> = [
     {
-      title: 'Item name',
+      title: 'Item Name',
       dataIndex: 'itemName',
       key: 'itemName',
       render: (plan, record) =>
@@ -218,16 +222,22 @@ const Index = ({
         )
     },
     {
-      title: 'Start',
+      title: 'Start Time',
       dataIndex: 'periodStart',
       key: 'periodStart',
       render: (d) => (d == 0 || d == null ? '―' : formatDate(d))
     },
     {
-      title: 'End',
+      title: 'End Time',
       dataIndex: 'periodEnd',
       key: 'periodEnd',
       render: (d) => (d == 0 || d == null ? '―' : formatDate(d))
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (s) => SubHistoryStatus(s)
     },
     {
       title: 'Addons',

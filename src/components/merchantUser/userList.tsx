@@ -132,16 +132,16 @@ const Index = () => {
       title: (
         <>
           <span>Actions</span>
-          {profileStore.isOwner && (
-            <Tooltip title="Invite member">
-              <Button
-                // disabled={copyingPlan}
-                style={{ border: 'unset' }}
-                onClick={toggleInviteModal}
-                icon={<UserAddOutlined />}
-              />
-            </Tooltip>
-          )}
+
+          <Tooltip title="Invite member">
+            <Button
+              // disabled={copyingPlan}
+              style={{ border: 'unset' }}
+              onClick={toggleInviteModal}
+              icon={<UserAddOutlined />}
+            />
+          </Tooltip>
+
           <Tooltip title="Refresh">
             <Button
               size="small"
@@ -165,16 +165,15 @@ const Index = () => {
               icon={<ProfileOutlined />}
             />
           </Tooltip>
-          {profileStore.isOwner && (
-            <Tooltip title="Suspend">
-              <Button
-                style={{ border: 'unset' }}
-                disabled={loading}
-                // onClick={() => copyPlan(record.id)}
-                icon={<UserDeleteOutlined />}
-              />
-            </Tooltip>
-          )}
+
+          <Tooltip title="Suspend">
+            <Button
+              style={{ border: 'unset' }}
+              disabled={loading}
+              // onClick={() => copyPlan(record.id)}
+              icon={<UserDeleteOutlined />}
+            />
+          </Tooltip>
         </Space>
       )
     }
@@ -215,7 +214,7 @@ const Index = () => {
           return {
             onClick: (evt) => {
               if (!profileStore.isOwner) {
-                return
+                // return
               }
               if (
                 evt.target instanceof HTMLElement &&
