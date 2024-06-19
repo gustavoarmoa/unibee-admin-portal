@@ -23,8 +23,15 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
   (responseConfig) => {
-    if (responseConfig.data.code !== 0 && responseConfig.data.code !== 61) {
+    if (
+      responseConfig.data.code !== 0 &&
+      responseConfig.data.code !== 61 &&
+      responseConfig.data.code !== 62
+    ) {
       return Promise.reject(new Error(responseConfig.data.message))
+    }
+    if (responseConfig.data.code === 62) {
+      window.redirectToLogin = true
     }
     return responseConfig
   },

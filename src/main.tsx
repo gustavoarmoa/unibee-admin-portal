@@ -6,6 +6,12 @@ import App from './App.tsx'
 import './global.css'
 import './main.css'
 
+declare global {
+  interface Window {
+    redirectToLogin?: boolean
+  }
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>

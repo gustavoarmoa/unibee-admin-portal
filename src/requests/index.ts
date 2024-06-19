@@ -153,9 +153,11 @@ export const resetPassReq = async (
       oldPassword,
       newPassword
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null]
   } catch (err) {
@@ -181,9 +183,11 @@ export const getAppConfigReq = async () => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/system/information/get`, {})
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -196,9 +200,11 @@ export const getGatewayListReq = async () => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/gateway/list`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.gateways, null]
   } catch (err) {
@@ -211,9 +217,11 @@ export const getMerchantInfoReq = async (refreshCb?: () => void) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/get`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb ?? null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -226,9 +234,11 @@ export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.post(`/merchant/update`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.merchant, null]
   } catch (err) {
@@ -247,9 +257,11 @@ export const uploadLogoReq = async (f: FormData) => {
         Authorization: `${token}` // Bearer: ******
       }
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.url, null]
   } catch (err) {
@@ -261,9 +273,11 @@ export const uploadLogoReq = async (f: FormData) => {
 export const generateApiKeyReq = async () => {
   try {
     const res = await request.post('/merchant/new_apikey', {})
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.apiKey, null]
   } catch (err) {
@@ -285,9 +299,11 @@ export const saveGatewayKeyReq = async (
   const url = isNew ? '/merchant/gateway/setup' : '/merchant/gateway/edit'
   try {
     const res = await request.post(url, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -305,9 +321,11 @@ export const saveChangellyPubKeyReq = async (
       gatewayId,
       webhookSecret
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -324,9 +342,11 @@ export const saveVatSenseKeyReq = async (vatKey: string) => {
   }
   try {
     const res = await request.post('/merchant/vat/setup_gateway', body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -343,9 +363,11 @@ export const saveSendGridKeyReq = async (vatKey: string) => {
   }
   try {
     const res = await request.post('/merchant/email/gateway_setup', body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -368,9 +390,11 @@ export const getPlanList = async (
   const session = useSessionStore.getState()
   try {
     const res = await request.post('/merchant/plan/list', body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -387,9 +411,11 @@ export const getPlanDetail = async (planId: number) => {
     const res = await request.post('/merchant/plan/detail', {
       planId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     console.log('get plan detail: ', res.data.data)
     return [res.data.data.plan, null]
@@ -405,9 +431,11 @@ export const copyPlanReq = async (planId: number) => {
     const res = await request.post('/merchant/plan/copy', {
       planId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.plan, null]
   } catch (err) {
@@ -452,9 +480,11 @@ export const savePlan = async (planDetail: any, isNew: boolean) => {
   const url = isNew ? '/merchant/plan/new' : `/merchant/plan/edit`
   try {
     const res = await request.post(url, planDetail)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.plan, null]
   } catch (err) {
@@ -468,9 +498,11 @@ export const activatePlan = async (planId: number) => {
     const res = await request.post(`/merchant/plan/activate`, {
       planId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful result returned.
   } catch (err) {
@@ -484,9 +516,11 @@ export const deletePlanReq = async (planId: number) => {
     const res = await request.post(`/merchant/plan/delete`, {
       planId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful result returned.
   } catch (err) {
@@ -507,9 +541,11 @@ export const togglePublishReq = async ({
   }`
   try {
     const res = await request.post(url, { planId })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful result returned.
   } catch (err) {
@@ -522,9 +558,11 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/metric/list`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -556,9 +594,11 @@ export const saveMetricsReq = async (
   const url = isNew ? `/merchant/metric/new` : `/merchant/metric/edit`
   try {
     const res = await request.post(url, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful result returned.
   } catch (err) {
@@ -576,9 +616,11 @@ export const getMetricDetailReq = async (
     const res = await request.post(`/merchant/metric/detail`, {
       metricId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.merchantMetric, null]
   } catch (err) {
@@ -596,9 +638,11 @@ type TSubListReq = {
 export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
   try {
     const res = await request.post(`/merchant/subscription/list`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -616,9 +660,11 @@ export const getSubByUserReq = async (
     const res = await request.get(
       `/merchant/subscription/user_subscription_detail?userId=${userId}`
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -632,9 +678,11 @@ export const getSubDetail = async (subscriptionId: string) => {
     const res = await request.post(`/merchant/subscription/detail`, {
       subscriptionId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -685,9 +733,11 @@ export const getSubscriptionHistoryReq = async ({
       page,
       count
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null] // backend has no meaningful return value
   } catch (err) {
@@ -709,9 +759,11 @@ export const getOneTimePaymentHistoryReq = async ({
     const res = await request.get(
       `/merchant/payment/item/list?userId=${userId}&page=${page}&count=${count}`
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null] // backend has no meaningful return value
   } catch (err) {
@@ -728,9 +780,11 @@ export const cancelSubReq = async (subscriptionId: string) => {
     const res = await request.post(`/merchant/subscription/cancel`, {
       subscriptionId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -752,9 +806,11 @@ export const markAsIncompleteReq = async (
         expireTime: until
       }
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -775,9 +831,11 @@ export const createPreviewReq = async (
       quantity: 1,
       addonParams: addons
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -804,9 +862,11 @@ export const updateSubscription = async (
       confirmCurrency,
       prorationDate
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -846,9 +906,11 @@ export const createSubscriptionReq = async ({
       confirmCurrency,
       startIncomplete
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -877,9 +939,11 @@ export const terminateSubReq = async (
   }
   try {
     const res = await request.post(url, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -896,9 +960,11 @@ export const resumeSubReq = async (subscriptionId: string) => {
     const res = await request.post(url, {
       subscriptionId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -917,9 +983,11 @@ export const getSubTimelineReq = async (body: TGetSubTimelineReq) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.post(`/merchant/subscription/timeline_list`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.subscriptionTimeLines, null]
   } catch (err) {
@@ -940,9 +1008,11 @@ export const getPaymentTimelineReq = async (
   }
   try {
     const res = await request.get(url)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -960,9 +1030,11 @@ export const getDetailPaymentListReq = async (
     const res = await request.get(
       `/merchant/payment/list?page=${page}&count=${count}`
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.paymentDetails, null]
   } catch (err) {
@@ -979,9 +1051,11 @@ export const getPaymentDetailReq = async (
     const res = await request.get(
       `/merchant/payment/detail?paymentId=${paymentId}`
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.paymentDetail, null]
   } catch (err) {
@@ -998,9 +1072,11 @@ export const getCountryListReq = async () => {
     const res = await request.post(`/merchant/vat/country_list`, {
       merchantId: merchantStore.id
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.vatCountryList, null]
   } catch (err) {
@@ -1021,9 +1097,11 @@ export const extendDueDateReq = async (
         appendTrialEndHour
       }
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null]
   } catch (err) {
@@ -1049,9 +1127,11 @@ export const getAdminNoteReq = async ({
       page,
       count
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.noteLists, null]
   } catch (err) {
@@ -1074,9 +1154,11 @@ export const createAdminNoteReq = async ({
       merchantMemberId: merchantStore.id,
       note
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null]
   } catch (err) {
@@ -1094,9 +1176,11 @@ export const setSimDateReq = async (
       subscriptionId,
       newTestClock
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null]
   } catch (err) {
@@ -1110,9 +1194,11 @@ export const getUserProfile = async (userId: number, refreshCb: () => void) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/user/get?userId=${userId}`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.user, null]
   } catch (err) {
@@ -1128,9 +1214,11 @@ export const saveUserProfileReq = async (newProfile: IProfile) => {
   u.userId = newProfile.id
   try {
     const res = await request.post(`/merchant/user/update`, u)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1152,9 +1240,11 @@ export const getUserPaymentMethodListReq = async ({
     const res = await request.get(
       `/merchant/payment/method_list?gatewayId=${gatewayId}&userId=${userId}`
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.methodList, null]
   } catch (err) {
@@ -1167,9 +1257,11 @@ export const getUserPaymentMethodListReq = async ({
 export const suspendUserReq = async (userId: number) => {
   try {
     const res = await request.post(`/merchant/user/suspend_user`, { userId })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null]
   } catch (err) {
@@ -1191,9 +1283,11 @@ type TNewUserInfo = {
 export const createNewUserReq = async (newUser: TNewUserInfo) => {
   try {
     const res = await request.post(`/merchant/user/new`, newUser)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // this call has no meaningful result to return
   } catch (err) {
@@ -1207,9 +1301,11 @@ export const appSearchReq = async (searchKey: string) => {
     const res = await request.post(`/merchant/search/key_search`, {
       searchKey
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1231,9 +1327,11 @@ export const getDiscountCodeListReq = async (
     const res = await request.get(
       `/merchant/discount/list?page=${page}&count=${count}`
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1245,9 +1343,11 @@ export const getDiscountCodeListReq = async (
 const getDiscountCodeDetailReq = async (codeId: number) => {
   try {
     const res = await request.get(`/merchant/discount/detail?id=${codeId}`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.discount, null]
   } catch (err) {
@@ -1285,9 +1385,11 @@ export const getDiscountCodeDetailWithMore = async (
 
   try {
     const res = await request.get(`/merchant/discount/detail?id=${codeId}`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.discount, null]
   } catch (err) {
@@ -1299,9 +1401,11 @@ export const getDiscountCodeDetailWithMore = async (
 export const createDiscountCodeReq = async (body: DiscountCode) => {
   try {
     const res = await request.post(`/merchant/discount/new`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       // session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1313,9 +1417,11 @@ export const createDiscountCodeReq = async (body: DiscountCode) => {
 export const updateDiscountCodeReq = async (body: DiscountCode) => {
   try {
     const res = await request.post(`/merchant/discount/edit`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       // session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1327,9 +1433,11 @@ export const updateDiscountCodeReq = async (body: DiscountCode) => {
 export const deleteDiscountCodeReq = async (id: number) => {
   try {
     const res = await request.post(`/merchant/discount/delete`, { id })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       // session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1344,9 +1452,11 @@ export const toggleDiscountCodeActivateReq = async (
 ) => {
   try {
     const res = await request.post(`/merchant/discount/${action}`, { id })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       // session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1372,9 +1482,11 @@ export const getInvoiceListReq = async (
 ) => {
   try {
     const res = await request.post(`/merchant/invoice/list`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1393,9 +1505,11 @@ export const getInvoiceDetailReq = async (
       invoiceId
     })
 
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1421,9 +1535,11 @@ export const markInvoiceAsPaidReq = async (
       }
     )
 
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1445,9 +1561,11 @@ export const markRefundAsSucceedReq = async (
       reason
     })
 
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1477,9 +1595,11 @@ export const createInvoiceReq = async (body: TCreateInvoiceReq) => {
   body.lines = body.invoiceItems
   try {
     const res = await request.post(`/merchant/invoice/new`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // backend has no meaningful return value
   } catch (err) {
@@ -1502,9 +1622,11 @@ export const saveInvoiceReq = async (body: TSaveInvoiceReq) => {
   body.lines = body.invoiceItems
   try {
     const res = await request.post(`/merchant/invoice/edit`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1519,9 +1641,11 @@ export const deleteInvoiceReq = async (invoiceId: string) => {
     const res = await request.post(`/merchant/invoice/delete`, {
       invoiceId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1540,9 +1664,11 @@ type TPublishInvoiceReq = {
 export const publishInvoiceReq = async (body: TPublishInvoiceReq) => {
   try {
     const res = await request.post(`/merchant/invoice/finish`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1557,9 +1683,11 @@ export const revokeInvoiceReq = async (invoiceId: string) => {
     const res = await request.post(`/merchant/invoice/cancel`, {
       invoiceId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1581,9 +1709,11 @@ export const refundReq = async (
   body.refundAmount = Math.round(body.refundAmount)
   try {
     const res = await request.post(`/merchant/invoice/refund`, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1597,9 +1727,11 @@ export const sendInvoiceInMailReq = async (invoiceId: string) => {
     const res = await request.post(`/merchant/invoice/send_email`, {
       invoiceId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // no meaningful return value
   } catch (err) {
@@ -1646,9 +1778,11 @@ export const getUserListReq = async (
   const session = useSessionStore.getState()
   try {
     const res = await request.post(`/merchant/user/list`, users)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1660,9 +1794,11 @@ export const getUserListReq = async (
 export const getMerchantUserListReq = async (refreshCb: () => void) => {
   try {
     const res = await request.get('/merchant/member/list')
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1685,9 +1821,11 @@ export const inviteMemberReq = async ({
   const body = { email, firstName, lastName, roleIds }
   try {
     const res = await request.post('/merchant/member/new_member', body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1706,9 +1844,11 @@ export const updateMemberRolesReq = async ({
   const body = { memberId, roleIds }
   try {
     const res = await request.post('/merchant/member/update_member_role', body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1720,9 +1860,11 @@ export const updateMemberRolesReq = async ({
 export const getPaymentGatewayListReq = async () => {
   try {
     const res = await request.get(`/merchant/gateway/list`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.gateways, null]
   } catch (err) {
@@ -1763,9 +1905,11 @@ export const createWireTransferAccountReq = async (
       '/merchant/gateway/wire_transfer_setup',
       body
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null]
   } catch (err) {
@@ -1779,9 +1923,11 @@ export const updateWireTransferAccountReq = async (
 ) => {
   try {
     const res = await request.post('/merchant/gateway/wire_transfer_edit', body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null]
   } catch (err) {
@@ -1794,9 +1940,11 @@ export const getEventListReq = async () => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/webhook/event_list`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.eventList, null]
   } catch (err) {
@@ -1809,9 +1957,11 @@ export const getWebhookListReq = async (refreshCb: () => void) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/webhook/endpoint_list`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data.endpointList, null]
   } catch (err) {
@@ -1841,9 +1991,11 @@ export const saveWebhookReq = async ({
       body.endpointId = endpointId
     }
     const res = await request.post(actionUrl, body)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // this call has no meaningful result
   } catch (err) {
@@ -1858,9 +2010,11 @@ export const deleteWebhookReq = async (endpointId: number) => {
     const res = await request.post('/merchant/webhook/delete_endpoint', {
       endpointId
     })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [null, null] // this call has no meaningful result
   } catch (err) {
@@ -1882,9 +2036,11 @@ export const getWebhookLogs = async (
     const res = await request.get(
       `/merchant/webhook/endpoint_log_list?endpointId=${endpointId}&page=${page}&count=${count}`
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1897,9 +2053,11 @@ export const resendWebhookEvt = async (logId: number) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.post(`/merchant/webhook/resend`, { logId })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1912,9 +2070,11 @@ export const getRoleListReq = async (refreshCb: null | (() => void)) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/role/list`)
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1929,9 +2089,11 @@ export const saveRoleReq = async (role: TRole, isNew: boolean) => {
       `/merchant/role/${isNew ? 'new' : 'edit'}`,
       role
     )
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {
@@ -1943,9 +2105,11 @@ export const saveRoleReq = async (role: TRole, isNew: boolean) => {
 export const deleteRoleReq = async (id: number) => {
   try {
     const res = await request.post(`/merchant/role/delete`, { id })
-    if (res.data.code == 61) {
+    if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
-      throw new ExpiredError('Session expired')
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
     }
     return [res.data.data, null]
   } catch (err) {

@@ -109,13 +109,6 @@ const App: React.FC = () => {
     getItem('Configuration', '/configuration', <SettingOutlined />)
   ]
 
-  console.log(
-    'roles/isOwner: ',
-    profileStore.MemberRoles,
-    '//',
-    profileStore.isOwner
-  )
-
   const accessiblePages: string[] = []
   profileStore.MemberRoles.forEach((r) =>
     r.permissions.forEach(
@@ -132,7 +125,7 @@ const App: React.FC = () => {
         ) != -1
     )
   }
-  console.log('menu items: ', items)
+  // console.log('menu items: ', items)
   const defaultPage = () => {
     if (profileStore.isOwner) {
       return 'subscription'
@@ -367,7 +360,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (sessionStore.expired) {
-      if (null == profileStore.id) {
+      if (null == profileStore.id || window.redirectToLogin) {
         // is it better to use email?
         navigate(`${APP_PATH}login`)
       } else {
