@@ -1791,11 +1791,11 @@ export const getUserListReq = async (
   }
 }
 
-export const getMerchantUserListReq = async (refreshCb: () => void) => {
+export const getMerchantUserListReq = async (refreshCb?: () => void) => {
   try {
     const res = await request.get('/merchant/member/list')
     if (res.data.code == 61 || res.data.code == 62) {
-      session.setSession({ expired: true, refresh: refreshCb })
+      session.setSession({ expired: true, refresh: refreshCb ?? null })
       throw new ExpiredError(
         `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
       )
@@ -1805,6 +1805,21 @@ export const getMerchantUserListReq = async (refreshCb: () => void) => {
     const e = err instanceof Error ? err : new Error('Unknown error')
     return [null, e]
   }
+}
+
+export const getMerchantUserListWithMoreReq = async (refreshCb: () => void) => {
+  const [
+    [merchantUserListRes, errMerchantUserList],
+    [roleListRes, errRoleList]
+  ] = await Promise.all([getMerchantUserListReq(), getRoleListReq()])
+  const err = errMerchantUserList || errRoleList
+  if (null != err) {
+    if (err instanceof ExpiredError) {
+      session.setSession({ expired: true, refresh: refreshCb })
+    }
+    return [null, err]
+  }
+  return [{ merchantUserListRes, roleListRes }, null]
 }
 
 // invite other admin (with different roles)
@@ -2085,12 +2100,12 @@ export const resendWebhookEvt = async (logId: number) => {
   }
 }
 
-export const getRoleListReq = async (refreshCb: null | (() => void)) => {
+export const getRoleListReq = async (refreshCb?: () => void) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.get(`/merchant/role/list`)
     if (res.data.code == 61 || res.data.code == 62) {
-      session.setSession({ expired: true, refresh: refreshCb })
+      session.setSession({ expired: true, refresh: refreshCb ?? null })
       throw new ExpiredError(
         `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
       )

@@ -30,6 +30,7 @@ import { emailValidate, formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
 import {
   getMerchantUserListReq,
+  getMerchantUserListWithMoreReq,
   getRoleListReq,
   inviteMemberReq,
   suspendMemberReq,
@@ -49,6 +50,7 @@ const Index = () => {
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [roles, setRoles] = useState<TRole[]>([])
   const [users, setUsers] = useState<IMerchantUserProfile[]>([])
   const [activeUser, setActiveUser] = useState<
     IMerchantUserProfile | undefined
@@ -73,30 +75,34 @@ const Index = () => {
 
   const fetchData = async () => {
     setLoading(true)
-    const [res, err] = await getMerchantUserListReq(fetchData)
+    const [res, err] = await getMerchantUserListWithMoreReq(fetchData)
     setLoading(false)
     if (err != null) {
       message.error(err.message)
       return
     }
-    const { merchantMembers, total } = res
+    console.log('res: ', res)
+    const { merchantUserListRes, roleListRes } = res
+    const { merchantMembers, total } = merchantUserListRes
     setUsers(merchantMembers ?? [])
     setTotal(total)
+    setRoles(roleListRes.merchantRoles ?? [])
   }
 
-  const suspendAccount = (memberId: number) => async () => {
+  const getRoleList = async () => {
     setLoading(true)
-    const [res, err] = await suspendMemberReq(memberId)
+    const [res, err] = await getRoleListReq(getRoleList)
     setLoading(false)
     if (err != null) {
       message.error(err.message)
       return
     }
-    fetchData()
-    const u = users.find((u) => u.id == memberId)
-    message.success(
-      `Account of '${u?.firstName} ${u?.lastName}' has been suspended`
-    )
+    console.log('res: ', res)
+    const { merchantUserListRes, roleListRes } = res
+    const { merchantMembers, total } = merchantUserListRes
+    setUsers(merchantMembers ?? [])
+    setTotal(total)
+    setRoles(roleListRes.merchantRoles ?? [])
   }
 
   const columns: ColumnsType<IMerchantUserProfile> = [
@@ -115,6 +121,11 @@ const Index = () => {
       title: 'Roles',
       dataIndex: 'MemberRoles',
       key: 'MemberRoles',
+      /* filters: [
+        { text: 'Main plan', value: 1 },
+        { text: 'Add-on', value: 2 },
+        { text: 'One-time payment', value: 3 }
+      ], */
       render: (roles, user) => (
         <Popover
           placement="top"
@@ -220,6 +231,7 @@ const Index = () => {
           closeModal={toggleInviteModal}
           refresh={fetchData}
           userData={activeUser}
+          roles={roles}
         />
       )}
       {suspendModalOpen && (
@@ -300,15 +312,16 @@ export default Index
 const InviteModal = ({
   closeModal,
   refresh,
-  userData
+  userData,
+  roles
 }: {
   closeModal: () => void
   refresh: () => void
   userData: IMerchantUserProfile | undefined
+  roles: TRole[]
 }) => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
-  const [roles, setRoles] = useState<TRole[]>([])
   const isNew = userData == undefined
 
   const onConfirm = async () => {
@@ -341,22 +354,6 @@ const InviteModal = ({
     closeModal()
     refresh()
   }
-
-  const getRoleList = async () => {
-    setLoading(true)
-    const [res, err] = await getRoleListReq(getRoleList)
-    setLoading(false)
-    if (null != err) {
-      message.error(err.message)
-      return
-    }
-    const { merchantRoles, total } = res
-    setRoles(merchantRoles ?? [])
-  }
-
-  useEffect(() => {
-    getRoleList()
-  }, [])
 
   return (
     <Modal
@@ -449,7 +446,7 @@ const InviteModal = ({
           <Select
             mode="multiple"
             disabled={loading}
-            style={{ width: '100%' }}
+            style={{ width: '80%' }}
             options={roles.map((r) => ({
               label: r.role,
               value: r.id as number
@@ -568,64 +565,3 @@ const SuspendModal = ({
     </Modal>
   )
 }
-/*
-const DEFAULT_SEARCH_TERM = {
-  firstName: '',
-  lastName: '',
-  email: ''
-}
-const Search = ({
-  form,
-  searching,
-  goSearch
-}: {
-  form: FormInstance<any>
-  searching: boolean
-  goSearch: () => void
-}) => {
-  const clear = () => form.resetFields()
-
-  return (
-    <div>
-      <Form form={form} initialValues={DEFAULT_SEARCH_TERM}>
-        <Row className="flex items-center" gutter={[8, 8]}>
-          <Col span={3}>First/Last name</Col>
-          <Col span={4}>
-            <Form.Item name="firstName" noStyle={true}>
-              <Input onPressEnter={goSearch} placeholder="first name" />
-            </Form.Item>
-          </Col>
-          <Col span={4}>
-            <Form.Item name="lastName" noStyle={true}>
-              <Input onPressEnter={goSearch} placeholder="last name" />
-            </Form.Item>
-          </Col>
-
-          <Col span={6} className="flex justify-end">
-            <Button onClick={clear} disabled={searching}>
-              Clear
-            </Button>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <Button
-              onClick={goSearch}
-              type="primary"
-              loading={searching}
-              disabled={searching}
-            >
-              Search
-            </Button>
-          </Col>
-        </Row>
-        <Row className="my-3 flex items-center" gutter={[8, 8]}>
-          <Col span={3}>Email</Col>
-          <Col span={4}>
-            <Form.Item name="email" noStyle={true}>
-              <Input onPressEnter={goSearch} />
-            </Form.Item>
-          </Col>
-        </Row>
-      </Form>
-    </div>
-  )
-}
-*/

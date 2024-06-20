@@ -89,10 +89,10 @@ const OneTimeHistory = ({ userId }: { userId: number }) => {
       key: 'quantity'
     },
     {
-      title: 'created at',
+      title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d) => (d == 0 || d == null ? '―' : formatDate(d))
+      render: (d) => (d == 0 || d == null ? '―' : formatDate(d, true))
     },
     {
       title: 'Status',
@@ -100,22 +100,7 @@ const OneTimeHistory = ({ userId }: { userId: number }) => {
       key: 'status',
       render: (status) => PaymentStatus(status)
     },
-    {
-      title: 'Invoice Id',
-      dataIndex: 'invoiceId',
-      key: 'invoiceId',
-      render: (ivId) =>
-        ivId == '' || ivId == null ? (
-          ''
-        ) : (
-          <div
-            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
-            onClick={() => navigate(`${APP_PATH}invoice/${ivId}`)}
-          >
-            {ivId}
-          </div>
-        )
-    },
+
     {
       title: 'Subscription Id',
       dataIndex: 'subscriptionId',
@@ -137,6 +122,22 @@ const OneTimeHistory = ({ userId }: { userId: number }) => {
       title: 'Payment Id',
       dataIndex: 'paymentId',
       key: 'paymentId'
+    },
+    {
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId',
+      render: (ivId) =>
+        ivId == '' || ivId == null ? (
+          ''
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}invoice/${ivId}`)}
+          >
+            {ivId}
+          </div>
+        )
     }
   ]
 
@@ -152,7 +153,7 @@ const OneTimeHistory = ({ userId }: { userId: number }) => {
       <Table
         columns={columns}
         dataSource={onetimeHistory}
-        rowKey={'uniqueId'}
+        rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}
         // scroll={{ x: true, y: 640 }}
@@ -240,6 +241,12 @@ const Index = ({
       render: (s) => SubHistoryStatus(s)
     },
     {
+      title: 'Created at',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (d, _) => (d === 0 ? 'N/A' : formatDate(d, true))
+    },
+    {
       title: 'Addons',
       dataIndex: 'addons',
       key: 'addons',
@@ -294,12 +301,6 @@ const Index = ({
         )
     },
     {
-      title: 'Created at',
-      dataIndex: 'createTime',
-      key: 'createTime',
-      render: (d, _) => (d === 0 ? 'N/A' : formatDate(d))
-    },
-    {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
       key: 'invoiceId',
@@ -315,8 +316,8 @@ const Index = ({
             {invoiceId}
           </div>
         )
-      // render: (status, _) => UserStatus(status)
-    }
+    },
+    { title: 'Payment Id', dataIndex: 'paymentId', key: 'paymentId' }
   ]
 
   const getSubHistory = async () => {
@@ -554,7 +555,7 @@ const Index = ({
         rowKey={'uniqueId'}
         rowClassName="clickable-tbl-row"
         pagination={false}
-        // scroll={{ x: true, y: 640 }}
+        scroll={{ x: 1280 }}
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {}

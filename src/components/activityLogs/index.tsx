@@ -18,7 +18,7 @@ import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY } from '../../constants'
-import { getActivityLogsReq } from '../../requests'
+import { getActivityLogsReq, getRoleListReq } from '../../requests'
 import { TActivityLogs } from '../../shared.types.d'
 
 import { formatDate } from '../../helpers'
@@ -54,6 +54,7 @@ const Index = () => {
     {
       title: 'By',
       dataIndex: 'member',
+      fixed: 'left',
       key: 'member',
       render: (m, _) => m.firstName + ' ' + m.lastName
     },
@@ -132,6 +133,7 @@ const Index = () => {
       title: 'Subscription Id',
       dataIndex: 'subscriptionId',
       key: 'subscriptionId',
+      width: 200,
       render: (subId) =>
         subId == '' ? (
           '―'
@@ -140,7 +142,13 @@ const Index = () => {
             onClick={() => navigate(`${APP_PATH}subscription/${subId}`)}
             type="link"
             className="log-key-info-id"
-            style={{ padding: 0 }}
+            style={{
+              padding: 0,
+              width: '160px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
           >
             {subId}
           </Button>
