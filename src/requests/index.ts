@@ -2137,9 +2137,32 @@ export const deleteRoleReq = async (id: number) => {
   }
 }
 
-export const getActivityLogsReq = async (refreshCb: () => void) => {
+type TActivityLogParams = {
+  memberFirstName?: string
+  memberLastName?: string
+  memberEmail?: string
+  firstName?: string
+  lastName?: string
+  email?: string
+  subscriptionId?: string
+  invoiceId?: string
+  planId?: number
+  discountCode?: number
+  page: number
+  count: number
+}
+export const getActivityLogsReq = async (
+  searchTerm: TActivityLogParams,
+  refreshCb: () => void
+) => {
+  let term = ''
+  for (const [key, value] of Object.entries(searchTerm)) {
+    console.log(key, value)
+    term += `${key}=${value}&`
+  }
+  term = term.substring(0, term.length - 1)
   try {
-    const res = await request.get(`/merchant/member/operation_log_list`)
+    const res = await request.get(`/merchant/member/operation_log_list?${term}`)
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
       throw new ExpiredError(

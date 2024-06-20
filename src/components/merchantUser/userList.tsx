@@ -258,7 +258,6 @@ const Index = () => {
                 tgt instanceof HTMLElement &&
                 tgt.classList.contains('btn-merchant-user-roles')
               ) {
-                console.log('fff')
                 setActiveUser(user)
                 toggleInviteModal()
                 return

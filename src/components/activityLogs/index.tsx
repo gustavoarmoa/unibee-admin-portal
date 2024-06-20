@@ -36,8 +36,9 @@ const Index = () => {
   const [logs, setLogs] = useState<TActivityLogs[]>([])
 
   const fetchLogs = async () => {
+    const searchTerm = { page, count: PAGE_SIZE }
     setLoading(true)
-    const [res, err] = await getActivityLogsReq(fetchLogs)
+    const [res, err] = await getActivityLogsReq(searchTerm, fetchLogs)
     setLoading(false)
     if (err != null) {
       message.error((err as Error).message)
@@ -50,12 +51,17 @@ const Index = () => {
 
   const columns: ColumnsType<TActivityLogs> = [
     {
+      title: 'By',
+      dataIndex: 'member',
+      key: 'member',
+      render: (m, _) => m.firstName + ' ' + m.lastName
+    },
+    {
       title: 'Target',
       dataIndex: 'optTarget',
       key: 'optTarget'
       // render: (text) => <a>{text}</a>,
     },
-
     {
       title: 'Content',
       dataIndex: 'optContent',
@@ -64,13 +70,80 @@ const Index = () => {
     {
       title: 'User Id',
       dataIndex: 'userId',
-      key: 'userId'
+      key: 'userId',
+      render: (userId) =>
+        userId == 0 ? (
+          '―'
+        ) : (
+          <Button
+            type="link"
+            onClick={() => navigate(`${APP_PATH}user/${userId}`)}
+            className="log-key-info-id"
+            style={{ padding: 0 }}
+          >
+            {userId}
+          </Button>
+        )
     },
     {
-      title: 'Created at',
+      title: 'Time',
       dataIndex: 'createTime',
       key: 'createTime',
       render: (d, log) => formatDate(d, true) // dayjs(d * 1000).format('YYYY-MMM-DD, HH:MM:ss')
+    },
+    {
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId',
+      render: (invoiceId) =>
+        invoiceId == '' ? (
+          '―'
+        ) : (
+          <Button
+            onClick={() => navigate(`${APP_PATH}invoice/${invoiceId}`)}
+            type="link"
+            className="log-key-info-id"
+            style={{ padding: 0 }}
+          >
+            {invoiceId}
+          </Button>
+        )
+    },
+    {
+      title: 'Plan Id',
+      dataIndex: 'planId',
+      key: 'planId',
+      render: (planId) =>
+        planId == '' ? (
+          '―'
+        ) : (
+          <Button
+            onClick={() => navigate(`${APP_PATH}plan/${planId}`)}
+            type="link"
+            className="log-key-info-id"
+            style={{ padding: 0 }}
+          >
+            {planId}
+          </Button>
+        )
+    },
+    {
+      title: 'Subscription Id',
+      dataIndex: 'subscriptionId',
+      key: 'subscriptionId',
+      render: (subId) =>
+        subId == '' ? (
+          '―'
+        ) : (
+          <Button
+            onClick={() => navigate(`${APP_PATH}subscription/${subId}`)}
+            type="link"
+            className="log-key-info-id"
+            style={{ padding: 0 }}
+          >
+            {subId}
+          </Button>
+        )
     },
     {
       title: (
@@ -122,6 +195,7 @@ const Index = () => {
         rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}
+        scroll={{ x: 1680 }}
         loading={{
           spinning: loading,
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
@@ -130,7 +204,14 @@ const Index = () => {
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
+              const tgt = event.target
               // navigate(`${APP_PATH}billable-metric/${record.id}`)
+              if (
+                tgt instanceof HTMLElement &&
+                tgt.classList.contains('log-key-info-id')
+              ) {
+                return
+              }
             }
           }
         }}
