@@ -1807,6 +1807,7 @@ export const getMerchantUserListReq = async (refreshCb: () => void) => {
   }
 }
 
+// invite other admin (with different roles)
 export const inviteMemberReq = async ({
   email,
   firstName,
@@ -1844,6 +1845,24 @@ export const updateMemberRolesReq = async ({
   const body = { memberId, roleIds }
   try {
     const res = await request.post('/merchant/member/update_member_role', body)
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const suspendMemberReq = async (memberId: number) => {
+  try {
+    const res = await request.post('/merchant/member/suspend_member', {
+      memberId
+    })
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
       throw new ExpiredError(

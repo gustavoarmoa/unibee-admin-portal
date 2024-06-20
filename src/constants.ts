@@ -34,6 +34,11 @@ export const USER_STATUS: { [key: number]: string } = {
   2: 'Suspended'
 }
 
+export const MERCHANT_USER_STATUS: { [key: number]: string } = {
+  0: 'Active',
+  2: 'Suspended'
+}
+
 export const CURRENCY: {
   [key: string]: {
     symbol: string

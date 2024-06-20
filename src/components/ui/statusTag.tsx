@@ -4,6 +4,7 @@ import {
   CURRENCY,
   DISCOUNT_CODE_STATUS,
   INVOICE_STATUS,
+  MERCHANT_USER_STATUS,
   PAYMENT_STATUS,
   PLAN_STATUS,
   SUBSCRIPTION_HISTORY_STATUS,
@@ -74,9 +75,17 @@ const USER_STATUS_TAG: { [key: number]: ReactElement } = {
 }
 const UserStatus = (statusId: number) => USER_STATUS_TAG[statusId]
 
+const MERCHANT_USER_STATUS_TAG: { [key: number]: ReactElement } = {
+  0: <Tag color="#87d068">{MERCHANT_USER_STATUS[0]}</Tag>, // active
+  2: <Tag color="red">{MERCHANT_USER_STATUS[2]}</Tag> // suspended
+}
+const MerchantUserStatus = (statusId: number) =>
+  MERCHANT_USER_STATUS_TAG[statusId]
+
 export {
   DiscountCodeStatus,
   InvoiceStatus,
+  MerchantUserStatus,
   PaymentStatus,
   PlanStatus,
   SubHistoryStatus,

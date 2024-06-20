@@ -8,11 +8,13 @@ import {
 } from '@ant-design/icons'
 import {
   Button,
+  Col,
   Form,
   Input,
   Modal,
   Pagination,
   Popover,
+  Row,
   Select,
   Space,
   Table,
@@ -22,7 +24,7 @@ import {
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { emailValidate, formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
@@ -30,11 +32,13 @@ import {
   getMerchantUserListReq,
   getRoleListReq,
   inviteMemberReq,
+  suspendMemberReq,
   updateMemberRolesReq
 } from '../../requests'
 import '../../shared.css'
 import { IMerchantUserProfile, IProfile, TRole } from '../../shared.types'
 import { useProfileStore } from '../../stores'
+import { MerchantUserStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL
 const PAGE_SIZE = 10
@@ -58,6 +62,15 @@ const Index = () => {
     setInviteModalOpen(!inviteModalOpen)
   }
 
+  const [suspendModalOpen, setSuspendModalOpen] = useState(false)
+  const toggleSuspendModal = () => {
+    if (suspendModalOpen) {
+      // before closing the modal, set user = null, otherwise, clicking 'invite' button will the previous active user data
+      setActiveUser(undefined)
+    }
+    setSuspendModalOpen(!suspendModalOpen)
+  }
+
   const fetchData = async () => {
     setLoading(true)
     const [res, err] = await getMerchantUserListReq(fetchData)
@@ -69,6 +82,21 @@ const Index = () => {
     const { merchantMembers, total } = res
     setUsers(merchantMembers ?? [])
     setTotal(total)
+  }
+
+  const suspendAccount = (memberId: number) => async () => {
+    setLoading(true)
+    const [res, err] = await suspendMemberReq(memberId)
+    setLoading(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    fetchData()
+    const u = users.find((u) => u.id == memberId)
+    message.success(
+      `Account of '${u?.firstName} ${u?.lastName}' has been suspended`
+    )
   }
 
   const columns: ColumnsType<IMerchantUserProfile> = [
@@ -115,7 +143,8 @@ const Index = () => {
     {
       title: 'Status',
       dataIndex: 'status',
-      key: 'status'
+      key: 'status',
+      render: (s, user) => MerchantUserStatus(s)
     },
     {
       title: 'Email',
@@ -126,7 +155,7 @@ const Index = () => {
       title: 'Created at',
       dataIndex: 'createTime',
       key: 'createTime',
-      render: (d, plan) => (d === 0 ? '―' : formatDate(d)) // dayjs(d * 1000).format('YYYY-MMM-DD')
+      render: (d, user) => (d === 0 ? '―' : formatDate(d)) // dayjs(d * 1000).format('YYYY-MMM-DD')
     },
     {
       title: (
@@ -155,7 +184,7 @@ const Index = () => {
       ),
       width: 164,
       key: 'action',
-      render: (_, record) => (
+      render: (_, user) => (
         <Space size="middle" className="member-action-btn-wrapper">
           <Tooltip title="View activities logs">
             <Button
@@ -166,11 +195,12 @@ const Index = () => {
             />
           </Tooltip>
 
-          <Tooltip title="Suspend">
+          <Tooltip title="Suspend account">
             <Button
+              className="btn-merchant-suspend"
               style={{ border: 'unset' }}
               disabled={loading}
-              // onClick={() => copyPlan(record.id)}
+              onClick={toggleSuspendModal}
               icon={<UserDeleteOutlined />}
             />
           </Tooltip>
@@ -188,6 +218,13 @@ const Index = () => {
       {inviteModalOpen && (
         <InviteModal
           closeModal={toggleInviteModal}
+          refresh={fetchData}
+          userData={activeUser}
+        />
+      )}
+      {suspendModalOpen && (
+        <SuspendModal
+          closeModal={toggleSuspendModal}
           refresh={fetchData}
           userData={activeUser}
         />
@@ -216,12 +253,23 @@ const Index = () => {
               if (!profileStore.isOwner) {
                 // return
               }
+              const tgt = evt.target
               if (
-                evt.target instanceof HTMLElement &&
-                evt.target.classList.contains('btn-merchant-user-roles')
+                tgt instanceof HTMLElement &&
+                tgt.classList.contains('btn-merchant-user-roles')
               ) {
+                console.log('fff')
                 setActiveUser(user)
                 toggleInviteModal()
+                return
+              }
+
+              if (
+                tgt instanceof Element &&
+                tgt.closest('.btn-merchant-suspend')
+              ) {
+                setActiveUser(user)
+                toggleSuspendModal()
                 return
               }
               // navigate(`${APP_PATH}admin/${user.id}`)
@@ -428,6 +476,99 @@ const InviteModal = ({
   )
 }
 
+const rowStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  height: '32px'
+}
+const colStyle: CSSProperties = { fontWeight: 'bold' }
+
+const SuspendModal = ({
+  closeModal,
+  refresh,
+  userData
+}: {
+  closeModal: () => void
+  refresh: () => void
+  userData: IMerchantUserProfile | undefined
+}) => {
+  const [loading, setLoading] = useState(false)
+
+  const onConfirm = async () => {
+    if (userData == null) {
+      return
+    }
+    setLoading(true)
+    const [res, err] = await suspendMemberReq(userData!.id)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+
+    message.success(
+      `Admin account of '${userData!.firstName} ${userData!.lastName} has been suspended`
+    )
+    closeModal()
+    refresh()
+  }
+
+  return (
+    <Modal
+      title={`Suspend account confirm`}
+      width={'640px'}
+      open={true}
+      footer={null}
+      closeIcon={null}
+    >
+      <Row style={rowStyle}>
+        <Col span={8} style={colStyle}>
+          First Name
+        </Col>
+        <Col span={16}>{userData?.firstName}</Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col style={colStyle} span={8}>
+          Last Name
+        </Col>
+        <Col span={16}>{userData?.lastName}</Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col style={colStyle} span={8}>
+          Email
+        </Col>
+        <Col span={16}>{userData?.email}</Col>
+      </Row>
+      <Row style={rowStyle}>
+        <Col style={colStyle} span={8}>
+          Roles
+        </Col>
+        <Col span={16}>
+          <Space size={[0, 8]} wrap>
+            {userData?.MemberRoles.map((r) => (
+              <Tag key={r.id as number}>{r.role}</Tag>
+            ))}
+          </Space>
+        </Col>
+      </Row>
+
+      <div className="mt-6 flex items-center justify-end gap-4">
+        <Button onClick={closeModal} disabled={loading}>
+          Cancel
+        </Button>
+        <Button
+          type="primary"
+          danger
+          onClick={onConfirm}
+          loading={loading}
+          disabled={loading}
+        >
+          Suspend
+        </Button>
+      </div>
+    </Modal>
+  )
+}
 /*
 const DEFAULT_SEARCH_TERM = {
   firstName: '',
