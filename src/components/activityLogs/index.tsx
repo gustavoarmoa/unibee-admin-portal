@@ -17,7 +17,7 @@ import type { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CURRENCY, METRICS_AGGREGATE_TYPE, METRICS_TYPE } from '../../constants'
+import { CURRENCY } from '../../constants'
 import { getActivityLogsReq } from '../../requests'
 import { TActivityLogs } from '../../shared.types.d'
 
@@ -30,6 +30,7 @@ const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
   const navigate = useNavigate()
+  const [form] = Form.useForm()
   const [total, setTotal] = useState(0)
   const { page, onPageChange } = usePagination()
   const [loading, setLoading] = useState(false)
@@ -189,6 +190,12 @@ const Index = () => {
 
   return (
     <>
+      <Search
+        form={form}
+        searching={loading}
+        onPageChange={onPageChange}
+        goSearch={fetchLogs}
+      />
       <Table
         columns={columns}
         dataSource={logs}
@@ -254,44 +261,28 @@ const Search = ({
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
 }) => {
-  /* const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
-      value: Number(s),
-      label: INVOICE_STATUS[Number(s)]
-    })) */
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
     goSearch()
   }
-  const watchCurrency = Form.useWatch('currency', form)
-  useEffect(() => {
-    // just to trigger rerender when currency changed
-  }, [watchCurrency])
-
-  const currencySymbol =
-    CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol
 
   return (
     <div>
       <Form form={form} initialValues={DEFAULT_TERM} disabled={searching}>
-        <Row className="flex items-center" gutter={[8, 8]}>
-          <Col span={4}>First/Last name</Col>
+        <Row className="my-2 flex items-center" gutter={[8, 8]}>
+          <Col span={3}>Billing admin name</Col>
           <Col span={4}>
             <Form.Item name="firstName" noStyle={true}>
-              <Input onPressEnter={goSearch} placeholder="first name" />
+              <Input style={{ width: '80%' }} />
             </Form.Item>
           </Col>
-          /
+
+          <Col span={3}>User account email</Col>
           <Col span={4}>
-            <Form.Item name="lastName" noStyle={true}>
-              <Input onPressEnter={goSearch} placeholder="last name" />
+            <Form.Item name="email" noStyle={true}>
+              <Input style={{ width: '80%' }} />
             </Form.Item>
-          </Col>
-          <Col span={3}>
-            <span></span>
-            {/* <Form.Item name="refunded" noStyle={true} valuePropName="checked">
-                <Checkbox>Refunded</Checkbox>
-    </Form.Item> */}
           </Col>
           <Col span={8} className="flex justify-end">
             <Button onClick={clear} disabled={searching}>
@@ -309,44 +300,26 @@ const Search = ({
           </Col>
         </Row>
 
-        <Row className="flex items-center" gutter={[8, 8]}>
+        <Row className="my-2 flex items-center" gutter={[8, 8]}>
+          <Col span={3}>Subscription Id </Col>
           <Col span={4}>
-            <div className="flex items-center">
-              <span className="mr-2">Amount</span>
-              <Form.Item name="currency" noStyle={true}>
-                <Select
-                  style={{ width: 80 }}
-                  options={[
-                    { value: 'EUR', label: 'EUR' },
-                    { value: 'USD', label: 'USD' },
-                    { value: 'JPY', label: 'JPY' }
-                  ]}
-                />
-              </Form.Item>
-            </div>
-          </Col>
-          <Col span={4}>
-            <Form.Item name="amountStart" noStyle={true}>
-              <Input
-                prefix={`from ${currencySymbol}`}
-                onPressEnter={goSearch}
-              />
+            <Form.Item name="subscriptionId" noStyle={true}>
+              <Input style={{ width: '80%' }} />
             </Form.Item>
           </Col>
-          &nbsp;
+
+          <Col span={3}>Invoice Id</Col>
           <Col span={4}>
-            <Form.Item name="amountEnd" noStyle={true}>
-              <Input prefix={`to ${currencySymbol}`} onPressEnter={goSearch} />
+            <Form.Item name="invoiceId" noStyle={true}>
+              <Input style={{ width: '80%' }} />
             </Form.Item>
           </Col>
-          <Col span={11}>
-            <span className="mr-2">Status</span>
-            <Form.Item name="status" noStyle={true}>
-              <Select
-                mode="multiple"
-                options={[]}
-                style={{ maxWidth: 420, minWidth: 120, margin: '8px 0' }}
-              />
+        </Row>
+        <Row className="my-2">
+          <Col span={3}>Plan Id</Col>
+          <Col span={4}>
+            <Form.Item name="planId" noStyle={true}>
+              <Input style={{ width: '80%' }} />
             </Form.Item>
           </Col>
         </Row>
