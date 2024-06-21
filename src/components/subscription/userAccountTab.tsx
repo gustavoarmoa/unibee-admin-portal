@@ -39,8 +39,7 @@ const UserAccountTab = ({
   const [suspendModalOpen, setSuspendModalOpen] = useState(false)
   const toggleSuspend = () => setSuspendModalOpen(!suspendModalOpen)
   const [gatewayId, setGatewayId] = useState<number | undefined>(undefined)
-  const onGatewayChange: React.ChangeEventHandler<HTMLInputElement> = (evt) =>
-    setGatewayId(Number(evt.target.value))
+  const onGatewayChange = (gatewayId: number) => setGatewayId(gatewayId) // React.ChangeEventHandler<HTMLInputElement> = (evt) =>
 
   const filterOption = (
     input: string,

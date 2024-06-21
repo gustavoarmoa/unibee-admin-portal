@@ -22,14 +22,15 @@ import {
   Tooltip,
   message
 } from 'antd'
-import { ColumnsType } from 'antd/es/table'
+import { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { CSSProperties, useEffect, useState } from 'react'
+import { CSSProperties, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { emailValidate, formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
 import {
   getMerchantUserListReq,
+  getMerchantUserListReq2,
   getMerchantUserListWithMoreReq,
   getRoleListReq,
   inviteMemberReq,
@@ -44,13 +45,21 @@ import { MerchantUserStatus } from '../ui/statusTag'
 const APP_PATH = import.meta.env.BASE_URL
 const PAGE_SIZE = 10
 
+type TFilters = {
+  MemberRoles: number[] | null
+}
+
 const Index = () => {
   // const navigate = useNavigate()
+  const isMountingRef = useRef(false)
   const profileStore = useProfileStore()
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [roles, setRoles] = useState<TRole[]>([])
+  const [roleFilters, setRoleFilters] = useState<TFilters>({
+    MemberRoles: null
+  })
   const [users, setUsers] = useState<IMerchantUserProfile[]>([])
   const [activeUser, setActiveUser] = useState<
     IMerchantUserProfile | undefined
@@ -81,7 +90,7 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    console.log('res: ', res)
+    console.log('get merchantUser AND roleList: ', res)
     const { merchantUserListRes, roleListRes } = res
     const { merchantMembers, total } = merchantUserListRes
     setUsers(merchantMembers ?? [])
@@ -89,20 +98,22 @@ const Index = () => {
     setRoles(roleListRes.merchantRoles ?? [])
   }
 
-  const getRoleList = async () => {
+  const getMerchantUserList = async () => {
+    const body: any = { page, count: PAGE_SIZE }
+    if (roleFilters.MemberRoles != null && roleFilters.MemberRoles.length > 0) {
+      body.roleIds = roleFilters.MemberRoles
+    }
     setLoading(true)
-    const [res, err] = await getRoleListReq(getRoleList)
+    const [res, err] = await getMerchantUserListReq2(body, getMerchantUserList)
     setLoading(false)
     if (err != null) {
       message.error(err.message)
       return
     }
-    console.log('res: ', res)
-    const { merchantUserListRes, roleListRes } = res
-    const { merchantMembers, total } = merchantUserListRes
+    console.log('get merchant user list: ', res)
+    const { merchantMembers, total } = res
     setUsers(merchantMembers ?? [])
     setTotal(total)
-    setRoles(roleListRes.merchantRoles ?? [])
   }
 
   const columns: ColumnsType<IMerchantUserProfile> = [
@@ -121,11 +132,7 @@ const Index = () => {
       title: 'Roles',
       dataIndex: 'MemberRoles',
       key: 'MemberRoles',
-      /* filters: [
-        { text: 'Main plan', value: 1 },
-        { text: 'Add-on', value: 2 },
-        { text: 'One-time payment', value: 3 }
-      ], */
+      filters: roles.map((r) => ({ text: r.role, value: r.id as number })),
       render: (roles, user) => (
         <Popover
           placement="top"
@@ -187,7 +194,7 @@ const Index = () => {
               size="small"
               style={{ marginLeft: '8px' }}
               disabled={loading}
-              onClick={fetchData}
+              onClick={getMerchantUserList}
               icon={<SyncOutlined />}
             ></Button>
           </Tooltip>
@@ -220,16 +227,35 @@ const Index = () => {
     }
   ]
 
+  const onTableChange: TableProps<IMerchantUserProfile>['onChange'] = (
+    pagination,
+    filters,
+    sorter,
+    extra
+  ) => {
+    // onPageChange(1, PAGE_SIZE)
+    setRoleFilters(filters as TFilters)
+  }
+
   useEffect(() => {
-    fetchData()
-  }, [page])
+    isMountingRef.current = true
+  }, [])
+
+  useEffect(() => {
+    if (!isMountingRef.current) {
+      getMerchantUserList()
+    } else {
+      isMountingRef.current = false
+      fetchData()
+    }
+  }, [roleFilters, page])
 
   return (
     <div>
       {inviteModalOpen && (
         <InviteModal
           closeModal={toggleInviteModal}
-          refresh={fetchData}
+          refresh={getMerchantUserList}
           userData={activeUser}
           roles={roles}
         />
@@ -237,7 +263,7 @@ const Index = () => {
       {suspendModalOpen && (
         <SuspendModal
           closeModal={toggleSuspendModal}
-          refresh={fetchData}
+          refresh={getMerchantUserList}
           userData={activeUser}
         />
       )}
@@ -252,6 +278,7 @@ const Index = () => {
       <Table
         columns={columns}
         dataSource={users}
+        onChange={onTableChange}
         rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}

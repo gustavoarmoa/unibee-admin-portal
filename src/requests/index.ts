@@ -1791,9 +1791,10 @@ export const getUserListReq = async (
   }
 }
 
+// this is used when page is loading (as part of getMerchantUserListWithMoreReq), no search params available
 export const getMerchantUserListReq = async (refreshCb?: () => void) => {
   try {
-    const res = await request.get('/merchant/member/list')
+    const res = await request.get('/merchant/member/list?page=0&count=10')
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb ?? null })
       throw new ExpiredError(
@@ -1807,6 +1808,30 @@ export const getMerchantUserListReq = async (refreshCb?: () => void) => {
   }
 }
 
+export const getMerchantUserListReq2 = async (
+  { page, count, roleIds }: { page: number; count: number; roleIds?: number[] },
+  refreshCb?: () => void
+) => {
+  try {
+    const res = await request.post('/merchant/member/list', {
+      page,
+      count,
+      roleIds
+    })
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: refreshCb ?? null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+// merchant user list page need: userList and roleList.
 export const getMerchantUserListWithMoreReq = async (refreshCb: () => void) => {
   const [
     [merchantUserListRes, errMerchantUserList],

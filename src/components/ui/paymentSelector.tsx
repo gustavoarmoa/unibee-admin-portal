@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import React, { ChangeEventHandler, ReactElement } from 'react'
 import { useAppConfigStore } from '../../stores'
 import PayPalIcon from './icon/PayPal.svg?react'
 import AmexIcon from './icon/amex.svg?react'
@@ -70,7 +70,8 @@ const Index = ({
   disabled
 }: {
   selected: number | undefined
-  onSelect: React.ChangeEventHandler<HTMLInputElement>
+  // onSelect: React.ChangeEventHandler<HTMLInputElement>
+  onSelect: (v: number) => void
   disabled?: boolean
 }) => {
   const appConfig = useAppConfigStore()
@@ -83,11 +84,33 @@ const Index = ({
     }))
     .sort((a, b) => a.order - b.order)
 
+  const onLabelClick: React.MouseEventHandler<HTMLLabelElement> = (e) => {
+    if (disabled) {
+      return
+    }
+    console.log('label clicked')
+    if (e.target instanceof HTMLInputElement) {
+      console.log('radio inside label clicked..', e.target.value)
+      onSelect(Number(e.target.value))
+    }
+  }
+
+  const onChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+    if (disabled) {
+      return
+    }
+    console.log('radio clicked')
+    onSelect(Number(e.target.value))
+  }
+
+  console.log('selected: .....', selected)
+
   return (
     <div className="flex flex-col gap-3">
       {gateways.map((g) => {
         return (
           <label
+            onClick={onLabelClick}
             key={g.gatewayId}
             htmlFor={`payment-${g.gatewayName}`}
             className={`flex h-12 w-full ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} items-center justify-between rounded border border-solid ${selected == g.gatewayId ? 'border-blue-500' : 'border-gray-200'} px-2`}
@@ -99,7 +122,7 @@ const Index = ({
                 id={`payment-${g.gatewayName}`}
                 value={g.gatewayId}
                 checked={g.gatewayId == selected}
-                onChange={onSelect}
+                onChange={onChange}
                 disabled={disabled}
               />
               <div className="ml-2 flex justify-between">{g.label}</div>

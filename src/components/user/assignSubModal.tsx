@@ -44,8 +44,11 @@ const Index = ({ user, closeModal, refresh }: Props) => {
   const [gatewayId, setGatewayId] = useState<undefined | number>(
     appConfig.gateway.find((g) => g.gatewayName == 'stripe')?.gatewayId
   )
-  const onGatewayChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    setGatewayId(Number(e.target.value))
+
+  //const onGatewayChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  const onGatewayChange = (gatewayId: number) => {
+    console.log('gateway changed in parent...', gatewayId)
+    setGatewayId(gatewayId)
   }
 
   const onAddonChange = (
