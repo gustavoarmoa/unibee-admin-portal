@@ -144,15 +144,7 @@ const Index = () => {
             </Space>
           }
         >
-          <div
-            className="btn-merchant-user-roles"
-            style={{
-              width: '18px',
-              height: '24px',
-              cursor: 'pointer',
-              color: '#1677ff'
-            }}
-          >
+          <div className="btn-merchant-user-roles h-6 w-4 cursor-pointer text-blue-500">
             {roles.length}
           </div>
         </Popover>
@@ -233,8 +225,8 @@ const Index = () => {
     sorter,
     extra
   ) => {
-    // onPageChange(1, PAGE_SIZE)
     setRoleFilters(filters as TFilters)
+    onPageChange(1, PAGE_SIZE) // any search term, filters change should reset page to 1.
   }
 
   useEffect(() => {
