@@ -51,8 +51,8 @@ import Login from './components/login'
 import LoginModal from './components/login/LoginModal'
 import MerchantUserDetail from './components/merchantUser/userDetail'
 import MerchantUserList from './components/merchantUser/userList'
+import MyAccount from './components/myAccount/'
 import NotFound from './components/notFound'
-import Profile from './components/profile'
 import WebhookLogs from './components/settings/webHooks/webhookLogs'
 import Signup from './components/signup'
 import { initializeReq, logoutReq } from './requests'
@@ -350,7 +350,7 @@ const app_routes = [
       <Route
         key="my-account"
         path={`${APP_PATH}my-account`}
-        Component={Profile}
+        Component={MyAccount}
       />
     )
   },

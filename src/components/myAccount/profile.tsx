@@ -1,23 +1,46 @@
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Form, Input, Modal, Skeleton, Spin, message } from 'antd'
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Skeleton,
+  Space,
+  Spin,
+  Tabs,
+  TabsProps,
+  Tag,
+  message
+} from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { emailValidate, passwordSchema } from '../helpers'
+import { emailValidate, passwordSchema } from '../../helpers'
+import { useCountdown } from '../../hooks'
 import {
+  forgetPassReq,
+  getMemberProfileReq,
   getMerchantInfoReq,
   logoutReq,
   resetPassReq,
   updateMerchantInfoReq,
   uploadLogoReq
-} from '../requests'
-import { IProfile, TMerchantInfo } from '../shared.types.d'
+} from '../../requests'
+import {
+  IMerchantMemberProfile,
+  IProfile,
+  TMerchantInfo,
+  TRole
+} from '../../shared.types'
 import {
   useAppConfigStore,
   useMerchantInfoStore,
   usePermissionStore,
   useProfileStore,
   useSessionStore
-} from '../stores'
+} from '../../stores'
+import ResetPasswordWithOTP from '../login/forgetPasswordForm'
 
 const APP_PATH = import.meta.env.BASE_URL
 
@@ -26,65 +49,21 @@ const Index = () => {
   const profileStore = useProfileStore()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false) // page loading
-  const [uploading, setUploading] = useState(false) // logo upload
   const [submitting, setSubmitting] = useState(false)
   const [resetPasswordModal, setResetPasswordModal] = useState(false)
   const togglePasswordModal = () => setResetPasswordModal(!resetPasswordModal)
-  const [logoUrl, setLogoUrl] = useState('')
-  const [merchantInfo, setMerchantInfo] = useState<TMerchantInfo | null>(null)
+  const [myInfo, setMyInfo] = useState<IMerchantMemberProfile | null>(null)
 
   const getInfo = async () => {
     setLoading(true)
-    const [merchantInfo, err] = await getMerchantInfoReq(getInfo)
+    const [res, err] = await getMemberProfileReq(getInfo)
     setLoading(false)
     if (err != null) {
       message.error(err.message)
       return
     }
-
-    setMerchantInfo(merchantInfo.merchant)
-    setLogoUrl(merchantInfo.merchant.companyLogo)
-  }
-
-  const onFileUplaod = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    let file
-    if (event.target.files && event.target.files.length > 0) {
-      file = event.target.files[0]
-    }
-    if (file == null) {
-      return
-    }
-
-    if (file.size > 4 * 1024 * 1024) {
-      message.error('Max logo file size: 4M.')
-      return
-    }
-
-    const formData = new FormData()
-    formData.append('file', file)
-    setUploading(true)
-    const [logoUrl, err] = await uploadLogoReq(formData)
-    console.log('logo urll: ', logoUrl, '//', err)
-    setUploading(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    form.setFieldValue('companyLogo', logoUrl)
-    setLogoUrl(logoUrl)
-  }
-
-  const onSubmit = async () => {
-    const info = form.getFieldsValue()
-    setSubmitting(true)
-    const [merchantInfo, err] = await updateMerchantInfoReq(info)
-    setSubmitting(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    message.success('Info Updated')
-    merchantInfoStore.setMerchantInfo(merchantInfo)
+    setMyInfo(res.merchantMember)
+    form.setFieldsValue(res.merchantMember)
   }
 
   useEffect(() => {
@@ -99,7 +78,7 @@ const Index = () => {
           email={profileStore.email}
         />
       )}
-      {loading ? (
+      {loading && (
         <Spin
           spinning={loading}
           indicator={
@@ -107,144 +86,97 @@ const Index = () => {
           }
           fullscreen
         />
-      ) : (
-        merchantInfo && (
-          <Form
-            form={form}
-            onFinish={onSubmit}
-            name="basic"
-            labelCol={{
-              span: 10
-            }}
-            wrapperCol={{
-              span: 16
-            }}
-            style={{
-              maxWidth: 600
-            }}
-            initialValues={merchantInfo}
-            autoComplete="off"
-          >
-            <Form.Item
-              label="Company Name"
-              name="companyName"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your company name!'
-                }
-              ]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Company Logo (< 4M)"
-              name="companyLogo"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please upload your company logo! (Max size: 4M)'
-                },
-                ({ getFieldValue }) => ({
-                  validator(rule, value) {
-                    if (value != '') {
-                      return Promise.resolve()
-                    }
-                    return Promise.reject()
-                  }
-                })
-              ]}
-            >
-              <label htmlFor="companyLogoURL" style={{ cursor: 'pointer' }}>
-                {logoUrl == '' ? (
-                  <div style={{ width: '48px', height: '48px' }}>
-                    <Skeleton.Image
-                      active={uploading}
-                      style={{ width: '48px', height: '48px' }}
-                    />
-                  </div>
-                ) : (
-                  <img src={logoUrl} style={{ maxWidth: '64px' }} />
-                )}
-              </label>
-            </Form.Item>
-            <input
-              type="file"
-              accept="image/png, image/gif, image/jpeg"
-              onChange={onFileUplaod}
-              id="companyLogoURL"
-              name="companyLogoURL"
-              style={{ display: 'none' }}
-            />
-
-            <Form.Item
-              label="Physical Address"
-              name="address"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your company address!'
-                }
-              ]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your Email!'
-                },
-                ({ getFieldValue }) => ({
-                  validator(rule, value) {
-                    if (emailValidate(value)) {
-                      return Promise.resolve()
-                    }
-                    return Promise.reject('Invalid email address')
-                  }
-                })
-              ]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Phone"
-              name="phone"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input company phone!'
-                }
-              ]}
-            >
-              <Input />
-            </Form.Item>
-
-            <div className="mx-8 my-8 flex justify-center">
-              <Button
-                onClick={togglePasswordModal}
-                disabled={submitting || uploading}
-              >
-                Change Password
-              </Button>
-              &nbsp;&nbsp;&nbsp;&nbsp;
-              <Button
-                type="primary"
-                onClick={form.submit}
-                loading={submitting || uploading}
-                disabled={submitting || uploading}
-              >
-                {uploading ? 'Uploading' : submitting ? 'Submiting' : 'Save'}
-              </Button>
-            </div>
-          </Form>
-        )
       )}
+      <Form
+        form={form}
+        // onFinish={onSubmit}
+        name="merchant-user-profile"
+        // labelAlign="left"
+        labelCol={{
+          flex: '130px'
+        }}
+        wrapperCol={{
+          span: 16
+        }}
+        autoComplete="off"
+      >
+        <Form.Item label="user Id" name="id" hidden>
+          <Input disabled />
+        </Form.Item>
+        <Form.Item label="Merchant Id" name="merchantId" hidden>
+          <Input disabled />
+        </Form.Item>
+        <Row>
+          <Col span={12}>
+            <Form.Item
+              label="First name"
+              name="firstName"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your first name!'
+                }
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              label="Last name"
+              name="lastName"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input your last name!'
+                }
+              ]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row>
+          <Col span={12}>
+            <Form.Item label="Email" name="email">
+              <Input disabled />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="Mobile" name="mobile">
+              <Input />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row>
+          <Col span={12}>
+            <Form.Item label="Roles">
+              <Space size={[0, 8]} wrap>
+                {form
+                  .getFieldValue('MemberRoles')
+                  ?.map((role: TRole) => (
+                    <Tag key={role.id as number}>{role.role}</Tag>
+                  ))}
+              </Space>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <div className="mx-8 my-8 flex justify-center">
+          <Button onClick={togglePasswordModal} disabled={submitting}>
+            Change Password
+          </Button>
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          {/* <Button
+            type="primary"
+            onClick={form.submit}
+            loading={submitting}
+            disabled={submitting}
+          >
+            Save
+          </Button> */}
+        </div>
+      </Form>
     </div>
   )
 }
@@ -257,13 +189,17 @@ interface IResetPassProps {
 }
 const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
   const navigate = useNavigate()
+  const [countVal, counting, startCount, stopCounter] = useCountdown(60)
   const merchantInfoStore = useMerchantInfoStore()
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
   const permStore = usePermissionStore()
   const appConfig = useAppConfigStore()
-  const [form] = Form.useForm()
-  const [loading, setLoading] = useState(false)
+
+  const [activeTab, setActiveTab] = useState('withOldPassword')
+  const onTabChange = (key: string) => {
+    setActiveTab(key)
+  }
 
   const logout = async () => {
     const [_, err] = await logoutReq()
@@ -288,6 +224,71 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
     })
   }
 
+  const sendCode = async () => {
+    stopCounter()
+    startCount()
+    // setSubmittingForgetPass(true)
+    const [_, err] = await forgetPassReq(email)
+    // setSubmittingForgetPass(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success('Code sent, please check your email!')
+  }
+
+  const tabItems: TabsProps['items'] = [
+    {
+      key: 'withOldPassword',
+      label: 'With old password',
+      children: (
+        <ResetPassWithOldPass
+          email={email}
+          closeModal={closeModal}
+          logout={logout}
+        />
+      )
+    },
+    {
+      key: 'OTP',
+      label: 'OTP',
+      children: (
+        <ResetPasswordWithOTP
+          email={email}
+          resend={sendCode}
+          countVal={countVal}
+          counting={counting}
+          closeModal={closeModal}
+          logout={logout}
+        />
+      )
+    }
+  ]
+
+  return (
+    <Modal
+      title="Change Password"
+      open={true}
+      width={'640px'}
+      footer={null}
+      closeIcon={null}
+    >
+      <Tabs activeKey={activeTab} items={tabItems} onChange={onTabChange} />
+    </Modal>
+  )
+}
+
+const ResetPassWithOldPass = ({
+  email,
+  closeModal,
+  logout
+}: {
+  email: string
+  logout?: () => void
+  closeModal?: () => void
+}) => {
+  const [form] = Form.useForm()
+  const [loading, setLoading] = useState(false)
   const onConfirm = async () => {
     const formValues = form.getFieldsValue()
     setLoading(true)
@@ -300,21 +301,19 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
       message.error(err.message)
       return
     }
-    await logout()
+    if (closeModal != null) {
+      closeModal()
+    }
+    if (logout != null) {
+      logout()
+    }
   }
-
   return (
-    <Modal
-      title="Change Password"
-      open={true}
-      width={'640px'}
-      footer={null}
-      closeIcon={null}
-    >
+    <>
       <Form
         form={form}
         onFinish={onConfirm}
-        //name="reset-password"
+        name="reset-password-with-oldpass"
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
         className="my-6"
@@ -394,9 +393,11 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
       </Form>
 
       <div className="my-6 flex items-center justify-end">
-        <Button onClick={closeModal} disabled={loading}>
-          Cancel
-        </Button>
+        {closeModal != null && (
+          <Button onClick={closeModal} disabled={loading}>
+            Cancel
+          </Button>
+        )}
         &nbsp;&nbsp;&nbsp;&nbsp;
         <Button
           type="primary"
@@ -407,6 +408,6 @@ const ResetPasswordModal = ({ email, closeModal }: IResetPassProps) => {
           OK
         </Button>
       </div>
-    </Modal>
+    </>
   )
 }

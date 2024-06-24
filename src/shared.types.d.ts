@@ -2,6 +2,7 @@
 import { Dayjs } from 'dayjs'
 import { Currency } from 'dinero.js'
 
+// this is end user profile
 interface IProfile {
   address: string
   // country: string;
@@ -32,6 +33,20 @@ interface IProfile {
   whatsAPP: string
   otherSocialInfo: string
   token: string
+}
+
+// this is admin profile
+interface IMerchantMemberProfile {
+  id: number
+  merchantId: number
+  email: string
+  firstName: string
+  lastName: string
+  createTime: number
+  mobile: string
+  isOwner: boolean
+  status: number
+  MemberRoles: TRole[]
 }
 
 interface IMerchantUserProfile {
@@ -452,6 +467,7 @@ export type {
   DiscountCode,
   IAppConfig,
   IBillableMetrics,
+  IMerchantMemberProfile,
   IMerchantUserProfile,
   IOneTimeHistoryItem,
   IPlan,

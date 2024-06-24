@@ -303,7 +303,6 @@ const Index = () => {
         </Col>
       </Row>
       {/* <UserInfo user={userProfile} /> */}
-      {/* <Tabs defaultActiveKey="1" items={tabItems} onChange={onTabChange} /> */}
       {invoiceDetail == null ||
       invoiceDetail.sendPdf == null ||
       invoiceDetail.sendPdf == '' ||

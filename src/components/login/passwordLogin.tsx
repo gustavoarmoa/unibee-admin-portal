@@ -1,4 +1,4 @@
-import type { InputRef } from 'antd'
+import type { FormInstance, InputRef } from 'antd'
 import { Button, Form, Input, Modal, message } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -17,6 +17,7 @@ import {
   useProfileStore,
   useSessionStore
 } from '../../stores'
+import ForgetPasswordForm from './forgetPasswordForm'
 
 const APP_PATH = import.meta.env.BASE_URL
 
@@ -220,25 +221,11 @@ const ForgetPasswordModal = ({
   countVal: number
   counting: boolean
 }) => {
-  const [form2] = Form.useForm()
-  const [loading, setLoading] = useState(false)
-
-  const onConfirm = async () => {
-    setLoading(true)
-    const [_, err] = await forgetPassVerifyReq(
-      form2.getFieldValue('email'),
-      form2.getFieldValue('verificationCode'),
-      form2.getFieldValue('newPassword')
-    )
-    setLoading(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
+  // we're already on /login, there is no need to logout,
+  // this is to show a success toast.
+  const logout = () => {
     message.success('Password reset succeeded.')
-    closeModal()
   }
-
   return (
     <Modal
       title="Forgot Password"
@@ -247,120 +234,14 @@ const ForgetPasswordModal = ({
       footer={null}
       closeIcon={null}
     >
-      <Form
-        form={form2}
-        onFinish={onConfirm}
-        name="forget-password"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        // style={{ maxWidth: 640, width: 360 }}
-        className="my-6"
-        initialValues={{
-          email,
-          verificationCode: '',
-          newPassword: '',
-          newPassword2: ''
-        }}
-      >
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[
-            {
-              required: true,
-              message: 'Please input your email!'
-            }
-          ]}
-        >
-          <Input disabled />
-        </Form.Item>
-
-        <Form.Item
-          label="Verification Code"
-          name="verificationCode"
-          rules={[
-            {
-              required: true,
-              message: 'Please input your verification code!'
-            }
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        {/* <div className="mb-4 flex justify-center text-red-500">{errMsg}</div> */}
-
-        <Form.Item
-          label="New Password"
-          name="newPassword"
-          dependencies={['newPassword2']}
-          rules={[
-            {
-              required: true,
-              message: 'Please input your new password!'
-            },
-            ({ getFieldValue }) => ({
-              validator(rule, value) {
-                if (!passwordSchema.validate(value)) {
-                  return Promise.reject(
-                    'At least 8 characters containing lowercase, uppercase, number and special character.'
-                  )
-                }
-                return Promise.resolve()
-              }
-            })
-          ]}
-        >
-          <Input.Password />
-        </Form.Item>
-
-        <Form.Item
-          label="New Password Confirm"
-          name="newPassword2"
-          dependencies={['newPassword']}
-          rules={[
-            {
-              required: true,
-              message: 'Please retype your new password!'
-            },
-            ({ getFieldValue }) => ({
-              validator(rule, value) {
-                if (value == getFieldValue('newPassword')) {
-                  return Promise.resolve()
-                }
-                return Promise.reject('Please retype the same password')
-              }
-            })
-          ]}
-        >
-          <Input.Password onPressEnter={onConfirm} />
-        </Form.Item>
-      </Form>
-
-      <div className="my-6 flex items-center justify-between">
-        <div className="flex max-w-48 items-center justify-center">
-          <Button onClick={resend} disabled={counting}>
-            Resend
-          </Button>
-          {counting && (
-            <span style={{ marginLeft: '6px' }}>in {countVal} seconds</span>
-          )}
-        </div>
-        <div>
-          <Button onClick={closeModal} disabled={loading}>
-            Cancel
-          </Button>
-          &nbsp;&nbsp;&nbsp;&nbsp;
-          <Button
-            type="primary"
-            onClick={form2.submit}
-            loading={loading}
-            disabled={loading}
-          >
-            OK
-          </Button>
-        </div>
-      </div>
+      <ForgetPasswordForm
+        resend={resend}
+        closeModal={closeModal}
+        email={email}
+        counting={counting}
+        countVal={countVal}
+        logout={logout}
+      />
     </Modal>
   )
 }

@@ -1916,6 +1916,22 @@ export const suspendMemberReq = async (memberId: number) => {
   }
 }
 
+export const getMemberProfileReq = async (refreshCb?: () => void) => {
+  try {
+    const res = await request.get('/merchant/member/profile')
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: refreshCb ?? null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const getPaymentGatewayListReq = async () => {
   try {
     const res = await request.get(`/merchant/gateway/list`)
