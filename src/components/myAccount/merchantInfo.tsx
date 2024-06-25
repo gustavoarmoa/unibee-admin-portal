@@ -219,14 +219,16 @@ const Index = () => {
             </Form.Item>
 
             <div className="mx-8 my-8 flex justify-center">
-              <Button
-                type="primary"
-                onClick={form.submit}
-                loading={submitting || uploading}
-                disabled={submitting || uploading}
-              >
-                {uploading ? 'Uploading' : submitting ? 'Submiting' : 'Save'}
-              </Button>
+              {profileStore.isOwner && (
+                <Button
+                  type="primary"
+                  onClick={form.submit}
+                  loading={submitting || uploading}
+                  disabled={submitting || uploading}
+                >
+                  {uploading ? 'Uploading' : submitting ? 'Submiting' : 'Save'}
+                </Button>
+              )}
             </div>
           </Form>
         )

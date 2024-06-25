@@ -37,9 +37,17 @@ const Index = () => {
   const [logs, setLogs] = useState<TActivityLogs[]>([])
 
   const fetchLogs = async () => {
-    const searchTerm = { page, count: PAGE_SIZE }
+    const searchTerms = JSON.parse(JSON.stringify(form.getFieldsValue()))
+    Object.keys(searchTerms).forEach(
+      (k) =>
+        (searchTerms[k] == undefined || searchTerms[k].trim() == '') &&
+        delete searchTerms[k]
+    )
+    console.log('search term: ', searchTerms)
+    // return
+    const params = { page, count: PAGE_SIZE, ...searchTerms }
     setLoading(true)
-    const [res, err] = await getActivityLogsReq(searchTerm, fetchLogs)
+    const [res, err] = await getActivityLogsReq(params, fetchLogs)
     setLoading(false)
     if (err != null) {
       message.error((err as Error).message)
@@ -196,13 +204,21 @@ const Index = () => {
     fetchLogs()
   }, [page])
 
+  const goSearch = () => {
+    if (page == 0) {
+      fetchLogs()
+    } else {
+      onPageChange(1, PAGE_SIZE)
+    }
+  }
+
   return (
     <>
       <Search
         form={form}
         searching={loading}
         onPageChange={onPageChange}
-        goSearch={fetchLogs}
+        goSearch={goSearch}
       />
       <Table
         columns={columns}
@@ -279,19 +295,37 @@ const Search = ({
     <div>
       <Form form={form} initialValues={DEFAULT_TERM} disabled={searching}>
         <Row className="my-2 flex items-center" gutter={[8, 8]}>
-          <Col span={3}>Billing admin name</Col>
+          <Col span={2} className=" font-bold text-gray-600">
+            Billing admin
+          </Col>
           <Col span={4}>
-            <Form.Item name="firstName" noStyle={true}>
-              <Input style={{ width: '80%' }} />
+            <Form.Item name="memberFirstName" noStyle={true}>
+              <Input
+                onPressEnter={goSearch}
+                style={{ width: '100%' }}
+                placeholder="First name"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="memberLastName" noStyle={true}>
+              <Input
+                onPressEnter={goSearch}
+                style={{ width: '100%' }}
+                placeholder="Last name"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item name="memberEmail" noStyle={true}>
+              <Input
+                onPressEnter={goSearch}
+                style={{ width: '100%' }}
+                placeholder="Email"
+              />
             </Form.Item>
           </Col>
 
-          <Col span={3}>User account email</Col>
-          <Col span={4}>
-            <Form.Item name="email" noStyle={true}>
-              <Input style={{ width: '80%' }} />
-            </Form.Item>
-          </Col>
           <Col span={8} className="flex justify-end">
             <Button onClick={clear} disabled={searching}>
               Clear
@@ -309,25 +343,70 @@ const Search = ({
         </Row>
 
         <Row className="my-2 flex items-center" gutter={[8, 8]}>
-          <Col span={3}>Subscription Id </Col>
+          <Col span={2} className=" font-bold text-gray-600">
+            User
+          </Col>
           <Col span={4}>
-            <Form.Item name="subscriptionId" noStyle={true}>
-              <Input style={{ width: '80%' }} />
+            <Form.Item name="firstName" noStyle={true}>
+              <Input
+                onPressEnter={goSearch}
+                style={{ width: '100%' }}
+                placeholder="First name"
+              />
             </Form.Item>
           </Col>
-
-          <Col span={3}>Invoice Id</Col>
           <Col span={4}>
-            <Form.Item name="invoiceId" noStyle={true}>
-              <Input style={{ width: '80%' }} />
+            <Form.Item name="lastName" noStyle={true}>
+              <Input
+                onPressEnter={goSearch}
+                style={{ width: '100%' }}
+                placeholder="Last name"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item name="email" noStyle={true}>
+              <Input
+                onPressEnter={goSearch}
+                style={{ width: '100%' }}
+                placeholder="Email"
+              />
             </Form.Item>
           </Col>
         </Row>
-        <Row className="my-2">
-          <Col span={3}>Plan Id</Col>
+
+        <Row className="my-2 flex items-center" gutter={[8, 8]}>
+          <Col span={2} className=" font-bold text-gray-600">
+            Subscription Id{' '}
+          </Col>
+          <Col span={4}>
+            <Form.Item name="subscriptionId" noStyle={true}>
+              <Input onPressEnter={goSearch} style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+
+          <Col span={2} className="text-right font-bold text-gray-600">
+            Invoice Id
+          </Col>
+          <Col span={4}>
+            <Form.Item name="invoiceId" noStyle={true}>
+              <Input onPressEnter={goSearch} style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+          <Col span={2} className="text-right font-bold text-gray-600">
+            Plan Id
+          </Col>
           <Col span={4}>
             <Form.Item name="planId" noStyle={true}>
-              <Input style={{ width: '80%' }} />
+              <Input onPressEnter={goSearch} style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+          <Col span={3} className="text-right font-bold text-gray-600">
+            Discount code
+          </Col>
+          <Col span={3}>
+            <Form.Item name="discountCode" noStyle={true}>
+              <Input onPressEnter={goSearch} style={{ width: '100%' }} />
             </Form.Item>
           </Col>
         </Row>
