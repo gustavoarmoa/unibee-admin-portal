@@ -178,12 +178,12 @@ const Index = () => {
         </>
       ),
       key: 'action',
-      width: 150,
-      render: (_, record) => (
+      width: 150
+      /* render: (_, record) => (
         <Space size="middle">
           <a>View detail</a>
         </Space>
-      )
+      ) */
     }
   ]
 
