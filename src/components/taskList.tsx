@@ -1,34 +1,22 @@
-import {
-  InfoCircleOutlined,
-  LoadingOutlined,
-  SearchOutlined
-} from '@ant-design/icons'
-import { Col, Divider, Input, Popover, Row, Spin, message } from 'antd'
-import dayjs from 'dayjs'
-import { CSSProperties, ChangeEvent, useEffect, useRef, useState } from 'react'
+import { DownloadOutlined, InfoCircleOutlined } from '@ant-design/icons'
+import { Button, Col, Input, Popover, Row, Spin, message } from 'antd'
+import axios from 'axios'
+import { CSSProperties, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
-import { useOnClickOutside } from 'usehooks-ts'
-import { INVOICE_STATUS, SUBSCRIPTION_STATUS } from '../constants'
-import { formatDate, showAmount } from '../helpers'
+import { formatDate } from '../helpers'
 import { usePagination } from '../hooks'
-import { appSearchReq, getDownloadListReq } from '../requests'
-import { IProfile, TExportDataType, UserInvoice } from '../shared.types'
+import { getDownloadListReq } from '../requests'
+import { IProfile, TExportDataType } from '../shared.types'
 import { useAppConfigStore } from '../stores'
 import './appSearch.css'
 import { TaskStatus } from './ui/statusTag'
 
 SyntaxHighlighter.registerLanguage('json', json)
 
-const { Search } = Input
 const APP_PATH = import.meta.env.BASE_URL
-
-interface IAccountInfo extends IProfile {
-  subscriptionId: string
-  subscriptionStatus: number
-}
 
 const Index = () => {
   const navigate = useNavigate()
@@ -66,7 +54,7 @@ const Index = () => {
 
 export default Index
 
-const renderJson = (label: string, text: string) => {
+const renderJson = (text: string) => {
   if (null == text || '' == text) {
     return ''
   }
@@ -76,36 +64,23 @@ const renderJson = (label: string, text: string) => {
   } catch (err) {
     parsedJson = text
   }
-
   return (
-    <Popover
-      placement="right"
-      content={
-        <div
-          style={{
-            width: '360px',
-            maxHeight: '380px',
-            minHeight: '80px',
-            overflow: 'auto'
-          }}
-        >
-          <SyntaxHighlighter language="json" style={prism}>
-            {parsedJson}
-          </SyntaxHighlighter>
-        </div>
-      }
-    >
-      <div
-        style={{
-          width: '80px',
-          height: '60px',
-          overflow: 'hidden'
-        }}
+    <div>
+      <Popover
+        placement="right"
+        content={
+          <div>
+            <SyntaxHighlighter language="json" style={prism}>
+              {parsedJson}
+            </SyntaxHighlighter>
+          </div>
+        }
       >
-        <span>{label}</span> &nbsp;
-        <InfoCircleOutlined />
-      </div>
-    </Popover>
+        <div className=" cursor-pointer">
+          <InfoCircleOutlined />
+        </div>
+      </Popover>
+    </div>
   )
 }
 
@@ -123,36 +98,68 @@ type TTaskItem = {
   taskName: TExportDataType
   payload: string
   downloadUrl: string
+  uploadFileUrl: string
   status: number
   startTime: number
   finishTime: number
   failReason: string
 }
-const TaskItem = ({ t }: { t: TTaskItem }) => (
-  <div style={{ height: '56px', marginBottom: '18px' }}>
-    <Row style={rowStyle}>
-      <Col span={3} className=" font-bold text-gray-500">
-        Task
-      </Col>
-      <Col span={9}>
-        <div className=" flex">{t.taskName}</div>
-      </Col>
-      <Col span={10}>{TaskStatus(t.status)}</Col>
-    </Row>
+const TaskItem = ({ t }: { t: TTaskItem }) => {
+  const onDownload = (url: string) => () => {
+    axios({
+      url,
+      method: 'GET',
+      responseType: 'blob'
+    }).then((response) => {
+      // create file link in browser's memory
+      const href = URL.createObjectURL(response.data)
 
-    <Row style={rowStyle}>
-      <Col span={3} className=" font-bold text-gray-500">
-        Start
-      </Col>
-      <Col span={9}>{formatDate(t.startTime, true)}</Col>
-      <Col span={3} className=" font-bold text-gray-500">
-        End
-      </Col>
-      <Col>{t.finishTime == 0 ? '―' : formatDate(t.finishTime, true)}</Col>
-      {/* <Col>download btn</Col> */}
-    </Row>
-  </div>
-)
+      const link = document.createElement('a')
+      link.href = href
+      link.setAttribute('download', 'exportedData.xlsx')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(href)
+    })
+  }
+  return (
+    <div style={{ height: '56px', marginBottom: '18px' }}>
+      <Row style={rowStyle}>
+        <Col span={3} className=" font-bold text-gray-500">
+          Task
+        </Col>
+        <Col span={9}>
+          <div className=" flex">
+            {t.taskName}&nbsp;{t.payload != 'null' && renderJson(t.payload)}
+          </div>
+        </Col>
+        <Col span={8}>{TaskStatus(t.status)}</Col>
+        <Col span={4}>
+          {t.status == 2 && (
+            <Button
+              onClick={onDownload(t.uploadFileUrl)}
+              size="small"
+              icon={<DownloadOutlined />}
+            />
+          )}
+        </Col>
+      </Row>
+
+      <Row style={rowStyle}>
+        <Col span={3} className=" font-bold text-gray-500">
+          Start
+        </Col>
+        <Col span={9}>{formatDate(t.startTime, true)}</Col>
+        <Col span={2} className=" font-bold text-gray-500">
+          End
+        </Col>
+        <Col>{t.finishTime == 0 ? '―' : formatDate(t.finishTime, true)}</Col>
+        {/* <Col>download btn</Col> */}
+      </Row>
+    </div>
+  )
+}
 
 /*
       <Col span={4}>Export params</Col>
