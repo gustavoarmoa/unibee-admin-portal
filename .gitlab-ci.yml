@@ -55,10 +55,10 @@ hub_push:
     - docker tag easzlab.io.local:5000/unibee/unibee-merchant-portal:daily unibee/admin-portal:stage
     - docker push unibee/admin-portal:stage
 
-nm_stage_deploy:
-  only:
-    - main
-  image: registry.cn-shenzhen.aliyuncs.com/heiku/kubectl:latest
-  stage: deploy
-  script:
-    - kubectl --kubeconfig /data/kubeconfigs/nodemaven_dev_config rollout restart deployment/unibee-admin-protal
+# nm_stage_deploy:
+#   only:
+#     - main
+#   image: registry.cn-shenzhen.aliyuncs.com/heiku/kubectl:latest
+#   stage: deploy
+#   script:
+#     - kubectl --kubeconfig /data/kubeconfigs/nodemaven_dev_config rollout restart deployment/unibee-admin-protal
