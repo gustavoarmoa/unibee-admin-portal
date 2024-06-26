@@ -302,15 +302,7 @@ const App: React.FC = () => {
               </div>
             </div>
           </Sider>
-          <Drawer
-            title="Task list"
-            placement="right"
-            width={500}
-            onClose={toggleTaskListOpen}
-            open={taskListOpen}
-          >
-            <TaskList />
-          </Drawer>
+          {taskListOpen && <TaskList onClose={toggleTaskListOpen} />}
           <Layout>
             <Header style={{ background: colorBgContainer }}>
               <div className=" flex h-full items-center justify-between">

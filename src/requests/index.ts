@@ -2233,9 +2233,15 @@ export const getActivityLogsReq = async (
   }
 }
 
-export const getDownloadListReq = async (refreshCb?: () => void) => {
+export const getDownloadListReq = async (
+  page: number,
+  count: number,
+  refreshCb?: () => void
+) => {
   try {
-    const res = await request.get(`/merchant/download/list`)
+    const res = await request.get(
+      `/merchant/download/list?page=${page}&count=${count}`
+    )
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb ?? null })
       throw new ExpiredError(
