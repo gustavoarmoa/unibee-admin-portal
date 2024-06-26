@@ -1,6 +1,7 @@
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 import {
   Button,
+  Divider,
   Form,
   Input,
   Modal,
@@ -68,7 +69,26 @@ const Index = () => {
     setSearchParams({ tab: key })
   }
 
-  return <Tabs activeKey={activeTab} items={tabItems} onChange={onTabChange} />
+  return (
+    <>
+      <Divider
+        orientation="left"
+        style={{ color: '#757575', fontSize: '14px' }}
+      >
+        Company profile
+      </Divider>
+      <MerchantInfo />
+      <Divider
+        orientation="left"
+        style={{ color: '#757575', fontSize: '14px' }}
+      >
+        My profile
+      </Divider>
+      <MyProfile />
+    </>
+  )
+
+  // <Tabs activeKey={activeTab} items={tabItems} onChange={onTabChange} />
 }
 
 export default Index
