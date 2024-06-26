@@ -39,6 +39,13 @@ export const MERCHANT_USER_STATUS: { [key: number]: string } = {
   2: 'Suspended'
 }
 
+export const TASK_STATUS: { [key: number]: string } = {
+  0: 'Queued',
+  1: 'Running',
+  2: 'Succeeded',
+  3: 'Failed'
+}
+
 export const CURRENCY: {
   [key: string]: {
     symbol: string
@@ -61,7 +68,8 @@ export const INVOICE_STATUS: { [key: number]: string } = {
   2: 'Processing', // admin has published the invoice, user will receive a mail with payment link. Admin can revoke the invoice if user hasn't made the payment.
   3: 'Paid', // user paid the invoice
   4: 'Failed', // user not pay the invoice before it get expired
-  5: 'Cancelled' // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
+  5: 'Cancelled', // admin cancel the invoice after publishing, only if user hasn't paid yet. If user has paid, admin cannot cancel it.
+  6: 'Reversed' // 取消后被通知支付成功的，这种情况一般是要排查的
 }
 
 export const METRICS_TYPE: { [key: number]: string } = {

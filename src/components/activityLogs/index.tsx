@@ -161,29 +161,6 @@ const Index = () => {
             {subId}
           </Button>
         )
-    },
-    {
-      title: (
-        <>
-          <span>Actions</span>
-          <Tooltip title="Refresh">
-            <Button
-              size="small"
-              style={{ marginLeft: '8px' }}
-              disabled={loading}
-              onClick={fetchLogs}
-              icon={<SyncOutlined />}
-            ></Button>
-          </Tooltip>
-        </>
-      ),
-      key: 'action',
-      width: 150
-      /* render: (_, record) => (
-        <Space size="middle">
-          <a>View detail</a>
-        </Space>
-      ) */
     }
   ]
 
@@ -220,6 +197,7 @@ const Index = () => {
         onPageChange={onPageChange}
         goSearch={goSearch}
       />
+      <div className=" h-4"></div>
       <Table
         columns={columns}
         dataSource={logs}

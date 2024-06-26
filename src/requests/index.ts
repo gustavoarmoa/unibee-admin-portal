@@ -5,6 +5,7 @@ import {
   DiscountCode,
   ExpiredError,
   IProfile,
+  TExportDataType,
   TMerchantInfo,
   TRole
 } from '../shared.types.d'
@@ -2221,6 +2222,44 @@ export const getActivityLogsReq = async (
     const res = await request.get(`/merchant/member/operation_log_list?${term}`)
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getDownloadListReq = async (refreshCb?: () => void) => {
+  try {
+    const res = await request.get(`/merchant/download/list`)
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: refreshCb ?? null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const exportDataReq = async ({
+  task,
+  payload
+}: {
+  task: TExportDataType
+  payload: any
+}) => {
+  try {
+    const res = await request.post(`/merchant/download/new`, { task, payload })
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
       throw new ExpiredError(
         `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
       )

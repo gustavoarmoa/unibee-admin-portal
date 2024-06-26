@@ -6,10 +6,11 @@ import {
   ProfileOutlined,
   SettingOutlined,
   TeamOutlined,
-  TransactionOutlined
+  TransactionOutlined,
+  UnorderedListOutlined
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { Layout, Menu, message, theme } from 'antd'
+import { Button, Drawer, Layout, Menu, message, theme } from 'antd'
 import React, { useEffect, useState } from 'react'
 import {
   Navigate,
@@ -55,6 +56,7 @@ import MyAccount from './components/myAccount/'
 import NotFound from './components/notFound'
 import WebhookLogs from './components/settings/webHooks/webhookLogs'
 import Signup from './components/signup'
+import TaskList from './components/taskList'
 import { initializeReq, logoutReq } from './requests'
 
 const { Header, Content, Footer, Sider } = Layout
@@ -97,6 +99,9 @@ const App: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG }
   } = theme.useToken()
 
+  const [taskListOpen, setTaskListOpen] = useState(false)
+  const toggleTaskListOpen = () => setTaskListOpen(!taskListOpen)
+
   let items: MenuItem[] = [
     getItem('Plan', '/plan/list', <DesktopOutlined />),
     getItem('Billable Metric', '/billable-metric/list', <DesktopOutlined />),
@@ -128,7 +133,7 @@ const App: React.FC = () => {
         ) != -1
     )
   }
-  // console.log('menu items: ', items)
+
   const defaultPage = () => {
     if (profileStore.isOwner) {
       return 'subscription'
@@ -297,9 +302,26 @@ const App: React.FC = () => {
               </div>
             </div>
           </Sider>
+          <Drawer
+            title="Task list"
+            placement="right"
+            width={500}
+            onClose={toggleTaskListOpen}
+            open={taskListOpen}
+          >
+            <TaskList />
+          </Drawer>
           <Layout>
             <Header style={{ background: colorBgContainer }}>
-              <AppSearch />
+              <div className=" flex h-full items-center justify-between">
+                <AppSearch />
+                <Button
+                  onClick={toggleTaskListOpen}
+                  icon={<UnorderedListOutlined />}
+                >
+                  Tasks
+                </Button>
+              </div>
             </Header>
             <Content
               style={{

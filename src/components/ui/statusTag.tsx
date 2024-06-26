@@ -9,6 +9,7 @@ import {
   PLAN_STATUS,
   SUBSCRIPTION_HISTORY_STATUS,
   SUBSCRIPTION_STATUS,
+  TASK_STATUS,
   USER_STATUS
 } from '../../constants'
 
@@ -36,7 +37,8 @@ const IV_STATUS: { [key: number]: ReactElement } = {
   2: <Tag color="blue">{INVOICE_STATUS[2]}</Tag>, // 2: processing
   3: <Tag color="#87d068">{INVOICE_STATUS[3]}</Tag>, // 3: paid
   4: <Tag color="red">{INVOICE_STATUS[4]}</Tag>, // 4: failed
-  5: <Tag color="purple">{INVOICE_STATUS[5]}</Tag> // 5: cancellled
+  5: <Tag color="purple">{INVOICE_STATUS[5]}</Tag>, // 5: cancellled
+  6: <Tag color="cyan">{INVOICE_STATUS[6]}</Tag> // reversed???
 }
 const InvoiceStatus = (statusId: number, isRefund?: boolean) =>
   statusId == 3 && isRefund ? ( // status == 3 means invoice Paid, for refund invoice, description should be Refunded
@@ -82,6 +84,14 @@ const MERCHANT_USER_STATUS_TAG: { [key: number]: ReactElement } = {
 const MerchantUserStatus = (statusId: number) =>
   MERCHANT_USER_STATUS_TAG[statusId]
 
+const TASK_STATUS_TAG: { [key: number]: ReactElement } = {
+  0: <Tag color="orange">{TASK_STATUS[0]}</Tag>, // queued
+  1: <Tag color="geekblue">{TASK_STATUS[1]}</Tag>, // running
+  2: <Tag color="#87d068">{TASK_STATUS[2]}</Tag>, // succeeded
+  3: <Tag color="red">{TASK_STATUS[3]}</Tag> // failed
+}
+const TaskStatus = (statusId: number) => TASK_STATUS_TAG[statusId]
+
 export {
   DiscountCodeStatus,
   InvoiceStatus,
@@ -90,5 +100,6 @@ export {
   PlanStatus,
   SubHistoryStatus,
   SubscriptionStatus,
+  TaskStatus,
   UserStatus
 }

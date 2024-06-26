@@ -11,6 +11,7 @@ import {
   Input,
   Pagination,
   Row,
+  Space,
   Table,
   message
 } from 'antd'
@@ -20,7 +21,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { getUserListReq } from '../../requests'
+import { exportDataReq, getUserListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types'
 import { SubscriptionStatus, UserStatus } from '../ui/statusTag'
@@ -215,10 +216,28 @@ const Search = ({
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
 }) => {
+  const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
     goSearch()
+  }
+
+  const exportData = async () => {
+    const payload = form.getFieldsValue()
+    console.log('export user params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({ task: 'UserExport', payload })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'User list is being exported, please check task list for progress.'
+    )
+    console.log('exporting user res: ', res)
   }
 
   return (
@@ -237,20 +256,28 @@ const Search = ({
             </Form.Item>
           </Col>
 
-          <Col span={6} className="flex justify-end">
-            <Button onClick={clear} disabled={searching}>
-              Clear
-            </Button>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <Button
-              onClick={goSearch}
-              type="primary"
-              icon={<SearchOutlined />}
-              loading={searching}
-              disabled={searching}
-            >
-              Search
-            </Button>
+          <Col span={7} className="flex justify-end">
+            <Space>
+              <Button onClick={clear} disabled={searching || exporting}>
+                Clear
+              </Button>
+              <Button
+                onClick={goSearch}
+                type="primary"
+                icon={<SearchOutlined />}
+                loading={searching}
+                disabled={searching || exporting}
+              >
+                Search
+              </Button>
+              <Button
+                onClick={exportData}
+                loading={exporting}
+                disabled={searching || exporting}
+              >
+                Export
+              </Button>
+            </Space>
           </Col>
         </Row>
         <Row className="my-3 flex items-center" gutter={[8, 8]}>
