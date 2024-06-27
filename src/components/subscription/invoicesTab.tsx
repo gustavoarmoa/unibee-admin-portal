@@ -1,6 +1,7 @@
 import {
   Button,
   Col,
+  DatePicker,
   Form,
   FormInstance,
   Input,
@@ -109,39 +110,62 @@ const Index = ({
     setInvoiceDetailModalOpen(!invoiceDetailModalOpen)
   }
 
-  const fetchData = async () => {
+  const normalizeSearchTerms = () => {
     let searchTerm: any = {}
     if (enableSearch) {
       searchTerm = form.getFieldsValue()
+      const start = form.getFieldValue('createTimeStart')
+      const end = form.getFieldValue('createTimeEnd')
+      if (start != null) {
+        searchTerm.createTimeStart = start.hour(0).minute(0).second(0).unix()
+      }
+      if (end != null) {
+        searchTerm.createTimeEnd = end.hour(23).minute(59).second(59).unix()
+      }
+      console.log('search term:  ', searchTerm)
+      // return
       let amtFrom = searchTerm.amountStart,
         amtTo = searchTerm.amountEnd
       if (amtFrom != '' && amtFrom != null) {
         amtFrom = Number(amtFrom) * CURRENCY[searchTerm.currency].stripe_factor
+        if (isNaN(amtFrom) || amtFrom < 0) {
+          message.error('Invalid amount-from value.')
+          return null
+        }
       }
       if (amtTo != '' && amtTo != null) {
         amtTo = Number(amtTo) * CURRENCY[searchTerm.currency].stripe_factor
+        if (isNaN(amtTo) || amtTo < 0) {
+          message.error('Invalid amount-to value')
+          return null
+        }
       }
-      if (isNaN(amtFrom) || amtFrom < 0) {
-        message.error('Invalid amount-from value.')
-        return
-      }
-      if (isNaN(amtTo) || amtTo < 0) {
-        message.error('Invalid amount-to value')
-        return
-      }
-      if (amtFrom > amtTo) {
+      console.log('amtFrom/to ', amtFrom, '//', amtTo)
+
+      if (
+        typeof amtFrom == 'number' &&
+        typeof amtTo == 'number' &&
+        amtFrom > amtTo
+      ) {
         message.error('Amount-from must be less than or equal to amount-to')
-        return
+        return null
       }
       searchTerm.amountStart = amtFrom
       searchTerm.amountEnd = amtTo
     }
-    searchTerm.page = page
-    searchTerm.count = PAGE_SIZE
     if (user != null) {
       searchTerm.userId = user.id as number
     }
+    return searchTerm
+  }
 
+  const fetchData = async () => {
+    const searchTerm = normalizeSearchTerms()
+    if (null == searchTerm) {
+      return
+    }
+    searchTerm.page = page
+    searchTerm.count = PAGE_SIZE
     setLoading(true)
     const [res, err] = await getInvoiceListReq(searchTerm, fetchData)
     setLoading(false)
@@ -428,6 +452,7 @@ const Index = ({
           goSearch={goSearch}
           searching={loading}
           onPageChange={pageChange}
+          normalizeSearchTerms={normalizeSearchTerms}
         />
       )}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -507,12 +532,14 @@ const Search = ({
   form,
   searching,
   goSearch,
-  onPageChange
+  onPageChange,
+  normalizeSearchTerms
 }: {
   form: FormInstance<any>
   searching: boolean
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
+  normalizeSearchTerms: () => any
 }) => {
   const [exporting, setExporting] = useState(false)
   const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
@@ -526,7 +553,10 @@ const Search = ({
   }
 
   const exportData = async () => {
-    const payload = form.getFieldsValue()
+    const payload = normalizeSearchTerms()
+    if (null == payload) {
+      return
+    }
     console.log('export iv params: ', payload)
     // return
     setExporting(true)
@@ -552,18 +582,20 @@ const Search = ({
 
   return (
     <div>
-      <Form form={form} initialValues={DEFAULT_TERM} disabled={searching}>
+      <Form form={form} onFinish={goSearch} disabled={searching}>
         <Row className="flex items-center" gutter={[8, 8]}>
-          <Col span={4}>First/Last name</Col>
+          <Col span={4} className="font-bold text-gray-500">
+            First/Last name
+          </Col>
           <Col span={4}>
             <Form.Item name="firstName" noStyle={true}>
-              <Input onPressEnter={goSearch} placeholder="first name" />
+              <Input onPressEnter={form.submit} placeholder="first name" />
             </Form.Item>
           </Col>
           /
           <Col span={4}>
             <Form.Item name="lastName" noStyle={true}>
-              <Input onPressEnter={goSearch} placeholder="last name" />
+              <Input onPressEnter={form.submit} placeholder="last name" />
             </Form.Item>
           </Col>
           <Col span={3}>
@@ -578,7 +610,7 @@ const Search = ({
                 Clear
               </Button>
               <Button
-                onClick={goSearch}
+                onClick={form.submit}
                 type="primary"
                 loading={searching}
                 disabled={searching}
@@ -597,7 +629,7 @@ const Search = ({
         </Row>
 
         <Row className="flex items-center" gutter={[8, 8]}>
-          <Col span={4}>
+          <Col span={4} className="font-bold text-gray-500">
             <div className="flex items-center">
               <span className="mr-2">Amount</span>
               <Form.Item name="currency" noStyle={true}>
@@ -616,23 +648,72 @@ const Search = ({
             <Form.Item name="amountStart" noStyle={true}>
               <Input
                 prefix={`from ${currencySymbol}`}
-                onPressEnter={goSearch}
+                onPressEnter={form.submit}
               />
             </Form.Item>
           </Col>
           &nbsp;
           <Col span={4}>
             <Form.Item name="amountEnd" noStyle={true}>
-              <Input prefix={`to ${currencySymbol}`} onPressEnter={goSearch} />
+              <Input
+                prefix={`to ${currencySymbol}`}
+                onPressEnter={form.submit}
+              />
             </Form.Item>
           </Col>
-          <Col span={11}>
+          <Col span={11} className=" ml-4 font-bold text-gray-500">
             <span className="mr-2">Status</span>
             <Form.Item name="status" noStyle={true}>
               <Select
                 mode="multiple"
                 options={statusOpt}
                 style={{ maxWidth: 420, minWidth: 120, margin: '8px 0' }}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
+          <Col span={4} className=" font-bold text-gray-500">
+            Invoice created
+          </Col>
+          <Col span={4}>
+            <Form.Item name="createTimeStart" noStyle={true}>
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="From"
+                format="YYYY-MMM-DD"
+                disabledDate={(d) => d.isAfter(new Date())}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item
+              name="createTimeEnd"
+              noStyle={true}
+              rules={[
+                {
+                  required: false,
+                  message: 'Must be later than start date.'
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    const start = getFieldValue('createTimeStart')
+                    if (null == start || value == null) {
+                      return Promise.resolve()
+                    }
+                    return value.isAfter(start)
+                      ? Promise.resolve()
+                      : Promise.reject('Must be later than start date')
+                  }
+                })
+              ]}
+            >
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="To"
+                format="YYYY-MMM-DD"
+                disabledDate={(d) => d.isAfter(new Date())}
               />
             </Form.Item>
           </Col>
