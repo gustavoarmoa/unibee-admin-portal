@@ -1,6 +1,7 @@
 import {
   Button,
   Col,
+  DatePicker,
   Form,
   FormInstance,
   Input,
@@ -45,6 +46,7 @@ const Index = ({
   enableSearch?: boolean
 }) => {
   const navigate = useNavigate()
+  const [form] = Form.useForm()
   const { page, onPageChange, onPageChangeNoParams } = usePagination()
   const pageChange = embeddingMode ? onPageChangeNoParams : onPageChange
   const appConfigStore = useAppConfigStore()
@@ -165,13 +167,36 @@ const Index = ({
     }
   ]
 
-  const fetchData = async () => {
-    const body: any = { page, count: PAGE_SIZE }
-    if (user != null) {
-      body.userId = user!.id as number
+  const normalizeSearchTerms = () => {
+    let searchTerm: any = {}
+    if (enableSearch) {
+      searchTerm = form.getFieldsValue()
+      const start = form.getFieldValue('createTimeStart')
+      const end = form.getFieldValue('createTimeEnd')
+      if (start != null) {
+        searchTerm.createTimeStart = start.hour(0).minute(0).second(0).unix()
+      }
+      if (end != null) {
+        searchTerm.createTimeEnd = end.hour(23).minute(59).second(59).unix()
+      }
+      console.log('search term:  ', searchTerm)
+      // return
     }
+    if (user != null) {
+      searchTerm.userId = user.id as number
+    }
+    return searchTerm
+  }
+
+  const fetchData = async () => {
+    const searchTerm = normalizeSearchTerms()
+    if (null == searchTerm) {
+      return
+    }
+    searchTerm.page = page
+    searchTerm.count = PAGE_SIZE
     setLoading(true)
-    const [res, err] = await getPaymentTimelineReq(body, fetchData)
+    const [res, err] = await getPaymentTimelineReq(searchTerm, fetchData)
     setLoading(false)
     if (null != err) {
       message.error(err.message)
@@ -180,6 +205,13 @@ const Index = ({
     const { paymentTimeLines, total } = res
     setPaymentList(paymentTimeLines ?? [])
     setTotal(total)
+  }
+  const goSearch = () => {
+    if (page == 0) {
+      fetchData()
+    } else {
+      pageChange(1, PAGE_SIZE)
+    }
   }
 
   useEffect(() => {
@@ -195,7 +227,15 @@ const Index = ({
           ignoreAmtFactor={false}
         />
       )}
-
+      {enableSearch && (
+        <Search
+          form={form}
+          goSearch={goSearch}
+          searching={loading}
+          onPageChange={pageChange}
+          normalizeSearchTerms={normalizeSearchTerms}
+        />
+      )}
       <Table
         columns={
           embeddingMode ? columns.filter((c) => c.key != 'userId') : columns
@@ -254,12 +294,14 @@ const Search = ({
   form,
   searching,
   goSearch,
-  onPageChange
+  onPageChange,
+  normalizeSearchTerms
 }: {
   form: FormInstance<any>
   searching: boolean
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
+  normalizeSearchTerms: () => any
 }) => {
   const [exporting, setExporting] = useState(false)
   const clear = () => {
@@ -269,7 +311,11 @@ const Search = ({
   }
 
   const exportData = async () => {
-    const payload = form.getFieldsValue()
+    const payload = normalizeSearchTerms()
+    if (null == payload) {
+      return
+    }
+
     console.log('export tx params: ', payload)
     // return
     setExporting(true)
@@ -283,38 +329,67 @@ const Search = ({
       return
     }
     message.success(
-      'User list is being exported, please check task list for progress.'
+      'Transaction list is being exported, please check task list for progress.'
     )
-    console.log('exporting user res: ', res)
   }
 
   return (
     <div>
-      <Form form={form} initialValues={DEFAULT_SEARCH_TERM}>
-        <Row className="flex items-center" gutter={[8, 8]}>
-          <Col span={3}>First/Last name</Col>
+      <Form form={form} onFinish={goSearch} disabled={searching}>
+        <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
+          <Col span={4} className=" font-bold text-gray-500">
+            Transaction created
+          </Col>
           <Col span={4}>
-            <Form.Item name="firstName" noStyle={true}>
-              <Input onPressEnter={goSearch} placeholder="first name" />
+            <Form.Item name="createTimeStart" noStyle={true}>
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="From"
+                format="YYYY-MMM-DD"
+                disabledDate={(d) => d.isAfter(new Date())}
+              />
             </Form.Item>
           </Col>
           <Col span={4}>
-            <Form.Item name="lastName" noStyle={true}>
-              <Input onPressEnter={goSearch} placeholder="last name" />
+            <Form.Item
+              name="createTimeEnd"
+              noStyle={true}
+              rules={[
+                {
+                  required: false,
+                  message: 'Must be later than start date.'
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    const start = getFieldValue('createTimeStart')
+                    if (null == start || value == null) {
+                      return Promise.resolve()
+                    }
+                    return value.isAfter(start)
+                      ? Promise.resolve()
+                      : Promise.reject('Must be later than start date')
+                  }
+                })
+              ]}
+            >
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="To"
+                format="YYYY-MMM-DD"
+                disabledDate={(d) => d.isAfter(new Date())}
+              />
             </Form.Item>
           </Col>
-
-          <Col span={7} className="flex justify-end">
+          <Col span={12} className="flex justify-end">
             <Space>
-              <Button onClick={clear} disabled={searching || exporting}>
+              <Button onClick={clear} disabled={searching}>
                 Clear
               </Button>
               <Button
-                onClick={goSearch}
+                onClick={form.submit}
                 type="primary"
-                icon={<SearchOutlined />}
                 loading={searching}
-                disabled={searching || exporting}
+                disabled={searching}
               >
                 Search
               </Button>
@@ -326,14 +401,6 @@ const Search = ({
                 Export
               </Button>
             </Space>
-          </Col>
-        </Row>
-        <Row className="my-3 flex items-center" gutter={[8, 8]}>
-          <Col span={3}>Email</Col>
-          <Col span={4}>
-            <Form.Item name="email" noStyle={true}>
-              <Input onPressEnter={goSearch} />
-            </Form.Item>
           </Col>
         </Row>
       </Form>

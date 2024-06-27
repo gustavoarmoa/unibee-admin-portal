@@ -3,7 +3,7 @@ import TransactionList from '../subscription/paymentTab'
 const Index = () => {
   return (
     <div>
-      <TransactionList embeddingMode={false} />
+      <TransactionList embeddingMode={false} enableSearch={true} />
     </div>
   )
 }
