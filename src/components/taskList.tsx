@@ -171,8 +171,10 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
     axios({
       url,
       method: 'GET',
+      headers: { Authorization: `${localStorage.getItem('merchantToken')}` },
       responseType: 'blob'
     }).then((response) => {
+      console.log('download res: ', response)
       const href = URL.createObjectURL(response.data)
       const link = document.createElement('a')
       link.href = href

@@ -456,7 +456,10 @@ export type TActivityLogs = {
   member: IMerchantUserProfile[]
 }
 
-export type TExportDataType = 'InvoiceExport' | 'UserExport'
+export type TExportDataType =
+  | 'InvoiceExport'
+  | 'UserExport'
+  | 'TransactionExport'
 
 export class ExpiredError extends Error {
   constructor(m: string) {

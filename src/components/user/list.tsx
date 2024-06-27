@@ -1,11 +1,15 @@
 import {
+  EditOutlined,
   LoadingOutlined,
+  PlusOutlined,
   SearchOutlined,
+  SyncOutlined,
   UserAddOutlined
 } from '@ant-design/icons'
 import {
   Button,
   Col,
+  DatePicker,
   Form,
   FormInstance,
   Input,
@@ -13,10 +17,11 @@ import {
   Row,
   Space,
   Table,
+  Tooltip,
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDate } from '../../helpers'
@@ -40,6 +45,47 @@ const Index = () => {
   const [users, setUsers] = useState<IProfile[]>([])
   const [form] = Form.useForm()
 
+  const normalizeSearchTerms = () => {
+    const start = form.getFieldValue('createTimeStart')
+    const end = form.getFieldValue('createTimeEnd')
+    const searchTerms = JSON.parse(JSON.stringify(form.getFieldsValue()))
+    Object.keys(searchTerms).forEach(
+      (k) =>
+        (searchTerms[k] == undefined ||
+          (typeof searchTerms[k] == 'string' && searchTerms[k].trim() == '')) &&
+        delete searchTerms[k]
+    )
+    if (start != null) {
+      searchTerms.createTimeStart = start.hour(0).minute(0).second(0).unix()
+    }
+    if (end != null) {
+      searchTerms.createTimeEnd = end.hour(23).minute(59).second(59).unix()
+    }
+    console.log('search term: ', searchTerms)
+    return searchTerms
+  }
+
+  const fetchData = async () => {
+    // return
+    setLoading(true)
+    const [res, err] = await getUserListReq(
+      {
+        page,
+        count: PAGE_SIZE,
+        ...normalizeSearchTerms()
+      },
+      fetchData
+    )
+    setLoading(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    const { userAccounts, total } = res
+    setUsers(userAccounts ?? [])
+    setTotal(total)
+  }
+
   const columns: ColumnsType<IProfile> = [
     {
       title: 'Name',
@@ -47,11 +93,6 @@ const Index = () => {
       key: 'userName',
       render: (firstName, user) => `${user.firstName} ${user.lastName}`
     },
-    /* {
-      title: 'Last Name',
-      dataIndex: 'lastName',
-      key: 'lastName'
-    }, */
     {
       title: 'Email',
       dataIndex: 'email',
@@ -94,29 +135,46 @@ const Index = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status, _) => UserStatus(status)
+    },
+    {
+      title: (
+        <>
+          <span></span>
+          <Tooltip title="New user">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              onClick={toggleNewUserModal}
+              icon={<UserAddOutlined />}
+            />
+          </Tooltip>
+          <Tooltip title="Refresh">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading}
+              onClick={fetchData}
+              icon={<SyncOutlined />}
+            />
+          </Tooltip>
+        </>
+      ),
+      width: 100,
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle" className="plan-action-btn-wrapper">
+          <Tooltip title="Edit">
+            <Button
+              // disabled={copyingPlan}
+              style={{ border: 'unset' }}
+              // onClick={() => goToDetail(record.id)}
+              icon={<EditOutlined />}
+            />
+          </Tooltip>
+        </Space>
+      )
     }
   ]
-
-  const fetchData = async () => {
-    const searchTerm = form.getFieldsValue()
-    setLoading(true)
-    const [res, err] = await getUserListReq(
-      {
-        page,
-        count: PAGE_SIZE,
-        ...searchTerm
-      },
-      fetchData
-    )
-    setLoading(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    const { userAccounts, total } = res
-    setUsers(userAccounts ?? [])
-    setTotal(total)
-  }
 
   // search should always start with page 0(it shows ?page=1 on URL)
   // search result might have fewer records than PAGE_SIZE(only visible on page=1), it will be empty from page=2
@@ -138,24 +196,17 @@ const Index = () => {
         <CreateUserModal closeModal={toggleNewUserModal} refresh={fetchData} />
       )}
       <Row>
-        <Col span={22}>
+        <Col span={24}>
           <Search
             form={form}
             goSearch={goSearch}
             onPageChange={onPageChange}
             searching={loading}
-          />{' '}
-        </Col>
-        <Col span={2}>
-          <Button
-            type="primary"
-            onClick={toggleNewUserModal}
-            icon={<UserAddOutlined />}
-          >
-            Add New
-          </Button>
+            normalizeSearchTerms={normalizeSearchTerms}
+          />
         </Col>
       </Row>
+      <div className=" h-3"></div>
 
       <Table
         columns={columns}
@@ -209,15 +260,16 @@ const Search = ({
   form,
   searching,
   goSearch,
-  onPageChange
+  onPageChange,
+  normalizeSearchTerms
 }: {
   form: FormInstance<any>
   searching: boolean
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
+  normalizeSearchTerms: () => any
 }) => {
   const [exporting, setExporting] = useState(false)
-  // const {loading, err} = useAsyncExport(UserExport)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
@@ -225,7 +277,7 @@ const Search = ({
   }
 
   const exportData = async () => {
-    const payload = form.getFieldsValue()
+    const payload = normalizeSearchTerms()
     console.log('export user params: ', payload)
     // return
     setExporting(true)
@@ -238,14 +290,19 @@ const Search = ({
     message.success(
       'User list is being exported, please check task list for progress.'
     )
-    console.log('exporting user res: ', res)
   }
 
   return (
     <div>
-      <Form form={form} initialValues={DEFAULT_SEARCH_TERM}>
+      <Form
+        form={form}
+        onFinish={goSearch}
+        // initialValues={DEFAULT_SEARCH_TERM}
+      >
         <Row className="flex items-center" gutter={[8, 8]}>
-          <Col span={3}>First/Last name</Col>
+          <Col span={3} className=" font-bold text-gray-500">
+            Account name
+          </Col>
           <Col span={4}>
             <Form.Item name="firstName" noStyle={true}>
               <Input onPressEnter={goSearch} placeholder="first name" />
@@ -257,13 +314,65 @@ const Search = ({
             </Form.Item>
           </Col>
 
-          <Col span={7} className="flex justify-end">
+          <Col span={2} className="text-right font-bold text-gray-500">
+            Email
+          </Col>
+          <Col span={5}>
+            <Form.Item name="email" noStyle={true}>
+              <Input onPressEnter={goSearch} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row className="my-3 flex items-center" gutter={[8, 8]}>
+          <Col span={3} className=" font-bold text-gray-500">
+            Account created
+          </Col>
+          <Col span={4}>
+            <Form.Item name="createTimeStart" noStyle={true}>
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="From"
+                format="YYYY-MMM-DD"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item
+              name="createTimeEnd"
+              noStyle={true}
+              rules={[
+                {
+                  required: false,
+                  message: 'Must be later than start date.'
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    const start = getFieldValue('createTimeStart')
+                    if (null == start || value == null) {
+                      return Promise.resolve()
+                    }
+                    return value.isAfter(start)
+                      ? Promise.resolve()
+                      : Promise.reject('Must be later than start date')
+                  }
+                })
+              ]}
+            >
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="To"
+                format="YYYY-MMM-DD"
+              />
+            </Form.Item>
+          </Col>
+          <Col span={13} className="flex justify-end">
             <Space>
               <Button onClick={clear} disabled={searching || exporting}>
                 Clear
               </Button>
               <Button
-                onClick={goSearch}
+                onClick={form.submit}
                 type="primary"
                 icon={<SearchOutlined />}
                 loading={searching}
@@ -279,14 +388,6 @@ const Search = ({
                 Export
               </Button>
             </Space>
-          </Col>
-        </Row>
-        <Row className="my-3 flex items-center" gutter={[8, 8]}>
-          <Col span={3}>Email</Col>
-          <Col span={4}>
-            <Form.Item name="email" noStyle={true}>
-              <Input onPressEnter={goSearch} />
-            </Form.Item>
           </Col>
         </Row>
       </Form>

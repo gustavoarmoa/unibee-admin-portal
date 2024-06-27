@@ -1,14 +1,29 @@
-import { Button, Pagination, Table, message } from 'antd'
+import {
+  Button,
+  Col,
+  Form,
+  FormInstance,
+  Input,
+  Pagination,
+  Row,
+  Space,
+  Table,
+  message
+} from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
-import { LoadingOutlined } from '@ant-design/icons'
+import { LoadingOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY, INVOICE_STATUS, PAYMENT_TYPE } from '../../constants'
 import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { downloadInvoice, getPaymentTimelineReq } from '../../requests'
+import {
+  downloadInvoice,
+  exportDataReq,
+  getPaymentTimelineReq
+} from '../../requests'
 import '../../shared.css'
 import { IProfile, PaymentItem, UserInvoice } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
@@ -21,11 +36,13 @@ const APP_PATH = import.meta.env.BASE_URL
 const Index = ({
   user,
   extraButton,
-  embeddingMode
+  embeddingMode,
+  enableSearch
 }: {
   user?: IProfile | undefined
   extraButton?: ReactElement
   embeddingMode: boolean
+  enableSearch?: boolean
 }) => {
   const navigate = useNavigate()
   const { page, onPageChange, onPageChangeNoParams } = usePagination()
@@ -227,3 +244,99 @@ const Index = ({
 }
 
 export default Index
+
+const DEFAULT_SEARCH_TERM = {
+  firstName: '',
+  lastName: '',
+  email: ''
+}
+const Search = ({
+  form,
+  searching,
+  goSearch,
+  onPageChange
+}: {
+  form: FormInstance<any>
+  searching: boolean
+  goSearch: () => void
+  onPageChange: (page: number, pageSize: number) => void
+}) => {
+  const [exporting, setExporting] = useState(false)
+  const clear = () => {
+    form.resetFields()
+    onPageChange(1, PAGE_SIZE)
+    goSearch()
+  }
+
+  const exportData = async () => {
+    const payload = form.getFieldsValue()
+    console.log('export tx params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({
+      task: 'TransactionExport',
+      payload
+    })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'User list is being exported, please check task list for progress.'
+    )
+    console.log('exporting user res: ', res)
+  }
+
+  return (
+    <div>
+      <Form form={form} initialValues={DEFAULT_SEARCH_TERM}>
+        <Row className="flex items-center" gutter={[8, 8]}>
+          <Col span={3}>First/Last name</Col>
+          <Col span={4}>
+            <Form.Item name="firstName" noStyle={true}>
+              <Input onPressEnter={goSearch} placeholder="first name" />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="lastName" noStyle={true}>
+              <Input onPressEnter={goSearch} placeholder="last name" />
+            </Form.Item>
+          </Col>
+
+          <Col span={7} className="flex justify-end">
+            <Space>
+              <Button onClick={clear} disabled={searching || exporting}>
+                Clear
+              </Button>
+              <Button
+                onClick={goSearch}
+                type="primary"
+                icon={<SearchOutlined />}
+                loading={searching}
+                disabled={searching || exporting}
+              >
+                Search
+              </Button>
+              <Button
+                onClick={exportData}
+                loading={exporting}
+                disabled={searching || exporting}
+              >
+                Export
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+        <Row className="my-3 flex items-center" gutter={[8, 8]}>
+          <Col span={3}>Email</Col>
+          <Col span={4}>
+            <Form.Item name="email" noStyle={true}>
+              <Input onPressEnter={goSearch} />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </div>
+  )
+}

@@ -979,6 +979,8 @@ type TGetSubTimelineReq = {
   userId?: number
   page: number
   count: number
+  createTimeStart?: number // used in /merchant/payment/timeline/list only
+  createTimeEnd?: number // ditto
 }
 export const getSubTimelineReq = async (body: TGetSubTimelineReq) => {
   const session = useSessionStore.getState()
@@ -1002,10 +1004,16 @@ export const getPaymentTimelineReq = async (
   params: TGetSubTimelineReq,
   refreshCb: () => void
 ) => {
-  const { page, count, userId } = params
+  const { page, count, userId, createTimeStart, createTimeEnd } = params
   let url = `/merchant/payment/timeline/list?page=${page}&count=${count}`
   if (userId != null) {
-    url += `&userId=${params.userId}`
+    url += `&userId=${userId}`
+  }
+  if (createTimeStart != null) {
+    url += `&createTimeStart=${createTimeStart}`
+  }
+  if (createTimeEnd != null) {
+    url += `&createTimeStart=${createTimeStart}`
   }
   try {
     const res = await request.get(url)
@@ -1769,6 +1777,8 @@ type TUserList = {
   lastName?: string
   email?: string
   status?: number[]
+  createTimeStart?: number
+  createTimeEnd?: number
   page: number
   count: number
 }
