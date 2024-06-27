@@ -334,6 +334,7 @@ const Search = ({
                 style={{ width: '100%' }}
                 placeholder="From"
                 format="YYYY-MMM-DD"
+                disabledDate={(d) => d.isAfter(new Date())}
               />
             </Form.Item>
           </Col>
@@ -363,6 +364,7 @@ const Search = ({
                 style={{ width: '100%' }}
                 placeholder="To"
                 format="YYYY-MMM-DD"
+                disabledDate={(d) => d.isAfter(new Date())}
               />
             </Form.Item>
           </Col>
