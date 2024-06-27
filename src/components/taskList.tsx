@@ -7,6 +7,7 @@ import {
 import {
   Button,
   Col,
+  Divider,
   Drawer,
   Pagination,
   Popover,
@@ -53,7 +54,7 @@ const Index = ({ onClose }: { onClose: () => void }) => {
 
   useEffect(() => {
     getList()
-  }, [])
+  }, [page])
 
   return (
     <Drawer
@@ -82,11 +83,14 @@ const Index = ({ onClose }: { onClose: () => void }) => {
             style={{
               overflowY: 'auto',
               height: '100%',
-              maxHeight: 'calc(100vh - 120px)'
+              maxHeight: 'calc(100vh - 162px)'
             }}
           >
             {taskList.map((t) => (
-              <TaskItem key={t.id} t={t} />
+              <div key={t.id}>
+                <TaskItem key={t.id} t={t} />
+                <Divider style={{ margin: '16px 0' }} />
+              </div>
             ))}
           </div>
         </Spin>
@@ -180,7 +184,7 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
     })
   }
   return (
-    <div style={{ height: '56px', marginBottom: '18px' }}>
+    <div style={{ height: '50px' }}>
       <Row style={rowStyle}>
         <Col span={3} className=" font-bold text-gray-500">
           Task

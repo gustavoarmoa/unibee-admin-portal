@@ -31,7 +31,7 @@ import RefundIcon from '../../assets/refund.svg?react'
 import { CURRENCY, INVOICE_STATUS } from '../../constants'
 import { formatDate, getInvoicePermission, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { getInvoiceListReq } from '../../requests'
+import { exportDataReq, getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
 import { normalizeAmt } from '../helpers'
@@ -244,6 +244,7 @@ const Index = ({
       title: 'Created by',
       dataIndex: 'createFrom',
       key: 'createFrom',
+      width: 110,
       render: (by, _) => (by != 'Admin' ? 'System' : 'Admin')
     },
     {
@@ -513,6 +514,7 @@ const Search = ({
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
 }) => {
+  const [exporting, setExporting] = useState(false)
   const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
     value: Number(s),
     label: INVOICE_STATUS[Number(s)]
@@ -522,6 +524,24 @@ const Search = ({
     onPageChange(1, PAGE_SIZE)
     goSearch()
   }
+
+  const exportData = async () => {
+    const payload = form.getFieldsValue()
+    console.log('export iv params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({ task: 'InvoiceExport', payload })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'Invoice list is being exported, please check task list for progress.'
+    )
+    console.log('exporting iv res: ', res)
+  }
+
   const watchCurrency = Form.useWatch('currency', form)
   useEffect(() => {
     // just to trigger rerender when currency changed
@@ -553,18 +573,26 @@ const Search = ({
   </Form.Item> */}
           </Col>
           <Col span={8} className="flex justify-end">
-            <Button onClick={clear} disabled={searching}>
-              Clear
-            </Button>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <Button
-              onClick={goSearch}
-              type="primary"
-              loading={searching}
-              disabled={searching}
-            >
-              Search
-            </Button>
+            <Space>
+              <Button onClick={clear} disabled={searching}>
+                Clear
+              </Button>
+              <Button
+                onClick={goSearch}
+                type="primary"
+                loading={searching}
+                disabled={searching}
+              >
+                Search
+              </Button>
+              <Button
+                onClick={exportData}
+                loading={exporting}
+                disabled={searching || exporting}
+              >
+                Export
+              </Button>
+            </Space>
           </Col>
         </Row>
 

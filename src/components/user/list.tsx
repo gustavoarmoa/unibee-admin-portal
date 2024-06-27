@@ -20,7 +20,7 @@ import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDate } from '../../helpers'
-import { usePagination } from '../../hooks'
+import { useAsyncExport, usePagination } from '../../hooks'
 import { exportDataReq, getUserListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types'
@@ -217,6 +217,7 @@ const Search = ({
   onPageChange: (page: number, pageSize: number) => void
 }) => {
   const [exporting, setExporting] = useState(false)
+  // const {loading, err} = useAsyncExport(UserExport)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
