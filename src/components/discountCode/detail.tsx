@@ -66,6 +66,8 @@ const Index = () => {
   const watchPlanIds = Form.useWatch('planIds', form)
 
   const goBack = () => navigate(`${APP_PATH}discount-code/list`)
+  const goToUsageDetail = () =>
+    navigate(`${APP_PATH}discount-code/${codeId}/usage-detail`)
 
   // for editing code, need to fetch code detail and planList
   const fetchData = async () => {
@@ -568,6 +570,11 @@ const Index = () => {
 
         <div className="flex justify-center gap-4">
           <Button onClick={goBack}>Go back</Button>
+          {!isNew && (
+            <Button onClick={goToUsageDetail} disabled={code?.status == 1}>
+              View usage detail
+            </Button>
+          )}
           {code != null &&
             (code.status == 1 || code.status == 2 || code.status == 3) && (
               <Button onClick={toggleActivate}>

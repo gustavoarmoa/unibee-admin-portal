@@ -64,7 +64,7 @@ const Index = () => {
       dataIndex: 'member',
       fixed: 'left',
       key: 'member',
-      render: (m, _) => m.firstName + ' ' + m.lastName
+      render: (m, _) => `${m.firstName} ${m.lastName} (${m.email})`
     },
     {
       title: 'Target',
