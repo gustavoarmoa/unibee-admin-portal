@@ -189,6 +189,7 @@ const Index = ({
 
   const fetchData = async () => {
     const searchTerm = normalizeSearchTerms()
+    console.log('searchTerm: ', searchTerm)
     if (null == searchTerm) {
       return
     }
@@ -284,11 +285,6 @@ const Index = ({
 
 export default Index
 
-const DEFAULT_SEARCH_TERM = {
-  firstName: '',
-  lastName: '',
-  email: ''
-}
 const Search = ({
   form,
   searching,

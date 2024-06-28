@@ -1013,7 +1013,7 @@ export const getPaymentTimelineReq = async (
     url += `&createTimeStart=${createTimeStart}`
   }
   if (createTimeEnd != null) {
-    url += `&createTimeStart=${createTimeStart}`
+    url += `&createTimeEnd=${createTimeEnd}`
   }
   try {
     const res = await request.get(url)
