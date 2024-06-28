@@ -17,6 +17,9 @@ import {
   message
 } from 'antd'
 import axios from 'axios'
+import dayjs from 'dayjs'
+import duration from 'dayjs/plugin/duration'
+import relativeTime from 'dayjs/plugin/relativeTime'
 import { CSSProperties, useEffect, useState } from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
@@ -27,6 +30,8 @@ import { getDownloadListReq } from '../requests'
 import { TExportDataType } from '../shared.types'
 import './appSearch.css'
 import { TaskStatus } from './ui/statusTag'
+dayjs.extend(duration)
+dayjs.extend(relativeTime)
 
 SyntaxHighlighter.registerLanguage('json', json)
 
@@ -60,7 +65,7 @@ const Index = ({ onClose }: { onClose: () => void }) => {
     <Drawer
       title="Task list"
       placement="right"
-      width={580}
+      width={600}
       onClose={onClose}
       open={true}
       extra={
@@ -219,10 +224,14 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
         <Col span={2} className=" font-bold text-gray-500">
           End
         </Col>
-        <Col span={7}>
+        <Col span={6}>
           {t.finishTime == 0 ? '―' : formatDate(t.finishTime, true)}
         </Col>
-        <Col span={2}>{t.status == 2 ? `${t.taskCost}s` : '―'}</Col>
+        <Col span={3} className=" text-xs">
+          {t.status == 2
+            ? `${dayjs.duration(t.taskCost, 'seconds').humanize()}`
+            : '―'}
+        </Col>
       </Row>
     </div>
   )

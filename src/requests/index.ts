@@ -1328,16 +1328,23 @@ export const appSearchReq = async (searchKey: string) => {
 type TDiscountCodeQry = {
   page: number
   count: number
+  createTimeStart?: number
+  createTimeEnd?: number
 }
 export const getDiscountCodeListReq = async (
   params: TDiscountCodeQry,
   refreshCb: () => void
 ) => {
-  const { page, count } = params // these 2 fields always exist
+  const { page, count, createTimeStart, createTimeEnd } = params
+  let url = `/merchant/discount/list?page=${page}&count=${count}`
+  if (createTimeStart != null) {
+    url += `&createTimeStart=${createTimeStart}`
+  }
+  if (createTimeEnd != null) {
+    url += `&createTimeEnd=${createTimeEnd}`
+  }
   try {
-    const res = await request.get(
-      `/merchant/discount/list?page=${page}&count=${count}`
-    )
+    const res = await request.get(url)
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: refreshCb })
       throw new ExpiredError(

@@ -162,7 +162,7 @@ const Index = () => {
       width: 100,
       key: 'action',
       render: (_, record) => (
-        <Space size="middle" className="plan-action-btn-wrapper">
+        <Space size="middle" className="user-action-btn-wrapper">
           <Tooltip title="Edit">
             <Button
               // disabled={copyingPlan}

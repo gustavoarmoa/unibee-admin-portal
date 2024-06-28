@@ -463,6 +463,7 @@ export type TExportDataType =
   | 'SubscriptionExport'
   | 'UserDiscountExport'
   | 'DiscountExport'
+  | 'UserDiscountExport'
 
 export class ExpiredError extends Error {
   constructor(m: string) {
