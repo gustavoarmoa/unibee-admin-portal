@@ -207,7 +207,7 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
         <Col span={3}>
           {t.status == 2 && (
             <Button
-              onClick={onDownload(t.uploadFileUrl)}
+              onClick={onDownload(t.downloadUrl)}
               size="small"
               icon={<DownloadOutlined />}
             />
