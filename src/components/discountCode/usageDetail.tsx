@@ -1,70 +1,65 @@
-import {
-  EditOutlined,
-  LoadingOutlined,
-  PlusCircleOutlined,
-  PlusOutlined,
-  ProfileOutlined,
-  SyncOutlined
-} from '@ant-design/icons'
+import { LoadingOutlined } from '@ant-design/icons'
 import {
   Button,
   Col,
   DatePicker,
   Form,
   FormInstance,
+  Input,
   Pagination,
+  Popconfirm,
   Row,
+  Select,
   Space,
+  Spin,
   Table,
-  Tooltip,
   message
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
-import React, { ReactElement, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { DISCOUNT_CODE_BILLING_TYPE, DISCOUNT_CODE_TYPE } from '../../constants'
-import { showAmount } from '../../helpers'
+import dayjs, { Dayjs } from 'dayjs'
+import React, { useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { CURRENCY } from '../../constants'
+import {
+  currencyDecimalValidate,
+  showAmount,
+  toFixedNumber
+} from '../../helpers'
 import { usePagination } from '../../hooks'
-import { exportDataReq, getDiscountCodeListReq } from '../../requests'
-import '../../shared.css'
-import { DiscountCode } from '../../shared.types.d'
+import {
+  createDiscountCodeReq,
+  deleteDiscountCodeReq,
+  exportDataReq,
+  getDiscountCodeDetailWithMore,
+  getDiscountCodeUsageDetailReq,
+  getPlanList,
+  toggleDiscountCodeActivateReq,
+  updateDiscountCodeReq
+} from '../../requests'
+import { DiscountCode, DiscountCodeUsage, IPlan } from '../../shared.types'
+import { useMerchantInfoStore } from '../../stores'
 import { DiscountCodeStatus } from '../ui/statusTag'
 
+const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
 const PAGE_SIZE = 10
-const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
+  const params = useParams()
+  const codeId = params.discountCodeId
   const [form] = Form.useForm()
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [codeList, setCodeList] = useState<DiscountCode[]>([])
+  const [usageDetailList, setUsageDetailList] = useState<DiscountCodeUsage[]>(
+    []
+  )
 
-  const onNewCode = () => {
-    onPageChange(1, 100)
-    navigate(`${APP_PATH}discount-code/new`)
-  }
-  const fetchData = async () => {
-    const searchTerm = normalizeSearchTerms()
-    setLoading(true)
-    const [res, err] = await getDiscountCodeListReq(
-      { page, count: PAGE_SIZE, ...searchTerm },
-      fetchData
-    )
-    console.log('code list: ', res)
-    setLoading(false)
-    if (null != err) {
-      message.error(err.message)
-      return
-    }
-    const { discounts, total } = res
-    setCodeList(discounts ?? [])
-    setTotal(total)
-  }
+  const goBack = () => navigate(`${APP_PATH}discount-code/list`)
 
-  const columns: ColumnsType<DiscountCode> = [
+  console.log('codeId: ', codeId)
+
+  const columns: ColumnsType<DiscountCodeUsage> = [
     {
       title: 'Code',
       dataIndex: 'code',
@@ -72,111 +67,46 @@ const Index = () => {
       // render: (text) => <a>{text}</a>,
     },
     {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name'
+      title: 'Applied plan',
+      dataIndex: 'plan',
+      key: 'plan'
+      // render: (plan, code_detail) => plan.planName
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (s) => DiscountCodeStatus(s) // STATUS[s]
+      title: 'Applied Amt',
+      dataIndex: 'applyAmount',
+      key: 'applyAmount',
+      render: (amt, code_detail) => showAmount(amt, code_detail.currency)
     },
     {
-      title: 'Billing Type',
-      dataIndex: 'billingType',
-      key: 'billingType',
-      render: (s) => DISCOUNT_CODE_BILLING_TYPE[s]
+      title: 'Used by',
+      dataIndex: 'user',
+      key: 'user',
+      render: (user, code_detail) => `${user.firstName} ${user.lastName}`
     },
     {
-      title: 'Discount Type',
-      dataIndex: 'discountType',
-      key: 'discountType',
-      render: (s) => DISCOUNT_CODE_TYPE[s]
+      title: 'Used at',
+      dataIndex: 'usedAt',
+      key: 'usedAt'
+      // render: (user, code_detail) => `${user.firstName} ${user.lastName}`
     },
     {
-      title: 'Amount',
-      dataIndex: 'discountAmount',
-      key: 'discountAmount',
-      render: (amt, code) =>
-        code.discountType == 1 ? '' : showAmount(amt, code.currency)
+      title: 'Subscription Id',
+      dataIndex: 'subscriptionId',
+      key: 'subscriptionId'
+      // render: (plan, code_detail) => plan.planName
     },
     {
-      title: 'Percentage',
-      dataIndex: 'discountPercentage',
-      key: 'discountPercentage',
-      render: (percent, code) =>
-        code.discountType == 1 ? `${percent / 100} %` : ''
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId'
+      // render: (plan, code_detail) => plan.planName
     },
     {
-      title: 'Cycle Limit',
-      dataIndex: 'cycleLimit',
-      key: 'cycleLimit',
-      render: (lim, code) => {
-        if (code.billingType == 1) {
-          // one-time use
-          return '1'
-        } else if (code.billingType == 2) {
-          // recurring
-          return lim === 0 ? 'Unlimited' : lim
-        } else {
-          return lim
-        }
-      }
-    },
-    {
-      title: 'Validity Range',
-      dataIndex: 'startTime',
-      key: 'startTime',
-      render: (start, code) =>
-        dayjs(start * 1000).format('YYYY-MMM-DD') +
-        ' ~ ' +
-        dayjs(code.endTime * 1000).format('YYYY-MMM-DD')
-    },
-    {
-      title: (
-        <>
-          <span></span>
-          <Tooltip title="New discount code">
-            <Button
-              size="small"
-              style={{ marginLeft: '8px' }}
-              onClick={onNewCode}
-              icon={<PlusOutlined />}
-            />
-          </Tooltip>
-          <Tooltip title="Refresh">
-            <Button
-              size="small"
-              style={{ marginLeft: '8px' }}
-              disabled={loading}
-              onClick={fetchData}
-              icon={<SyncOutlined />}
-            />
-          </Tooltip>
-        </>
-      ),
-      width: 100,
-      key: 'action',
-      render: (_, record) => (
-        <Space size="middle" className="code-action-btn-wrapper">
-          <Tooltip title="Edit">
-            <Button
-              // disabled={copyingPlan}
-              style={{ border: 'unset' }}
-              // onClick={() => goToDetail(record.id)}
-              icon={<EditOutlined />}
-            />
-          </Tooltip>
-          <Tooltip title="View usage detail">
-            <Button
-              className="btn-code-usage-detail"
-              style={{ border: 'unset' }}
-              icon={<ProfileOutlined />}
-            />
-          </Tooltip>
-        </Space>
-      )
+      title: 'Payment Id',
+      dataIndex: 'paymentId',
+      key: 'paymentId'
+      // render: (plan, code_detail) => plan.planName
     }
   ]
 
@@ -192,6 +122,32 @@ const Index = () => {
       searchTerm.createTimeEnd = end.hour(23).minute(59).second(59).unix()
     }
     return searchTerm
+  }
+
+  const fetchData = async () => {
+    const id = Number(codeId)
+    if (isNaN(id)) {
+      message.error('Invalid code Id')
+      return
+    }
+    const searchTerms = normalizeSearchTerms()
+    setLoading(true)
+    const [res, err] = await getDiscountCodeUsageDetailReq({
+      id,
+      page,
+      count: PAGE_SIZE,
+      searchTerms,
+      refreshCb: fetchData
+    })
+    console.log('code usage detail list: ', res)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    const { userDiscounts, total } = res
+    setUsageDetailList(userDiscounts ?? [])
+    setTotal(total)
   }
 
   const goSearch = () => {
@@ -210,15 +166,14 @@ const Index = () => {
     <div>
       <Search
         form={form}
-        goSearch={goSearch}
-        searching={loading}
         onPageChange={onPageChange}
+        searching={loading}
+        goSearch={goSearch}
         normalizeSearchTerms={normalizeSearchTerms}
       />
-      <div className=" mb-4"></div>
       <Table
         columns={columns}
-        dataSource={codeList}
+        dataSource={usageDetailList}
         rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}
@@ -228,35 +183,28 @@ const Index = () => {
         }}
         onRow={(code, rowIndex) => {
           return {
-            onClick: (evt) => {
-              const tgt = evt.target
-              if (
-                tgt instanceof Element &&
-                tgt.closest('.btn-code-usage-detail')
-              ) {
-                navigate(`${APP_PATH}discount-code/${code.id}/usage-detail`)
-                return
-              }
-              navigate(`${APP_PATH}discount-code/${code.id}`, {
-                state: codeList[rowIndex as number]
-              })
-            }
+            onClick: (evt) => {}
           }
         }}
       />
-      <div className="mx-0 my-4 flex items-center justify-end">
-        <Pagination
-          current={page + 1} // back-end starts with 0, front-end starts with 1
-          pageSize={PAGE_SIZE}
-          total={total}
-          size="small"
-          onChange={onPageChange}
-          disabled={loading}
-          showSizeChanger={false}
-          showTotal={(total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`
-          }
-        />
+      <div className="mx-0 my-4 flex w-full items-center justify-end">
+        <div className=" flex w-2/4 justify-end">
+          <div className=" flex w-full justify-between">
+            <Button onClick={goBack}>Go back</Button>
+            <Pagination
+              current={page + 1} // back-end starts with 0, front-end starts with 1
+              pageSize={PAGE_SIZE}
+              total={total}
+              size="small"
+              onChange={onPageChange}
+              disabled={loading}
+              showSizeChanger={false}
+              showTotal={(total, range) =>
+                `${range[0]}-${range[1]} of ${total} items`
+              }
+            />
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -277,6 +225,8 @@ const Search = ({
   onPageChange: (page: number, pageSize: number) => void
   normalizeSearchTerms: () => any
 }) => {
+  const params = useParams()
+  const codeId = params.discountCodeId
   const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
@@ -285,16 +235,21 @@ const Search = ({
   }
 
   const exportData = async () => {
+    const id = Number(codeId)
+    if (isNaN(id)) {
+      message.error('Invalid code Id')
+      return
+    }
     const payload = normalizeSearchTerms()
     if (null == payload) {
       return
     }
-
+    payload.id = id
     console.log('export tx params: ', payload)
     // return
     setExporting(true)
     const [res, err] = await exportDataReq({
-      task: 'DiscountExport',
+      task: 'UserDiscountExport',
       payload
     })
     setExporting(false)

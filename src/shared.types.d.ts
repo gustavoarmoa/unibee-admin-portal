@@ -247,6 +247,20 @@ type DiscountCode = {
   }
 }
 
+type DiscountCodeUsage = {
+  id: number
+  merchantId: number
+  user: IProfile
+  code: string
+  plan: IPlan
+  subscriptionId: string
+  paymentId: string
+  invoiceId: string
+  createTime: number
+  applyAmount: number
+  currency: string
+}
+
 type TransactionItem = {
   gateway: TGateway
   invoice: UserInvoice
@@ -474,6 +488,7 @@ export class ExpiredError extends Error {
 export type {
   Country,
   DiscountCode,
+  DiscountCodeUsage,
   IAppConfig,
   IBillableMetrics,
   IMerchantMemberProfile,

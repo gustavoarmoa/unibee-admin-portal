@@ -39,6 +39,7 @@ import BillableMetricsDetail from './components/billableMetrics/detail'
 import BillableMetricsList from './components/billableMetrics/list'
 import DiscountCodeDetail from './components/discountCode/detail'
 import DiscountCodeList from './components/discountCode/list'
+import DiscountCodeUsage from './components/discountCode/usageDetail'
 import PricePlanList from './components/plan/list'
 import Settings from './components/settings/index'
 import SubscriptionDetail from './components/subscription/detail'
@@ -486,6 +487,10 @@ const app_routes = [
         <Route path="list" element={<DiscountCodeList />} />
         <Route path="new" element={<DiscountCodeDetail />} />
         <Route path=":discountCodeId" element={<DiscountCodeDetail />} />
+        <Route
+          path=":discountCodeId/usage-detail"
+          element={<DiscountCodeUsage />}
+        />
       </Route>
     )
   },

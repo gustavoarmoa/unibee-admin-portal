@@ -1374,6 +1374,40 @@ const getDiscountCodeDetailReq = async (codeId: number) => {
   }
 }
 
+type TDiscountUsageDetail = {
+  id: number
+  searchTerms: { createTimeStart?: number; createTimeEnd?: number }
+  page: number
+  count: number
+  refreshCb?: () => void
+}
+export const getDiscountCodeUsageDetailReq = async (
+  params: TDiscountUsageDetail
+) => {
+  const { id, searchTerms, page, count, refreshCb } = params
+  const { createTimeStart, createTimeEnd } = searchTerms
+  let url = `/merchant/discount/user_discount_list?id=${id}&page=${page}&count=${count}`
+  if (null != createTimeStart) {
+    url += `&createTimeStart=${createTimeStart}`
+  }
+  if (null != createTimeEnd) {
+    url += `&createTimeEnd=${createTimeEnd}`
+  }
+  try {
+    const res = await request.get(url)
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: refreshCb ?? null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const getDiscountCodeDetailWithMore = async (
   codeId: number,
   refreshCb: () => void
