@@ -60,7 +60,7 @@ const Index = ({ onClose }: { onClose: () => void }) => {
     <Drawer
       title="Task list"
       placement="right"
-      width={500}
+      width={580}
       onClose={onClose}
       open={true}
       extra={
@@ -165,6 +165,7 @@ type TTaskItem = {
   startTime: number
   finishTime: number
   failReason: string
+  taskCost: number
 }
 const TaskItem = ({ t }: { t: TTaskItem }) => {
   const onDownload = (url: string) => () => {
@@ -188,16 +189,17 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
   return (
     <div style={{ height: '50px' }}>
       <Row style={rowStyle}>
+        <Col span={3}>{t.id}</Col>
         <Col span={3} className=" font-bold text-gray-500">
           Task
         </Col>
-        <Col span={9}>
+        <Col span={7}>
           <div className=" flex">
             {t.taskName}&nbsp;{t.payload != 'null' && renderJson(t.payload)}
           </div>
         </Col>
-        <Col span={8}>{TaskStatus(t.status)}</Col>
-        <Col span={4}>
+        <Col span={6}>{TaskStatus(t.status)}</Col>
+        <Col span={3}>
           {t.status == 2 && (
             <Button
               onClick={onDownload(t.uploadFileUrl)}
@@ -209,14 +211,18 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
       </Row>
 
       <Row style={rowStyle}>
+        <Col span={3}></Col>
         <Col span={3} className=" font-bold text-gray-500">
           Start
         </Col>
-        <Col span={9}>{formatDate(t.startTime, true)}</Col>
+        <Col span={7}>{formatDate(t.startTime, true)}</Col>
         <Col span={2} className=" font-bold text-gray-500">
           End
         </Col>
-        <Col>{t.finishTime == 0 ? '―' : formatDate(t.finishTime, true)}</Col>
+        <Col span={7}>
+          {t.finishTime == 0 ? '―' : formatDate(t.finishTime, true)}
+        </Col>
+        <Col span={2}>{t.status == 2 ? `${t.taskCost}s` : '―'}</Col>
       </Row>
     </div>
   )

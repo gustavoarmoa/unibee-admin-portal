@@ -1,5 +1,16 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Pagination, Table, message } from 'antd'
+import {
+  Button,
+  Col,
+  DatePicker,
+  Form,
+  FormInstance,
+  Pagination,
+  Row,
+  Space,
+  Table,
+  message
+} from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
@@ -7,7 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import { SUBSCRIPTION_STATUS } from '../../constants'
 import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { getSublist } from '../../requests'
+import { exportDataReq, getSublist } from '../../requests'
 import '../../shared.css'
 import { ISubscriptionType } from '../../shared.types.d'
 import { SubscriptionStatus } from '../ui/statusTag'
@@ -103,6 +114,7 @@ const columns: ColumnsType<ISubscriptionType> = [
 ]
 
 const Index = () => {
+  const [form] = Form.useForm()
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
   const [subList, setSubList] = useState<ISubscriptionType[]>([])
@@ -111,12 +123,14 @@ const Index = () => {
   const [statusFilter, setStatusFilter] = useState<number[]>([])
 
   const fetchData = async () => {
+    const searchTerm = normalizeSearchTerms()
     setLoading(true)
     const [res, err] = await getSublist(
       {
         page: page as number,
         count: PAGE_SIZE,
-        status: statusFilter
+        status: statusFilter,
+        ...searchTerm
       },
       fetchData
     )
@@ -165,12 +179,44 @@ const Index = () => {
     setStatusFilter(filters.status as number[])
   }
 
+  const normalizeSearchTerms = () => {
+    let searchTerm: any = {}
+    searchTerm = form.getFieldsValue()
+    const start = form.getFieldValue('createTimeStart')
+    const end = form.getFieldValue('createTimeEnd')
+    if (start != null) {
+      searchTerm.createTimeStart = start.hour(0).minute(0).second(0).unix()
+    }
+    if (end != null) {
+      searchTerm.createTimeEnd = end.hour(23).minute(59).second(59).unix()
+    }
+    searchTerm.status = statusFilter
+    console.log('search term:  ', searchTerm)
+    return searchTerm
+  }
+
+  const goSearch = () => {
+    if (page == 0) {
+      fetchData()
+    } else {
+      onPageChange(1, PAGE_SIZE)
+    }
+  }
+
   useEffect(() => {
     fetchData()
   }, [page, statusFilter])
 
   return (
     <div>
+      <Search
+        form={form}
+        goSearch={goSearch}
+        searching={loading}
+        onPageChange={onPageChange}
+        normalizeSearchTerms={normalizeSearchTerms}
+      />
+      <div className=" mb-3"></div>
       <Table
         columns={columns}
         dataSource={subList}
@@ -212,3 +258,121 @@ const Index = () => {
 }
 
 export default Index
+
+const Search = ({
+  form,
+  searching,
+  goSearch,
+  onPageChange,
+  normalizeSearchTerms
+}: {
+  form: FormInstance<any>
+  searching: boolean
+  goSearch: () => void
+  onPageChange: (page: number, pageSize: number) => void
+  normalizeSearchTerms: () => any
+}) => {
+  const [exporting, setExporting] = useState(false)
+  const clear = () => {
+    form.resetFields()
+    onPageChange(1, PAGE_SIZE)
+    goSearch()
+  }
+
+  const exportData = async () => {
+    const payload = normalizeSearchTerms()
+    if (null == payload) {
+      return
+    }
+
+    console.log('export tx params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({
+      task: 'SubscriptionExport',
+      payload
+    })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'Subscription list is being exported, please check task list for progress.'
+    )
+  }
+
+  return (
+    <div>
+      <Form form={form} onFinish={goSearch} disabled={searching || exporting}>
+        <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
+          <Col span={4} className=" font-bold text-gray-500">
+            Subscription created
+          </Col>
+          <Col span={4}>
+            <Form.Item name="createTimeStart" noStyle={true}>
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="From"
+                format="YYYY-MMM-DD"
+                disabledDate={(d) => d.isAfter(new Date())}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item
+              name="createTimeEnd"
+              noStyle={true}
+              rules={[
+                {
+                  required: false,
+                  message: 'Must be later than start date.'
+                },
+                ({ getFieldValue }) => ({
+                  validator(rule, value) {
+                    const start = getFieldValue('createTimeStart')
+                    if (null == start || value == null) {
+                      return Promise.resolve()
+                    }
+                    return value.isAfter(start)
+                      ? Promise.resolve()
+                      : Promise.reject('Must be later than start date')
+                  }
+                })
+              ]}
+            >
+              <DatePicker
+                style={{ width: '100%' }}
+                placeholder="To"
+                format="YYYY-MMM-DD"
+                disabledDate={(d) => d.isAfter(new Date())}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={12} className="flex justify-end">
+            <Space>
+              <Button onClick={clear} disabled={searching || exporting}>
+                Clear
+              </Button>
+              <Button
+                onClick={form.submit}
+                type="primary"
+                loading={searching}
+                disabled={searching || exporting}
+              >
+                Search
+              </Button>
+              <Button
+                onClick={exportData}
+                loading={exporting}
+                disabled={searching || exporting}
+              >
+                Export
+              </Button>
+            </Space>
+          </Col>
+        </Row>
+      </Form>
+    </div>
+  )
+}
