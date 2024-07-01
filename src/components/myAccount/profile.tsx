@@ -6,7 +6,6 @@ import {
   Input,
   Modal,
   Row,
-  Skeleton,
   Space,
   Spin,
   Tabs,
@@ -16,23 +15,15 @@ import {
 } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { emailValidate, passwordSchema } from '../../helpers'
+import { passwordSchema } from '../../helpers'
 import { useCountdown } from '../../hooks'
 import {
   forgetPassReq,
   getMemberProfileReq,
-  getMerchantInfoReq,
   logoutReq,
-  resetPassReq,
-  updateMerchantInfoReq,
-  uploadLogoReq
+  resetPassReq
 } from '../../requests'
-import {
-  IMerchantMemberProfile,
-  IProfile,
-  TMerchantInfo,
-  TRole
-} from '../../shared.types'
+import { IMerchantMemberProfile, TRole } from '../../shared.types'
 import {
   useAppConfigStore,
   useMerchantInfoStore,
@@ -45,7 +36,6 @@ import ResetPasswordWithOTP from '../login/forgetPasswordForm'
 const APP_PATH = import.meta.env.BASE_URL
 
 const Index = () => {
-  const merchantInfoStore = useMerchantInfoStore()
   const profileStore = useProfileStore()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false) // page loading
@@ -151,13 +141,17 @@ const Index = () => {
         <Row>
           <Col span={12}>
             <Form.Item label="Roles">
-              <Space size={[0, 8]} wrap>
-                {form
-                  .getFieldValue('MemberRoles')
-                  ?.map((role: TRole) => (
-                    <Tag key={role.id as number}>{role.role}</Tag>
-                  ))}
-              </Space>
+              {profileStore.isOwner ? (
+                <Tag>Owner</Tag>
+              ) : (
+                <Space size={[0, 8]} wrap>
+                  {form
+                    .getFieldValue('MemberRoles')
+                    ?.map((role: TRole) => (
+                      <Tag key={role.id as number}>{role.role}</Tag>
+                    ))}
+                </Space>
+              )}
             </Form.Item>
           </Col>
         </Row>

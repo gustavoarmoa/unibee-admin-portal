@@ -295,7 +295,7 @@ const Search = ({
       <Form form={form} onFinish={goSearch} disabled={searching || exporting}>
         <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
           <Col span={3} className=" font-bold text-gray-500">
-            Code created
+            search params
           </Col>
           <Col span={4}>
             <Form.Item name="createTimeStart" noStyle={true}>
