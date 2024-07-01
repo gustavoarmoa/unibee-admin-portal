@@ -20,24 +20,10 @@ import dayjs, { Dayjs } from 'dayjs'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY } from '../../constants'
-import {
-  currencyDecimalValidate,
-  showAmount,
-  toFixedNumber
-} from '../../helpers'
+import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import {
-  createDiscountCodeReq,
-  deleteDiscountCodeReq,
-  exportDataReq,
-  getDiscountCodeDetailWithMore,
-  getDiscountCodeUsageDetailReq,
-  getPlanList,
-  toggleDiscountCodeActivateReq,
-  updateDiscountCodeReq
-} from '../../requests'
+import { exportDataReq, getDiscountCodeUsageDetailReq } from '../../requests'
 import { DiscountCode, DiscountCodeUsage, IPlan } from '../../shared.types'
-import { useMerchantInfoStore } from '../../stores'
 import { DiscountCodeStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
@@ -65,6 +51,16 @@ const Index = () => {
       dataIndex: 'code',
       key: 'code'
       // render: (text) => <a>{text}</a>,
+      /*
+      render: (code, code_detail) => (
+        <div
+          onClick={(e) => navigate(`${APP_PATH}discount-code/${code.id}`)}
+          className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+        >
+          {code.name}
+        </div>
+      )
+        */
     },
     {
       title: 'Applied plan',
@@ -82,7 +78,18 @@ const Index = () => {
       title: 'Used by',
       dataIndex: 'user',
       key: 'user',
-      render: (user, code_detail) => `${user.firstName} ${user.lastName}`
+      // render: (user, code_detail) => `${user.firstName} ${user.lastName}`,
+      render: (user, code_detail) =>
+        user == null ? (
+          ''
+        ) : (
+          <div
+            onClick={(e) => navigate(`${APP_PATH}user/${user.id}`)}
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+          >
+            {`${code_detail.user.firstName} ${code_detail.user.lastName}`}
+          </div>
+        )
     },
     {
       title: 'Used at',
@@ -93,14 +100,35 @@ const Index = () => {
     {
       title: 'Subscription Id',
       dataIndex: 'subscriptionId',
-      key: 'subscriptionId'
-      // render: (plan, code_detail) => plan.planName
+      key: 'subscriptionId',
+      render: (subId) =>
+        subId == '' || subId == null ? (
+          ''
+        ) : (
+          <div
+            onClick={(e) => navigate(`${APP_PATH}subscription/${subId}`)}
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+          >
+            {subId}
+          </div>
+        )
     },
     {
       title: 'Invoice Id',
       dataIndex: 'invoiceId',
-      key: 'invoiceId'
-      // render: (plan, code_detail) => plan.planName
+      key: 'invoiceId',
+      render: (ivId) =>
+        ivId == '' || ivId == null ? (
+          ''
+        ) : (
+          <Button
+            onClick={() => navigate(`${APP_PATH}invoice/${ivId}`)}
+            type="link"
+            style={{ padding: 0 }}
+          >
+            {ivId}
+          </Button>
+        )
     },
     {
       title: 'Payment Id',
