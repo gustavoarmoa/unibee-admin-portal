@@ -181,8 +181,13 @@ const Index = () => {
   ]
 
   const normalizeSearchTerms = () => {
-    let searchTerm: any = {}
-    searchTerm = form.getFieldsValue()
+    const searchTerm = JSON.parse(JSON.stringify(form.getFieldsValue()))
+    Object.keys(searchTerm).forEach(
+      (k) =>
+        (searchTerm[k] == undefined ||
+          (typeof searchTerm[k] == 'string' && searchTerm[k].trim() == '')) &&
+        delete searchTerm[k]
+    )
     const start = form.getFieldValue('createTimeStart')
     const end = form.getFieldValue('createTimeEnd')
     if (start != null) {

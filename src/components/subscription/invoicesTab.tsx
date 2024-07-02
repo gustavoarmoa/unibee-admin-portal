@@ -112,9 +112,15 @@ const Index = ({
   }
 
   const normalizeSearchTerms = () => {
-    let searchTerm: any = {}
+    const searchTerm = JSON.parse(JSON.stringify(form.getFieldsValue()))
+    Object.keys(searchTerm).forEach(
+      (k) =>
+        (searchTerm[k] == undefined ||
+          (typeof searchTerm[k] == 'string' && searchTerm[k].trim() == '')) &&
+        delete searchTerm[k]
+    )
     if (enableSearch) {
-      searchTerm = form.getFieldsValue()
+      // searchTerm = form.getFieldsValue()
       const start = form.getFieldValue('createTimeStart')
       const end = form.getFieldValue('createTimeEnd')
       if (start != null) {
@@ -153,6 +159,7 @@ const Index = ({
       }
       searchTerm.amountStart = amtFrom
       searchTerm.amountEnd = amtTo
+      console.log('searchTerm: ', searchTerm)
     }
     if (user != null) {
       searchTerm.userId = user.id as number
@@ -584,7 +591,12 @@ const Search = ({
 
   return (
     <div>
-      <Form form={form} onFinish={goSearch} disabled={searching}>
+      <Form
+        form={form}
+        onFinish={goSearch}
+        disabled={searching}
+        initialValues={DEFAULT_TERM}
+      >
         <Row className="flex items-center" gutter={[8, 8]}>
           <Col span={4} className="font-bold text-gray-500">
             First/Last name
