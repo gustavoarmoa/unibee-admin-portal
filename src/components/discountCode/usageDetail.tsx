@@ -24,6 +24,7 @@ import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { exportDataReq, getDiscountCodeUsageDetailReq } from '../../requests'
 import { DiscountCode, DiscountCodeUsage, IPlan } from '../../shared.types'
+import { useAppConfigStore } from '../../stores'
 import { DiscountCodeStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL // if not specified in build command, default is /
@@ -253,6 +254,7 @@ const Search = ({
   onPageChange: (page: number, pageSize: number) => void
   normalizeSearchTerms: () => any
 }) => {
+  const appConfig = useAppConfigStore()
   const params = useParams()
   const codeId = params.discountCodeId
   const [exporting, setExporting] = useState(false)
@@ -288,6 +290,7 @@ const Search = ({
     message.success(
       'Discount code list is being exported, please check task list for progress.'
     )
+    appConfig.setTaskListOpen(true)
   }
 
   return (

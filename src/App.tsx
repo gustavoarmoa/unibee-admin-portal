@@ -100,8 +100,8 @@ const App: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG }
   } = theme.useToken()
 
-  const [taskListOpen, setTaskListOpen] = useState(false)
-  const toggleTaskListOpen = () => setTaskListOpen(!taskListOpen)
+  const toggleTaskListOpen = () =>
+    appConfigStore.setTaskListOpen(!appConfigStore.taskListOpen)
 
   let items: MenuItem[] = [
     getItem('Plan', '/plan/list', <DesktopOutlined />),
@@ -303,7 +303,9 @@ const App: React.FC = () => {
               </div>
             </div>
           </Sider>
-          {taskListOpen && <TaskList onClose={toggleTaskListOpen} />}
+          {appConfigStore.taskListOpen && (
+            <TaskList onClose={toggleTaskListOpen} />
+          )}
           <Layout>
             <Header style={{ background: colorBgContainer }}>
               <div className=" flex h-full items-center justify-between">

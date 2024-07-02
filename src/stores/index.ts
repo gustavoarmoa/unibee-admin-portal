@@ -89,13 +89,15 @@ const INITIAL_APP_VALUE: IAppConfig = {
   isProd: false,
   supportCurrency: [],
   supportTimeZone: [],
-  gateway: []
+  gateway: [],
+  taskListOpen: false
 }
 
 interface AppConfigSlice extends IAppConfig {
   getAppConfig: () => IAppConfig
   setAppConfig: (a: IAppConfig) => void
   setGateway: (g: any) => void
+  setTaskListOpen: (isOpen: boolean) => void
   reset: () => void
 }
 
@@ -107,6 +109,9 @@ export const useAppConfigStore = create<AppConfigSlice>()(
       setAppConfig: (a) => set({ ...a }),
       setGateway: (g: any) => {
         set({ ...get(), gateway: g })
+      },
+      setTaskListOpen: (isOpen) => {
+        set({ ...get(), taskListOpen: isOpen })
       },
       reset: () => set(INITIAL_APP_VALUE)
     }),

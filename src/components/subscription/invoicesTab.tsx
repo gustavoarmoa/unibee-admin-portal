@@ -35,6 +35,7 @@ import { usePagination } from '../../hooks'
 import { exportDataReq, getInvoiceListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, TInvoicePerm, UserInvoice } from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
 import { normalizeAmt } from '../helpers'
 import MarkAsPaidModal from '../invoice/markAsPaidModal'
 import MarkAsRefundedModal from '../invoice/markAsRefundedModal'
@@ -541,6 +542,7 @@ const Search = ({
   onPageChange: (page: number, pageSize: number) => void
   normalizeSearchTerms: () => any
 }) => {
+  const appConfig = useAppConfigStore()
   const [exporting, setExporting] = useState(false)
   const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
     value: Number(s),
@@ -569,7 +571,7 @@ const Search = ({
     message.success(
       'Invoice list is being exported, please check task list for progress.'
     )
-    console.log('exporting iv res: ', res)
+    appConfig.setTaskListOpen(true)
   }
 
   const watchCurrency = Form.useWatch('currency', form)

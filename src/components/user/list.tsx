@@ -29,6 +29,7 @@ import { usePagination } from '../../hooks'
 import { exportDataReq, getUserListReq } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types'
+import { useAppConfigStore } from '../../stores'
 import { SubscriptionStatus, UserStatus } from '../ui/statusTag'
 import CreateUserModal from './createUserModal'
 
@@ -269,6 +270,7 @@ const Search = ({
   onPageChange: (page: number, pageSize: number) => void
   normalizeSearchTerms: () => any
 }) => {
+  const appConfig = useAppConfigStore()
   const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
@@ -290,6 +292,7 @@ const Search = ({
     message.success(
       'User list is being exported, please check task list for progress.'
     )
+    appConfig.setTaskListOpen(true)
   }
 
   return (

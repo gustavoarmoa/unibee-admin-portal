@@ -20,6 +20,7 @@ import { usePagination } from '../../hooks'
 import { exportDataReq, getSublist } from '../../requests'
 import '../../shared.css'
 import { ISubscriptionType } from '../../shared.types.d'
+import { useAppConfigStore } from '../../stores'
 import { SubscriptionStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -271,6 +272,7 @@ const Search = ({
   onPageChange: (page: number, pageSize: number) => void
   normalizeSearchTerms: () => any
 }) => {
+  const appConfig = useAppConfigStore()
   const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
@@ -299,6 +301,7 @@ const Search = ({
     message.success(
       'Subscription list is being exported, please check task list for progress.'
     )
+    appConfig.setTaskListOpen(true)
   }
 
   return (

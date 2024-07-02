@@ -82,6 +82,7 @@ interface IAppConfig {
   supportTimeZone: string[]
   supportCurrency: { Currency: string; Symbol: string; Scale: number }[]
   gateway: TGateway[]
+  taskListOpen: boolean // task list is in app.tsx, which is accessible to all pages.
 }
 
 interface IAddon extends IPlan {
