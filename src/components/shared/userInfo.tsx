@@ -13,18 +13,15 @@ const Index = ({ user }: { user: IProfile | undefined }) => {
   const appConfig = useAppConfigStore()
   return (
     <div style={{ marginBottom: '24px' }}>
-      {/* <Divider orientation="left" style={{ margin: '16px 0' }}>
-        User Info
-  </Divider> */}
       <Row style={rowStyle}>
         <Col span={4}>
-          <span style={{ fontWeight: 'bold' }}>First Name</span>
+          <span style={{ fontWeight: 'bold' }}>User Id</span>
         </Col>
-        <Col span={6}>{user?.firstName}</Col>
+        <Col span={6}>{user?.id}</Col>
         <Col span={4}>
-          <span style={{ fontWeight: 'bold' }}>Last Name</span>
+          <span style={{ fontWeight: 'bold' }}>First/Last Name</span>
         </Col>
-        <Col span={6}>{user?.lastName}</Col>
+        <Col span={6}>{`${user?.firstName} ${user?.lastName}`}</Col>
       </Row>
       <Row style={rowStyle}>
         <Col span={4}>

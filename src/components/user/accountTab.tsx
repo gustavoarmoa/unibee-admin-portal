@@ -1,13 +1,9 @@
-import {
-  InfoCircleOutlined,
-  LoadingOutlined,
-  SyncOutlined
-} from '@ant-design/icons'
-import { Button, Col, Divider, Empty, Popover, Row, Spin, message } from 'antd'
-import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
+import { LoadingOutlined } from '@ant-design/icons'
+import { Spin, message } from 'antd'
+import React, { ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getSubByUserReq, getUserProfile } from '../../requests'
-import { IProfile, ISubscriptionType } from '../../shared.types'
+import { getUserProfile } from '../../requests'
+import { IProfile } from '../../shared.types'
 import UserAccountTab from '../subscription/userAccountTab'
 
 const APP_PATH = import.meta.env.BASE_URL

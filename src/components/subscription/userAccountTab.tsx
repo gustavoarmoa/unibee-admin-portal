@@ -129,8 +129,12 @@ const UserAccountTab = ({
           </Divider>
           <Row>
             <Col span={12}>
-              <Form.Item label="Status" name="status">
-                <div>{user && UserStatus(user.status)}</div>
+              <Form.Item label="User Id" name="id">
+                <div>
+                  <span className="  text-gray-500">{user.id}</span>
+                  &nbsp;&nbsp;
+                  {UserStatus(user.status)}
+                </div>
               </Form.Item>
             </Col>
             <Col span={12}>

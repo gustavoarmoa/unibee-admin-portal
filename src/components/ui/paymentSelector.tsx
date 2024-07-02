@@ -99,11 +99,8 @@ const Index = ({
     if (disabled) {
       return
     }
-    console.log('radio clicked')
     onSelect(Number(e.target.value))
   }
-
-  console.log('selected: .....', selected)
 
   return (
     <div className="flex flex-col gap-3">
