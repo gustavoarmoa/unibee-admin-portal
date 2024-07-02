@@ -2316,7 +2316,10 @@ export const exportDataReq = async ({
   payload: any
 }) => {
   try {
-    const res = await request.post(`/merchant/task/new_export`, { task, payload })
+    const res = await request.post(`/merchant/task/new_export`, {
+      task,
+      payload
+    })
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
       throw new ExpiredError(
