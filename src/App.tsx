@@ -281,6 +281,7 @@ const App: React.FC = () => {
               selectedKeys={activeMenuItem}
               mode="inline"
               items={items}
+              style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}
               onClick={onItemClick}
             />
             <div className="absolute bottom-20 flex w-full flex-col items-center justify-center text-gray-50">
