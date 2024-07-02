@@ -1,4 +1,4 @@
-import { Col, Divider, Row } from 'antd'
+import { Col, Row } from 'antd'
 import { CSSProperties } from 'react'
 import { IProfile } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'

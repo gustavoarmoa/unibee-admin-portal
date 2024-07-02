@@ -37,8 +37,8 @@ const PLAN_TYPE_FILTER = [
 ] // main plan or addon
 
 type TFilters = {
-  type: number[] | null
-  status: number[] | null
+  type: number[] | null // plan type filter
+  status: number[] | null // plan status filter
 }
 const Index = () => {
   const navigate = useNavigate()

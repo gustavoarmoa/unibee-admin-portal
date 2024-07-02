@@ -1328,6 +1328,9 @@ export const appSearchReq = async (searchKey: string) => {
 type TDiscountCodeQry = {
   page: number
   count: number
+  status?: number[]
+  billingType?: number[]
+  discountType?: number[]
   createTimeStart?: number
   createTimeEnd?: number
 }
@@ -1335,13 +1338,30 @@ export const getDiscountCodeListReq = async (
   params: TDiscountCodeQry,
   refreshCb: () => void
 ) => {
-  const { page, count, createTimeStart, createTimeEnd } = params
+  const {
+    page,
+    count,
+    createTimeStart,
+    createTimeEnd,
+    status,
+    billingType,
+    discountType
+  } = params
   let url = `/merchant/discount/list?page=${page}&count=${count}`
   if (createTimeStart != null) {
     url += `&createTimeStart=${createTimeStart}`
   }
   if (createTimeEnd != null) {
     url += `&createTimeEnd=${createTimeEnd}`
+  }
+  if (status != null) {
+    url += `&status=[${status.toString()}]`
+  }
+  if (billingType != null) {
+    url += `&billingType=[${billingType.toString()}]`
+  }
+  if (discountType != null) {
+    url += `&discountType=[${discountType.toString()}]`
   }
   try {
     const res = await request.get(url)

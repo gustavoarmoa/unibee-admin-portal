@@ -18,11 +18,15 @@ import {
   Tooltip,
   message
 } from 'antd'
-import { ColumnsType } from 'antd/es/table'
+import { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { DISCOUNT_CODE_BILLING_TYPE, DISCOUNT_CODE_TYPE } from '../../constants'
+import {
+  DISCOUNT_CODE_BILLING_TYPE,
+  DISCOUNT_CODE_STATUS,
+  DISCOUNT_CODE_TYPE
+} from '../../constants'
 import { showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { exportDataReq, getDiscountCodeListReq } from '../../requests'
@@ -34,10 +38,36 @@ import { DiscountCodeStatus } from '../ui/statusTag'
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
 
+const CODE_STATUS_FILTER = Object.entries(DISCOUNT_CODE_STATUS).map((s) => {
+  const [value, text] = s
+  return { value: Number(value), text }
+})
+const BILLING_TYPE_FILTER = Object.entries(DISCOUNT_CODE_BILLING_TYPE).map(
+  (s) => {
+    const [value, text] = s
+    return { value: Number(value), text }
+  }
+)
+const DISCOUNT_TYPE_FILTER = Object.entries(DISCOUNT_CODE_TYPE).map((s) => {
+  const [value, text] = s
+  return { value: Number(value), text }
+})
+
+type TFilters = {
+  status: number[] | null
+  billingType: number[] | null
+  discountType: number[] | null
+}
+
 const Index = () => {
   const [form] = Form.useForm()
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
+  const [filters, setFilters] = useState<TFilters>({
+    status: null,
+    billingType: null,
+    discountType: null
+  })
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [codeList, setCodeList] = useState<DiscountCode[]>([])
@@ -50,7 +80,7 @@ const Index = () => {
     const searchTerm = normalizeSearchTerms()
     setLoading(true)
     const [res, err] = await getDiscountCodeListReq(
-      { page, count: PAGE_SIZE, ...searchTerm },
+      { page, count: PAGE_SIZE, ...searchTerm, ...filters },
       fetchData
     )
     console.log('code list: ', res)
@@ -80,19 +110,22 @@ const Index = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (s) => DiscountCodeStatus(s) // STATUS[s]
+      render: (s) => DiscountCodeStatus(s), // STATUS[s]
+      filters: CODE_STATUS_FILTER
     },
     {
       title: 'Billing Type',
       dataIndex: 'billingType',
       key: 'billingType',
-      render: (s) => DISCOUNT_CODE_BILLING_TYPE[s]
+      render: (s) => DISCOUNT_CODE_BILLING_TYPE[s],
+      filters: BILLING_TYPE_FILTER
     },
     {
       title: 'Discount Type',
       dataIndex: 'discountType',
       key: 'discountType',
-      render: (s) => DISCOUNT_CODE_TYPE[s]
+      render: (s) => DISCOUNT_CODE_TYPE[s],
+      filters: DISCOUNT_TYPE_FILTER
     },
     {
       title: 'Amount',
@@ -207,9 +240,20 @@ const Index = () => {
     }
   }
 
+  const onTableChange: TableProps<DiscountCode>['onChange'] = (
+    pagination,
+    filters,
+    sorter,
+    extra
+  ) => {
+    // onPageChange(1, PAGE_SIZE)
+    console.log('table changed params', pagination, filters, sorter, extra)
+    setFilters(filters as TFilters)
+  }
+
   useEffect(() => {
     fetchData()
-  }, [page])
+  }, [filters, page])
 
   return (
     <div>
@@ -217,6 +261,7 @@ const Index = () => {
         form={form}
         goSearch={goSearch}
         searching={loading}
+        filters={filters}
         onPageChange={onPageChange}
         normalizeSearchTerms={normalizeSearchTerms}
       />
@@ -224,6 +269,7 @@ const Index = () => {
       <Table
         columns={columns}
         dataSource={codeList}
+        onChange={onTableChange}
         rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}
@@ -272,12 +318,14 @@ export default Index
 const Search = ({
   form,
   searching,
+  filters,
   goSearch,
   onPageChange,
   normalizeSearchTerms
 }: {
   form: FormInstance<any>
   searching: boolean
+  filters: TFilters
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
   normalizeSearchTerms: () => any
@@ -291,11 +339,11 @@ const Search = ({
   }
 
   const exportData = async () => {
-    const payload = normalizeSearchTerms()
+    let payload = normalizeSearchTerms()
     if (null == payload) {
       return
     }
-
+    payload = { ...payload, ...filters }
     console.log('export tx params: ', payload)
     // return
     setExporting(true)

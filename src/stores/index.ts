@@ -21,6 +21,7 @@ const INITIAL_PROFILE: IProfile = {
   createTime: 0,
   status: 0, // 0-Active, 2-Frozen
   id: null,
+  externalUserId: '',
   type: 1, // 1: individual, 2: business
   phone: '',
   paymentMethod: '',
