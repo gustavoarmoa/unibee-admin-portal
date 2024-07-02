@@ -129,9 +129,9 @@ const UserAccountTab = ({
           </Divider>
           <Row>
             <Col span={12}>
-              <Form.Item label="User Id" name="id">
+              <Form.Item label="User Id / External Id" name="id">
                 <div>
-                  <span className="  text-gray-500">{user.id}</span>
+                  <span className="  text-gray-500">{`${user?.id} / ${user?.externalUserId == '' ? '―' : user?.externalUserId}`}</span>
                   &nbsp;&nbsp;
                   {UserStatus(user.status)}
                 </div>

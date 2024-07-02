@@ -18,6 +18,7 @@ interface IProfile {
   firstName: string
   lastName: string
   id: number | null
+  externalUserId: string
   type: 1 | 2 // 1: individual, 2: business
   status: number // 0-Active, 2-Frozen
   phone: string
