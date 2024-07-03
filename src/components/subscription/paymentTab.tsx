@@ -10,13 +10,13 @@ import {
   Table,
   message
 } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import type { ColumnsType, TableProps } from 'antd/es/table'
 import dayjs from 'dayjs'
 import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
 import { LoadingOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { CURRENCY, INVOICE_STATUS, PAYMENT_TYPE } from '../../constants'
+import { PAYMENT_STATUS, PAYMENT_TYPE } from '../../constants'
 import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import {
@@ -25,13 +25,26 @@ import {
   getPaymentTimelineReq
 } from '../../requests'
 import '../../shared.css'
-import { IProfile, PaymentItem, UserInvoice } from '../../shared.types.d'
+import { IProfile, PaymentItem } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
 import RefundInfoModal from '../payment/refundModal'
 import { PaymentStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
+const STATUS_FILTER = Object.entries(PAYMENT_STATUS).map((s) => {
+  const [value, text] = s
+  return { value: Number(value), text }
+})
+const PAYMENT_TYPE_FILTER = Object.entries(PAYMENT_TYPE).map((s) => {
+  const [value, text] = s
+  return { value: Number(value), text }
+})
+
+type TFilters = {
+  status: number[] | null
+  timelineTypes: number[] | null
+}
 
 const Index = ({
   user,
@@ -47,6 +60,10 @@ const Index = ({
   const navigate = useNavigate()
   const [form] = Form.useForm()
   const { page, onPageChange, onPageChangeNoParams } = usePagination()
+  const [filters, setFilters] = useState<TFilters>({
+    status: null,
+    timelineTypes: null
+  })
   const pageChange = embeddingMode ? onPageChangeNoParams : onPageChange
   const appConfigStore = useAppConfigStore()
   const [paymentList, setPaymentList] = useState<PaymentItem[]>([])
@@ -77,12 +94,14 @@ const Index = ({
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => PaymentStatus(status) // PAYMENT_STATUS[status]
+      render: (status) => PaymentStatus(status), // PAYMENT_STATUS[status]
+      filters: STATUS_FILTER
     },
     {
       title: 'Type',
       dataIndex: 'timelineType',
-      key: 'timelineType',
+      key: 'timelineTypes',
+      filters: PAYMENT_TYPE_FILTER,
       render: (s) => {
         const title = PAYMENT_TYPE[s as keyof typeof PAYMENT_TYPE]
         if (s == 1) {
@@ -194,13 +213,14 @@ const Index = ({
   }
 
   const fetchData = async () => {
-    const searchTerm = normalizeSearchTerms()
-    console.log('searchTerm: ', searchTerm)
+    let searchTerm = normalizeSearchTerms()
     if (null == searchTerm) {
       return
     }
     searchTerm.page = page
     searchTerm.count = PAGE_SIZE
+    searchTerm = { ...searchTerm, ...filters }
+    console.log('searchTerm: ', searchTerm)
     setLoading(true)
     const [res, err] = await getPaymentTimelineReq(searchTerm, fetchData)
     setLoading(false)
@@ -220,9 +240,20 @@ const Index = ({
     }
   }
 
+  const onTableChange: TableProps<PaymentItem>['onChange'] = (
+    pagination,
+    filters,
+    sorter,
+    extra
+  ) => {
+    // onPageChange(1, PAGE_SIZE)
+    console.log('table changed params', pagination, filters, sorter, extra)
+    setFilters(filters as TFilters)
+  }
+
   useEffect(() => {
     fetchData()
-  }, [page, user])
+  }, [page, filters, user])
 
   return (
     <div>
@@ -247,6 +278,7 @@ const Index = ({
           embeddingMode ? columns.filter((c) => c.key != 'userId') : columns
         }
         dataSource={paymentList}
+        onChange={onTableChange}
         rowKey={'id'}
         rowClassName="clickable-tbl-row"
         pagination={false}

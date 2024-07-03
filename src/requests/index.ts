@@ -979,6 +979,10 @@ export const resumeSubReq = async (subscriptionId: string) => {
 // -------------
 type TGetSubTimelineReq = {
   userId?: number
+  amountStart?: number
+  amountEnd?: number
+  status?: number[]
+  timelineTypes?: number[]
   page: number
   count: number
   createTimeStart?: number // used in /merchant/payment/timeline/list only
@@ -1006,7 +1010,17 @@ export const getPaymentTimelineReq = async (
   params: TGetSubTimelineReq,
   refreshCb: () => void
 ) => {
-  const { page, count, userId, createTimeStart, createTimeEnd } = params
+  const {
+    page,
+    count,
+    userId,
+    status,
+    timelineTypes,
+    amountStart,
+    amountEnd,
+    createTimeStart,
+    createTimeEnd
+  } = params
   let url = `/merchant/payment/timeline/list?page=${page}&count=${count}`
   if (userId != null) {
     url += `&userId=${userId}`
@@ -1016,6 +1030,12 @@ export const getPaymentTimelineReq = async (
   }
   if (createTimeEnd != null) {
     url += `&createTimeEnd=${createTimeEnd}`
+  }
+  if (status != null) {
+    url += `&status=[${status.toString()}]`
+  }
+  if (timelineTypes != null) {
+    url += `&timelineTypes=[${timelineTypes.toString()}]`
   }
   try {
     const res = await request.get(url)
