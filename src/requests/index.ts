@@ -1840,6 +1840,7 @@ type TUserList = {
   lastName?: string
   email?: string
   status?: number[]
+  subStatus?: number[]
   createTimeStart?: number
   createTimeEnd?: number
   page: number

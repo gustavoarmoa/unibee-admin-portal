@@ -35,7 +35,7 @@ import axios from 'axios'
 import dayjs, { Dayjs } from 'dayjs'
 import { MouseEventHandler, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { USER_STATUS } from '../../constants'
+import { SUBSCRIPTION_STATUS, USER_STATUS } from '../../constants'
 import { downloadStaticFile, formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
 import {
@@ -56,9 +56,14 @@ const STATUS_FILTER = Object.entries(USER_STATUS).map((s) => {
   const [value, text] = s
   return { value: Number(value), text }
 })
+const SUB_STATUS_FILTER = Object.entries(SUBSCRIPTION_STATUS).map((s) => {
+  const [value, text] = s
+  return { value: Number(value), text }
+})
 
 type TFilters = {
   status: number[] | null
+  subStatus: number[] | null
 }
 
 const Index = () => {
@@ -70,7 +75,8 @@ const Index = () => {
   const toggleImportModal = () => setImportModalOpen(!importModalOpen)
   const [total, setTotal] = useState(0)
   const [filters, setFilters] = useState<TFilters>({
-    status: null
+    status: null,
+    subStatus: null
   })
   const [newUserModalOpen, setNewUserModalOpen] = useState(false)
   const toggleNewUserModal = () => setNewUserModalOpen(!newUserModalOpen)
@@ -100,6 +106,7 @@ const Index = () => {
 
   const fetchData = async () => {
     // return
+    console.log('inside fetch data filters: ', filters)
     setLoading(true)
     const [res, err] = await getUserListReq(
       {
@@ -208,8 +215,9 @@ const Index = () => {
     {
       title: 'Sub Status',
       dataIndex: 'subscriptionStatus',
-      key: 'subscriptionStatus',
-      render: (subStatus, _) => SubscriptionStatus(subStatus) // (status, plan) => SUBSCRIPTION_STATUS[status]
+      key: 'subStatus',
+      render: (subStatus, _) => SubscriptionStatus(subStatus),
+      filters: SUB_STATUS_FILTER
     },
     {
       title: 'Created at',
@@ -576,7 +584,7 @@ const ImportModal = ({
         <Steps
           direction="vertical"
           size="small"
-          progressDot={true}
+          // progressDot={true}
           current={1}
           items={[
             {
