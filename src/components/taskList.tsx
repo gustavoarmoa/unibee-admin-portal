@@ -24,7 +24,7 @@ import { CSSProperties, useEffect, useState } from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
-import { formatDate } from '../helpers'
+import { downloadStaticFile, formatDate } from '../helpers'
 import { usePagination } from '../hooks'
 import { getDownloadListReq } from '../requests'
 import { TExportDataType } from '../shared.types'
@@ -174,6 +174,8 @@ type TTaskItem = {
 }
 const TaskItem = ({ t }: { t: TTaskItem }) => {
   const onDownload = (url: string) => () => {
+    downloadStaticFile(url, 'exportedData.xlsx')
+    /*
     axios({
       url,
       method: 'GET',
@@ -190,6 +192,7 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
       document.body.removeChild(link)
       URL.revokeObjectURL(href)
     })
+      */
   }
   return (
     <div style={{ height: '50px' }}>
@@ -227,11 +230,11 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
         <Col span={6}>
           {t.finishTime == 0 ? '―' : formatDate(t.finishTime, true)}
         </Col>
-        <Col span={3} className=" text-xs">
+        {/* <Col span={3} className=" text-xs">
           {t.status == 2
             ? `${dayjs.duration(t.taskCost, 'seconds').humanize()}`
             : '―'}
-        </Col>
+        </Col> */}
       </Row>
     </div>
   )

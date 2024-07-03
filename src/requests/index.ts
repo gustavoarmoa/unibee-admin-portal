@@ -1865,6 +1865,31 @@ export const getUserListReq = async (
   }
 }
 
+export const importUserDataReq = async (file: File, task: TExportDataType) => {
+  const session = useSessionStore.getState()
+  try {
+    const res = await request.post(
+      `/merchant/task/new_import`,
+      { file, task },
+      {
+        headers: {
+          'content-type': 'multipart/form-data'
+        }
+      }
+    )
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 // this is used when page is loading (as part of getMerchantUserListWithMoreReq), no search params available
 export const getMerchantUserListReq = async (refreshCb?: () => void) => {
   try {

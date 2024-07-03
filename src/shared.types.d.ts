@@ -480,6 +480,7 @@ export type TExportDataType =
   | 'UserDiscountExport'
   | 'DiscountExport'
   | 'UserDiscountExport'
+  | 'UserImport'
 
 export class ExpiredError extends Error {
   constructor(m: string) {

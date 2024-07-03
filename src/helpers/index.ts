@@ -1,3 +1,4 @@
+import axios from 'axios'
 import dayjs from 'dayjs'
 import Dinero from 'dinero.js'
 import passwordValidator from 'password-validator'
@@ -207,4 +208,23 @@ export const isValidMap = (str: string | null) => {
   } catch (err) {
     return false
   }
+}
+
+export const downloadStaticFile = (url: string, fileName: string) => {
+  axios({
+    url,
+    method: 'GET',
+    headers: { Authorization: `${localStorage.getItem('merchantToken')}` },
+    responseType: 'blob'
+  }).then((response) => {
+    console.log('download res: ', response)
+    const href = URL.createObjectURL(response.data)
+    const link = document.createElement('a')
+    link.href = href
+    link.setAttribute('download', fileName)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(href)
+  })
 }
