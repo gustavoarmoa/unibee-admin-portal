@@ -635,6 +635,10 @@ type TSubListReq = {
   status: number[]
   page: number
   count: number
+  currency?: string
+  amountStart?: number
+  amountEnd?: number
+  planIds?: number[]
   createTimeStart?: number
   createTimeEnd?: number
 }

@@ -174,26 +174,7 @@ type TTaskItem = {
 }
 const TaskItem = ({ t }: { t: TTaskItem }) => {
   const onDownload = (url: string) => () => {
-    console.log('downloading...: ', url)
-    downloadStaticFile(url, 'exportedData.xlsx')
-    /*
-    axios({
-      url,
-      method: 'GET',
-      headers: { Authorization: `${localStorage.getItem('merchantToken')}` },
-      responseType: 'blob'
-    }).then((response) => {
-      console.log('download res: ', response)
-      const href = URL.createObjectURL(response.data)
-      const link = document.createElement('a')
-      link.href = href
-      link.setAttribute('download', 'exportedData.xlsx')
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(href)
-    })
-      */
+    downloadStaticFile(url, `${t.taskName}_${t.id}.xlsx`)
   }
   return (
     <div style={{ height: '50px' }}>

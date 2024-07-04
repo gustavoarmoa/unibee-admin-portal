@@ -5,21 +5,25 @@ import {
   DatePicker,
   Form,
   FormInstance,
+  Input,
   Pagination,
   Row,
+  Select,
+  Skeleton,
   Space,
+  Spin,
   Table,
   message
 } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SUBSCRIPTION_STATUS } from '../../constants'
+import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants'
 import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { exportDataReq, getSublist } from '../../requests'
+import { exportDataReq, getPlanList, getSublist } from '../../requests'
 import '../../shared.css'
-import { ISubscriptionType } from '../../shared.types.d'
+import { IPlan, ISubscriptionType } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
 import { SubscriptionStatus } from '../ui/statusTag'
 
@@ -32,86 +36,10 @@ const SUB_STATUS_FILTER = Object.keys(SUBSCRIPTION_STATUS)
   }))
   .sort((a, b) => (a.value < b.value ? -1 : 1))
 
-const columns: ColumnsType<ISubscriptionType> = [
-  {
-    title: 'Plan Name',
-    dataIndex: 'planName',
-    key: 'planName',
-    render: (_, sub) => <span>{sub.plan?.planName}</span>
-  },
-  {
-    title: 'Description',
-    dataIndex: 'description',
-    key: 'description',
-    render: (_, sub) => <span>{sub.plan?.description}</span>
-  },
-  {
-    title: 'Amount',
-    dataIndex: 'amount',
-    key: 'amount',
-    render: (_, s) => (
-      <span>{` ${showAmount(
-        s.plan!.amount +
-          (s.addons == null
-            ? 0
-            : s.addons!.reduce(
-                // total subscription amount = plan amount + all addons(an array): amount * quantity
-                // this value might not be the value users are gonna pay on next billing cycle
-                // because, users might downgrade their plan.
-                (
-                  sum,
-                  { quantity, amount }: { quantity: number; amount: number } // destructure the quantity and amount from addon obj
-                ) => sum + quantity * amount,
-                0
-              )),
-        s.plan!.currency
-      )} /${s.plan!.intervalCount == 1 ? '' : s.plan!.intervalCount}${
-        s.plan!.intervalUnit
-      } `}</span>
-    )
-  },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    render: (_, sub) => SubscriptionStatus(sub.status),
-    filters: SUB_STATUS_FILTER
-    // onFilter: (value, record) => record.status == value,
-  },
-  {
-    title: 'Start',
-    dataIndex: 'currentPeriodStart',
-    key: 'currentPeriodStart',
-    render: (_, sub) =>
-      // (sub.currentPeriodStart * 1000).format('YYYY-MMM-DD HH:MM')
-      formatDate(sub.currentPeriodStart, true)
-  },
-  {
-    title: 'End',
-    dataIndex: 'currentPeriodEnd',
-    key: 'currentPeriodEnd',
-    render: (_, sub) =>
-      // dayjs(sub.currentPeriodEnd * 1000).format('YYYY-MMM-DD HH:MM')
-      formatDate(sub.currentPeriodEnd, true)
-  },
-  {
-    title: 'User',
-    dataIndex: 'userId',
-    key: 'userId',
-    render: (_, sub) => (
-      <span>{`${sub.user != null ? sub.user.firstName + ' ' + sub.user.lastName : ''}`}</span>
-    )
-  },
-  {
-    title: 'Email',
-    dataIndex: 'userEmail',
-    key: 'userEmail',
-    render: (_, sub) =>
-      sub.user != null ? (
-        <a href={`mailto:${sub.user.email}`}>{sub.user.email}</a>
-      ) : null
-  }
-]
+type TFilters = {
+  status: number[] | null
+  planIds: number[] | null
+}
 
 const Index = () => {
   const appConfigStore = useAppConfigStore()
@@ -120,18 +48,110 @@ const Index = () => {
   const [total, setTotal] = useState(0)
   const [subList, setSubList] = useState<ISubscriptionType[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingPlans, setLoadingPlans] = useState(false)
   const [exporting, setExporting] = useState(false)
   const navigate = useNavigate()
-  const [statusFilter, setStatusFilter] = useState<number[]>([])
+  const [filters, setFilters] = useState<TFilters>({
+    status: null,
+    planIds: null
+  })
+  // const [statusFilter, setStatusFilter] = useState<number[]>([])
+  // const [planFilter, setPlanFilter] = useState<number[]>([])
+  const planFilterRef = useRef<{ value: number; text: string }[]>([])
+
+  const getColumns = (): ColumnsType<ISubscriptionType> => [
+    {
+      title: 'Plan Name',
+      dataIndex: 'planName',
+      key: 'planIds',
+      filters: planFilterRef.current,
+      render: (_, sub) => <span>{sub.plan?.planName}</span>
+    },
+    {
+      title: 'Description',
+      dataIndex: 'description',
+      key: 'description',
+      render: (_, sub) => <span>{sub.plan?.description}</span>
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (_, s) => (
+        <span>{` ${showAmount(
+          s.plan!.amount +
+            (s.addons == null
+              ? 0
+              : s.addons!.reduce(
+                  // total subscription amount = plan amount + all addons(an array): amount * quantity
+                  // this value might not be the value users are gonna pay on next billing cycle
+                  // because, users might downgrade their plan.
+                  (
+                    sum,
+                    { quantity, amount }: { quantity: number; amount: number } // destructure the quantity and amount from addon obj
+                  ) => sum + quantity * amount,
+                  0
+                )),
+          s.plan!.currency
+        )} /${s.plan!.intervalCount == 1 ? '' : s.plan!.intervalCount}${
+          s.plan!.intervalUnit
+        } `}</span>
+      )
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (_, sub) => SubscriptionStatus(sub.status),
+      filters: SUB_STATUS_FILTER
+      // onFilter: (value, record) => record.status == value,
+    },
+    {
+      title: 'Start',
+      dataIndex: 'currentPeriodStart',
+      key: 'currentPeriodStart',
+      render: (_, sub) =>
+        // (sub.currentPeriodStart * 1000).format('YYYY-MMM-DD HH:MM')
+        formatDate(sub.currentPeriodStart, true)
+    },
+    {
+      title: 'End',
+      dataIndex: 'currentPeriodEnd',
+      key: 'currentPeriodEnd',
+      render: (_, sub) =>
+        // dayjs(sub.currentPeriodEnd * 1000).format('YYYY-MMM-DD HH:MM')
+        formatDate(sub.currentPeriodEnd, true)
+    },
+    {
+      title: 'User',
+      dataIndex: 'userId',
+      key: 'userId',
+      render: (_, sub) => (
+        <span>{`${sub.user != null ? sub.user.firstName + ' ' + sub.user.lastName : ''}`}</span>
+      )
+    },
+    {
+      title: 'Email',
+      dataIndex: 'userEmail',
+      key: 'userEmail',
+      render: (_, sub) =>
+        sub.user != null ? (
+          <a href={`mailto:${sub.user.email}`}>{sub.user.email}</a>
+        ) : null
+    }
+  ]
 
   const fetchData = async () => {
     const searchTerm = normalizeSearchTerms()
+    if (null == searchTerm) {
+      return
+    }
     setLoading(true)
     const [res, err] = await getSublist(
       {
         page: page as number,
         count: PAGE_SIZE,
-        status: statusFilter,
+        ...filters,
         ...searchTerm
       },
       fetchData
@@ -166,12 +186,39 @@ const Index = () => {
     setTotal(total)
   }
 
+  const fetchPlan = async () => {
+    setLoadingPlans(true)
+    const [planList, err] = await getPlanList(
+      {
+        type: [1], // 'main plan' only
+        status: [2], // 'active' only
+        page: page,
+        count: 100
+      },
+      fetchPlan
+    )
+    setLoadingPlans(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    const { plans, total } = planList
+    console.log('plan list: ', plans)
+    planFilterRef.current =
+      plans == null
+        ? []
+        : plans.map((p: any) => ({
+            value: p.plan.id,
+            text: p.plan.planName
+          }))
+  }
+
   const exportData = async () => {
     let payload = normalizeSearchTerms()
     if (null == payload) {
       return
     }
-    payload = { ...payload, status: statusFilter }
+    payload = { ...payload, ...filters }
     console.log('export tx params: ', payload)
     // return
     setExporting(true)
@@ -197,17 +244,18 @@ const Index = () => {
     extra
   ) => {
     // console.log('params', pagination, filters, sorter, extra);
-    onPageChange(1, PAGE_SIZE)
-    if (filters.status == null) {
-      setStatusFilter([])
-      return
-    }
-    setStatusFilter(filters.status as number[])
+    // onPageChange(1, PAGE_SIZE)
+    setFilters(filters as TFilters)
   }
 
   const normalizeSearchTerms = () => {
-    let searchTerm: any = {}
-    searchTerm = form.getFieldsValue()
+    const searchTerm = JSON.parse(JSON.stringify(form.getFieldsValue()))
+    Object.keys(searchTerm).forEach(
+      (k) =>
+        (searchTerm[k] == undefined ||
+          (typeof searchTerm[k] == 'string' && searchTerm[k].trim() == '')) &&
+        delete searchTerm[k]
+    )
     const start = form.getFieldValue('createTimeStart')
     const end = form.getFieldValue('createTimeEnd')
     if (start != null) {
@@ -216,7 +264,34 @@ const Index = () => {
     if (end != null) {
       searchTerm.createTimeEnd = end.hour(23).minute(59).second(59).unix()
     }
-    searchTerm.status = statusFilter
+
+    let amtFrom = searchTerm.amountStart,
+      amtTo = searchTerm.amountEnd
+    if (amtFrom != '' && amtFrom != null) {
+      amtFrom = Number(amtFrom) * CURRENCY[searchTerm.currency].stripe_factor
+      if (isNaN(amtFrom) || amtFrom < 0) {
+        message.error('Invalid amount-from value.')
+        return null
+      }
+    }
+    if (amtTo != '' && amtTo != null) {
+      amtTo = Number(amtTo) * CURRENCY[searchTerm.currency].stripe_factor
+      if (isNaN(amtTo) || amtTo < 0) {
+        message.error('Invalid amount-to value')
+        return null
+      }
+    }
+
+    if (
+      typeof amtFrom == 'number' &&
+      typeof amtTo == 'number' &&
+      amtFrom > amtTo
+    ) {
+      message.error('Amount-from must be less than or equal to amount-to')
+      return null
+    }
+    searchTerm.amountStart = amtFrom
+    searchTerm.amountEnd = amtTo
     console.log('search term:  ', searchTerm)
     return searchTerm
   }
@@ -231,41 +306,59 @@ const Index = () => {
 
   useEffect(() => {
     fetchData()
-  }, [page, statusFilter])
+  }, [page, filters])
+
+  useEffect(() => {
+    fetchPlan()
+  }, [])
 
   return (
     <div>
       <Search
         form={form}
         goSearch={goSearch}
-        searching={loading}
+        searching={loading || loadingPlans}
         exporting={exporting}
         exportData={exportData}
         onPageChange={onPageChange}
         // normalizeSearchTerms={normalizeSearchTerms}
       />
       <div className=" mb-3"></div>
-      <Table
-        columns={columns}
-        dataSource={subList}
-        rowKey={'id'}
-        rowClassName="clickable-tbl-row"
-        pagination={false}
-        onChange={onTableChange}
-        onRow={(record, rowIndex) => {
-          return {
-            onClick: (event) => {
-              navigate(`${APP_PATH}subscription/${record.subscriptionId}`, {
-                state: { subscriptionId: record.subscriptionId }
-              })
+      {loadingPlans ? (
+        <Spin
+          indicator={<LoadingOutlined spin />}
+          size="large"
+          style={{
+            width: '100%',
+            height: '320px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        />
+      ) : (
+        <Table
+          columns={getColumns()}
+          dataSource={subList}
+          rowKey={'id'}
+          rowClassName="clickable-tbl-row"
+          pagination={false}
+          onChange={onTableChange}
+          onRow={(record, rowIndex) => {
+            return {
+              onClick: (event) => {
+                navigate(`${APP_PATH}subscription/${record.subscriptionId}`, {
+                  state: { subscriptionId: record.subscriptionId }
+                })
+              }
             }
-          }
-        }}
-        loading={{
-          spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
-        }}
-      />
+          }}
+          loading={{
+            spinning: loading,
+            indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+          }}
+        />
+      )}
 
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
@@ -287,6 +380,13 @@ const Index = () => {
 
 export default Index
 
+const DEFAULT_TERM = {
+  currency: 'EUR'
+  // status: [],
+  // amountStart: '',
+  // amountEnd: ''
+  // refunded: false,
+}
 const Search = ({
   form,
   searching,
@@ -337,10 +437,17 @@ const Search = ({
     appConfig.setTaskListOpen(true)
   }
     */
+  const currencySymbol =
+    CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol
 
   return (
     <div>
-      <Form form={form} onFinish={goSearch} disabled={searching || exporting}>
+      <Form
+        form={form}
+        onFinish={goSearch}
+        initialValues={DEFAULT_TERM}
+        disabled={searching || exporting}
+      >
         <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
           <Col span={4} className=" font-bold text-gray-500">
             Subscription created
@@ -407,6 +514,49 @@ const Search = ({
               </Button>
             </Space>
           </Col>
+        </Row>
+        <Row className="flex items-center" gutter={[8, 8]}>
+          <Col span={4} className="font-bold text-gray-500">
+            <div className="flex items-center">
+              <span className="mr-2">Amount</span>
+              <Form.Item name="currency" noStyle={true}>
+                <Select
+                  style={{ width: 80 }}
+                  options={[
+                    { value: 'EUR', label: 'EUR' },
+                    { value: 'USD', label: 'USD' },
+                    { value: 'JPY', label: 'JPY' }
+                  ]}
+                />
+              </Form.Item>
+            </div>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="amountStart" noStyle={true}>
+              <Input
+                prefix={`from ${currencySymbol}`}
+                onPressEnter={form.submit}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="amountEnd" noStyle={true}>
+              <Input
+                prefix={`to ${currencySymbol}`}
+                onPressEnter={form.submit}
+              />
+            </Form.Item>
+          </Col>
+          {/* <Col span={11} className=" ml-4 font-bold text-gray-500">
+            <span className="mr-2">Status</span>
+            <Form.Item name="status" noStyle={true}>
+              <Select
+                mode="multiple"
+                options={statusOpt}
+                style={{ maxWidth: 420, minWidth: 120, margin: '8px 0' }}
+              />
+            </Form.Item>
+          </Col> */}
         </Row>
       </Form>
     </div>
