@@ -1036,6 +1036,12 @@ export const getPaymentTimelineReq = async (
   if (status != null) {
     url += `&status=[${status.toString()}]`
   }
+  if (amountStart != null) {
+    url += `&amountStart=${amountStart}`
+  }
+  if (amountEnd != null) {
+    url += `&amountEnd=${amountEnd}`
+  }
   if (timelineTypes != null) {
     url += `&timelineTypes=[${timelineTypes.toString()}]`
   }

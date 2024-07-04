@@ -13,8 +13,7 @@ import {
   Tooltip,
   message
 } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
+import type { ColumnsType, TableProps } from 'antd/es/table'
 import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
 import {
@@ -46,6 +45,14 @@ import NewInvoiceModal from './modals/newInvoice'
 
 const PAGE_SIZE = 10
 const APP_PATH = import.meta.env.BASE_URL
+const STATUS_FILTER = Object.entries(INVOICE_STATUS).map((s) => {
+  const [value, text] = s
+  return { value: Number(value), text }
+})
+
+type TFilters = {
+  status: number[] | null
+}
 
 const Index = ({
   user,
@@ -64,7 +71,9 @@ const Index = ({
   const [loading, setLoading] = useState(false)
   const { page, onPageChange, onPageChangeNoParams } = usePagination()
   const pageChange = embeddingMode ? onPageChangeNoParams : onPageChange
-
+  const [filters, setFilters] = useState<TFilters>({
+    status: null
+  })
   const [total, setTotal] = useState(0)
   const [newInvoiceModalOpen, setNewInvoiceModalOpen] = useState(false)
   const [invoiceDetailModalOpen, setInvoiceDetailModalOpen] = useState(false)
@@ -168,12 +177,13 @@ const Index = ({
   }
 
   const fetchData = async () => {
-    const searchTerm = normalizeSearchTerms()
+    let searchTerm = normalizeSearchTerms()
     if (null == searchTerm) {
       return
     }
     searchTerm.page = page
     searchTerm.count = PAGE_SIZE
+    searchTerm = { ...searchTerm, ...filters }
     setLoading(true)
     const [res, err] = await getInvoiceListReq(searchTerm, fetchData)
     setLoading(false)
@@ -249,6 +259,7 @@ const Index = ({
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      filters: STATUS_FILTER,
       render: (s, iv) => InvoiceStatus(s, iv.refund != null) // INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
     },
     {
@@ -406,9 +417,20 @@ const Index = ({
     toggleNewInvoiceModal()
   }
 
+  const onTableChange: TableProps<UserInvoice>['onChange'] = (
+    pagination,
+    filters,
+    sorter,
+    extra
+  ) => {
+    // onPageChange(1, PAGE_SIZE)
+    console.log('table changed params', pagination, filters, sorter, extra)
+    setFilters(filters as TFilters)
+  }
+
   useEffect(() => {
     fetchData()
-  }, [page, user])
+  }, [page, filters, user])
 
   return (
     <div>
@@ -473,6 +495,7 @@ const Index = ({
                 )
           }
           dataSource={invoiceList}
+          onChange={onTableChange}
           rowKey={'id'}
           rowClassName="clickable-tbl-row"
           pagination={false}
@@ -531,7 +554,7 @@ export default Index
 
 const DEFAULT_TERM = {
   currency: 'EUR',
-  status: [],
+  // status: [],
   amountStart: '',
   amountEnd: ''
   // refunded: false,
@@ -551,10 +574,12 @@ const Search = ({
 }) => {
   const appConfig = useAppConfigStore()
   const [exporting, setExporting] = useState(false)
+  /*
   const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
     value: Number(s),
     label: INVOICE_STATUS[Number(s)]
   }))
+    */
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
@@ -597,7 +622,7 @@ const Search = ({
         disabled={searching}
         initialValues={DEFAULT_TERM}
       >
-        <Row className="flex items-center" gutter={[8, 8]}>
+        <Row className="mb-3  flex items-center" gutter={[8, 8]}>
           <Col span={4} className="font-bold text-gray-500">
             First/Last name
           </Col>
@@ -642,7 +667,7 @@ const Search = ({
           </Col>
         </Row>
 
-        <Row className="flex items-center" gutter={[8, 8]}>
+        <Row className="mb-3 flex items-center" gutter={[8, 8]}>
           <Col span={4} className="font-bold text-gray-500">
             <div className="flex items-center">
               <span className="mr-2">Amount</span>
@@ -675,7 +700,7 @@ const Search = ({
               />
             </Form.Item>
           </Col>
-          <Col span={11} className=" ml-4 font-bold text-gray-500">
+          {/* <Col span={11} className=" ml-4 font-bold text-gray-500">
             <span className="mr-2">Status</span>
             <Form.Item name="status" noStyle={true}>
               <Select
@@ -684,7 +709,7 @@ const Search = ({
                 style={{ maxWidth: 420, minWidth: 120, margin: '8px 0' }}
               />
             </Form.Item>
-          </Col>
+          </Col> */}
         </Row>
 
         <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
@@ -700,7 +725,8 @@ const Search = ({
                 disabledDate={(d) => d.isAfter(new Date())}
               />
             </Form.Item>
-          </Col>
+          </Col>{' '}
+          &nbsp;
           <Col span={4}>
             <Form.Item
               name="createTimeEnd"
