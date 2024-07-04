@@ -20,7 +20,7 @@ import dayjs, { Dayjs } from 'dayjs'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CURRENCY } from '../../constants'
-import { showAmount } from '../../helpers'
+import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { exportDataReq, getDiscountCodeUsageDetailReq } from '../../requests'
 import { DiscountCode, DiscountCodeUsage, IPlan } from '../../shared.types'
@@ -51,23 +51,19 @@ const Index = () => {
       title: 'Code',
       dataIndex: 'code',
       key: 'code'
-      // render: (text) => <a>{text}</a>,
-      /*
-      render: (code, code_detail) => (
-        <div
-          onClick={(e) => navigate(`${APP_PATH}discount-code/${code.id}`)}
-          className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
-        >
-          {code.name}
-        </div>
-      )
-        */
     },
     {
       title: 'Applied plan',
       dataIndex: 'plan',
-      key: 'plan'
-      // render: (plan, code_detail) => plan.planName
+      key: 'plan',
+      render: (plan, codeUsagDetail) => (
+        <div
+          onClick={(e) => navigate(`${APP_PATH}plan/${plan.id}`)}
+          className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+        >
+          {plan.planName}
+        </div>
+      )
     },
     {
       title: 'Applied Amt',
@@ -79,7 +75,6 @@ const Index = () => {
       title: 'Used by',
       dataIndex: 'user',
       key: 'user',
-      // render: (user, code_detail) => `${user.firstName} ${user.lastName}`,
       render: (user, code_detail) =>
         user == null ? (
           ''
@@ -88,15 +83,15 @@ const Index = () => {
             onClick={(e) => navigate(`${APP_PATH}user/${user.id}`)}
             className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
           >
-            {`${code_detail.user.firstName} ${code_detail.user.lastName}`}
+            {`${user.firstName} ${user.lastName}`}
           </div>
         )
     },
     {
       title: 'Used at',
-      dataIndex: 'usedAt',
-      key: 'usedAt'
-      // render: (user, code_detail) => `${user.firstName} ${user.lastName}`
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (usedAt, code_detail) => formatDate(usedAt, true)
     },
     {
       title: 'Subscription Id',
@@ -132,7 +127,7 @@ const Index = () => {
         )
     },
     {
-      title: 'Payment Id',
+      title: 'Transaction Id',
       dataIndex: 'paymentId',
       key: 'paymentId'
       // render: (plan, code_detail) => plan.planName
@@ -296,9 +291,9 @@ const Search = ({
   return (
     <div>
       <Form form={form} onFinish={goSearch} disabled={searching || exporting}>
-        <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
-          <Col span={3} className=" font-bold text-gray-500">
-            search params
+        <Row className=" mb-5 flex items-center" gutter={[8, 8]}>
+          <Col span={2} className=" font-bold text-gray-500">
+            Code used
           </Col>
           <Col span={4}>
             <Form.Item name="createTimeStart" noStyle={true}>
@@ -340,7 +335,7 @@ const Search = ({
               />
             </Form.Item>
           </Col>
-          <Col span={12} className="flex justify-end">
+          <Col span={14} className="flex justify-end">
             <Space>
               <Button onClick={clear} disabled={searching || exporting}>
                 Clear
