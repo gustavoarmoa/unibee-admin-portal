@@ -69,6 +69,7 @@ const Index = ({
   const [paymentList, setPaymentList] = useState<PaymentItem[]>([])
   const [paymentIdx, setPaymentIdx] = useState(-1)
   const [loading, setLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [total, setTotal] = useState(0)
   const [refundModalOpen, setRefundModalOpen] = useState(false)
   const toggleRefundModal = () => setRefundModalOpen(!refundModalOpen)
@@ -291,6 +292,30 @@ const Index = ({
     }
   }
 
+  const exportData = async () => {
+    let payload = normalizeSearchTerms()
+    if (null == payload) {
+      return
+    }
+    payload = { ...payload, ...filters }
+    console.log('export tx params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({
+      task: 'TransactionExport',
+      payload
+    })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'Transaction list is being exported, please check task list for progress.'
+    )
+    appConfigStore.setTaskListOpen(true)
+  }
+
   const onTableChange: TableProps<PaymentItem>['onChange'] = (
     pagination,
     filters,
@@ -320,8 +345,10 @@ const Index = ({
           form={form}
           goSearch={goSearch}
           searching={loading}
+          exporting={exporting}
+          exportData={exportData}
           onPageChange={pageChange}
-          normalizeSearchTerms={normalizeSearchTerms}
+          // normalizeSearchTerms={normalizeSearchTerms}
         />
       )}
       <Table
@@ -384,24 +411,27 @@ const DEFAULT_TERM = {
 const Search = ({
   form,
   searching,
+  exporting,
+  exportData,
   goSearch,
-  onPageChange,
-  normalizeSearchTerms
+  onPageChange
 }: {
   form: FormInstance<any>
   searching: boolean
+  exporting: boolean
+  exportData: () => void
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
-  normalizeSearchTerms: () => any
 }) => {
-  const appConfig = useAppConfigStore()
-  const [exporting, setExporting] = useState(false)
+  // const appConfig = useAppConfigStore()
+  // const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
     goSearch()
   }
 
+  /*
   const exportData = async () => {
     const payload = normalizeSearchTerms()
     if (null == payload) {
@@ -425,6 +455,7 @@ const Search = ({
     )
     appConfig.setTaskListOpen(true)
   }
+    */
 
   const currencySymbol =
     CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol

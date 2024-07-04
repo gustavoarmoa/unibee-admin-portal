@@ -32,7 +32,7 @@ import { ColumnsType, TableProps } from 'antd/es/table'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SUBSCRIPTION_STATUS, USER_STATUS } from '../../constants'
-import { downloadStaticFile, formatDate } from '../../helpers'
+import { downloadStaticFile, formatBytes, formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
 import {
   exportDataReq,
@@ -323,8 +323,7 @@ const Index = () => {
             onPageChange={onPageChange}
             searching={loading}
             exporting={exporting}
-            normalizeSearchTerms={normalizeSearchTerms}
-            filters={filters}
+            // normalizeSearchTerms={normalizeSearchTerms}
           />
         </Col>
       </Row>
@@ -383,18 +382,16 @@ const Search = ({
   form,
   searching,
   exporting,
-  filters,
   goSearch,
-  onPageChange,
-  normalizeSearchTerms
+  onPageChange
+  // normalizeSearchTerms
 }: {
   form: FormInstance<any>
   searching: boolean
   exporting: boolean
-  filters: TFilters
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
-  normalizeSearchTerms: () => any
+  // </any>normalizeSearchTerms: () => any
 }) => {
   // const appConfig = useAppConfigStore()
   // const [exporting, setExporting] = useState(false)
@@ -538,6 +535,8 @@ const ImportModal = ({
 }) => {
   const appConfig = useAppConfigStore()
   const [importing, setImporting] = useState(false)
+  const [fileStat, setFileStat] = useState({ name: '', size: 0 })
+
   const onFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     evt
   ) => {
@@ -545,18 +544,17 @@ const ImportModal = ({
     if (evt.target.files == null) {
       return
     }
-    if (evt.target.files[0].size > 1024 * 1024 * 20) {
+    const f = evt.target.files[0]
+    if (f.size > 1024 * 1024 * 20) {
       message.error('Max file size is 20M')
       return
     }
+    setFileStat({ name: f.name, size: f.size })
     // evt.preventDefault()
-    evt.target.value = ''
     setImporting(true)
-    const [res, err] = await importUserDataReq(
-      evt.target.files[0],
-      'UserImport'
-    )
+    const [res, err] = await importUserDataReq(f, 'UserImport')
     setImporting(false)
+    evt.target.value = ''
     if (null != err) {
       message.error(`File upload failed: ${err.message}`)
       return
@@ -564,6 +562,7 @@ const ImportModal = ({
     message.success(
       'User data is being imported, please check task list for progress'
     )
+    // closeModal()
     appConfig.setTaskListOpen(true)
   }
 
@@ -615,15 +614,18 @@ const ImportModal = ({
             },
             {
               title: (
-                <>
+                <div className="items-c flex">
                   <label htmlFor="input-user-data-file">
                     <div
-                      className={`user-data-file-upload ${importing ? 'disabled' : ''}`}
+                      className={`user-data-file-upload flex items-center ${importing ? 'disabled' : ''}`}
                     >
                       {importing ? <LoadingOutlined /> : <UploadOutlined />}{' '}
-                      Upload and import user data
+                      <span className=" ml-2">Upload and import user data</span>
                     </div>
                   </label>
+                  <div className="ml-2 flex items-center text-sm text-gray-500">
+                    {`${fileStat.name} ${fileStat.size == 0 ? '' : '(' + formatBytes(fileStat.size) + ')'}`}
+                  </div>
                   <input
                     type="file"
                     hidden
@@ -635,7 +637,7 @@ const ImportModal = ({
                     name="input-user-data-file"
                     accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                   />
-                </>
+                </div>
               ),
               description: (
                 <span className="text-xs text-gray-500">

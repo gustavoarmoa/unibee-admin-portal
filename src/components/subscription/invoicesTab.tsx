@@ -21,6 +21,7 @@ import {
   DollarOutlined,
   DownloadOutlined,
   EditOutlined,
+  ExportOutlined,
   LoadingOutlined,
   MailOutlined,
   PlusOutlined,
@@ -66,9 +67,11 @@ const Index = ({
   enableSearch: boolean
 }) => {
   const navigate = useNavigate()
+  const appConfig = useAppConfigStore()
   const [form] = Form.useForm()
   const [invoiceList, setInvoiceList] = useState<UserInvoice[]>([])
   const [loading, setLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const { page, onPageChange, onPageChangeNoParams } = usePagination()
   const pageChange = embeddingMode ? onPageChangeNoParams : onPageChange
   const [filters, setFilters] = useState<TFilters>({
@@ -199,6 +202,27 @@ const Index = ({
       setInvoiceList([])
     }
     setTotal(total)
+  }
+
+  const exportData = async () => {
+    let payload = normalizeSearchTerms()
+    if (null == payload) {
+      return
+    }
+    payload = { ...payload, ...filters }
+    console.log('export iv params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({ task: 'InvoiceExport', payload })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'Invoice list is being exported, please check task list for progress.'
+    )
+    appConfig.setTaskListOpen(true)
   }
 
   const goSearch = () => {
@@ -341,6 +365,16 @@ const Index = ({
               icon={<SyncOutlined />}
             ></Button>
           </Tooltip>
+          <Tooltip title="Export">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading || exporting}
+              onClick={exportData}
+              loading={exporting}
+              icon={<ExportOutlined />}
+            ></Button>
+          </Tooltip>
         </>
       ),
       key: 'action',
@@ -423,8 +457,6 @@ const Index = ({
     sorter,
     extra
   ) => {
-    // onPageChange(1, PAGE_SIZE)
-    console.log('table changed params', pagination, filters, sorter, extra)
     setFilters(filters as TFilters)
   }
 
@@ -481,8 +513,10 @@ const Index = ({
           form={form}
           goSearch={goSearch}
           searching={loading}
+          exporting={exporting}
+          exportData={exportData}
           onPageChange={pageChange}
-          normalizeSearchTerms={normalizeSearchTerms}
+          // normalizeSearchTerms={normalizeSearchTerms}
         />
       )}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -562,18 +596,22 @@ const DEFAULT_TERM = {
 const Search = ({
   form,
   searching,
+  exporting,
   goSearch,
   onPageChange,
-  normalizeSearchTerms
+  exportData
+  // normalizeSearchTerms
 }: {
   form: FormInstance<any>
   searching: boolean
+  exporting: boolean
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
-  normalizeSearchTerms: () => any
+  exportData: () => void
+  // normalizeSearchTerms: () => any
 }) => {
-  const appConfig = useAppConfigStore()
-  const [exporting, setExporting] = useState(false)
+  // const appConfig = useAppConfigStore()
+  // const [exporting, setExporting] = useState(false)
   /*
   const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
     value: Number(s),
@@ -586,6 +624,7 @@ const Search = ({
     goSearch()
   }
 
+  /*
   const exportData = async () => {
     const payload = normalizeSearchTerms()
     if (null == payload) {
@@ -605,6 +644,7 @@ const Search = ({
     )
     appConfig.setTaskListOpen(true)
   }
+    */
 
   const watchCurrency = Form.useWatch('currency', form)
   useEffect(() => {
@@ -623,7 +663,7 @@ const Search = ({
         initialValues={DEFAULT_TERM}
       >
         <Row className="mb-3  flex items-center" gutter={[8, 8]}>
-          <Col span={4} className="font-bold text-gray-500">
+          <Col span={3} className="font-bold text-gray-500">
             First/Last name
           </Col>
           <Col span={4}>
@@ -631,44 +671,13 @@ const Search = ({
               <Input onPressEnter={form.submit} placeholder="first name" />
             </Form.Item>
           </Col>
-          /
           <Col span={4}>
             <Form.Item name="lastName" noStyle={true}>
               <Input onPressEnter={form.submit} placeholder="last name" />
             </Form.Item>
           </Col>
-          <Col span={3}>
-            <span></span>
-            {/* <Form.Item name="refunded" noStyle={true} valuePropName="checked">
-              <Checkbox>Refunded</Checkbox>
-  </Form.Item> */}
-          </Col>
-          <Col span={8} className="flex justify-end">
-            <Space>
-              <Button onClick={clear} disabled={searching}>
-                Clear
-              </Button>
-              <Button
-                onClick={form.submit}
-                type="primary"
-                loading={searching}
-                disabled={searching}
-              >
-                Search
-              </Button>
-              <Button
-                onClick={exportData}
-                loading={exporting}
-                disabled={searching || exporting}
-              >
-                Export
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-
-        <Row className="mb-3 flex items-center" gutter={[8, 8]}>
-          <Col span={4} className="font-bold text-gray-500">
+          <Col span={1}></Col>
+          <Col span={3} className="font-bold text-gray-500">
             <div className="flex items-center">
               <span className="mr-2">Amount</span>
               <Form.Item name="currency" noStyle={true}>
@@ -683,7 +692,7 @@ const Search = ({
               </Form.Item>
             </div>
           </Col>
-          <Col span={4}>
+          <Col span={3}>
             <Form.Item name="amountStart" noStyle={true}>
               <Input
                 prefix={`from ${currencySymbol}`}
@@ -691,8 +700,8 @@ const Search = ({
               />
             </Form.Item>
           </Col>
-          &nbsp;
-          <Col span={4}>
+
+          <Col span={3}>
             <Form.Item name="amountEnd" noStyle={true}>
               <Input
                 prefix={`to ${currencySymbol}`}
@@ -700,20 +709,10 @@ const Search = ({
               />
             </Form.Item>
           </Col>
-          {/* <Col span={11} className=" ml-4 font-bold text-gray-500">
-            <span className="mr-2">Status</span>
-            <Form.Item name="status" noStyle={true}>
-              <Select
-                mode="multiple"
-                options={statusOpt}
-                style={{ maxWidth: 420, minWidth: 120, margin: '8px 0' }}
-              />
-            </Form.Item>
-          </Col> */}
         </Row>
 
         <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
-          <Col span={4} className=" font-bold text-gray-500">
+          <Col span={3} className=" font-bold text-gray-500">
             Invoice created
           </Col>
           <Col span={4}>
@@ -725,8 +724,7 @@ const Search = ({
                 disabledDate={(d) => d.isAfter(new Date())}
               />
             </Form.Item>
-          </Col>{' '}
-          &nbsp;
+          </Col>
           <Col span={4}>
             <Form.Item
               name="createTimeEnd"
@@ -756,6 +754,28 @@ const Search = ({
                 disabledDate={(d) => d.isAfter(new Date())}
               />
             </Form.Item>
+          </Col>
+          <Col span={10} className="flex justify-end">
+            <Space>
+              <Button onClick={clear} disabled={searching}>
+                Clear
+              </Button>
+              <Button
+                onClick={form.submit}
+                type="primary"
+                loading={searching}
+                disabled={searching}
+              >
+                Search
+              </Button>
+              {/* <Button
+                onClick={exportData}
+                loading={exporting}
+                disabled={searching || exporting}
+              >
+                Export
+              </Button> */}
+            </Space>
           </Col>
         </Row>
       </Form>

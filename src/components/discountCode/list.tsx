@@ -1,5 +1,6 @@
 import {
   EditOutlined,
+  ExportOutlined,
   LoadingOutlined,
   PlusOutlined,
   ProfileOutlined,
@@ -60,6 +61,7 @@ type TFilters = {
 }
 
 const Index = () => {
+  const appConfig = useAppConfigStore()
   const [form] = Form.useForm()
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
@@ -70,6 +72,7 @@ const Index = () => {
   })
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [codeList, setCodeList] = useState<DiscountCode[]>([])
 
   const onNewCode = () => {
@@ -92,6 +95,30 @@ const Index = () => {
     const { discounts, total } = res
     setCodeList(discounts ?? [])
     setTotal(total)
+  }
+
+  const exportData = async () => {
+    let payload = normalizeSearchTerms()
+    if (null == payload) {
+      return
+    }
+    payload = { ...payload, ...filters }
+    console.log('export tx params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({
+      task: 'DiscountExport',
+      payload
+    })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'Discount code list is being exported, please check task list for progress.'
+    )
+    appConfig.setTaskListOpen(true)
   }
 
   const columns: ColumnsType<DiscountCode> = [
@@ -187,9 +214,19 @@ const Index = () => {
               icon={<SyncOutlined />}
             />
           </Tooltip>
+          <Tooltip title="Export">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading || exporting}
+              onClick={exportData}
+              loading={exporting}
+              icon={<ExportOutlined />}
+            ></Button>
+          </Tooltip>
         </>
       ),
-      width: 100,
+      width: 128,
       key: 'action',
       render: (_, record) => (
         <Space size="middle" className="code-action-btn-wrapper">
@@ -261,9 +298,9 @@ const Index = () => {
         form={form}
         goSearch={goSearch}
         searching={loading}
-        filters={filters}
+        // filters={filters}
         onPageChange={onPageChange}
-        normalizeSearchTerms={normalizeSearchTerms}
+        // normalizeSearchTerms={normalizeSearchTerms}
       />
       <div className=" mb-4"></div>
       <Table
@@ -318,17 +355,17 @@ export default Index
 const Search = ({
   form,
   searching,
-  filters,
+  // filters,
   goSearch,
-  onPageChange,
-  normalizeSearchTerms
+  onPageChange
+  // normalizeSearchTerms
 }: {
   form: FormInstance<any>
   searching: boolean
-  filters: TFilters
+  // </any>filters: TFilters
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
-  normalizeSearchTerms: () => any
+  // normalizeSearchTerms: () => any
 }) => {
   const appConfig = useAppConfigStore()
   const [exporting, setExporting] = useState(false)
@@ -338,6 +375,7 @@ const Search = ({
     goSearch()
   }
 
+  /*
   const exportData = async () => {
     let payload = normalizeSearchTerms()
     if (null == payload) {
@@ -361,6 +399,7 @@ const Search = ({
     )
     appConfig.setTaskListOpen(true)
   }
+    */
 
   return (
     <div>
@@ -422,13 +461,13 @@ const Search = ({
               >
                 Search
               </Button>
-              <Button
+              {/* <Button
                 onClick={exportData}
                 loading={exporting}
                 disabled={searching || exporting}
               >
                 Export
-              </Button>
+              </Button> */}
             </Space>
           </Col>
         </Row>

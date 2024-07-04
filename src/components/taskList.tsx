@@ -174,6 +174,7 @@ type TTaskItem = {
 }
 const TaskItem = ({ t }: { t: TTaskItem }) => {
   const onDownload = (url: string) => () => {
+    console.log('downloading...: ', url)
     downloadStaticFile(url, 'exportedData.xlsx')
     /*
     axios({
@@ -201,13 +202,13 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
         <Col span={3} className=" font-bold text-gray-500">
           Task
         </Col>
-        <Col span={7}>
+        <Col span={8}>
           <div className=" flex">
             {t.taskName}&nbsp;{t.payload != 'null' && renderJson(t.payload)}
           </div>
         </Col>
         <Col span={6}>{TaskStatus(t.status)}</Col>
-        <Col span={3}>
+        <Col span={2}>
           {t.status == 2 && (
             <Button
               onClick={onDownload(t.downloadUrl)}
@@ -223,14 +224,14 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
         <Col span={3} className=" font-bold text-gray-500">
           Start
         </Col>
-        <Col span={7}>{formatDate(t.startTime, true)}</Col>
+        <Col span={8}>{formatDate(t.startTime, true)}</Col>
         <Col span={2} className=" font-bold text-gray-500">
           End
         </Col>
         <Col span={6}>
           {t.finishTime == 0 ? '―' : formatDate(t.finishTime, true)}
         </Col>
-        {/* <Col span={3} className=" text-xs">
+        {/* <Col span={2} className=" text-xs">
           {t.status == 2
             ? `${dayjs.duration(t.taskCost, 'seconds').humanize()}`
             : '―'}

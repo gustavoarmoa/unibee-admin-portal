@@ -114,11 +114,13 @@ const columns: ColumnsType<ISubscriptionType> = [
 ]
 
 const Index = () => {
+  const appConfigStore = useAppConfigStore()
   const [form] = Form.useForm()
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
   const [subList, setSubList] = useState<ISubscriptionType[]>([])
   const [loading, setLoading] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const navigate = useNavigate()
   const [statusFilter, setStatusFilter] = useState<number[]>([])
 
@@ -162,6 +164,30 @@ const Index = () => {
     })
     setSubList(list)
     setTotal(total)
+  }
+
+  const exportData = async () => {
+    let payload = normalizeSearchTerms()
+    if (null == payload) {
+      return
+    }
+    payload = { ...payload, status: statusFilter }
+    console.log('export tx params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({
+      task: 'SubscriptionExport',
+      payload
+    })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'Subscription list is being exported, please check task list for progress.'
+    )
+    appConfigStore.setTaskListOpen(true)
   }
 
   const onTableChange: TableProps<ISubscriptionType>['onChange'] = (
@@ -213,8 +239,10 @@ const Index = () => {
         form={form}
         goSearch={goSearch}
         searching={loading}
+        exporting={exporting}
+        exportData={exportData}
         onPageChange={onPageChange}
-        normalizeSearchTerms={normalizeSearchTerms}
+        // normalizeSearchTerms={normalizeSearchTerms}
       />
       <div className=" mb-3"></div>
       <Table
@@ -262,24 +290,29 @@ export default Index
 const Search = ({
   form,
   searching,
+  exporting,
   goSearch,
-  onPageChange,
-  normalizeSearchTerms
+  exportData,
+  onPageChange
+  // normalizeSearchTerms
 }: {
   form: FormInstance<any>
   searching: boolean
+  exporting: boolean
   goSearch: () => void
+  exportData: () => void
   onPageChange: (page: number, pageSize: number) => void
-  normalizeSearchTerms: () => any
+  // </any>normalizeSearchTerms: () => any
 }) => {
-  const appConfig = useAppConfigStore()
-  const [exporting, setExporting] = useState(false)
+  // const appConfig = useAppConfigStore()
+  // const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
     goSearch()
   }
 
+  /*
   const exportData = async () => {
     const payload = normalizeSearchTerms()
     if (null == payload) {
@@ -303,6 +336,7 @@ const Search = ({
     )
     appConfig.setTaskListOpen(true)
   }
+    */
 
   return (
     <div>
