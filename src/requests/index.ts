@@ -982,6 +982,7 @@ type TGetSubTimelineReq = {
   amountStart?: number
   amountEnd?: number
   status?: number[]
+  gatewayIds?: number[]
   timelineTypes?: number[]
   page: number
   count: number
@@ -1016,6 +1017,7 @@ export const getPaymentTimelineReq = async (
     userId,
     status,
     timelineTypes,
+    gatewayIds,
     amountStart,
     amountEnd,
     createTimeStart,
@@ -1036,6 +1038,9 @@ export const getPaymentTimelineReq = async (
   }
   if (timelineTypes != null) {
     url += `&timelineTypes=[${timelineTypes.toString()}]`
+  }
+  if (gatewayIds != null) {
+    url += `&gatewayIds=[${gatewayIds.toString()}]`
   }
   try {
     const res = await request.get(url)

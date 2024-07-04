@@ -5,7 +5,6 @@ import {
   ImportOutlined,
   LoadingOutlined,
   MoreOutlined,
-  PlusOutlined,
   SearchOutlined,
   SyncOutlined,
   UploadOutlined,
@@ -29,11 +28,8 @@ import {
   Tooltip,
   message
 } from 'antd'
-import { icons } from 'antd/es/image/PreviewGroup'
 import { ColumnsType, TableProps } from 'antd/es/table'
-import axios from 'axios'
-import dayjs, { Dayjs } from 'dayjs'
-import { MouseEventHandler, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SUBSCRIPTION_STATUS, USER_STATUS } from '../../constants'
 import { downloadStaticFile, formatDate } from '../../helpers'
@@ -106,7 +102,6 @@ const Index = () => {
 
   const fetchData = async () => {
     // return
-    console.log('inside fetch data filters: ', filters)
     setLoading(true)
     const [res, err] = await getUserListReq(
       {

@@ -4,26 +4,24 @@ import {
   DatePicker,
   Form,
   FormInstance,
+  Input,
   Pagination,
   Row,
+  Select,
   Space,
   Table,
+  Tooltip,
   message
 } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
-import dayjs from 'dayjs'
 import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
-import { LoadingOutlined, SearchOutlined } from '@ant-design/icons'
+import { LoadingOutlined, SyncOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { PAYMENT_STATUS, PAYMENT_TYPE } from '../../constants'
+import { CURRENCY, PAYMENT_STATUS, PAYMENT_TYPE } from '../../constants'
 import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import {
-  downloadInvoice,
-  exportDataReq,
-  getPaymentTimelineReq
-} from '../../requests'
+import { exportDataReq, getPaymentTimelineReq } from '../../requests'
 import '../../shared.css'
 import { IProfile, PaymentItem } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
@@ -44,6 +42,7 @@ const PAYMENT_TYPE_FILTER = Object.entries(PAYMENT_TYPE).map((s) => {
 type TFilters = {
   status: number[] | null
   timelineTypes: number[] | null
+  gatewayIds: number[] | null
 }
 
 const Index = ({
@@ -62,7 +61,8 @@ const Index = ({
   const { page, onPageChange, onPageChangeNoParams } = usePagination()
   const [filters, setFilters] = useState<TFilters>({
     status: null,
-    timelineTypes: null
+    timelineTypes: null,
+    gatewayIds: null
   })
   const pageChange = embeddingMode ? onPageChangeNoParams : onPageChange
   const appConfigStore = useAppConfigStore()
@@ -72,6 +72,11 @@ const Index = ({
   const [total, setTotal] = useState(0)
   const [refundModalOpen, setRefundModalOpen] = useState(false)
   const toggleRefundModal = () => setRefundModalOpen(!refundModalOpen)
+
+  const GATEWAY_FILTER = appConfigStore.gateway.map((g) => ({
+    value: g.gatewayId as number,
+    text: g.displayName
+  }))
 
   const columns: ColumnsType<PaymentItem> = [
     {
@@ -124,7 +129,8 @@ const Index = ({
     {
       title: 'Gateway',
       dataIndex: 'gatewayId',
-      key: 'gatewayId',
+      key: 'gatewayIds',
+      filters: GATEWAY_FILTER,
       render: (gateway) =>
         appConfigStore.gateway.find((g) => g.gatewayId == gateway)?.displayName
     },
@@ -182,6 +188,22 @@ const Index = ({
       dataIndex: 'createTime',
       key: 'createTime',
       render: (d, invoice) => formatDate(d, true)
+    },
+    {
+      title: (
+        <Tooltip title="Refresh">
+          <Button
+            size="small"
+            style={{ marginLeft: '8px' }}
+            disabled={loading}
+            // onClick={fetchData}
+            icon={<SyncOutlined />}
+          />
+        </Tooltip>
+      ),
+      width: 60,
+      fixed: 'right',
+      key: 'action'
     }
   ]
 
@@ -205,6 +227,35 @@ const Index = ({
       }
       console.log('search term:  ', searchTerm)
       // return
+      let amtFrom = searchTerm.amountStart,
+        amtTo = searchTerm.amountEnd
+      if (amtFrom != '' && amtFrom != null) {
+        amtFrom = Number(amtFrom) * CURRENCY[searchTerm.currency].stripe_factor
+        if (isNaN(amtFrom) || amtFrom < 0) {
+          message.error('Invalid amount-from value.')
+          return null
+        }
+      }
+      if (amtTo != '' && amtTo != null) {
+        amtTo = Number(amtTo) * CURRENCY[searchTerm.currency].stripe_factor
+        if (isNaN(amtTo) || amtTo < 0) {
+          message.error('Invalid amount-to value')
+          return null
+        }
+      }
+      console.log('amtFrom/to ', amtFrom, '//', amtTo)
+
+      if (
+        typeof amtFrom == 'number' &&
+        typeof amtTo == 'number' &&
+        amtFrom > amtTo
+      ) {
+        message.error('Amount-from must be less than or equal to amount-to')
+        return null
+      }
+      searchTerm.amountStart = amtFrom
+      searchTerm.amountEnd = amtTo
+      console.log('searchTerm: ', searchTerm)
     }
     if (user != null) {
       searchTerm.userId = user.id as number
@@ -323,6 +374,13 @@ const Index = ({
 
 export default Index
 
+const DEFAULT_TERM = {
+  currency: 'EUR'
+  // status: [],
+  // amountStart: '',
+  // amountEnd: ''
+  // refunded: false,
+}
 const Search = ({
   form,
   searching,
@@ -368,9 +426,18 @@ const Search = ({
     appConfig.setTaskListOpen(true)
   }
 
+  const currencySymbol =
+    CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol
+
   return (
     <div>
-      <Form form={form} onFinish={goSearch} disabled={searching}>
+      <Form
+        form={form}
+        onFinish={goSearch}
+        disabled={searching}
+        initialValues={DEFAULT_TERM}
+        className="my-4"
+      >
         <Row className=" mb-3 flex items-center" gutter={[8, 8]}>
           <Col span={4} className=" font-bold text-gray-500">
             Transaction created
@@ -437,6 +504,49 @@ const Search = ({
               </Button>
             </Space>
           </Col>
+        </Row>
+        <Row className="flex items-center" gutter={[8, 8]}>
+          <Col span={4} className="font-bold text-gray-500">
+            <div className="flex items-center">
+              <span className="mr-2">Amount</span>
+              <Form.Item name="currency" noStyle={true}>
+                <Select
+                  style={{ width: 80 }}
+                  options={[
+                    { value: 'EUR', label: 'EUR' },
+                    { value: 'USD', label: 'USD' },
+                    { value: 'JPY', label: 'JPY' }
+                  ]}
+                />
+              </Form.Item>
+            </div>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="amountStart" noStyle={true}>
+              <Input
+                prefix={`from ${currencySymbol}`}
+                onPressEnter={form.submit}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={4}>
+            <Form.Item name="amountEnd" noStyle={true}>
+              <Input
+                prefix={`to ${currencySymbol}`}
+                onPressEnter={form.submit}
+              />
+            </Form.Item>
+          </Col>
+          {/* <Col span={11} className=" ml-4 font-bold text-gray-500">
+            <span className="mr-2">Status</span>
+            <Form.Item name="status" noStyle={true}>
+              <Select
+                mode="multiple"
+                options={statusOpt}
+                style={{ maxWidth: 420, minWidth: 120, margin: '8px 0' }}
+              />
+            </Form.Item>
+          </Col> */}
         </Row>
       </Form>
     </div>
