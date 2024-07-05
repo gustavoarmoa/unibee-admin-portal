@@ -263,7 +263,7 @@ export default Index
 
       <Row>
         <Col span={12}>
-          <Form.Item label="Phone number" name="mobile">
+          <Form.Item label="Phone number" name="phone">
             <Input />
           </Form.Item>
         </Col>

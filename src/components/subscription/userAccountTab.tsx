@@ -283,7 +283,7 @@ const UserAccountTab = ({
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Phone number" name="mobile">
+              <Form.Item label="Phone number" name="phone">
                 <Input style={{ width: '300px' }} />
               </Form.Item>
             </Col>
