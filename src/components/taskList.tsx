@@ -42,9 +42,13 @@ const Index = ({ onClose }: { onClose: () => void }) => {
   const { page, onPageChangeNoParams } = usePagination()
   const [taskList, setTaskList] = useState<TTaskItem[]>([])
   const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const getList = async () => {
+    if (loading) {
+      // if loading is true, skip the current run
+      return
+    }
     setLoading(true)
     const [res, err] = await getDownloadListReq(page, PAGE_SIZE, getList)
     setLoading(false)
@@ -56,6 +60,12 @@ const Index = ({ onClose }: { onClose: () => void }) => {
     setTaskList(downloads ?? [])
     setTotal(total)
   }
+
+  useEffect(() => {
+    // getList()
+    const intervalId = setInterval(getList, 6000)
+    return () => clearInterval(intervalId)
+  }, [])
 
   useEffect(() => {
     getList()
