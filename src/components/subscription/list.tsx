@@ -203,7 +203,6 @@ const Index = () => {
       return
     }
     const { plans, total } = planList
-    console.log('plan list: ', plans)
     planFilterRef.current =
       plans == null
         ? []

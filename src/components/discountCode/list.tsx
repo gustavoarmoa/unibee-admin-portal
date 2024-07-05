@@ -28,7 +28,7 @@ import {
   DISCOUNT_CODE_STATUS,
   DISCOUNT_CODE_TYPE
 } from '../../constants'
-import { showAmount } from '../../helpers'
+import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { exportDataReq, getDiscountCodeListReq } from '../../requests'
 import '../../shared.css'
@@ -183,6 +183,12 @@ const Index = () => {
           return lim
         }
       }
+    },
+    {
+      title: 'Created at',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (createTime, code) => formatDate(createTime)
     },
     {
       title: 'Validity Range',
