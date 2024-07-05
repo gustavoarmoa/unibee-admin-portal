@@ -562,7 +562,7 @@ const ImportModal = ({
     message.success(
       'User data is being imported, please check task list for progress'
     )
-    // closeModal()
+    closeModal()
     appConfig.setTaskListOpen(true)
   }
 
@@ -664,14 +664,6 @@ const ImportModal = ({
             {
               title: (
                 <span className=" text-gray-900">
-                  Open task list to check importing progress
-                </span>
-              ),
-              status: 'process'
-            },
-            {
-              title: (
-                <span className=" text-gray-900">
                   Go to User List page to further ensure data are imported
                 </span>
               ),
@@ -681,7 +673,7 @@ const ImportModal = ({
         />
         <div className=" flex items-center justify-end gap-4">
           <Button onClick={closeModal} disabled={importing}>
-            Cancel
+            Close
           </Button>
           {/* <Button
             type="primary"
