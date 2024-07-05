@@ -3,33 +3,18 @@ import {
   ExclamationOutlined,
   SyncOutlined
 } from '@ant-design/icons'
-import type { CheckboxProps, TabsProps } from 'antd'
-import {
-  Button,
-  Checkbox,
-  Col,
-  Divider,
-  Modal,
-  Row,
-  Table,
-  Tabs,
-  Tag,
-  message
-} from 'antd'
-import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
-import React, { CSSProperties, useEffect, useState } from 'react'
-import ReactQuill from 'react-quill'
+import { Button, Col, Row, Tag, message } from 'antd'
+import React, { useEffect, useState } from 'react'
 import 'react-quill/dist/quill.snow.css'
-import { useSearchParams } from 'react-router-dom'
 import { CURRENCY } from '../../../constants'
-import { getAppKeysWithMore, getMerchantInfoReq } from '../../../requests'
+import { getAppKeysWithMore } from '../../../requests'
 // import '../../shared.css'
 import { TGateway } from '../../../shared.types.d'
 import { useAppConfigStore } from '../../../stores'
 import ModalApiKey from './apiKeyModal'
 import ChangellyModal from './changellyModal'
 import PaymentGatewayList from './paymentGatewayList'
+import SegmentModal from './segmentModal'
 import ModalSendgridKeyModal from './sendGridKeyModal'
 import ModalVATsenseKeyModal from './vatKeyModal'
 import ModalWireTransfer from './wireTransferModal'
@@ -57,10 +42,14 @@ const Index = () => {
   const [sendgridKeyModalOpen, setSendgridKeyModalOpen] = useState(false)
   const [wireTransferModalOpen, setWireTransferModalOpen] = useState(false)
   const [changellyModalOpen, setChangellyModalOpen] = useState(false)
+  const [segmentModalOpen, setSegmentModalOpen] = useState(false)
+
   const [keys, setKeys] = useState({
     openApiKey: '',
     sendGridKey: '',
-    vatSenseKey: ''
+    vatSenseKey: '',
+    segmentServerSideKey: '',
+    segmentUserPortalKey: ''
   })
   const [gatewayList, setGatewayList] = useState<TGateway[]>([])
 
@@ -72,6 +61,7 @@ const Index = () => {
     setVatSenseKeyModalOpen(!vatSenseKeyModalOpen)
   const toggleWireTransferModal = () =>
     setWireTransferModalOpen(!wireTransferModalOpen)
+  const toggleSegmentModal = () => setSegmentModalOpen(!segmentModalOpen)
 
   const getAppKeys = async () => {
     setLoadingKeys(true)
@@ -84,8 +74,20 @@ const Index = () => {
     }
     const { merchantInfo, gateways } = res
     // these keys have been desensitized, their purposes is to show which keys have been set, which haven't
-    const { openApiKey, sendGridKey, vatSenseKey } = merchantInfo
-    const k = { openApiKey: '', sendGridKey: '', vatSenseKey: '' }
+    const {
+      openApiKey,
+      sendGridKey,
+      vatSenseKey,
+      segmentServerSideKey,
+      segmentUserPortalKey
+    } = merchantInfo
+    const k = {
+      openApiKey: '',
+      sendGridKey: '',
+      vatSenseKey: '',
+      segmentServerSideKey: '',
+      segmentUserPortalKey: ''
+    }
     if (openApiKey != null && openApiKey != '') {
       k.openApiKey = openApiKey
     }
@@ -94,6 +96,12 @@ const Index = () => {
     }
     if (vatSenseKey != null && vatSenseKey != '') {
       k.vatSenseKey = vatSenseKey
+    }
+    if (segmentServerSideKey != null && segmentServerSideKey != '') {
+      k.segmentServerSideKey = segmentServerSideKey
+    }
+    if (segmentUserPortalKey != null && segmentUserPortalKey != '') {
+      k.segmentUserPortalKey = segmentUserPortalKey
     }
     setKeys(k)
     if (gateways != null) {
@@ -132,6 +140,13 @@ const Index = () => {
         <ModalWireTransfer
           closeModal={toggleWireTransferModal}
           detail={gatewayList.find((g) => g.gatewayName == 'wire_transfer')}
+          refresh={getAppKeys}
+        />
+      )}
+      {segmentModalOpen && (
+        <SegmentModal
+          closeModal={toggleSegmentModal}
+          serverSideKey={keys.segmentServerSideKey}
           refresh={getAppKeys}
         />
       )}
@@ -276,6 +291,33 @@ const Index = () => {
         </Col>
         <Col span={2}>
           <Button onClick={toggleSendgridModal} disabled={loadingKeys}>
+            Edit
+          </Button>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 32]} style={{ marginBottom: '16px' }}>
+        <Col span={4}>
+          <a href="https://segment.com" target="_blank" rel="noreferrer">
+            Segment setup
+          </a>
+        </Col>
+        <Col span={2}>
+          {loadingKeys ? (
+            <LoadingTag />
+          ) : keys.segmentServerSideKey != '' ? (
+            <SetTag />
+          ) : (
+            <NotSetTag />
+          )}
+        </Col>
+        <Col span={10}>
+          <div className=" text-gray-500">
+            Use these server/client keys to track user behavior.
+          </div>
+        </Col>
+        <Col span={2}>
+          <Button onClick={toggleSegmentModal} disabled={loadingKeys}>
             Edit
           </Button>
         </Col>

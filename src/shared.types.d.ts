@@ -107,13 +107,6 @@ interface IPlan {
   onetimeAddonIds?: number[] // which one-time payment addons have been attached to this plan (main plan only)
   metricPlanLimits?: { metricId: number; metricLimit: number }[]
   metadata?: string
-  /*
-  metadata?: {
-    property: string
-    value: string
-    valueType: 'string' | 'boolean' | 'number'
-  }[] // backend structure is metadata: {key1: val1, key2: val2, ...}, but both key and value are editable, so I convert it to this structure
-  */
   createTime: number
   companyId: number
   merchantId: number
