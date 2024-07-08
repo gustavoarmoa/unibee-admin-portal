@@ -174,8 +174,8 @@ const Index = () => {
 
           <Tooltip title="Invite member">
             <Button
-              // disabled={copyingPlan}
-              style={{ border: 'unset' }}
+              size="small"
+              style={{ border: 'unset', marginLeft: '4px' }}
               onClick={toggleInviteModal}
               icon={<UserAddOutlined />}
             />
@@ -184,7 +184,7 @@ const Index = () => {
           <Tooltip title="Refresh">
             <Button
               size="small"
-              style={{ marginLeft: '8px' }}
+              style={{ border: 'unset', marginLeft: '8px' }}
               disabled={loading}
               onClick={getMerchantUserList}
               icon={<SyncOutlined />}

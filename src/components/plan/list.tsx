@@ -171,6 +171,11 @@ const Index = () => {
       render: (m, plan) => (null == m || 0 == m.length ? 'No' : m.length)
     },
     {
+      title: 'External Id',
+      dataIndex: 'externalPlanId',
+      width: 120
+    },
+    {
       title: (
         <>
           <span>Actions</span>

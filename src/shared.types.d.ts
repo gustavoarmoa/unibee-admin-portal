@@ -93,6 +93,7 @@ interface IAddon extends IPlan {
 
 interface IPlan {
   id: number
+  externalPlanId?: '' // used for subscription import, the to-be-imported active sub need to bind to a plan.
   planName: string
   description: string
   type: number // 1: main plan, 2: add-on, 3: one-time addon

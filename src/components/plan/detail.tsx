@@ -48,6 +48,7 @@ type TMetricsItem = {
 }
 type TNewPlan = {
   // why can't I use IPlan??????????
+  externalPlanId?: string
   currency: string
   // amount: number
   intervalUnit: string
@@ -574,7 +575,11 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               }
             ]}
           >
-            <Input />
+            <Input.TextArea rows={4} style={{ width: '640px' }} />
+          </Form.Item>
+
+          <Form.Item label="External Plan Id" name="externalPlanId">
+            <Input style={{ width: '180px' }} />
           </Form.Item>
 
           <Form.Item label="Status" name="status">
