@@ -19,6 +19,7 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState(0) // [0, 1]
   const [errMsg, setErrMsg] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [resending, setResending] = useState(false)
 
   const [otp, setOtp] = useState('')
   const onOTPchange = (value: string) => {
@@ -30,9 +31,13 @@ const Index = () => {
   // submit basic signup ingo
   const onSubmitBasicInfo = async () => {
     setErrMsg('')
+    console.log('submit basic info: ', form.getFieldsValue())
+    // return
     setSubmitting(true)
+    setResending(true)
     const [res, err] = await signUpReq(form.getFieldsValue())
     setSubmitting(false)
+    setResending(false)
     console.log('signup res: ', res)
     if (null != err) {
       message.error(err.message)
@@ -102,246 +107,253 @@ const Index = () => {
         }}
       >
         <h1 className=" mb-6 mt-9">Merchant Signup</h1>
-        {currentStep == 0 ? (
-          <>
-            <div
-              className="flex flex-col justify-center"
-              style={{
-                width: '640px',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                background: '#FFF',
-                paddingTop: '24px'
+        <>
+          <div
+            className="flex flex-col justify-center"
+            style={{
+              display: currentStep == 0 ? 'unset' : 'none',
+              width: '640px',
+              border: '1px solid #e0e0e0',
+              borderRadius: '8px',
+              background: '#FFF',
+              paddingTop: '24px'
+            }}
+          >
+            <Form
+              name="basic"
+              form={form}
+              onFinish={onSubmitBasicInfo}
+              labelCol={{
+                span: 10
               }}
+              wrapperCol={{
+                span: 18
+              }}
+              style={{
+                maxWidth: 600
+              }}
+              initialValues={{
+                remember: true
+              }}
+              autoComplete="off"
             >
-              <Form
-                name="basic"
-                form={form}
-                onFinish={onSubmitBasicInfo}
-                labelCol={{
-                  span: 10
-                }}
-                wrapperCol={{
-                  span: 18
-                }}
-                style={{
-                  maxWidth: 600
-                }}
-                initialValues={{
-                  remember: true
-                }}
-                autoComplete="off"
+              <Form.Item
+                label="First Name"
+                name="firstName"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input your first name!'
+                  }
+                ]}
               >
-                <Form.Item
-                  label="First Name"
-                  name="firstName"
-                  rules={[
-                    {
-                      required: true,
-                      message: 'Please input your first name!'
-                    }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
+                <Input />
+              </Form.Item>
 
-                <Form.Item
-                  label="Last Name"
-                  name="lastName"
-                  rules={[
-                    {
-                      required: true,
-                      message: 'Please input yourn last name!'
-                    }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
+              <Form.Item
+                label="Last Name"
+                name="lastName"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input yourn last name!'
+                  }
+                ]}
+              >
+                <Input />
+              </Form.Item>
 
-                <Form.Item
-                  label="Email"
-                  name="email"
-                  rules={[
-                    {
-                      required: true,
-                      message: 'Please input your Email!'
-                    },
-                    ({ getFieldValue }) => ({
-                      validator(rule, value) {
-                        if (
-                          value != null &&
-                          value != '' &&
-                          emailValidate(value)
-                        ) {
-                          return Promise.resolve()
-                        }
-                        return Promise.reject('Invalid email address')
-                      }
-                    })
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-
-                <Form.Item
-                  label="Phone"
-                  name="phone"
-                  rules={[
-                    {
-                      required: false
-                    }
-                  ]}
-                >
-                  <Input />
-                </Form.Item>
-
-                <Form.Item
-                  label="Password"
-                  name="password"
-                  dependencies={['password2']}
-                  rules={[
-                    {
-                      required: true,
-                      message: 'Please input your password!'
-                    },
-                    ({ getFieldValue }) => ({
-                      validator(rule, value) {
-                        if (!passwordSchema.validate(value)) {
-                          return Promise.reject(
-                            'At least 8 characters containing lowercase, uppercase, number and special character.'
-                          )
-                        }
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input your Email!'
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(rule, value) {
+                      if (
+                        value != null &&
+                        value != '' &&
+                        emailValidate(value)
+                      ) {
                         return Promise.resolve()
                       }
-                    })
-                  ]}
-                >
-                  <Input.Password />
-                </Form.Item>
+                      return Promise.reject('Invalid email address')
+                    }
+                  })
+                ]}
+              >
+                <Input />
+              </Form.Item>
 
-                <Form.Item
-                  label="Password Confirm"
-                  name="password2"
-                  dependencies={['password']}
-                  rules={[
-                    {
-                      required: true,
-                      message: 'Please retype your password!'
-                    },
-                    ({ getFieldValue }) => ({
-                      validator(rule, value) {
-                        if (value == getFieldValue('password')) {
-                          return Promise.resolve()
-                        }
-                        return Promise.reject('Please retype the same password')
+              <Form.Item
+                label="Phone"
+                name="phone"
+                rules={[
+                  {
+                    required: false
+                  }
+                ]}
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                label="Password"
+                name="password"
+                dependencies={['password2']}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please input your password!'
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(rule, value) {
+                      if (!passwordSchema.validate(value)) {
+                        return Promise.reject(
+                          'At least 8 characters containing lowercase, uppercase, number and special character.'
+                        )
                       }
-                    })
-                  ]}
-                >
-                  <Input.Password onPressEnter={form.submit} />
-                </Form.Item>
+                      return Promise.resolve()
+                    }
+                  })
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
 
-                <Form.Item
-                  name="errMsg"
-                  wrapperCol={{
-                    offset: 8,
-                    span: 16
-                  }}
-                >
-                  <span style={{ color: 'red' }}>{errMsg}</span>
-                </Form.Item>
+              <Form.Item
+                label="Password Confirm"
+                name="password2"
+                dependencies={['password']}
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please retype your password!'
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(rule, value) {
+                      if (value == getFieldValue('password')) {
+                        return Promise.resolve()
+                      }
+                      return Promise.reject('Please retype the same password')
+                    }
+                  })
+                ]}
+              >
+                <Input.Password onPressEnter={form.submit} />
+              </Form.Item>
 
-                <Form.Item
-                  wrapperCol={{
-                    offset: 11,
-                    span: 8
-                  }}
-                >
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    onClick={form.submit}
-                    loading={submitting}
-                    disabled={submitting}
-                  >
-                    Submit
-                  </Button>
-                </Form.Item>
-              </Form>
-              <div
-                style={{
-                  display: 'flex',
-                  color: '#757575',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  margin: '-12px 0 18px 0'
+              <Form.Item
+                name="errMsg"
+                wrapperCol={{
+                  offset: 8,
+                  span: 16
                 }}
               >
-                Already have an account?
-                <Button type="link" onClick={goLogin}>
-                  Login
+                <span style={{ color: 'red' }}>{errMsg}</span>
+              </Form.Item>
+
+              <Form.Item
+                wrapperCol={{
+                  offset: 11,
+                  span: 8
+                }}
+              >
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  onClick={form.submit}
+                  loading={submitting}
+                  disabled={submitting}
+                >
+                  Submit
                 </Button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+              </Form.Item>
+            </Form>
             <div
               style={{
                 display: 'flex',
+                color: '#757575',
                 justifyContent: 'center',
                 alignItems: 'center',
-                height: '78px'
+                margin: '-12px 0 18px 0'
               }}
             >
-              <h3>Enter verification code for {form.getFieldValue('email')}</h3>
+              Already have an account?
+              <Button type="link" onClick={goLogin}>
+                Login
+              </Button>
             </div>
-            <OtpInput
-              value={otp}
-              onChange={onOTPchange}
-              numInputs={6}
-              shouldAutoFocus={true}
-              skipDefaultStyles={true}
-              inputStyle={{
-                height: '80px',
-                width: '60px',
-                border: '1px solid gray',
-                borderRadius: '6px',
-                textAlign: 'center',
-                fontSize: '36px'
-              }}
-              renderSeparator={<span style={{ width: '36px' }}></span>}
-              renderInput={(props) => <input {...props} />}
-            />
-            <div
-              style={{
-                height: '64px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: 'red'
-              }}
+          </div>
+        </>
+
+        <div
+          style={{
+            flexDirection: 'column',
+            display: currentStep == 0 ? 'none' : 'flex'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '78px'
+            }}
+          >
+            <h3>Enter verification code for {form.getFieldValue('email')}</h3>
+          </div>
+          <OtpInput
+            value={otp}
+            onChange={onOTPchange}
+            numInputs={6}
+            shouldAutoFocus={true}
+            skipDefaultStyles={true}
+            inputStyle={{
+              height: '80px',
+              width: '60px',
+              border: '1px solid gray',
+              borderRadius: '6px',
+              textAlign: 'center',
+              fontSize: '36px'
+            }}
+            renderSeparator={<span style={{ width: '36px' }}></span>}
+            renderInput={(props) => <input {...props} />}
+          />
+          <div
+            style={{
+              height: '64px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              color: 'red'
+            }}
+          >
+            {errMsg}
+          </div>
+          <div>
+            <Button
+              type="primary"
+              block
+              onClick={onSubmitCode}
+              loading={submitting}
+              disabled={submitting}
             >
-              {errMsg}
-            </div>
-            <div>
-              <Button
-                type="primary"
-                block
-                onClick={onSubmitCode}
-                loading={submitting}
-              >
-                Submit
-              </Button>
-              <Button
-                type="link"
-                block
-                onClick={onSubmitBasicInfo}
-                loading={submitting}
-              >
-                Resend
-              </Button>
-              {/* <Button
+              Submit
+            </Button>
+            <Button
+              type="link"
+              block
+              onClick={onSubmitBasicInfo}
+              loading={resending}
+              disabled={resending}
+            >
+              Resend
+            </Button>
+            {/* <Button
               type="link"
               block
               onClick={() => {
@@ -352,9 +364,8 @@ const Index = () => {
             >
               Go back
             </Button>*/}
-            </div>
           </div>
-        )}
+        </div>
       </div>
       <AppFooter />
     </div>
