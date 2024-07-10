@@ -63,6 +63,7 @@ const Index = () => {
       dataIndex: 'planName',
       key: 'planIds',
       filters: planFilterRef.current,
+      filteredValue: filters.planIds,
       render: (_, sub) => <span>{sub.plan?.planName}</span>
     },
     {
@@ -101,8 +102,8 @@ const Index = () => {
       dataIndex: 'status',
       key: 'status',
       render: (_, sub) => SubscriptionStatus(sub.status),
-      filters: SUB_STATUS_FILTER
-      // onFilter: (value, record) => record.status == value,
+      filters: SUB_STATUS_FILTER,
+      filteredValue: filters.status
     },
     {
       title: 'Start',
@@ -293,6 +294,8 @@ const Index = () => {
     return searchTerm
   }
 
+  const clearFilters = () => setFilters({ status: null, planIds: null })
+
   const goSearch = () => {
     if (page == 0) {
       fetchData()
@@ -318,7 +321,7 @@ const Index = () => {
         exporting={exporting}
         exportData={exportData}
         onPageChange={onPageChange}
-        // normalizeSearchTerms={normalizeSearchTerms}
+        clearFilters={clearFilters}
       />
       <div className=" mb-3"></div>
       {loadingPlans ? (
@@ -390,8 +393,8 @@ const Search = ({
   exporting,
   goSearch,
   exportData,
-  onPageChange
-  // normalizeSearchTerms
+  onPageChange,
+  clearFilters
 }: {
   form: FormInstance<any>
   searching: boolean
@@ -399,41 +402,14 @@ const Search = ({
   goSearch: () => void
   exportData: () => void
   onPageChange: (page: number, pageSize: number) => void
-  // </any>normalizeSearchTerms: () => any
+  clearFilters: () => void
 }) => {
-  // const appConfig = useAppConfigStore()
-  // const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
-    goSearch()
+    clearFilters()
   }
 
-  /*
-  const exportData = async () => {
-    const payload = normalizeSearchTerms()
-    if (null == payload) {
-      return
-    }
-
-    console.log('export tx params: ', payload)
-    // return
-    setExporting(true)
-    const [res, err] = await exportDataReq({
-      task: 'SubscriptionExport',
-      payload
-    })
-    setExporting(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    message.success(
-      'Subscription list is being exported, please check task list for progress.'
-    )
-    appConfig.setTaskListOpen(true)
-  }
-    */
   const currencySymbol =
     CURRENCY[form.getFieldValue('currency') || DEFAULT_TERM.currency].symbol
 

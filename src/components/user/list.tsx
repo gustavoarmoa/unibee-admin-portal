@@ -76,7 +76,7 @@ const Index = () => {
   const [filters, setFilters] = useState<TFilters>({
     status: null,
     subStatus: null,
-    planIds: null // [1, 2, 3]
+    planIds: null
   })
   const planFilterRef = useRef<{ value: number; text: string }[]>([])
 
@@ -108,7 +108,6 @@ const Index = () => {
   }
 
   const fetchData = async () => {
-    // return
     setLoading(true)
     const [res, err] = await getUserListReq(
       {
@@ -230,7 +229,8 @@ const Index = () => {
       title: 'Subscription Plan',
       dataIndex: 'subscriptionName',
       key: 'planIds',
-      filters: planFilterRef.current
+      filters: planFilterRef.current,
+      filteredValue: filters.planIds
     },
     {
       title: 'Sub Id',
@@ -252,7 +252,8 @@ const Index = () => {
       dataIndex: 'subscriptionStatus',
       key: 'subStatus',
       render: (subStatus, _) => SubscriptionStatus(subStatus),
-      filters: SUB_STATUS_FILTER
+      filters: SUB_STATUS_FILTER,
+      filteredValue: filters.subStatus
     },
     {
       title: 'Created at',
@@ -265,7 +266,8 @@ const Index = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status, _) => UserStatus(status),
-      filters: STATUS_FILTER
+      filters: STATUS_FILTER,
+      filteredValue: filters.status
     },
     {
       title: (
@@ -329,6 +331,9 @@ const Index = () => {
     }
   }
 
+  const clearFilters = () =>
+    setFilters({ status: null, subStatus: null, planIds: null })
+
   const onTableChange: TableProps<IProfile>['onChange'] = (
     pagination,
     filters,
@@ -365,6 +370,7 @@ const Index = () => {
             form={form}
             goSearch={goSearch}
             onPageChange={onPageChange}
+            clearFilters={clearFilters}
             searching={loading}
             exporting={exporting}
             // normalizeSearchTerms={normalizeSearchTerms}
@@ -442,43 +448,21 @@ const Search = ({
   searching,
   exporting,
   goSearch,
-  onPageChange
-  // normalizeSearchTerms
+  onPageChange,
+  clearFilters
 }: {
   form: FormInstance<any>
   searching: boolean
   exporting: boolean
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
-  // </any>normalizeSearchTerms: () => any
+  clearFilters: () => void
 }) => {
-  // const appConfig = useAppConfigStore()
-  // const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
-    goSearch()
+    clearFilters()
   }
-
-  /*
-  const exportData = async () => {
-    let payload = normalizeSearchTerms()
-    payload = { ...payload, ...filters }
-    console.log('export user params: ', payload)
-    // return
-    setExporting(true)
-    const [res, err] = await exportDataReq({ task: 'UserExport', payload })
-    setExporting(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    message.success(
-      'User list is being exported, please check task list for progress.'
-    )
-    appConfig.setTaskListOpen(true)
-  }
-    */
 
   return (
     <div>

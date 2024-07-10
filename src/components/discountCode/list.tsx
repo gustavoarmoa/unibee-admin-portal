@@ -138,21 +138,24 @@ const Index = () => {
       dataIndex: 'status',
       key: 'status',
       render: (s) => DiscountCodeStatus(s), // STATUS[s]
-      filters: CODE_STATUS_FILTER
+      filters: CODE_STATUS_FILTER,
+      filteredValue: filters.status
     },
     {
       title: 'Billing Type',
       dataIndex: 'billingType',
       key: 'billingType',
       render: (s) => DISCOUNT_CODE_BILLING_TYPE[s],
-      filters: BILLING_TYPE_FILTER
+      filters: BILLING_TYPE_FILTER,
+      filteredValue: filters.billingType
     },
     {
       title: 'Discount Type',
       dataIndex: 'discountType',
       key: 'discountType',
       render: (s) => DISCOUNT_CODE_TYPE[s],
-      filters: DISCOUNT_TYPE_FILTER
+      filters: DISCOUNT_TYPE_FILTER,
+      filteredValue: filters.discountType
     },
     {
       title: 'Amount',
@@ -275,6 +278,9 @@ const Index = () => {
     return searchTerm
   }
 
+  const clearFilters = () =>
+    setFilters({ status: null, billingType: null, discountType: null })
+
   const goSearch = () => {
     if (page == 0) {
       fetchData()
@@ -304,9 +310,9 @@ const Index = () => {
         form={form}
         goSearch={goSearch}
         searching={loading}
-        // filters={filters}
+        exporting={exporting}
         onPageChange={onPageChange}
-        // normalizeSearchTerms={normalizeSearchTerms}
+        clearFilters={clearFilters}
       />
       <div className=" mb-4"></div>
       <Table
@@ -361,51 +367,23 @@ export default Index
 const Search = ({
   form,
   searching,
-  // filters,
+  exporting,
   goSearch,
-  onPageChange
-  // normalizeSearchTerms
+  onPageChange,
+  clearFilters
 }: {
   form: FormInstance<any>
   searching: boolean
-  // </any>filters: TFilters
+  exporting: boolean
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
-  // normalizeSearchTerms: () => any
+  clearFilters: () => void
 }) => {
-  const appConfig = useAppConfigStore()
-  const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
-    goSearch()
+    clearFilters()
   }
-
-  /*
-  const exportData = async () => {
-    let payload = normalizeSearchTerms()
-    if (null == payload) {
-      return
-    }
-    payload = { ...payload, ...filters }
-    console.log('export tx params: ', payload)
-    // return
-    setExporting(true)
-    const [res, err] = await exportDataReq({
-      task: 'DiscountExport',
-      payload
-    })
-    setExporting(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    message.success(
-      'Discount code list is being exported, please check task list for progress.'
-    )
-    appConfig.setTaskListOpen(true)
-  }
-    */
 
   return (
     <div>

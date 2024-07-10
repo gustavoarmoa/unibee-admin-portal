@@ -101,13 +101,15 @@ const Index = ({
       dataIndex: 'status',
       key: 'status',
       render: (status) => PaymentStatus(status), // PAYMENT_STATUS[status]
-      filters: STATUS_FILTER
+      filters: STATUS_FILTER,
+      filteredValue: filters.status
     },
     {
       title: 'Type',
       dataIndex: 'timelineType',
       key: 'timelineTypes',
       filters: PAYMENT_TYPE_FILTER,
+      filteredValue: filters.timelineTypes,
       render: (s) => {
         const title = PAYMENT_TYPE[s as keyof typeof PAYMENT_TYPE]
         if (s == 1) {
@@ -132,6 +134,7 @@ const Index = ({
       dataIndex: 'gatewayId',
       key: 'gatewayIds',
       filters: GATEWAY_FILTER,
+      filteredValue: filters.gatewayIds,
       render: (gateway) =>
         appConfigStore.gateway.find((g) => g.gatewayId == gateway)?.displayName
     },
@@ -292,6 +295,9 @@ const Index = ({
     }
   }
 
+  const clearFilters = () =>
+    setFilters({ status: null, timelineTypes: null, gatewayIds: null })
+
   const exportData = async () => {
     let payload = normalizeSearchTerms()
     if (null == payload) {
@@ -344,6 +350,7 @@ const Index = ({
         <Search
           form={form}
           goSearch={goSearch}
+          clearFilters={clearFilters}
           searching={loading}
           exporting={exporting}
           exportData={exportData}
@@ -414,7 +421,8 @@ const Search = ({
   exporting,
   exportData,
   goSearch,
-  onPageChange
+  onPageChange,
+  clearFilters
 }: {
   form: FormInstance<any>
   searching: boolean
@@ -422,13 +430,12 @@ const Search = ({
   exportData: () => void
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
+  clearFilters: () => void
 }) => {
-  // const appConfig = useAppConfigStore()
-  // const [exporting, setExporting] = useState(false)
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
-    goSearch()
+    clearFilters()
   }
 
   /*

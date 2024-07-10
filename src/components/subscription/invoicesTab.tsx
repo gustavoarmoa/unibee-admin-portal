@@ -284,6 +284,7 @@ const Index = ({
       dataIndex: 'status',
       key: 'status',
       filters: STATUS_FILTER,
+      filteredValue: filters.status,
       render: (s, iv) => InvoiceStatus(s, iv.refund != null) // INVOICE_STATUS[s as keyof typeof INVOICE_STATUS]
     },
     {
@@ -451,6 +452,8 @@ const Index = ({
     toggleNewInvoiceModal()
   }
 
+  const clearFilters = () => setFilters({ status: null })
+
   const onTableChange: TableProps<UserInvoice>['onChange'] = (
     pagination,
     filters,
@@ -513,10 +516,8 @@ const Index = ({
           form={form}
           goSearch={goSearch}
           searching={loading}
-          exporting={exporting}
-          exportData={exportData}
+          clearFilters={clearFilters}
           onPageChange={pageChange}
-          // normalizeSearchTerms={normalizeSearchTerms}
         />
       )}
       <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -588,63 +589,27 @@ export default Index
 
 const DEFAULT_TERM = {
   currency: 'EUR',
-  // status: [],
   amountStart: '',
   amountEnd: ''
-  // refunded: false,
 }
 const Search = ({
   form,
   searching,
-  exporting,
   goSearch,
   onPageChange,
-  exportData
-  // normalizeSearchTerms
+  clearFilters
 }: {
   form: FormInstance<any>
   searching: boolean
-  exporting: boolean
   goSearch: () => void
   onPageChange: (page: number, pageSize: number) => void
-  exportData: () => void
-  // normalizeSearchTerms: () => any
+  clearFilters: () => void
 }) => {
-  // const appConfig = useAppConfigStore()
-  // const [exporting, setExporting] = useState(false)
-  /*
-  const statusOpt = Object.keys(INVOICE_STATUS).map((s) => ({
-    value: Number(s),
-    label: INVOICE_STATUS[Number(s)]
-  }))
-    */
   const clear = () => {
     form.resetFields()
     onPageChange(1, PAGE_SIZE)
-    goSearch()
+    clearFilters()
   }
-
-  /*
-  const exportData = async () => {
-    const payload = normalizeSearchTerms()
-    if (null == payload) {
-      return
-    }
-    console.log('export iv params: ', payload)
-    // return
-    setExporting(true)
-    const [res, err] = await exportDataReq({ task: 'InvoiceExport', payload })
-    setExporting(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    message.success(
-      'Invoice list is being exported, please check task list for progress.'
-    )
-    appConfig.setTaskListOpen(true)
-  }
-    */
 
   const watchCurrency = Form.useWatch('currency', form)
   useEffect(() => {
@@ -768,13 +733,6 @@ const Search = ({
               >
                 Search
               </Button>
-              {/* <Button
-                onClick={exportData}
-                loading={exporting}
-                disabled={searching || exporting}
-              >
-                Export
-              </Button> */}
             </Space>
           </Col>
         </Row>
