@@ -55,8 +55,6 @@ const Index = () => {
     status: null,
     planIds: null
   })
-  // const [statusFilter, setStatusFilter] = useState<number[]>([])
-  // const [planFilter, setPlanFilter] = useState<number[]>([])
   const planFilterRef = useRef<{ value: number; text: string }[]>([])
 
   const getColumns = (): ColumnsType<ISubscriptionType> => [

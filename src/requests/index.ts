@@ -1876,6 +1876,7 @@ type TUserList = {
   email?: string
   status?: number[]
   subStatus?: number[]
+  planId?: number[]
   createTimeStart?: number
   createTimeEnd?: number
   page: number
@@ -1927,6 +1928,7 @@ export const importUserDataReq = async (file: File, task: TExportDataType) => {
 }
 
 // this is used when page is loading (as part of getMerchantUserListWithMoreReq), no search params available
+// ??? I don't like this.
 export const getMerchantUserListReq = async (refreshCb?: () => void) => {
   try {
     const res = await request.get('/merchant/member/list?page=0&count=10')

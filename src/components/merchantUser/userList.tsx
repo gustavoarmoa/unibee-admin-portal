@@ -32,7 +32,6 @@ import {
   getMerchantUserListReq,
   getMerchantUserListReq2,
   getMerchantUserListWithMoreReq,
-  getRoleListReq,
   inviteMemberReq,
   suspendMemberReq,
   updateMemberRolesReq

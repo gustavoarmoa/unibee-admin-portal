@@ -23,19 +23,21 @@ import {
   Pagination,
   Row,
   Space,
+  Spin,
   Steps,
   Table,
   Tooltip,
   message
 } from 'antd'
 import { ColumnsType, TableProps } from 'antd/es/table'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { SUBSCRIPTION_STATUS, USER_STATUS } from '../../constants'
 import { downloadStaticFile, formatBytes, formatDate } from '../../helpers'
 import { usePagination } from '../../hooks'
 import {
   exportDataReq,
+  getPlanList,
   getUserListReq,
   importUserDataReq
 } from '../../requests'
@@ -60,6 +62,7 @@ const SUB_STATUS_FILTER = Object.entries(SUBSCRIPTION_STATUS).map((s) => {
 type TFilters = {
   status: number[] | null
   subStatus: number[] | null
+  planIds: number[] | null
 }
 
 const Index = () => {
@@ -72,11 +75,15 @@ const Index = () => {
   const [total, setTotal] = useState(0)
   const [filters, setFilters] = useState<TFilters>({
     status: null,
-    subStatus: null
+    subStatus: null,
+    planIds: null // [1, 2, 3]
   })
+  const planFilterRef = useRef<{ value: number; text: string }[]>([])
+
   const [newUserModalOpen, setNewUserModalOpen] = useState(false)
   const toggleNewUserModal = () => setNewUserModalOpen(!newUserModalOpen)
   const [loading, setLoading] = useState(false)
+  const [loadingPlans, setLoadingPlans] = useState(false)
   const [users, setUsers] = useState<IProfile[]>([])
   const [form] = Form.useForm()
 
@@ -120,6 +127,32 @@ const Index = () => {
     const { userAccounts, total } = res
     setUsers(userAccounts ?? [])
     setTotal(total)
+  }
+
+  const fetchPlan = async () => {
+    setLoadingPlans(true)
+    const [planList, err] = await getPlanList(
+      {
+        type: [1], // 'main plan' only
+        status: [2], // 'active' only
+        page: page,
+        count: 100
+      },
+      fetchPlan
+    )
+    setLoadingPlans(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    const { plans, total } = planList
+    planFilterRef.current =
+      plans == null
+        ? []
+        : plans.map((p: any) => ({
+            value: p.plan.id,
+            text: p.plan.planName
+          }))
   }
 
   const exportData = async () => {
@@ -175,7 +208,8 @@ const Index = () => {
   const onMenuClick: MenuProps['onClick'] = (e) => {
     extraActions[e.key]()
   }
-  const columns: ColumnsType<IProfile> = [
+  //   const getColumns = (): ColumnsType<ISubscriptionType> => [
+  const getColumns = (): ColumnsType<IProfile> => [
     {
       title: 'Name',
       dataIndex: 'firstName',
@@ -187,10 +221,16 @@ const Index = () => {
       dataIndex: 'email',
       key: 'email'
     },
-    {
+    /* {
       title: 'Subscription',
       dataIndex: 'subscriptionName',
       key: 'subscriptionName'
+    }, */
+    {
+      title: 'Subscription Plan',
+      dataIndex: 'subscriptionName',
+      key: 'planIds',
+      filters: planFilterRef.current
     },
     {
       title: 'Sub Id',
@@ -304,6 +344,10 @@ const Index = () => {
     fetchData()
   }, [filters, page])
 
+  useEffect(() => {
+    fetchPlan()
+  }, [])
+
   return (
     <div>
       {newUserModalOpen && (
@@ -329,31 +373,46 @@ const Index = () => {
       </Row>
       <div className=" h-3"></div>
 
-      <Table
-        columns={columns}
-        dataSource={users}
-        onChange={onTableChange}
-        rowKey={'id'}
-        rowClassName="clickable-tbl-row"
-        pagination={false}
-        loading={{
-          spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
-        }}
-        onRow={(user, rowIndex) => {
-          return {
-            onClick: (evt) => {
-              if (
-                evt.target instanceof HTMLElement &&
-                evt.target.classList.contains('btn-user-with-subid')
-              ) {
-                return
+      {loadingPlans ? (
+        <Spin
+          indicator={<LoadingOutlined spin />}
+          size="large"
+          style={{
+            width: '100%',
+            height: '320px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        />
+      ) : (
+        <Table
+          columns={getColumns()}
+          dataSource={users}
+          onChange={onTableChange}
+          rowKey={'id'}
+          rowClassName="clickable-tbl-row"
+          pagination={false}
+          loading={{
+            spinning: loading,
+            indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+          }}
+          onRow={(user, rowIndex) => {
+            return {
+              onClick: (evt) => {
+                if (
+                  evt.target instanceof HTMLElement &&
+                  evt.target.classList.contains('btn-user-with-subid')
+                ) {
+                  return
+                }
+                navigate(`${APP_PATH}user/${user.id}`)
               }
-              navigate(`${APP_PATH}user/${user.id}`)
             }
-          }
-        }}
-      />
+          }}
+        />
+      )}
+
       <div className="mx-0 my-4 flex items-center justify-end">
         <Pagination
           current={page + 1} // back-end starts with 0, front-end starts with 1
