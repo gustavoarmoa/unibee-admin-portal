@@ -474,7 +474,11 @@ export type TExportDataType =
   | 'UserDiscountExport'
   | 'DiscountExport'
   | 'UserDiscountExport'
+
+export type TImportDataType =
   | 'UserImport'
+  | 'ActiveSubscriptionImport'
+  | 'HistorySubscriptionImport'
 
 export class ExpiredError extends Error {
   constructor(m: string) {

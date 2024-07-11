@@ -6,6 +6,7 @@ import {
   ExpiredError,
   IProfile,
   TExportDataType,
+  TImportDataType,
   TMerchantInfo,
   TRole
 } from '../shared.types.d'
@@ -1902,7 +1903,7 @@ export const getUserListReq = async (
   }
 }
 
-export const importUserDataReq = async (file: File, task: TExportDataType) => {
+export const importDataReq = async (file: File, task: TImportDataType) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.post(

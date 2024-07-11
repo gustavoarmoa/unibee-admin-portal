@@ -39,7 +39,7 @@ import {
   exportDataReq,
   getPlanList,
   getUserListReq,
-  importUserDataReq
+  importDataReq
 } from '../../requests'
 import '../../shared.css'
 import { IProfile } from '../../shared.types'
@@ -590,7 +590,7 @@ const ImportModal = ({
     setFileStat({ name: f.name, size: f.size })
     // evt.preventDefault()
     setImporting(true)
-    const [res, err] = await importUserDataReq(f, 'UserImport')
+    const [res, err] = await importDataReq(f, 'UserImport')
     setImporting(false)
     evt.target.value = ''
     if (null != err) {
