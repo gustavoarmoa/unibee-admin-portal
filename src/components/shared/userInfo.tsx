@@ -17,13 +17,17 @@ const Index = ({ user }: { user: IProfile | undefined }) => {
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>User Id/External Id</span>
         </Col>
-        <Col
-          span={6}
-        >{`${user?.id} / ${user?.externalUserId == '' ? '―' : user?.externalUserId}`}</Col>
+        <Col span={6}>
+          {user == undefined
+            ? ''
+            : `${user?.id} / ${user?.externalUserId == '' ? '―' : user?.externalUserId}`}
+        </Col>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>First/Last Name</span>
         </Col>
-        <Col span={6}>{`${user?.firstName} ${user?.lastName}`}</Col>
+        <Col span={6}>
+          {user == undefined ? '' : `${user?.firstName} ${user?.lastName}`}
+        </Col>
       </Row>
       <Row style={rowStyle}>
         <Col span={4}>

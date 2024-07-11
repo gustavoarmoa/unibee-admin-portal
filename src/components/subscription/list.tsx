@@ -1,11 +1,21 @@
-import { LoadingOutlined } from '@ant-design/icons'
+import {
+  DownloadOutlined,
+  ExportOutlined,
+  ImportOutlined,
+  LoadingOutlined,
+  MoreOutlined,
+  ProfileOutlined,
+  SyncOutlined
+} from '@ant-design/icons'
 import {
   Button,
   Col,
   DatePicker,
+  Dropdown,
   Form,
   FormInstance,
   Input,
+  MenuProps,
   Pagination,
   Row,
   Select,
@@ -13,13 +23,14 @@ import {
   Space,
   Spin,
   Table,
+  Tooltip,
   message
 } from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants'
-import { formatDate, showAmount } from '../../helpers'
+import { formatDate, formatPlanInterval, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
 import { exportDataReq, getPlanList, getSublist } from '../../requests'
 import '../../shared.css'
@@ -57,6 +68,57 @@ const Index = () => {
   })
   const planFilterRef = useRef<{ value: number; text: string }[]>([])
 
+  const exportData = async () => {
+    let payload = normalizeSearchTerms()
+    if (null == payload) {
+      return
+    }
+    payload = { ...payload, ...filters }
+    console.log('export tx params: ', payload)
+    // return
+    setExporting(true)
+    const [res, err] = await exportDataReq({
+      task: 'SubscriptionExport',
+      payload
+    })
+    setExporting(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    message.success(
+      'Subscription list is being exported, please check task list for progress.'
+    )
+    appConfigStore.setTaskListOpen(true)
+  }
+
+  const extraActions: { [key: string]: () => void } = {
+    exportData: exportData,
+    importData: () => {}, // importData,
+    downloadImportTemplate: () => {} // downloadTemplate
+  }
+
+  const extraButtons = [
+    {
+      key: 'exportData',
+      label: 'Export',
+      icon: <ExportOutlined />
+    },
+    {
+      key: 'importData',
+      label: 'Import',
+      icon: <ImportOutlined />
+    }
+    /* {
+      key: 'downloadImportTemplate',
+      label: 'Download import template',
+      icon: <DownloadOutlined />
+    } */
+  ]
+  const onMenuClick: MenuProps['onClick'] = (e) => {
+    extraActions[e.key]()
+  }
+
   const getColumns = (): ColumnsType<ISubscriptionType> => [
     {
       title: 'Plan Name',
@@ -64,7 +126,16 @@ const Index = () => {
       key: 'planIds',
       filters: planFilterRef.current,
       filteredValue: filters.planIds,
-      render: (_, sub) => <span>{sub.plan?.planName}</span>
+      render: (_, sub) => (
+        <span>
+          {`${sub.plan?.planName}`}{' '}
+          <span className=" text-xs text-gray-400">
+            (
+            {`${showAmount(sub.plan?.amount, sub.plan?.currency)}/${formatPlanInterval(sub.plan)}`}
+            )
+          </span>
+        </span>
+      )
     },
     {
       title: 'Description',
@@ -73,6 +144,13 @@ const Index = () => {
       render: (_, sub) => <span>{sub.plan?.description}</span>
     },
     {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (amt, s) =>
+        `${showAmount(amt, s.currency)}/${formatPlanInterval(s.plan)}`
+    },
+    /* {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
@@ -92,11 +170,10 @@ const Index = () => {
                   0
                 )),
           s.plan!.currency
-        )} /${s.plan!.intervalCount == 1 ? '' : s.plan!.intervalCount}${
-          s.plan!.intervalUnit
-        } `}</span>
+        )}/${formatPlanInterval(s.plan)}
+        `}</span>
       )
-    },
+    }, */
     {
       title: 'Status',
       dataIndex: 'status',
@@ -137,6 +214,58 @@ const Index = () => {
         sub.user != null ? (
           <a href={`mailto:${sub.user.email}`}>{sub.user.email}</a>
         ) : null
+    },
+    {
+      title: (
+        <>
+          <span>Actions</span>
+          <Tooltip title="Refresh">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading}
+              onClick={fetchData}
+              icon={<SyncOutlined />}
+            ></Button>
+          </Tooltip>
+          <Dropdown menu={{ items: extraButtons, onClick: onMenuClick }}>
+            <Button
+              icon={<MoreOutlined />}
+              size="small"
+              style={{ marginLeft: '8px' }}
+            ></Button>
+          </Dropdown>
+          {/* <Tooltip title="Export">
+            <Button
+              size="small"
+              style={{ marginLeft: '8px' }}
+              disabled={loading || exporting}
+              onClick={exportData}
+              loading={exporting}
+              icon={<ExportOutlined />}
+            ></Button>
+          </Tooltip> */}
+        </>
+      ),
+      key: 'action',
+      width: 160,
+      // fixed: 'right',
+      render: (_) => (
+        <Space
+          size="small"
+          className="invoice-action-btn-wrapper"
+          // style={{ width: '170px' }}
+        >
+          <Tooltip title="Detail">
+            <Button
+              // onClick={toggleNewInvoiceModal}
+              icon={<ProfileOutlined />}
+              style={{ border: 'unset' }}
+              // disabled={!getInvoicePermission(invoice).editable}
+            />
+          </Tooltip>
+        </Space>
+      )
     }
   ]
 
@@ -209,30 +338,6 @@ const Index = () => {
             value: p.plan.id,
             text: p.plan.planName
           }))
-  }
-
-  const exportData = async () => {
-    let payload = normalizeSearchTerms()
-    if (null == payload) {
-      return
-    }
-    payload = { ...payload, ...filters }
-    console.log('export tx params: ', payload)
-    // return
-    setExporting(true)
-    const [res, err] = await exportDataReq({
-      task: 'SubscriptionExport',
-      payload
-    })
-    setExporting(false)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    message.success(
-      'Subscription list is being exported, please check task list for progress.'
-    )
-    appConfigStore.setTaskListOpen(true)
   }
 
   const onTableChange: TableProps<ISubscriptionType>['onChange'] = (
@@ -319,7 +424,6 @@ const Index = () => {
         goSearch={goSearch}
         searching={loading || loadingPlans}
         exporting={exporting}
-        exportData={exportData}
         onPageChange={onPageChange}
         clearFilters={clearFilters}
       />
@@ -392,7 +496,6 @@ const Search = ({
   searching,
   exporting,
   goSearch,
-  exportData,
   onPageChange,
   clearFilters
 }: {
@@ -400,7 +503,6 @@ const Search = ({
   searching: boolean
   exporting: boolean
   goSearch: () => void
-  exportData: () => void
   onPageChange: (page: number, pageSize: number) => void
   clearFilters: () => void
 }) => {
@@ -478,13 +580,13 @@ const Search = ({
               >
                 Search
               </Button>
-              <Button
+              {/* <Button
                 onClick={exportData}
                 loading={exporting}
                 disabled={searching || exporting}
               >
                 Export
-              </Button>
+              </Button> */}
             </Space>
           </Col>
         </Row>

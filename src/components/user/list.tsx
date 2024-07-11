@@ -197,12 +197,12 @@ const Index = () => {
       key: 'importData',
       label: 'Import',
       icon: <ImportOutlined />
-    },
-    {
+    }
+    /* {
       key: 'downloadImportTemplate',
       label: 'Download import template',
       icon: <DownloadOutlined />
-    }
+    } */
   ]
   const onMenuClick: MenuProps['onClick'] = (e) => {
     extraActions[e.key]()
@@ -290,11 +290,6 @@ const Index = () => {
               icon={<SyncOutlined />}
             />
           </Tooltip>
-          {/* <Button
-            icon={<MoreOutlined />}
-            size="small"
-            style={{ marginLeft: '8px' }}
-          ></Button> */}
           <Dropdown menu={{ items: extraButtons, onClick: onMenuClick }}>
             <Button
               icon={<MoreOutlined />}

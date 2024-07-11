@@ -27,10 +27,13 @@ export const urlRegx =
   /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/
 
 export const showAmount = (
-  amount: number,
-  currency: keyof typeof CURRENCY,
+  amount: number | undefined,
+  currency: keyof typeof CURRENCY | undefined,
   ignoreFactor?: boolean
 ): string => {
+  if (amount == undefined || currency == undefined) {
+    return ''
+  }
   const isNegative = amount < 0
   if (isNegative) {
     amount *= -1
@@ -238,3 +241,8 @@ export const formatBytes = (bytes: number, decimals?: number) => {
     i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
 }
+
+export const formatPlanInterval = (plan: IPlan | undefined) =>
+  plan == null
+    ? ''
+    : `${plan.intervalCount == 1 ? '' : plan.intervalCount}${plan.intervalUnit}`
