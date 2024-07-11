@@ -278,6 +278,9 @@ type PaymentItem = {
   paymentId: string
   payment: {
     externalPaymentId: string
+    authorizeReason: string
+    authorizeStatus: number
+    failureReason: string
   }
   refund?: TRefund
   status: number

@@ -6,6 +6,7 @@ import {
   FormInstance,
   Input,
   Pagination,
+  Popover,
   Row,
   Select,
   Space,
@@ -16,7 +17,12 @@ import {
 import type { ColumnsType, TableProps } from 'antd/es/table'
 import React, { ReactElement, useEffect, useState } from 'react'
 // import { ISubscriptionType } from "../../shared.types";
-import { LoadingOutlined, SyncOutlined } from '@ant-design/icons'
+import {
+  InfoCircleFilled,
+  InfoCircleOutlined,
+  LoadingOutlined,
+  SyncOutlined
+} from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { CURRENCY, PAYMENT_STATUS, PAYMENT_TYPE } from '../../constants'
 import { formatDate, showAmount } from '../../helpers'
@@ -100,7 +106,42 @@ const Index = ({
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => PaymentStatus(status), // PAYMENT_STATUS[status]
+      render: (status, pay) => (
+        <>
+          {PaymentStatus(status)}
+          {status == 2 && (
+            <Popover
+              placement="right"
+              content={
+                <div className=" min-w-48 max-w-60">
+                  {pay.payment.authorizeReason != '' && (
+                    <Row>
+                      <Col span={8} className=" text-xs text-gray-500">
+                        Auth reason:
+                      </Col>
+                      <Col span={16} className=" text-sm">
+                        {pay.payment.authorizeReason}
+                      </Col>
+                    </Row>
+                  )}
+                  {pay.payment.failureReason != '' && (
+                    <Row>
+                      <Col span={8} className=" text-xs text-gray-500">
+                        Other:
+                      </Col>
+                      <Col span={16} className=" text-sm">
+                        {pay.payment.failureReason}
+                      </Col>
+                    </Row>
+                  )}
+                </div>
+              }
+            >
+              <InfoCircleOutlined />
+            </Popover>
+          )}
+        </>
+      ),
       filters: STATUS_FILTER,
       filteredValue: filters.status
     },
