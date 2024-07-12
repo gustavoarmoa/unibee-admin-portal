@@ -1,64 +1,56 @@
 import {
   DownloadOutlined,
-  EditOutlined,
-  ExportOutlined,
-  ImportOutlined,
   LoadingOutlined,
-  MoreOutlined,
-  SearchOutlined,
-  SyncOutlined,
-  UploadOutlined,
-  UserAddOutlined
+  UploadOutlined
 } from '@ant-design/icons'
-import {
-  Button,
-  Col,
-  DatePicker,
-  Dropdown,
-  Form,
-  FormInstance,
-  Input,
-  MenuProps,
-  Modal,
-  Pagination,
-  Row,
-  Space,
-  Spin,
-  Steps,
-  Table,
-  Tooltip,
-  message
-} from 'antd'
-import { ColumnsType, TableProps } from 'antd/es/table'
-import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { SUBSCRIPTION_STATUS, USER_STATUS } from '../../constants'
-import { downloadStaticFile, formatBytes, formatDate } from '../../helpers'
-import { usePagination } from '../../hooks'
-import {
-  exportDataReq,
-  getPlanList,
-  getUserListReq,
-  importDataReq
-} from '../../requests'
+import { Button, Modal, Steps, message } from 'antd'
+import { useState } from 'react'
+import { downloadStaticFile, formatBytes } from '../../helpers'
+import { importDataReq } from '../../requests'
 import '../../shared.css'
-import { IProfile } from '../../shared.types'
+import { TImportDataType } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
-import { SubscriptionStatus, UserStatus } from '../ui/statusTag'
-import './list.css'
 
 const Index = ({
   closeModal,
-  downloadTemplate,
-  title
+  importType
 }: {
   closeModal: () => void
-  downloadTemplate: () => void
-  title?: string
+  importType: TImportDataType
 }) => {
   const appConfig = useAppConfigStore()
   const [importing, setImporting] = useState(false)
   const [fileStat, setFileStat] = useState({ name: '', size: 0 })
+
+  const title: { [key in TImportDataType]: string } = {
+    UserImport: 'User import',
+    ActiveSubscriptionImport: 'Active subscription import',
+    HistorySubscriptionImport: 'Subscription history import'
+  }
+
+  const downloadTemplate: { [key in TImportDataType]: () => void } = {
+    UserImport: () => {
+      console.log('user data import')
+      downloadStaticFile(
+        'https://api.unibee.top/import/template/user_import',
+        'user_import_template.xlsx'
+      )
+    },
+    ActiveSubscriptionImport: () => {
+      console.log('active sub import')
+      downloadStaticFile(
+        'https://api.unibee.top/import/template/active_subscription_import',
+        'active_subscription_import_template.xlsx'
+      )
+    },
+    HistorySubscriptionImport: () => {
+      console.log('history sub import')
+      downloadStaticFile(
+        'https://api.unibee.top/import/template/history_subscription_import',
+        'subscription_history_import_template.xlsx'
+      )
+    }
+  }
 
   const onFileChange: React.ChangeEventHandler<HTMLInputElement> = async (
     evt
@@ -74,8 +66,10 @@ const Index = ({
     }
     setFileStat({ name: f.name, size: f.size })
     // evt.preventDefault()
+    // console.log('importing: ', importType, '///', f)
+    // return
     setImporting(true)
-    const [res, err] = await importDataReq(f, 'UserImport')
+    const [res, err] = await importDataReq(f, importType)
     setImporting(false)
     evt.target.value = ''
     if (null != err) {
@@ -83,7 +77,7 @@ const Index = ({
       return
     }
     message.success(
-      'User data is being imported, please check task list for progress'
+      'Data is being imported, please check task list for progress'
     )
     closeModal()
     appConfig.setTaskListOpen(true)
@@ -91,7 +85,7 @@ const Index = ({
 
   return (
     <Modal
-      title={title ?? 'Data import'}
+      title={title[importType]}
       width={'620px'}
       open={true}
       footer={null}
@@ -107,7 +101,7 @@ const Index = ({
             {
               title: (
                 <Button
-                  onClick={downloadTemplate}
+                  onClick={downloadTemplate[importType]}
                   size="small"
                   icon={<DownloadOutlined />}
                 >
@@ -116,7 +110,7 @@ const Index = ({
               ),
               description: (
                 <span className=" text-xs text-gray-500">
-                  To-be-imported user data must comply to the structure in this
+                  To-be-imported data must comply to the structure in this
                   template file.
                 </span>
               ),
@@ -125,7 +119,7 @@ const Index = ({
             {
               title: (
                 <span className=" text-lg text-gray-900">
-                  Populate template file with your user data
+                  Populate template file with your data
                 </span>
               ),
               description: (
@@ -143,7 +137,7 @@ const Index = ({
                       className={`user-data-file-upload flex items-center ${importing ? 'disabled' : ''}`}
                     >
                       {importing ? <LoadingOutlined /> : <UploadOutlined />}{' '}
-                      <span className=" ml-2">Upload and import user data</span>
+                      <span className=" ml-2">Upload and import</span>
                     </div>
                   </label>
                   <div className="ml-2 flex items-center text-sm text-gray-500">
@@ -177,9 +171,8 @@ const Index = ({
               ),
               description: (
                 <span className=" text-xs text-gray-500">
-                  In case of importing error, you can download the user data
-                  file you just uploaded, each error will be explained in
-                  detail.
+                  In case of importing error, you can download the file you just
+                  uploaded, each error will be explained in detail.
                 </span>
               ),
               status: 'process'
@@ -187,7 +180,7 @@ const Index = ({
             {
               title: (
                 <span className=" text-gray-900">
-                  Go to User List page to further ensure data are imported
+                  Refresh the page to further ensure data are imported
                 </span>
               ),
               status: 'process'
@@ -199,13 +192,13 @@ const Index = ({
             Close
           </Button>
           {/* <Button
-              type="primary"
-              // onClick={form.submit}
-              // loading={loading}
-              // disabled={loading}
-            >
-              Import
-            </Button> */}
+            type="primary"
+            // onClick={form.submit}
+            // loading={loading}
+            // disabled={loading}
+          >
+            Import
+          </Button> */}
         </div>
       </div>
     </Modal>
