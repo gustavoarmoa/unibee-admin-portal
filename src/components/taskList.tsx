@@ -24,6 +24,7 @@ import { CSSProperties, useEffect, useState } from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
+import { useInterval } from 'usehooks-ts'
 import { downloadStaticFile, formatDate } from '../helpers'
 import { usePagination } from '../hooks'
 import { getDownloadListReq } from '../requests'
@@ -61,12 +62,7 @@ const Index = ({ onClose }: { onClose: () => void }) => {
     setTotal(total)
   }
 
-  useEffect(() => {
-    // getList()
-    const intervalId = setInterval(getList, 6000)
-    return () => clearInterval(intervalId)
-  }, [])
-
+  useInterval(getList, 6000)
   useEffect(() => {
     getList()
   }, [page])
@@ -198,7 +194,17 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
             {t.taskName}&nbsp;{t.payload != 'null' && renderJson(t.payload)}
           </div>
         </Col>
-        <Col span={6}>{TaskStatus(t.status)}</Col>
+        <Col span={6}>
+          {TaskStatus(t.status)}
+          {t.status == 3 && (
+            <Popover
+              placement="right"
+              content={<div className=" min-w-48 max-w-60">{t.failReason}</div>}
+            >
+              <InfoCircleOutlined />
+            </Popover>
+          )}
+        </Col>
         <Col span={2}>
           {t.status == 2 && (
             <Button
