@@ -175,7 +175,7 @@ type TTaskItem = {
   status: number
   startTime: number
   finishTime: number
-  failReason: string
+  failureReason: string
   taskCost: number
 }
 const TaskItem = ({ t }: { t: TTaskItem }) => {
@@ -199,7 +199,9 @@ const TaskItem = ({ t }: { t: TTaskItem }) => {
           {t.status == 3 && (
             <Popover
               placement="right"
-              content={<div className=" min-w-48 max-w-60">{t.failReason}</div>}
+              content={
+                <div className=" min-w-48 max-w-60">{t.failureReason}</div>
+              }
             >
               <InfoCircleOutlined />
             </Popover>
