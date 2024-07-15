@@ -85,6 +85,35 @@ const Index = ({
     text: g.displayName
   }))
 
+  const fetchData = async () => {
+    let searchTerm = normalizeSearchTerms()
+    if (null == searchTerm) {
+      return
+    }
+    searchTerm.page = page
+    searchTerm.count = PAGE_SIZE
+    searchTerm = { ...searchTerm, ...filters }
+    console.log('searchTerm: ', searchTerm)
+    setLoading(true)
+    const [res, err] = await getPaymentTimelineReq(searchTerm, fetchData)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    const { paymentTimeLines, total } = res
+    console.log('paymentTimeLines: ', paymentTimeLines)
+    setPaymentList(paymentTimeLines ?? [])
+    setTotal(total)
+  }
+  const goSearch = () => {
+    if (page == 0) {
+      fetchData()
+    } else {
+      pageChange(1, PAGE_SIZE)
+    }
+  }
+
   const columns: ColumnsType<PaymentItem> = [
     {
       title: 'Transaction Id',
@@ -241,7 +270,7 @@ const Index = ({
             size="small"
             style={{ marginLeft: '8px' }}
             disabled={loading}
-            // onClick={fetchData}
+            onClick={fetchData}
             icon={<SyncOutlined />}
           />
         </Tooltip>
@@ -308,34 +337,6 @@ const Index = ({
     return searchTerm
   }
 
-  const fetchData = async () => {
-    let searchTerm = normalizeSearchTerms()
-    if (null == searchTerm) {
-      return
-    }
-    searchTerm.page = page
-    searchTerm.count = PAGE_SIZE
-    searchTerm = { ...searchTerm, ...filters }
-    console.log('searchTerm: ', searchTerm)
-    setLoading(true)
-    const [res, err] = await getPaymentTimelineReq(searchTerm, fetchData)
-    setLoading(false)
-    if (null != err) {
-      message.error(err.message)
-      return
-    }
-    const { paymentTimeLines, total } = res
-    setPaymentList(paymentTimeLines ?? [])
-    setTotal(total)
-  }
-  const goSearch = () => {
-    if (page == 0) {
-      fetchData()
-    } else {
-      pageChange(1, PAGE_SIZE)
-    }
-  }
-
   const clearFilters = () =>
     setFilters({ status: null, timelineTypes: null, gatewayIds: null })
 
@@ -382,6 +383,7 @@ const Index = ({
     <div>
       {refundModalOpen && (
         <RefundInfoModal
+          originalInvoiceId={paymentList[paymentIdx].payment.invoiceId}
           closeModal={toggleRefundModal}
           detail={paymentList[paymentIdx].refund!}
           ignoreAmtFactor={false}

@@ -2,19 +2,29 @@
 import { Button, Col, Modal, Row } from 'antd'
 import dayjs from 'dayjs'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { REFUND_STATUS } from '../../constants'
 import { showAmount } from '../../helpers'
 import { TRefund } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
 
+const APP_PATH = import.meta.env.BASE_URL
+
 interface Props {
   detail: TRefund
+  originalInvoiceId: string
   closeModal: () => void
   ignoreAmtFactor: boolean
 }
 
-const Index = ({ detail, closeModal, ignoreAmtFactor }: Props) => {
+const Index = ({
+  detail,
+  originalInvoiceId,
+  closeModal,
+  ignoreAmtFactor
+}: Props) => {
   const appConfigStore = useAppConfigStore()
+  const navigate = useNavigate()
 
   return (
     <Modal
@@ -85,6 +95,28 @@ const Index = ({ detail, closeModal, ignoreAmtFactor }: Props) => {
           {dayjs(detail.createTime * 1000).format('YYYY-MMM-DD')}
         </Col>
       </Row>
+      {originalInvoiceId != null && originalInvoiceId != '' && (
+        <Row style={{ margin: '8px 0' }}>
+          <Col
+            span={10}
+            style={{ fontWeight: 'bold' }}
+            className=" text-gray-600"
+          >
+            Original Invoice
+          </Col>
+          <Col span={14}>
+            <Button
+              type="link"
+              style={{ padding: 0 }}
+              onClick={() =>
+                navigate(`${APP_PATH}invoice/${originalInvoiceId}`)
+              }
+            >
+              {originalInvoiceId}
+            </Button>
+          </Col>
+        </Row>
+      )}
 
       <div className="mt-6 flex items-center justify-end gap-4">
         <div style={{ display: 'flex', gap: '16px' }}>
