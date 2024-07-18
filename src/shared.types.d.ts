@@ -373,6 +373,7 @@ interface UserInvoice {
     paidTime: number
     paymentAmount: number
     paymentId: string
+    invoiceId: string // for refund invoice, this is the original invoice, based on which this refund invoice is created
   }
   refundId: string
   refund?: TRefund //

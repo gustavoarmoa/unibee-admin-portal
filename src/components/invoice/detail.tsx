@@ -11,7 +11,7 @@ import React, {
   useRef,
   useState
 } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { INVOICE_STATUS } from '../../constants'
 import { getInvoicePermission, showAmount } from '../../helpers'
 import { getInvoiceDetailReq } from '../../requests'
@@ -40,6 +40,7 @@ const previewWrapperStyle: CSSProperties = {
 
 const Index = () => {
   const navigate = useNavigate()
+  let location = useLocation()
   const [loading, setLoading] = useState(false)
   const [invoiceDetail, setInvoiceDetail] = useState<UserInvoice | null>(null)
   //   const [userProfile, setUserProfile] = useState<IProfile | null>(null)
@@ -89,8 +90,15 @@ const Index = () => {
   }
 
   useEffect(() => {
+    if (refundModalOpen) {
+      // for refund invoice, there is a 'show detail' button, click will open a Modal showing this refund's original invoice which is a link.
+      // click that link will reload the current component page with THAT invoice's detail info.
+      // but that original invoice is not a refund invoice, so it has no 'show detail' button, no way to open a Modal
+      // so I have to close the current modal.
+      toggleRefundModal()
+    }
     fetchData()
-  }, [])
+  }, [location])
 
   const isRefund = invoiceDetail?.refund != null
   const perm = getInvoicePermission(invoiceDetail)
@@ -121,6 +129,7 @@ const Index = () => {
       )}
       {invoiceDetail && refundModalOpen && (
         <RefundModal
+          originalInvoiceId={invoiceDetail.payment?.invoiceId}
           detail={invoiceDetail.refund!}
           closeModal={toggleRefundModal}
           ignoreAmtFactor={true}

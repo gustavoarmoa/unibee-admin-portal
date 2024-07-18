@@ -12,7 +12,7 @@ const APP_PATH = import.meta.env.BASE_URL
 
 interface Props {
   detail: TRefund
-  originalInvoiceId: string
+  originalInvoiceId: string | undefined
   closeModal: () => void
   ignoreAmtFactor: boolean
 }

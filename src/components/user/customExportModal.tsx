@@ -130,7 +130,7 @@ const Index = ({ closeModal }: { closeModal: () => void }) => {
   const [availableFields, setAvailableFields] =
     useState<TExportField[]>(INITIA_FIELDS)
   const [fields, setFields] = useState<TExportField[]>([])
-  const onDragEnd = (result) => {
+  const onDragEnd = (result: any) => {
     const { destination, source, draggableId } = result
     console.log('dragEnd result :', result)
     /*

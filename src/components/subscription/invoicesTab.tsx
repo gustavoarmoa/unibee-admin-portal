@@ -471,6 +471,7 @@ const Index = ({
     <div>
       {refundInfoModalOpen && invoiceList[invoiceIdx].refund != null && (
         <RefundInfoModal
+          originalInvoiceId={invoiceList[invoiceIdx].payment?.invoiceId}
           detail={invoiceList[invoiceIdx].refund!}
           closeModal={toggleRefundInfoModal}
           ignoreAmtFactor={true}
