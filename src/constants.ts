@@ -190,25 +190,32 @@ const PERMISSIONS = {
     width: 100,
     permissions: ['access']
   },
-  'my-account': {
+  report: {
     order: 9,
+    group: 'report',
+    label: 'Report',
+    width: 100,
+    permissions: ['access']
+  },
+  'my-account': {
+    order: 10,
     group: 'my-account',
     label: 'My Account',
     width: 100,
     permissions: ['access']
   },
   'activity-logs': {
-    order: 10,
+    order: 11,
     group: 'activity-logs',
     label: 'Activity Logs',
     width: 100,
     permissions: ['access']
   },
   configuration: {
-    order: 11,
+    order: 12,
     group: 'configuration',
     label: 'Configuration',
-    width: 100,
+    width: 140,
     permissions: ['access']
   }
 }

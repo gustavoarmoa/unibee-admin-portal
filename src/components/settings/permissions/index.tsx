@@ -194,7 +194,7 @@ const Index = () => {
           perm == null ? undefined : perm.find((pm: any) => pm.group == p.group)
         return (
           <Switch
-            // size="small"
+            size="small"
             disabled={loading || record.id == -1} // Owner.id == -1 (locally defined, not from backend)
             onChange={onPermChange(record.localId, p.group)}
             checked={
@@ -282,7 +282,7 @@ const Index = () => {
           spinning: loading,
           indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
         }}
-        scroll={{ x: 1820 }}
+        scroll={{ x: 1990 }}
         // onChange={onTableChange}
         /* onRow={(record, rowIndex) => {
           return {

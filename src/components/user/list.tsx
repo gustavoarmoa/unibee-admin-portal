@@ -38,7 +38,6 @@ import { useAppConfigStore } from '../../stores'
 import ImportModal from '../shared/dataImportModal'
 import { SubscriptionStatus, UserStatus } from '../ui/statusTag'
 import CreateUserModal from './createUserModal'
-import CustomExportModal from './customExportModal'
 import './list.css'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -65,9 +64,6 @@ const Index = () => {
   const { page, onPageChange } = usePagination()
   const [importModalOpen, setImportModalOpen] = useState(false)
   const toggleImportModal = () => setImportModalOpen(!importModalOpen)
-  const [exportCustomModalOpen, setExportCustomModalOpen] = useState(false)
-  const toggleCustomExport = () =>
-    setExportCustomModalOpen(!exportCustomModalOpen)
   const [total, setTotal] = useState(0)
   const [filters, setFilters] = useState<TFilters>({
     status: null,
@@ -170,8 +166,7 @@ const Index = () => {
 
   const extraActions: { [key: string]: () => void } = {
     exportData: exportData,
-    importData: toggleImportModal,
-    customExport: toggleCustomExport
+    importData: toggleImportModal
   }
 
   const extraButtons = [
@@ -184,11 +179,6 @@ const Index = () => {
       key: 'importData',
       label: 'Import',
       icon: <ImportOutlined />
-    },
-    {
-      key: 'customExport',
-      label: 'Custom Export',
-      icon: <ExportOutlined />
     }
   ]
   const onMenuClick: MenuProps['onClick'] = (e) => {
@@ -346,9 +336,6 @@ const Index = () => {
           importType="UserImport"
           // downloadTemplate={downloadTemplate}
         />
-      )}
-      {exportCustomModalOpen && (
-        <CustomExportModal closeModal={toggleCustomExport} />
       )}
       <Row>
         <Col span={24}>

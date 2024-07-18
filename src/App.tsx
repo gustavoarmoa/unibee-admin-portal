@@ -1,4 +1,5 @@
 import {
+  BarChartOutlined,
   DesktopOutlined,
   IdcardOutlined,
   LogoutOutlined,
@@ -55,6 +56,7 @@ import MerchantUserDetail from './components/merchantUser/userDetail'
 import MerchantUserList from './components/merchantUser/userList'
 import MyAccount from './components/myAccount/'
 import NotFound from './components/notFound'
+import Report from './components/report'
 import WebhookLogs from './components/settings/webHooks/webhookLogs'
 import Signup from './components/signup'
 import TaskList from './components/taskList'
@@ -114,6 +116,7 @@ const App: React.FC = () => {
     getItem('Admin List', '/admin/list', <TeamOutlined />),
     getItem('Analytics', '/analytics', <PieChartOutlined />),
     getItem('My Account', '/my-account', <IdcardOutlined />),
+    getItem('Report', '/report', <BarChartOutlined />),
     getItem('Configuration', '/configuration', <SettingOutlined />),
     getItem('Activity Logs', '/activity-logs', <ProfileOutlined />)
   ]
@@ -195,6 +198,8 @@ const App: React.FC = () => {
       setActiveMenuItem(['/configuration'])
     } else if (pathItems[0] == 'activity-logs') {
       setActiveMenuItem(['/activity-logs'])
+    } else if (pathItems[0] == 'report') {
+      setActiveMenuItem(['/report'])
     } else {
       setActiveMenuItem(['/' + pathItems[0]])
     }
@@ -581,6 +586,12 @@ const app_routes = [
         path={`${APP_PATH}activity-logs`}
         element={<ActivityLogs />}
       />
+    )
+  },
+  {
+    page: 'report',
+    route: (
+      <Route key="report" path={`${APP_PATH}report`} element={<Report />} />
     )
   }
 ]

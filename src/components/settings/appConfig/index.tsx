@@ -66,7 +66,6 @@ const Index = () => {
   const getAppKeys = async () => {
     setLoadingKeys(true)
     const [res, err] = await getAppKeysWithMore(getAppKeys)
-    console.log('get app keys res: ', res)
     setLoadingKeys(false)
     if (null != err) {
       message.error(err.message)
