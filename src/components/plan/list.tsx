@@ -201,6 +201,7 @@ const Index = () => {
         </>
       ),
       key: 'action',
+      width: 150,
       render: (_, record) => (
         <Space size="middle" className="plan-action-btn-wrapper">
           <Tooltip title="Edit">

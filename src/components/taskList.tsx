@@ -24,7 +24,7 @@ import { CSSProperties, useEffect, useState } from 'react'
 import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import json from 'react-syntax-highlighter/dist/esm/languages/prism/json'
 import prism from 'react-syntax-highlighter/dist/esm/styles/prism/prism'
-import { useInterval } from 'usehooks-ts'
+import { useInterval, useTimeout } from 'usehooks-ts'
 import { downloadStaticFile, formatDate } from '../helpers'
 import { usePagination } from '../hooks'
 import { getDownloadListReq } from '../requests'
@@ -53,6 +53,7 @@ const Index = ({ onClose }: { onClose: () => void }) => {
     setLoading(true)
     const [res, err] = await getDownloadListReq(page, PAGE_SIZE, getList)
     setLoading(false)
+
     if (null != err) {
       message.error(err.message)
       return
@@ -62,10 +63,11 @@ const Index = ({ onClose }: { onClose: () => void }) => {
     setTotal(total)
   }
 
-  useInterval(getList, 6000)
   useEffect(() => {
     getList()
   }, [page])
+
+  useInterval(getList, 6000)
 
   return (
     <Drawer

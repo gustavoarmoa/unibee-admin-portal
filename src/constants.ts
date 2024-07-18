@@ -19,7 +19,8 @@ export const SUBSCRIPTION_STATUS: { [key: number]: string } = {
   5: 'Expired', // sub ended.
   // 6: 'Suspended', // suspend for a while, might want to resume later
   7: 'Incomplete', // user claimed they have wired the transfer, admin mark the invoice as Incomplete until a DATE, so user can use it before that DATE
-  8: 'Processing' // user claimed they have wired the transfer(this status if for wire only), but we're checking
+  8: 'Processing', // user claimed they have wired the transfer(this status if for wire only), but we're checking
+  9: 'Failed' //
 }
 
 export const SUBSCRIPTION_HISTORY_STATUS: { [key: number]: string } = {

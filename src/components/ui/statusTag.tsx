@@ -19,7 +19,8 @@ const SUB_STATUS: { [key: number]: ReactElement } = {
   4: <Tag color="purple">{SUBSCRIPTION_STATUS[4]}</Tag>, // 4: cancelled
   5: <Tag color="red">{SUBSCRIPTION_STATUS[5]}</Tag>, // 5: expired
   7: <Tag color="cyan">{SUBSCRIPTION_STATUS[7]}</Tag>, // 7: Incomplete
-  8: <Tag color="blue">{SUBSCRIPTION_STATUS[8]}</Tag> // 8: processing
+  8: <Tag color="blue">{SUBSCRIPTION_STATUS[8]}</Tag>, // 8: processing
+  9: <Tag color="#b71c1c">{SUBSCRIPTION_STATUS[9]}</Tag> // 9: failed
 }
 const SubscriptionStatus = (statusId: number) => SUB_STATUS[statusId]
 

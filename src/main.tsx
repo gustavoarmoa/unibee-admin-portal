@@ -13,9 +13,10 @@ declare global {
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
 )
+// react-beautiful-dnd throw errors if StrictMode is on
+/* <React.StrictMode> */
+/* </React.StrictMode> */
