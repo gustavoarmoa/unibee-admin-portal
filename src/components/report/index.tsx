@@ -21,11 +21,12 @@ import update from 'immutability-helper'
 import { ReactNode, useEffect, useRef, useState } from 'react'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import {
-  createExportTmplReq,
   exportDataReq,
   getExportFieldsReq,
   getExportFieldsWithMore,
-  getExportTmplReq
+  getExportTmplReq,
+  removeExportTmplReq,
+  saveExportTmplReq
 } from '../../requests'
 import { TExportDataType } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
@@ -180,7 +181,7 @@ const Index = () => {
     console.log('get fields res: ', res)
     const { exportTmplRes, exportFieldsRes } = res
     const { templates, total } = exportTmplRes
-    setTemplates(templates)
+    setTemplates(templates ?? [])
     let { columns } = exportFieldsRes
     columns = columns.map((c: string) => {
       const col = settableFields.find((f) => f.id == c)
@@ -252,17 +253,22 @@ const Index = () => {
       return
     }
     setLoading(true)
-    const [res, err] = await createExportTmplReq({
+    const [res, err] = await saveExportTmplReq({
       name: newTmplName,
       task: 'InvoiceExport',
       exportColumns: fields.map((f) => f.id)
     })
     setLoading(false)
+    console.log('creating new template res: ', res)
     if (null != err) {
       message.error(err.message)
       return
     }
-    message.success('New template created')
+    message.success('New preset created')
+    setSelectedTmpl(res.template.templateId)
+    setNewTmplName('')
+
+    // actually, I don't need to call this, just append the createNewTmpl res to the templates array.
     const [res2, err2] = await getExportTmplReq({
       task: 'InvoiceExport',
       page: 0,
@@ -275,6 +281,69 @@ const Index = () => {
     const { templates, total } = res2
     console.log('after createing new temp: ', templates)
     setTemplates(templates)
+  }
+
+  const saveTmpl = async () => {
+    if (selectedTmpl == null) {
+      return
+    }
+    setLoading(true)
+    const [res, err] = await saveExportTmplReq({
+      name: templates.find((t) => t.templateId == selectedTmpl)!.name,
+      templateId: selectedTmpl,
+      task: 'InvoiceExport',
+      exportColumns: fields.map((f) => f.id)
+    })
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success('Preset saved')
+
+    const [res2, err2] = await getExportTmplReq({
+      task: 'InvoiceExport',
+      page: 0,
+      count: 100
+    })
+    if (null != err2) {
+      message.error(err2.message)
+      return
+    }
+    {
+      const { templates, total } = res2
+      setTemplates(templates)
+    }
+  }
+
+  const removeTmpl = async () => {
+    if (selectedTmpl == null) {
+      return
+    }
+    setLoading(true)
+    const [res, err] = await removeExportTmplReq({
+      templateId: selectedTmpl
+    })
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success('Preset removed')
+
+    const [res2, err2] = await getExportTmplReq({
+      task: 'InvoiceExport',
+      page: 0,
+      count: 100
+    })
+    if (null != err2) {
+      message.error(err2.message)
+      return
+    }
+
+    const { templates, total } = res2
+    setTemplates(templates ?? [])
+    setSelectedTmpl(null)
   }
 
   const onDragEnd = (result: any) => {
@@ -351,9 +420,6 @@ const Index = () => {
     getFields()
   }, [])
 
-  console.log('templates: ', templates)
-
-  // console.log('allFields: ', allFields.current)
   return (
     <div>
       <div className="mb-5 flex justify-end">
@@ -374,6 +440,7 @@ const Index = () => {
         <div>
           <span>Preset: </span>
           <Select
+            disabled={loading || exporting}
             onChange={onSelectTmpl}
             value={selectedTmpl}
             style={{ width: '180px' }}
@@ -386,10 +453,14 @@ const Index = () => {
         <Button
           style={{ padding: 0, border: 'none' }}
           icon={<SaveOutlined />}
+          onClick={saveTmpl}
+          disabled={loading || exporting}
         ></Button>
         <Button
+          onClick={removeTmpl}
           style={{ padding: 0, border: 'none' }}
           icon={<DeleteOutlined />}
+          disabled={loading || exporting}
         ></Button>
       </div>
       <DragDropContext onDragEnd={onDragEnd}>

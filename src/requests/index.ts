@@ -2512,26 +2512,54 @@ export const getExportFieldsWithMore = async (
   return [{ exportTmplRes, exportFieldsRes }, null]
 }
 
-export const createExportTmplReq = async ({
+// creating new and editing existing share almost the same parameter, use templateId == null to check
+export const saveExportTmplReq = async ({
   name,
+  templateId,
   task,
   payload,
   exportColumns,
   format
 }: {
   name: string
+  templateId?: number
   task: TExportDataType
   payload?: any
   exportColumns?: string[]
   format?: 'xlsx' | 'csv'
 }) => {
+  let url = '/merchant/task/'
+  url += templateId == null ? 'new_export_template' : 'edit_export_template'
   try {
-    const res = await request.post(`/merchant/task/new_export_template`, {
+    const res = await request.post(url, {
       name,
+      templateId,
       task,
       payload,
       exportColumns,
       format
+    })
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const removeExportTmplReq = async ({
+  templateId
+}: {
+  templateId: number
+}) => {
+  try {
+    const res = await request.post(`/merchant/task/delete_export_template`, {
+      templateId
     })
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
