@@ -233,7 +233,7 @@ const Index = () => {
       return
     }
     setSelectedTmpl(tmplId)
-    const cols = tmpl.exportColumns
+    const cols = tmpl.exportColumns ?? []
     const newAvailableFields = allFields.current.filter(
       (f) => cols.findIndex((c) => c == f.id) == -1
     )
@@ -244,7 +244,9 @@ const Index = () => {
       })
       .filter((c) => c != null)
     setAvailableFields(newAvailableFields)
-    setFields(newFields)
+    setFields(newFields as TExportField[])
+    // without the 'as TExportField', TS'll complain: Type '(TExportField | undefined)[]' is not assignable to type 'TExportField[]'.
+    // but I already filtered out the undefined items.
   }
 
   const createTmpl = async () => {
