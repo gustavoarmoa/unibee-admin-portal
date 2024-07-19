@@ -31,6 +31,7 @@ import {
 import { TExportDataType } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
 import './index.css'
+const { RangePicker } = DatePicker
 
 type TExpTmpl = {
   templateId: number
@@ -178,7 +179,6 @@ const Index = () => {
       message.error(err.message)
       return
     }
-    console.log('get fields res: ', res)
     const { exportTmplRes, exportFieldsRes } = res
     const { templates, total } = exportTmplRes
     setTemplates(templates ?? [])
@@ -196,7 +196,6 @@ const Index = () => {
   }
 
   const removeField = (fieldId: string) => () => {
-    console.log('removing...', fieldId)
     const idx = fields.findIndex((f) => f.id == fieldId)
     if (idx != -1) {
       setAvailableFields(update(availableFields, { $push: [fields[idx]] }))
@@ -205,10 +204,6 @@ const Index = () => {
   }
 
   const exportReportReq = async () => {
-    console.log(
-      'export columsn: ',
-      fields.map((f) => f.id)
-    )
     const exportColumns = fields.map((f) => f.id)
     setExporting(true)
     const [res, err] = await exportDataReq({
@@ -261,7 +256,6 @@ const Index = () => {
       exportColumns: fields.map((f) => f.id)
     })
     setLoading(false)
-    console.log('creating new template res: ', res)
     if (null != err) {
       message.error(err.message)
       return
@@ -281,7 +275,6 @@ const Index = () => {
       return
     }
     const { templates, total } = res2
-    console.log('after createing new temp: ', templates)
     setTemplates(templates)
   }
 
@@ -403,7 +396,6 @@ const Index = () => {
 
     // add item in dst
     const item = availableFields.find((f) => f.id == draggableId)
-    console.log('item being dragged: ', item)
     const newFields = update(fields, {
       $splice: [
         [
@@ -506,6 +498,10 @@ const Index = () => {
             </Droppable>
           </div>
         </Spin>
+        <div className=" my-2 flex items-center justify-center">
+          <span className=" mr-2 text-gray-500">Report range:</span>
+          <RangePicker />
+        </div>
         <div
           className=" my-4 p-2"
           style={{
