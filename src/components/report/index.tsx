@@ -1,6 +1,7 @@
 import {
   DeleteOutlined,
   LoadingOutlined,
+  PlusOutlined,
   SaveOutlined
 } from '@ant-design/icons'
 import {
@@ -13,14 +14,31 @@ import {
   Spin,
   Switch,
   Tag,
+  Tooltip,
   message
 } from 'antd'
 import update from 'immutability-helper'
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
-import { exportDataReq, getExportFieldsReq } from '../../requests'
+import {
+  createExportTmplReq,
+  exportDataReq,
+  getExportFieldsReq,
+  getExportFieldsWithMore,
+  getExportTmplReq
+} from '../../requests'
+import { TExportDataType } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
 import './index.css'
+
+type TExpTmpl = {
+  templateId: number
+  name: string
+  createTime: string
+  task: TExportDataType
+  exportColumns: string[]
+  format: 'csv' | 'xlsx'
+}
 
 type TExportField = {
   name: string
@@ -144,19 +162,26 @@ const Index = () => {
 
   const [loading, setLoading] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const allFields = useRef<TExportField[]>([])
   const [availableFields, setAvailableFields] = useState<TExportField[]>([])
   const [fields, setFields] = useState<TExportField[]>([])
+  const [selectedTmpl, setSelectedTmpl] = useState<number | null>(null)
+  const [templates, setTemplates] = useState<TExpTmpl[]>([]) // use ref, no need to save in state
+  const [newTmplName, setNewTmplName] = useState('')
 
   const getFields = async () => {
     setLoading(true)
-    const [res, err] = await getExportFieldsReq({ task: 'InvoiceExport' })
+    const [res, err] = await getExportFieldsWithMore('InvoiceExport', getFields)
     setLoading(false)
     if (null != err) {
       message.error(err.message)
       return
     }
     console.log('get fields res: ', res)
-    let columns = res.columns
+    const { exportTmplRes, exportFieldsRes } = res
+    const { templates, total } = exportTmplRes
+    setTemplates(templates)
+    let { columns } = exportFieldsRes
     columns = columns.map((c: string) => {
       const col = settableFields.find((f) => f.id == c)
       if (col != null) {
@@ -166,6 +191,7 @@ const Index = () => {
       }
     })
     setAvailableFields(columns)
+    allFields.current = columns
   }
 
   const removeField = (fieldId: string) => () => {
@@ -183,10 +209,6 @@ const Index = () => {
       fields.map((f) => f.id)
     )
     const exportColumns = fields.map((f) => f.id)
-    if (exportColumns.length == 0) {
-      message.error('Please add at least one column.')
-      return
-    }
     setExporting(true)
     const [res, err] = await exportDataReq({
       task: 'InvoiceExport',
@@ -202,6 +224,57 @@ const Index = () => {
       'Report is being exported, please check task list for progress.'
     )
     appConfig.setTaskListOpen(true)
+  }
+
+  const onSelectTmpl = (tmplId: number) => {
+    const tmpl = templates.find((t) => t.templateId == tmplId)
+    if (tmpl == null) {
+      return
+    }
+    setSelectedTmpl(tmplId)
+    const cols = tmpl.exportColumns
+    const newAvailableFields = allFields.current.filter(
+      (f) => cols.findIndex((c) => c == f.id) == -1
+    )
+    const newFields = cols
+      .map((c) => {
+        const f = allFields.current.find((field) => field.id == c)
+        return f
+      })
+      .filter((c) => c != null)
+    setAvailableFields(newAvailableFields)
+    setFields(newFields)
+  }
+
+  const createTmpl = async () => {
+    if (newTmplName.trim() == '') {
+      message.error('New template name must not be empty')
+      return
+    }
+    setLoading(true)
+    const [res, err] = await createExportTmplReq({
+      name: newTmplName,
+      task: 'InvoiceExport',
+      exportColumns: fields.map((f) => f.id)
+    })
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    message.success('New template created')
+    const [res2, err2] = await getExportTmplReq({
+      task: 'InvoiceExport',
+      page: 0,
+      count: 100
+    })
+    if (null != err2) {
+      message.error(err2.message)
+      return
+    }
+    const { templates, total } = res2
+    console.log('after createing new temp: ', templates)
+    setTemplates(templates)
   }
 
   const onDragEnd = (result: any) => {
@@ -278,12 +351,37 @@ const Index = () => {
     getFields()
   }, [])
 
+  console.log('templates: ', templates)
+
+  // console.log('allFields: ', allFields.current)
   return (
     <div>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-5 flex justify-end">
+        <div className="mr-6 flex">
+          <Input
+            value={newTmplName}
+            onChange={(evt) => setNewTmplName(evt.target.value)}
+          />
+          <Tooltip title="New preset">
+            <Button
+              disabled={loading || exporting}
+              onClick={createTmpl}
+              icon={<PlusOutlined />}
+              style={{ padding: 0, border: 'none' }}
+            ></Button>
+          </Tooltip>
+        </div>
         <div>
           <span>Preset: </span>
-          <Select style={{ width: '180px' }} />
+          <Select
+            onChange={onSelectTmpl}
+            value={selectedTmpl}
+            style={{ width: '180px' }}
+            options={templates.map((t) => ({
+              value: t.templateId,
+              label: t.name
+            }))}
+          />
         </div>
         <Button
           style={{ padding: 0, border: 'none' }}

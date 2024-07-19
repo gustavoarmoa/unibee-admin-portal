@@ -2463,3 +2463,85 @@ export const getExportFieldsReq = async ({
     return [null, e]
   }
 }
+
+export const getExportTmplReq = async ({
+  task,
+  page,
+  count
+}: {
+  task: TExportDataType
+  page: number
+  count: number
+}) => {
+  try {
+    const res = await request.post(`/merchant/task/export_template_list`, {
+      task,
+      page,
+      count
+    })
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getExportFieldsWithMore = async (
+  task: TExportDataType,
+  refreshCb: (() => void) | null
+) => {
+  const session = useSessionStore.getState()
+  const [[exportTmplRes, errExportTmpl], [exportFieldsRes, errExportFields]] =
+    await Promise.all([
+      getExportTmplReq({ task, page: 0, count: 150 }),
+      getExportFieldsReq({ task })
+    ])
+  const err = errExportTmpl || errExportFields
+  if (null != err) {
+    if (err instanceof ExpiredError) {
+      session.setSession({ expired: true, refresh: refreshCb })
+    }
+    return [null, err]
+  }
+  return [{ exportTmplRes, exportFieldsRes }, null]
+}
+
+export const createExportTmplReq = async ({
+  name,
+  task,
+  payload,
+  exportColumns,
+  format
+}: {
+  name: string
+  task: TExportDataType
+  payload?: any
+  exportColumns?: string[]
+  format?: 'xlsx' | 'csv'
+}) => {
+  try {
+    const res = await request.post(`/merchant/task/new_export_template`, {
+      name,
+      task,
+      payload,
+      exportColumns,
+      format
+    })
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
