@@ -37,7 +37,7 @@ const Index = ({ user, closeModal, refresh, setRefreshSub }: Props) => {
     <Modal
       title="Suspend user confirm"
       open={true}
-      width={'780px'}
+      width={'860px'}
       footer={null}
       closeIcon={null}
     >
