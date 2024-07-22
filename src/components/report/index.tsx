@@ -4,11 +4,14 @@ import {
   PlusOutlined,
   SaveOutlined
 } from '@ant-design/icons'
+import type { DatePickerProps, InputRef, RadioChangeEvent } from 'antd'
 import {
   Button,
   Col,
   DatePicker,
+  Form,
   Input,
+  Radio,
   Row,
   Select,
   Spin,
@@ -17,8 +20,9 @@ import {
   Tooltip,
   message
 } from 'antd'
+import dayjs, { Dayjs } from 'dayjs'
 import update from 'immutability-helper'
-import { ReactNode, useEffect, useRef, useState } from 'react'
+import React, { ReactNode, useEffect, useRef, useState } from 'react'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import {
   exportDataReq,
@@ -31,13 +35,13 @@ import {
 import { TExportDataType } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
 import './index.css'
-const { RangePicker } = DatePicker
 
 type TExpTmpl = {
   templateId: number
   name: string
   createTime: string
   task: TExportDataType
+  payload: any
   exportColumns: string[]
   format: 'csv' | 'xlsx'
 }
@@ -48,128 +52,62 @@ type TExportField = {
   node: ReactNode | null
 }
 
-const settableFields: TExportField[] = [
-  { name: 'Amount To', id: 'amountEnd', node: <Input /> },
-  { name: 'Amount From', id: 'amountStart', node: <Input /> },
-  {
-    name: 'Create Time End',
-    id: 'createTimeEnd',
-    node: <DatePicker />
-  },
-  {
-    name: 'Create Time Start',
-    id: 'createTimeStart',
-    node: <DatePicker />
-  },
-  { name: 'Currency', id: 'currency', node: <Select /> },
-  { name: 'First Name', id: 'firstName', node: <Input /> },
-  { name: 'Last Name', id: 'lastName', node: <Input /> }
-]
+type TFieldComment = {
+  [key: string]: string
+}
 
 const Index = () => {
   const appConfig = useAppConfigStore()
-  /*
-  const INITIA_FIELDS: TExportField[] = [
-    {
-      name: 'Invoice Id',
-      id: 'InvoiceId',
-      node: <Input style={{ width: '80%' }} />
-    },
-    { name: 'Invoice Number', id: 'InvoiceNumber', node: <Input /> },
-    {
-      name: 'User Id',
-      id: 'UserId',
-      node: (
-        <div className=" flex items-center">
-          <Select />
-        </div>
-      )
-    },
-    {
-      name: 'External User Id',
-      id: 'ExternalUserId',
-      node: (
-        <div className=" flex items-center">
-          <Select
-            style={{ width: '120px' }}
-            options={Object.keys(SUBSCRIPTION_STATUS)
-              .map((s) => ({
-                label: SUBSCRIPTION_STATUS[Number(s)],
-                value: Number(s)
-              }))
-              .sort((a, b) => (a.value < b.value ? -1 : 1))}
-          />
-        </div>
-      )
-    },
-    {
-      name: 'First Name',
-      id: 'FirstName',
-      node: (
-        <div className=" flex items-center">
-          <DatePicker />
-        </div>
-      )
-    },
-    {
-      name: 'sub end',
-      id: 'subEnd',
-      node: (
-        <div className=" flex items-center">
-          <DatePicker />
-        </div>
-      )
-    },
-    {
-      name: 'discount code',
-      id: 'discountCode',
-      node: (
-        <div className=" flex items-center">
-          <Input />
-        </div>
-      )
-    },
-    {
-      name: 'payment gateway',
-      id: 'paymentGateway',
-      node: (
-        <div className=" flex items-center">
-          <Select
-            style={{ width: '130px' }}
-            options={appConfig.gateway.map((g) => ({
-              value: g.gatewayId as number,
-              label: g.displayName
-            }))}
-          />
-        </div>
-      )
-    },
-    {
-      name: 'user status',
-      id: 'userStatus',
-      node: (
-        <div className=" flex items-center">
-          <Select
-            style={{ width: '120px' }}
-            options={Object.entries(USER_STATUS).map((s) => {
-              const [value, text] = s
-              return { value: Number(value), label: text }
-            })}
-          />
-        </div>
-      )
-    }
-  ]
-  */
-
+  const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [exporting, setExporting] = useState(false)
   const allFields = useRef<TExportField[]>([])
+  const fieldComments = useRef<TFieldComment>({})
   const [availableFields, setAvailableFields] = useState<TExportField[]>([])
   const [fields, setFields] = useState<TExportField[]>([])
   const [selectedTmpl, setSelectedTmpl] = useState<number | null>(null)
   const [templates, setTemplates] = useState<TExpTmpl[]>([]) // use ref, no need to save in state
   const [newTmplName, setNewTmplName] = useState('')
+  const [exportFormat, setExportFormat] = useState<'xlsx' | 'csv'>('xlsx')
+  const [reportTimeStart, setReportTimeStart] = useState<null | Dayjs>(null)
+  const [reportTimeEnd, setReportTimeEnd] = useState<null | Dayjs>(null)
+
+  const onExportFormatChange = (e: RadioChangeEvent) => {
+    setExportFormat(e.target.value)
+  }
+
+  const settableFields: TExportField[] = [
+    /* {
+      name: 'Amount To',
+      id: 'amountEnd',
+      node: <Input />
+    }, */
+    // { name: 'Amount From', id: 'amountStart', node: <Input ref={} /> },
+    {
+      name: 'currency',
+      id: 'currency',
+      node: (
+        <Select
+          style={{ width: 120 }}
+          options={[
+            { value: 'EUR', label: 'EUR' },
+            { value: 'USD', label: 'USD' },
+            { value: 'JPY', label: 'JPY' }
+          ]}
+        />
+      )
+    },
+    {
+      name: 'firstName',
+      id: 'firstName',
+      node: <Input style={{ width: '240px' }} />
+    },
+    {
+      name: 'lastName',
+      id: 'lastName',
+      node: <Input style={{ width: '240px' }} />
+    }
+  ]
 
   const getFields = async () => {
     setLoading(true)
@@ -182,7 +120,8 @@ const Index = () => {
     const { exportTmplRes, exportFieldsRes } = res
     const { templates, total } = exportTmplRes
     setTemplates(templates ?? [])
-    let { columns } = exportFieldsRes
+    let { columns, columnComments } = exportFieldsRes
+    fieldComments.current = columnComments
     columns = columns.map((c: string) => {
       const col = settableFields.find((f) => f.id == c)
       if (col != null) {
@@ -195,6 +134,18 @@ const Index = () => {
     allFields.current = columns
   }
 
+  const AddCommentTip = ({
+    children,
+    fieldName
+  }: {
+    children: React.ReactNode
+    fieldName: string
+  }) => {
+    return (
+      <Tooltip title={fieldComments.current[fieldName]}>{children}</Tooltip>
+    )
+  }
+
   const removeField = (fieldId: string) => () => {
     const idx = fields.findIndex((f) => f.id == fieldId)
     if (idx != -1) {
@@ -203,13 +154,44 @@ const Index = () => {
     }
   }
 
+  const reportRangeChange =
+    (
+      dateType: 'reportTimeStart' | 'reportTimeEnd'
+    ): DatePickerProps['onChange'] =>
+    (date, dateString) => {
+      if (dateType == 'reportTimeStart') {
+        setReportTimeStart(date)
+      } else if (dateType == 'reportTimeEnd') {
+        setReportTimeEnd(date)
+      }
+    }
+
   const exportReportReq = async () => {
     const exportColumns = fields.map((f) => f.id)
+    const payload = { ...form.getFieldsValue(), reportTimeStart, reportTimeEnd }
+    if (reportTimeStart != null) {
+      payload.reportTimeStart = reportTimeStart.unix()
+    }
+    if (reportTimeEnd != null) {
+      payload.reportTimeEnd = reportTimeEnd.unix()
+    }
+    if (
+      reportTimeStart != null &&
+      reportTimeEnd != null &&
+      reportTimeEnd.isBefore(reportTimeStart)
+    ) {
+      message.error('Report end date must be later than start date')
+      return
+    }
+
+    // console.log('exporting...,', payload)
+    // return
     setExporting(true)
     const [res, err] = await exportDataReq({
       task: 'InvoiceExport',
-      payload: {},
-      exportColumns
+      payload,
+      exportColumns,
+      format: exportFormat
     })
     setExporting(false)
     if (null != err) {
@@ -228,6 +210,7 @@ const Index = () => {
       return
     }
     setSelectedTmpl(tmplId)
+    setExportFormat(tmpl.format)
     const cols = tmpl.exportColumns ?? []
     const newAvailableFields = allFields.current.filter(
       (f) => cols.findIndex((c) => c == f.id) == -1
@@ -241,19 +224,42 @@ const Index = () => {
     setAvailableFields(newAvailableFields)
     setFields(newFields as TExportField[])
     // without the 'as TExportField', TS'll complain: Type '(TExportField | undefined)[]' is not assignable to type 'TExportField[]'.
-    // but I already filtered out the undefined items.
+    // but I already filtered out the undefined items, why still complain?
+    if (tmpl.payload == null) {
+      return
+    }
+    if (tmpl.payload.reportTimeStart != null) {
+      setReportTimeStart(dayjs.unix(tmpl.payload.reportTimeStart))
+    }
+    if (tmpl.payload.reportTimeEnd != null) {
+      setReportTimeEnd(dayjs.unix(tmpl.payload.reportTimeEnd))
+    }
+    const fieldValues = JSON.parse(JSON.stringify(tmpl.payload))
+    delete fieldValues.reportTimeStart
+    delete fieldValues.reportTimeEnd
+    form.setFieldsValue(fieldValues)
   }
 
+  // create new template
   const createTmpl = async () => {
     if (newTmplName.trim() == '') {
       message.error('New template name must not be empty')
       return
     }
+    const payload = { ...form.getFieldsValue() }
+    if (reportTimeStart != null) {
+      payload.reportTimeStart = reportTimeStart.unix()
+    }
+    if (reportTimeEnd != null) {
+      payload.reportTimeEnd = reportTimeEnd.unix()
+    }
     setLoading(true)
     const [res, err] = await saveExportTmplReq({
       name: newTmplName,
       task: 'InvoiceExport',
-      exportColumns: fields.map((f) => f.id)
+      payload,
+      exportColumns: fields.map((f) => f.id),
+      format: exportFormat
     })
     setLoading(false)
     if (null != err) {
@@ -282,12 +288,21 @@ const Index = () => {
     if (selectedTmpl == null) {
       return
     }
+    const payload = { ...form.getFieldsValue() }
+    if (reportTimeStart != null) {
+      payload.reportTimeStart = reportTimeStart.unix()
+    }
+    if (reportTimeEnd != null) {
+      payload.reportTimeEnd = reportTimeEnd.unix()
+    }
     setLoading(true)
     const [res, err] = await saveExportTmplReq({
       name: templates.find((t) => t.templateId == selectedTmpl)!.name,
       templateId: selectedTmpl,
       task: 'InvoiceExport',
-      exportColumns: fields.map((f) => f.id)
+      payload,
+      exportColumns: fields.map((f) => f.id),
+      format: exportFormat
     })
     setLoading(false)
     if (null != err) {
@@ -484,9 +499,13 @@ const Index = () => {
                           ref={provided.innerRef}
                         >
                           {f.node == null ? (
-                            <Tag>{f.name}</Tag>
+                            <AddCommentTip fieldName={f.name}>
+                              <Tag>{f.name}</Tag>
+                            </AddCommentTip>
                           ) : (
-                            <Tag color="blue">{f.name}</Tag>
+                            <AddCommentTip fieldName={f.name}>
+                              <Tag color="blue">{f.name}</Tag>
+                            </AddCommentTip>
                           )}
                         </div>
                       )}
@@ -498,9 +517,30 @@ const Index = () => {
             </Droppable>
           </div>
         </Spin>
-        <div className=" my-2 flex items-center justify-center">
-          <span className=" mr-2 text-gray-500">Report range:</span>
-          <RangePicker />
+        <div className=" my-6 flex items-center justify-center">
+          <span className=" mr-2">Report from/to:</span>
+          <DatePicker
+            value={reportTimeStart}
+            onChange={reportRangeChange('reportTimeStart')}
+            disabled={loading || exporting}
+          />
+          &nbsp;&nbsp;&nbsp;
+          <DatePicker
+            value={reportTimeEnd}
+            onChange={reportRangeChange('reportTimeEnd')}
+            disabled={loading || exporting}
+          />
+          <div className=" mx-4">
+            <span className=" mx-2">Export format: </span>
+            <Radio.Group
+              onChange={onExportFormatChange}
+              value={exportFormat}
+              disabled={loading || exporting}
+            >
+              <Radio value={'xlsx'}>Excel xlsx</Radio>
+              <Radio value={'csv'}>CSV</Radio>
+            </Radio.Group>
+          </div>
         </div>
         <div
           className=" my-4 p-2"
@@ -518,95 +558,103 @@ const Index = () => {
             <Col span={12} className="font-bold">
               settings
             </Col>
-            <Col span={4} className="font-bold">
+            {/* <Col span={4} className="font-bold">
               Hidden
-            </Col>
+            </Col> */}
           </Row>
-          <Row>
-            <Col span={1}>
-              {fields.map((f) => (
-                <div
-                  className="flex items-center justify-center"
-                  style={{ height: '42px' }}
-                  key={f.id}
-                >
-                  <Button
-                    icon={<DeleteOutlined />}
-                    style={{ border: 'unset', padding: 0 }}
-                    onClick={removeField(f.id)}
-                  ></Button>
-                </div>
-              ))}
-            </Col>
-            <Col span={6}>
-              <Droppable droppableId="exported-fields">
-                {(provided, snapshot) => (
+          <Form form={form} disabled={loading || exporting}>
+            <Row>
+              <Col span={1}>
+                {fields.map((f) => (
                   <div
-                    className="exported-fields  px-2"
-                    style={{
-                      // minHeight: '42px',
-                      // maxHeight: '420px',
-                      height: '600px',
-                      overflowY: 'auto',
-                      background: '#F5F5F5',
-                      marginRight: '24px',
-                      border: snapshot.isDraggingOver
-                        ? '1px solid #bbdefb'
-                        : '1px solid #F5F5F5'
-                    }}
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
+                    className="flex items-center justify-center"
+                    style={{ height: '42px' }}
+                    key={f.id}
                   >
-                    <div>
-                      {fields.map((f, idx) => (
-                        <Draggable
-                          key={f.id}
-                          draggableId={f.id.toString()}
-                          index={idx}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              ref={provided.innerRef}
-                            >
-                              <div
-                                className="droppable-field flex items-center pl-2"
-                                style={{
-                                  borderRadius: '4px', // snapshot.isDragging ? '1px solid g'
-                                  height: '42px',
-                                  background: snapshot.isDragging
-                                    ? '#bbdefb'
-                                    : '#F5F5F5'
-                                }}
-                              >
-                                {f.name}
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                    </div>
-                    <div style={{ height: '42px' }}>{provided.placeholder}</div>
+                    <Button
+                      icon={<DeleteOutlined />}
+                      style={{ border: 'unset', padding: 0 }}
+                      onClick={removeField(f.id)}
+                    ></Button>
                   </div>
-                )}
-              </Droppable>
-            </Col>
-            <Col span={12}>
-              {fields.map((f) => (
-                <div style={{ height: '42px' }} key={f.id}>
-                  {f.node}
-                </div>
-              ))}
-            </Col>
-            <Col span={4}>
-              {fields.map((f) => (
-                <div style={{ height: '42px' }} key={f.id}>
-                  <Switch defaultChecked={false} size="small" />
-                </div>
-              ))}
-            </Col>
-          </Row>
+                ))}
+              </Col>
+              <Col span={6}>
+                <Droppable droppableId="exported-fields">
+                  {(provided, snapshot) => (
+                    <div
+                      className="exported-fields  px-2"
+                      style={{
+                        // minHeight: '42px',
+                        // maxHeight: '420px',
+                        height: '600px',
+                        overflowY: 'auto',
+                        background: '#F5F5F5',
+                        marginRight: '24px',
+                        border: snapshot.isDraggingOver
+                          ? '1px solid #bbdefb'
+                          : '1px solid #F5F5F5'
+                      }}
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                    >
+                      <div>
+                        {fields.map((f, idx) => (
+                          <Draggable
+                            key={f.id}
+                            draggableId={f.id.toString()}
+                            index={idx}
+                          >
+                            {(provided, snapshot) => (
+                              <div
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                ref={provided.innerRef}
+                              >
+                                <AddCommentTip fieldName={f.name}>
+                                  <div
+                                    className="droppable-field flex items-center pl-2"
+                                    style={{
+                                      borderRadius: '4px', // snapshot.isDragging ? '1px solid g'
+                                      height: '42px',
+                                      background: snapshot.isDragging
+                                        ? '#bbdefb'
+                                        : '#F5F5F5'
+                                    }}
+                                  >
+                                    {f.name}
+                                  </div>
+                                </AddCommentTip>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                      </div>
+                      <div style={{ height: '42px' }}>
+                        {provided.placeholder}
+                      </div>
+                    </div>
+                  )}
+                </Droppable>
+              </Col>
+              <Col span={12}>
+                {fields.map((f) => (
+                  <div style={{ height: '42px' }} key={f.id}>
+                    {f.node != null && (
+                      <Form.Item name={f.id}>{f.node}</Form.Item>
+                    )}
+                  </div>
+                ))}
+              </Col>
+              {/* <Col span={4}>
+                {fields.map((f) => (
+                  <div style={{ height: '42px' }} key={f.id}>
+                    <Switch defaultChecked={false} size="small" />
+                  </div>
+                ))}
+              </Col> */}
+            </Row>
+          </Form>
         </div>
       </DragDropContext>
       <div className=" flex items-center justify-end gap-4">

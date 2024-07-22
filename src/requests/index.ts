@@ -2417,17 +2417,20 @@ export const getDownloadListReq = async (
 export const exportDataReq = async ({
   task,
   payload,
-  exportColumns
+  exportColumns,
+  format
 }: {
   task: TExportDataType
   payload: any
   exportColumns?: string[]
+  format?: 'xlsx' | 'csv'
 }) => {
   try {
     const res = await request.post(`/merchant/task/new_export`, {
       task,
       payload,
-      exportColumns
+      exportColumns,
+      format
     })
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
