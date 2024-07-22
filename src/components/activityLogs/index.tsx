@@ -61,10 +61,10 @@ const Index = () => {
   const columns: ColumnsType<TActivityLogs> = [
     {
       title: 'By',
-      dataIndex: 'member',
+      dataIndex: 'optAccount',
       fixed: 'left',
-      key: 'member',
-      render: (m, _) => `${m.firstName} ${m.lastName} (${m.email})`
+      key: 'optAccount'
+      // render: (m, _) => `${m.firstName} ${m.lastName} (${m.email})`
     },
     {
       title: 'Target',
