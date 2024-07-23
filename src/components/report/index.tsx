@@ -478,7 +478,10 @@ const Index = () => {
           indicator={<LoadingOutlined spin />}
           size={'large'}
         >
-          <div className="available-fields" style={{ minHeight: '80px' }}>
+          <div
+            className="available-fields"
+            style={{ minHeight: '80px', maxHeight: '120px', overflowY: 'auto' }}
+          >
             <Droppable droppableId="available-fields">
               {(provided) => (
                 <div
@@ -542,30 +545,32 @@ const Index = () => {
             </Radio.Group>
           </div>
         </div>
+
+        <Row className=" mb-2">
+          <Col span={8} className=" font-bold">
+            Fields
+          </Col>
+          <Col span={12} className="font-bold">
+            settings
+          </Col>
+          {/* <Col span={4} className="font-bold">
+              Hidden
+            </Col> */}
+        </Row>
         <div
           className=" my-4 p-2"
           style={{
             border: '1px solid #eee',
             borderRadius: '4px',
-            minHeight: '160px'
+            minHeight: '160px',
+            maxHeight: 'calc(100vh - 540px)',
+            overflowY: 'auto'
           }}
         >
-          <Row className=" mb-2">
-            <Col span={1}></Col>
-            <Col span={6} className=" font-bold">
-              Fields
-            </Col>
-            <Col span={12} className="font-bold">
-              settings
-            </Col>
-            {/* <Col span={4} className="font-bold">
-              Hidden
-            </Col> */}
-          </Row>
           <Form form={form} disabled={loading || exporting}>
             <Row>
-              <Col span={1}>
-                {fields.map((f) => (
+              {/* <Col span={1}>
+                fields.map((f) => (
                   <div
                     className="flex items-center justify-center"
                     style={{ height: '42px' }}
@@ -577,18 +582,18 @@ const Index = () => {
                       onClick={removeField(f.id)}
                     ></Button>
                   </div>
-                ))}
-              </Col>
-              <Col span={6}>
+                ))
+              </Col> */}
+              <Col span={8}>
                 <Droppable droppableId="exported-fields">
                   {(provided, snapshot) => (
                     <div
                       className="exported-fields  px-2"
                       style={{
-                        // minHeight: '42px',
+                        minHeight: '420px',
                         // maxHeight: '420px',
-                        height: '600px',
-                        overflowY: 'auto',
+                        // height: '600px',
+                        // overflowY: 'auto',
                         background: '#F5F5F5',
                         marginRight: '24px',
                         border: snapshot.isDraggingOver
@@ -611,20 +616,32 @@ const Index = () => {
                                 {...provided.dragHandleProps}
                                 ref={provided.innerRef}
                               >
-                                <AddCommentTip fieldName={f.name}>
-                                  <div
-                                    className="droppable-field flex items-center pl-2"
+                                <div className=" flex items-center">
+                                  <Button
+                                    size="small"
+                                    icon={<DeleteOutlined />}
                                     style={{
-                                      borderRadius: '4px', // snapshot.isDragging ? '1px solid g'
-                                      height: '42px',
-                                      background: snapshot.isDragging
-                                        ? '#bbdefb'
-                                        : '#F5F5F5'
+                                      border: 'unset',
+                                      padding: 0,
+                                      background: 'unset'
                                     }}
-                                  >
-                                    {f.name}
-                                  </div>
-                                </AddCommentTip>
+                                    onClick={removeField(f.id)}
+                                  />
+                                  <AddCommentTip fieldName={f.name}>
+                                    <div
+                                      className="droppable-field flex items-center pl-2"
+                                      style={{
+                                        borderRadius: '4px', // snapshot.isDragging ? '1px solid g'
+                                        height: '42px',
+                                        background: snapshot.isDragging
+                                          ? '#bbdefb'
+                                          : '#F5F5F5'
+                                      }}
+                                    >
+                                      {f.name}
+                                    </div>
+                                  </AddCommentTip>
+                                </div>
                               </div>
                             )}
                           </Draggable>
@@ -639,9 +656,15 @@ const Index = () => {
               </Col>
               <Col span={12}>
                 {fields.map((f) => (
-                  <div style={{ height: '42px' }} key={f.id}>
+                  <div
+                    className="flex items-center"
+                    style={{ height: '42px' }}
+                    key={f.id}
+                  >
                     {f.node != null && (
-                      <Form.Item name={f.id}>{f.node}</Form.Item>
+                      <Form.Item noStyle={true} name={f.id}>
+                        {f.node}
+                      </Form.Item>
                     )}
                   </div>
                 ))}

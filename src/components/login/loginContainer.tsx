@@ -19,8 +19,8 @@ const Index = ({
   const onEmailChange = (evt: ChangeEvent<HTMLInputElement> | string) => {
     typeof evt == 'string' ? setEmail(evt) : setEmail(evt.target.value)
   }
-
   const [loginType, setLoginType] = useState<'password' | 'OTP'>('password')
+  const [logging, setLogging] = useState(false)
 
   const onLoginTypeChange = (e: RadioChangeEvent) =>
     setLoginType(e.target.value)
@@ -31,6 +31,7 @@ const Index = ({
       <div className="flex flex-col items-center justify-center">
         <h1 style={{ marginBottom: '36px' }}>Billing Admin Login</h1>
         <Radio.Group
+          disabled={logging}
           options={[
             { label: 'Password', value: 'password' },
             { label: 'OTP', value: 'OTP' }
@@ -49,12 +50,14 @@ const Index = ({
           {loginType == 'password' ? (
             <PasswordLogin
               email={email}
+              setLogging={setLogging}
               onEmailChange={onEmailChange}
               triggeredByExpired={triggeredByExpired}
             />
           ) : (
             <OTPLogin
               email={email}
+              setLogging={setLogging}
               onEmailChange={onEmailChange}
               triggeredByExpired={triggeredByExpired}
             />

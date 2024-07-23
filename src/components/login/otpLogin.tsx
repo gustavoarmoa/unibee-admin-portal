@@ -22,11 +22,13 @@ const APP_PATH = import.meta.env.BASE_URL
 const Index = ({
   email,
   onEmailChange,
-  triggeredByExpired
+  triggeredByExpired,
+  setLogging
 }: {
   email: string
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   triggeredByExpired: boolean
+  setLogging: (val: boolean) => void
 }) => {
   const [currentStep, setCurrentStep] = useState(0) // 0: input email, 1: input code
   const [errMailMsg, setErrMailMsg] = useState('')
@@ -62,6 +64,7 @@ const Index = ({
           onEmailChange={onEmailChange}
           sendMailaddress={sendMailaddress}
           goForward={goBackForward}
+          setLogging={setLogging}
         />
       ) : (
         <OTPForm
@@ -72,6 +75,7 @@ const Index = ({
           counting={counting}
           countVal={countVal}
           triggeredByExpired={triggeredByExpired}
+          setLogging={setLogging}
         />
       )}
     </div>
@@ -85,12 +89,14 @@ interface IMailFormProps {
   onEmailChange: (evt: React.ChangeEvent<HTMLInputElement>) => void
   goForward: () => void
   sendMailaddress: () => Promise<any>
+  setLogging: (val: boolean) => void
 }
 const MailForm = ({
   email,
   onEmailChange,
   goForward,
-  sendMailaddress
+  sendMailaddress,
+  setLogging
 }: IMailFormProps) => {
   const [submitting, setSubmitting] = useState(false)
   const [errMsg, setErrMsg] = useState('')
@@ -98,11 +104,14 @@ const MailForm = ({
   const submit = async () => {
     try {
       setSubmitting(true)
+      setLogging(true)
       await sendMailaddress()
       setSubmitting(false)
+      setLogging(false)
       goForward()
     } catch (err) {
       setSubmitting(false)
+      setLogging(false)
       if (err instanceof Error) {
         console.log('err sending mailaddress: ', err.message)
         setErrMsg(err.message)
@@ -158,6 +167,7 @@ interface IOtpFormProps {
   sendMailaddress: () => Promise<any>
   goBack: () => void
   triggeredByExpired: boolean
+  setLogging: (val: boolean) => void
 }
 
 const NUM_INPUTS = 6
@@ -169,7 +179,8 @@ const OTPForm = ({
   countVal,
   sendMailaddress,
   goBack,
-  triggeredByExpired
+  triggeredByExpired,
+  setLogging
 }: IOtpFormProps) => {
   const navigate = useNavigate()
   const appConfigStore = useAppConfigStore()
@@ -191,9 +202,11 @@ const OTPForm = ({
       return
     }
     setSubmitting(true)
+    setLogging(true)
     const [loginRes, errVerify] = await loginWithOTPVerifyReq(email, otp)
     if (null != errVerify) {
       setSubmitting(false)
+      setLogging(false)
       setErrMsg(errVerify.message)
       return
     }
@@ -206,6 +219,7 @@ const OTPForm = ({
 
     const [initRes, errInit] = await initializeReq()
     setSubmitting(false)
+    setLogging(false)
     if (null != errInit) {
       setErrMsg(errInit.message)
       return

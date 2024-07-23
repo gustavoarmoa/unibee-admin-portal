@@ -24,11 +24,13 @@ const APP_PATH = import.meta.env.BASE_URL
 const Index = ({
   email,
   onEmailChange,
-  triggeredByExpired
+  triggeredByExpired,
+  setLogging
 }: {
   email: string
   onEmailChange: (value: string) => void
   triggeredByExpired: boolean
+  setLogging: (val: boolean) => void
 }) => {
   const profileStore = useProfileStore()
   const appConfigStore = useAppConfigStore()
@@ -70,9 +72,11 @@ const Index = ({
   const onSubmit = async () => {
     setErrMsg('')
     setSubmitting(true)
+    setLogging(true)
     const [loginRes, err] = await loginWithPasswordReq(form.getFieldsValue())
     if (err != null) {
       setSubmitting(false)
+      setLogging(false)
       setErrMsg(err.message)
       return
     }
@@ -85,6 +89,7 @@ const Index = ({
 
     const [initRes, errInit] = await initializeReq()
     setSubmitting(false)
+    setLogging(false)
     if (null != errInit) {
       setErrMsg(errInit.message)
       return
