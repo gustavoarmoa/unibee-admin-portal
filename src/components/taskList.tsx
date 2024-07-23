@@ -179,10 +179,11 @@ type TTaskItem = {
   finishTime: number
   failureReason: string
   taskCost: number
+  format: 'xlsx' | 'csv'
 }
 const TaskItem = ({ t }: { t: TTaskItem }) => {
   const onDownload = (url: string) => () => {
-    downloadStaticFile(url, `${t.taskName}_${t.id}.xlsx`)
+    downloadStaticFile(url, `${t.taskName}_${t.id}.${t.format}`)
   }
   return (
     <div style={{ height: '50px' }}>
