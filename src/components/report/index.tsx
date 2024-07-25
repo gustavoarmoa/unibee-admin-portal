@@ -4,7 +4,7 @@ import {
   PlusOutlined,
   SaveOutlined
 } from '@ant-design/icons'
-import type { DatePickerProps, InputRef, RadioChangeEvent } from 'antd'
+import type { DatePickerProps, RadioChangeEvent } from 'antd'
 import {
   Button,
   Col,
@@ -15,7 +15,6 @@ import {
   Row,
   Select,
   Spin,
-  Switch,
   Tag,
   Tooltip,
   message
@@ -26,7 +25,6 @@ import React, { ReactNode, useEffect, useRef, useState } from 'react'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import {
   exportDataReq,
-  getExportFieldsReq,
   getExportFieldsWithMore,
   getExportTmplReq,
   removeExportTmplReq,
@@ -55,6 +53,9 @@ type TExportField = {
 type TFieldComment = {
   [key: string]: string
 }
+type TFieldHeader = {
+  [key: string]: string
+}
 
 const Index = () => {
   const appConfig = useAppConfigStore()
@@ -63,6 +64,7 @@ const Index = () => {
   const [exporting, setExporting] = useState(false)
   const allFields = useRef<TExportField[]>([])
   const fieldComments = useRef<TFieldComment>({})
+  const fieldHeaders = useRef<TFieldHeader>({})
   const [availableFields, setAvailableFields] = useState<TExportField[]>([])
   const [fields, setFields] = useState<TExportField[]>([])
   const [selectedTmpl, setSelectedTmpl] = useState<number | null>(null)
@@ -120,8 +122,9 @@ const Index = () => {
     const { exportTmplRes, exportFieldsRes } = res
     const { templates, total } = exportTmplRes
     setTemplates(templates ?? [])
-    let { columns, columnComments } = exportFieldsRes
+    let { columns, columnComments, columnHeaders } = exportFieldsRes
     fieldComments.current = columnComments
+    fieldHeaders.current = columnHeaders
     columns = columns.map((c: string) => {
       const col = settableFields.find((f) => f.id == c)
       if (col != null) {
@@ -160,8 +163,14 @@ const Index = () => {
     ): DatePickerProps['onChange'] =>
     (date, dateString) => {
       if (dateType == 'reportTimeStart') {
+        if (date != null) {
+          date = date.hour(0).minute(0).second(0)
+        }
         setReportTimeStart(date)
       } else if (dateType == 'reportTimeEnd') {
+        if (date != null) {
+          date = date.hour(23).minute(59).second(59)
+        }
         setReportTimeEnd(date)
       }
     }
@@ -503,11 +512,13 @@ const Index = () => {
                         >
                           {f.node == null ? (
                             <AddCommentTip fieldName={f.name}>
-                              <Tag>{f.name}</Tag>
+                              <Tag>{fieldHeaders.current[f.name]}</Tag>
                             </AddCommentTip>
                           ) : (
                             <AddCommentTip fieldName={f.name}>
-                              <Tag color="blue">{f.name}</Tag>
+                              <Tag color="blue">
+                                {fieldHeaders.current[f.name]}
+                              </Tag>
                             </AddCommentTip>
                           )}
                         </div>
@@ -551,7 +562,7 @@ const Index = () => {
             Fields
           </Col>
           <Col span={12} className="font-bold">
-            settings
+            Settings
           </Col>
           {/* <Col span={4} className="font-bold">
               Hidden
@@ -569,21 +580,6 @@ const Index = () => {
         >
           <Form form={form} disabled={loading || exporting}>
             <Row>
-              {/* <Col span={1}>
-                fields.map((f) => (
-                  <div
-                    className="flex items-center justify-center"
-                    style={{ height: '42px' }}
-                    key={f.id}
-                  >
-                    <Button
-                      icon={<DeleteOutlined />}
-                      style={{ border: 'unset', padding: 0 }}
-                      onClick={removeField(f.id)}
-                    ></Button>
-                  </div>
-                ))
-              </Col> */}
               <Col span={8}>
                 <Droppable droppableId="exported-fields">
                   {(provided, snapshot) => (
@@ -627,20 +623,21 @@ const Index = () => {
                                     }}
                                     onClick={removeField(f.id)}
                                   />
-                                  <AddCommentTip fieldName={f.name}>
-                                    <div
-                                      className="droppable-field flex items-center pl-2"
-                                      style={{
-                                        borderRadius: '4px', // snapshot.isDragging ? '1px solid g'
-                                        height: '42px',
-                                        background: snapshot.isDragging
-                                          ? '#bbdefb'
-                                          : '#F5F5F5'
-                                      }}
-                                    >
-                                      {f.name}
-                                    </div>
-                                  </AddCommentTip>
+
+                                  <div
+                                    className="droppable-field flex w-full items-center pl-2"
+                                    style={{
+                                      borderRadius: '4px', // snapshot.isDragging ? '1px solid g'
+                                      height: '42px',
+                                      background: snapshot.isDragging
+                                        ? '#bbdefb'
+                                        : '#F5F5F5'
+                                    }}
+                                  >
+                                    <AddCommentTip fieldName={f.name}>
+                                      {fieldHeaders.current[f.name]}
+                                    </AddCommentTip>
+                                  </div>
                                 </div>
                               </div>
                             )}
