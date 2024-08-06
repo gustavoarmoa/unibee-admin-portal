@@ -7,12 +7,21 @@ import {
   PlusOutlined,
   SyncOutlined
 } from '@ant-design/icons'
-import { Button, Pagination, Space, Table, Tooltip, message } from 'antd'
+import {
+  Button,
+  Pagination,
+  Result,
+  Space,
+  Table,
+  Tabs,
+  Tooltip,
+  message
+} from 'antd'
 import type { ColumnsType, TableProps } from 'antd/es/table'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { PLAN_STATUS } from '../../constants'
 import { formatPlanPrice } from '../../helpers'
 import { usePagination } from '../../hooks'
@@ -40,7 +49,14 @@ type TFilters = {
   type: number[] | null // plan type filter
   status: number[] | null // plan status filter
 }
-const Index = () => {
+
+const Index = ({
+  productId,
+  isProductValid
+}: {
+  productId: number
+  isProductValid: boolean
+}) => {
   const navigate = useNavigate()
   const { page, onPageChange } = usePagination()
   const [total, setTotal] = useState(0)
@@ -52,7 +68,8 @@ const Index = () => {
     status: null
   })
 
-  const goToDetail = (planId: number) => navigate(`${APP_PATH}plan/${planId}`)
+  const goToDetail = (planId: number) =>
+    navigate(`${APP_PATH}plan/${planId}?productId=${productId}`)
   const copyPlan = async (planId: number) => {
     setCopyingPlan(true)
     const [newPlan, err] = await copyPlanReq(planId)
@@ -67,7 +84,7 @@ const Index = () => {
   const onNewPlan = () => {
     // setPage(0) // if user are on page 3, after creating new plan, they'll be redirected back to page 1,so the newly created plan will be shown on the top
     onPageChange(1, 100)
-    navigate(`${APP_PATH}plan/new`)
+    navigate(`${APP_PATH}plan/new?productId=${productId}`)
   }
 
   const fetchPlan = async () => {
@@ -77,6 +94,7 @@ const Index = () => {
         // type: undefined, // get main plan and addon
         // status: undefined, // active, inactive, expired, editing, all of them
         ...filters,
+        productIds: [productId],
         page: page,
         count: PAGE_SIZE
       },
@@ -237,50 +255,67 @@ const Index = () => {
   }
 
   useEffect(() => {
-    fetchPlan()
+    if (isProductValid) {
+      fetchPlan()
+    }
   }, [filters, page])
 
   return (
     <>
-      <Table
-        columns={columns}
-        dataSource={plan}
-        rowKey={'id'}
-        rowClassName="clickable-tbl-row"
-        pagination={false}
-        loading={{
-          spinning: loading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
-        }}
-        onChange={onTableChange}
-        onRow={(record, rowIndex) => {
-          return {
-            onClick: (event) => {
-              if (
-                event.target instanceof Element &&
-                event.target.closest('.plan-action-btn-wrapper') != null
-              ) {
-                return
+      {!isProductValid ? (
+        <div className="flex justify-center">
+          <Result
+            status="404"
+            title="Product not found"
+            // subTitle="Invalid product"
+            // extra={<Button type="primary">Back Home</Button>}
+          />
+        </div>
+      ) : (
+        <>
+          <Table
+            columns={columns}
+            dataSource={plan}
+            rowKey={'id'}
+            rowClassName="clickable-tbl-row"
+            pagination={false}
+            loading={{
+              spinning: loading,
+              indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+            }}
+            onChange={onTableChange}
+            onRow={(record, rowIndex) => {
+              return {
+                onClick: (event) => {
+                  if (
+                    event.target instanceof Element &&
+                    event.target.closest('.plan-action-btn-wrapper') != null
+                  ) {
+                    return
+                  }
+                  navigate(
+                    `${APP_PATH}plan/${record.id}?productId=${productId}`
+                  )
+                }
               }
-              navigate(`${APP_PATH}plan/${record.id}`)
-            }
-          }
-        }}
-      />
-      <div className="mx-0 my-4 flex items-center justify-end">
-        <Pagination
-          current={page + 1} // back-end starts with 0, front-end starts with 1
-          pageSize={PAGE_SIZE}
-          total={total}
-          size="small"
-          onChange={onPageChange}
-          showTotal={(total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`
-          }
-          disabled={loading}
-          showSizeChanger={false}
-        />
-      </div>
+            }}
+          />
+          <div className="mx-0 my-4 flex items-center justify-end">
+            <Pagination
+              current={page + 1} // back-end starts with 0, front-end starts with 1
+              pageSize={PAGE_SIZE}
+              total={total}
+              size="small"
+              onChange={onPageChange}
+              showTotal={(total, range) =>
+                `${range[0]}-${range[1]} of ${total} items`
+              }
+              disabled={loading}
+              showSizeChanger={false}
+            />
+          </div>
+        </>
+      )}
     </>
   )
 }

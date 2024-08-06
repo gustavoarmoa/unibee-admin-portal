@@ -18,7 +18,12 @@ import {
 } from 'antd'
 import update from 'immutability-helper'
 import React, { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams
+} from 'react-router-dom'
 import { CURRENCY } from '../../constants'
 import {
   currencyDecimalValidate,
@@ -31,6 +36,7 @@ import {
   activatePlan,
   deletePlanReq,
   getPlanDetailWithMore,
+  getProductDetailReq,
   savePlan,
   togglePublishReq
 } from '../../requests'
@@ -117,6 +123,10 @@ const Index = () => {
   const planId = params.planId
   const isNew = planId == null
 
+  const [searchParams, setSearchParams] = useSearchParams()
+  const productId = useRef(parseInt(searchParams.get('productId') ?? '0'))
+  const [isProductValid, setIsProductValid] = useState(true) // user might manually type the invalid productId in url
+
   // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false)
   const [activating, setActivating] = useState(false)
@@ -157,7 +167,8 @@ const Index = () => {
   let savable =
     isNew || plan?.status == 1 || (plan?.status == 2 && plan.publishStatus == 1) // isNew || plan editing || (active && unpublished)
 
-  let formDisabled = plan?.status == 2 && plan.publishStatus == 2 // plan active && published
+  let formDisabled =
+    (plan?.status == 2 && plan.publishStatus == 2) || !isProductValid // (plan active && published) or productId is invalid
 
   const selectAfter = (
     <Select
@@ -245,6 +256,10 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       delete f.onetimeAddonIds
     }
 
+    if (isNew) {
+      f.productId = Number(productId.current)
+    }
+
     if (!isValidMap(f.metadata)) {
       message.error('Invalid custom data')
       return
@@ -277,8 +292,14 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     }
     console.log('saving plan res: ', updatedPlan)
     message.success(`Plan ${isNew ? 'created' : 'saved'}`)
+    productId.current = updatedPlan.productId
     if (isNew) {
-      navigate(`${APP_PATH}plan/${updatedPlan.id}`, { replace: true })
+      navigate(
+        `${APP_PATH}plan/${updatedPlan.id}&productId=${updatedPlan.productId}`,
+        {
+          replace: true
+        }
+      )
     } else {
       // navigate(`${APP_PATH}plan/list`)
     }
@@ -525,6 +546,19 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
 
   useEffect(() => {
     fetchData()
+    const getProductDetail = async () => {
+      const [res, err] = await getProductDetailReq(productId.current)
+      console.log('get product detail res: ', res)
+      if (null != err) {
+        // message.error(err.message)
+        setIsProductValid(false)
+        return
+      }
+      if (res.product == null) {
+        setIsProductValid(false)
+      }
+    }
+    getProductDetail()
   }, [])
 
   return (
@@ -1053,7 +1087,11 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               )}
               <div className="flex justify-center gap-5">
                 <Button
-                  onClick={() => navigate(`${APP_PATH}plan/list`)}
+                  onClick={() =>
+                    navigate(
+                      `${APP_PATH}plan/list?product=${isProductValid ? productId.current : 0}`
+                    )
+                  }
                   disabled={loading || activating}
                 >
                   Go Back
@@ -1062,7 +1100,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                   type="primary"
                   htmlType="submit"
                   loading={loading}
-                  disabled={loading || activating || !savable}
+                  disabled={
+                    loading || activating || !savable || !isProductValid
+                  }
                 >
                   Save
                 </Button>

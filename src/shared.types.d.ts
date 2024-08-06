@@ -91,8 +91,19 @@ interface IAddon extends IPlan {
   checked: boolean
 }
 
+interface IProduct {
+  id: number
+  productName: string
+  description: string
+  status: number // ，1-active，2-inactive, default active
+  metaData: string // json string
+  createTime: number
+  isDeleted: number
+}
+
 interface IPlan {
   id: number
+  productId: number
   externalPlanId?: '' // used for subscription import, the to-be-imported active sub need to bind to a plan.
   planName: string
   description: string
@@ -116,6 +127,8 @@ interface IPlan {
   trialDurationTime?: number
   trialDemand?: 'paymentMethod' | '' | boolean // backend requires this field to be a fixed string of 'paymentMethod' or '', but to ease the UX, front-end use <Switch />
   cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number of 1 | 0, but to ease the UX, front-end use <Switch />
+  productId: number
+  product: IProduct
 }
 
 interface ISubAddon extends IPlan {
@@ -503,6 +516,7 @@ export type {
   IOneTimeHistoryItem,
   IPlan,
   IPreview,
+  IProduct,
   IProfile,
   ISubHistoryItem,
   ISubscriptionType,

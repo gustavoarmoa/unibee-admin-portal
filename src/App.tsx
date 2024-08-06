@@ -11,7 +11,7 @@ import {
   UnorderedListOutlined
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { Button, Drawer, Layout, Menu, message, theme } from 'antd'
+import { Button, Layout, Menu, message, theme } from 'antd'
 import React, { useEffect, useState } from 'react'
 import {
   Navigate,
@@ -41,7 +41,7 @@ import BillableMetricsList from './components/billableMetrics/list'
 import DiscountCodeDetail from './components/discountCode/detail'
 import DiscountCodeList from './components/discountCode/list'
 import DiscountCodeUsage from './components/discountCode/usageDetail'
-import PricePlanList from './components/plan/list'
+import PricePlanList from './components/plan'
 import Settings from './components/settings/index'
 import SubscriptionDetail from './components/subscription/detail'
 import SubscriptionList from './components/subscription/list'
@@ -106,7 +106,7 @@ const App: React.FC = () => {
     appConfigStore.setTaskListOpen(!appConfigStore.taskListOpen)
 
   let items: MenuItem[] = [
-    getItem('Plan', '/plan/list', <DesktopOutlined />),
+    getItem('Product and Plan', '/plan/list', <DesktopOutlined />),
     getItem('Billable Metric', '/billable-metric/list', <DesktopOutlined />),
     getItem('Discount Code', '/discount-code/list', <DesktopOutlined />),
     getItem('Subscription', '/subscription/list', <PieChartOutlined />),

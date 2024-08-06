@@ -80,7 +80,7 @@ const Index = () => {
         onPressEnter={onEnter}
         allowClear={true}
         // prefix={<SearchOutlined />}
-        placeholder="Search invoiceId, customer email"
+        placeholder="Search invoice Id, customer email"
         style={{ width: '320px' }}
       />
       <div

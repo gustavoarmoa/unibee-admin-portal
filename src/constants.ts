@@ -130,7 +130,7 @@ const PERMISSIONS = {
   plan: {
     order: 0,
     group: 'plan',
-    label: 'Plan',
+    label: 'Product and Plan',
     width: 100,
     permissions: ['access']
   },

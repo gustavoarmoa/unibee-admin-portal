@@ -381,6 +381,7 @@ export const saveSendGridKeyReq = async (vatKey: string) => {
 export type TPlanListBody = {
   type?: number[] | null
   status?: number[] | null
+  productIds?: number[] | null
   publishStatus?: number // 1-UnPublished，2-Published
   page: number
   count: number
@@ -2564,6 +2565,95 @@ export const removeExportTmplReq = async ({
     const res = await request.post(`/merchant/task/delete_export_template`, {
       templateId
     })
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getProductListReq = async (count?: number, page?: number) => {
+  try {
+    const res = await request.post(`/merchant/product/list`, {
+      count: count ?? 30,
+      page: page ?? 0
+    })
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const saveProductReq = async ({
+  productId,
+  productName,
+  description
+}: {
+  productId?: number
+  productName: string
+  description: string
+}) => {
+  const isNew = productId == null
+  const url = `/merchant/product/${isNew ? 'new' : 'edit'}`
+  const body: any = { productName, description }
+  if (!isNew) {
+    body.productId = productId
+  }
+  try {
+    const res = await request.post(url, body)
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const deleteProductReq = async (productId: number) => {
+  try {
+    const res = await request.post(`/merchant/product/delete`, {
+      productId
+    })
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+// https://api.unibee.top/merchant/product/detail
+export const getProductDetailReq = async (productId: number) => {
+  try {
+    const res = await request.post(
+      `/merchant/product/detail?productId=${productId}`,
+      {
+        productId
+      }
+    )
     if (res.data.code == 61 || res.data.code == 62) {
       session.setSession({ expired: true, refresh: null })
       throw new ExpiredError(
