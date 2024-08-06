@@ -114,7 +114,7 @@ const App: React.FC = () => {
     getItem('Transaction', '/transaction/list', <TransactionOutlined />),
     getItem('User List', '/user/list', <IdcardOutlined />),
     getItem('Admin List', '/admin/list', <TeamOutlined />),
-    getItem('Analytics', '/analytics', <PieChartOutlined />),
+    // getItem('Analytics', '/analytics', <PieChartOutlined />),
     getItem('My Account', '/my-account', <IdcardOutlined />),
     getItem('Report', '/report', <BarChartOutlined />),
     getItem('Configuration', '/configuration', <SettingOutlined />),
@@ -377,7 +377,7 @@ const app_routes = [
       />
     )
   },
-  {
+  /* {
     page: 'analytics',
     route: (
       <Route
@@ -386,7 +386,7 @@ const app_routes = [
         Component={Dashboard}
       />
     )
-  },
+  }, */
   {
     page: 'configuration',
     route: (

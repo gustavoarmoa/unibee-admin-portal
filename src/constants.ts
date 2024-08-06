@@ -183,13 +183,13 @@ const PERMISSIONS = {
     width: 100,
     permissions: ['access']
   },
-  analytics: {
+  /* analytics: {
     order: 8,
     group: 'analytics',
     label: 'Analytics',
     width: 100,
     permissions: ['access']
-  },
+  }, */
   report: {
     order: 9,
     group: 'report',
