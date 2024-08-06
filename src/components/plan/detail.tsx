@@ -14,6 +14,7 @@ import {
   Select,
   Spin,
   Switch,
+  Tag,
   message
 } from 'antd'
 import update from 'immutability-helper'
@@ -40,7 +41,7 @@ import {
   savePlan,
   togglePublishReq
 } from '../../requests'
-import { IBillableMetrics, IPlan } from '../../shared.types.d'
+import { IBillableMetrics, IPlan, IProduct } from '../../shared.types.d'
 import { PlanStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -126,6 +127,7 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const productId = useRef(parseInt(searchParams.get('productId') ?? '0'))
   const [isProductValid, setIsProductValid] = useState(true) // user might manually type the invalid productId in url
+  const productDetail = useRef<IProduct | null>(null)
 
   // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false)
@@ -209,6 +211,9 @@ const Index = () => {
   }, [itvCountUnit, itvCountValue, planCurrency])
 
   const onSave = async (values: any) => {
+    if (!isProductValid) {
+      return
+    }
     const f = JSON.parse(JSON.stringify(values))
     f.amount = Number(f.amount)
     f.amount *= CURRENCY[f.currency].stripe_factor
@@ -551,13 +556,16 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       const [res, err] = await getProductDetailReq(productId.current)
       console.log('get product detail res: ', res)
       if (null != err) {
-        // message.error(err.message)
+        message.error('Invalid product')
         setIsProductValid(false)
         return
       }
       if (res.product == null) {
+        message.error('Invalid product')
         setIsProductValid(false)
+        return
       }
+      productDetail.current = res.product
     }
     getProductDetail()
   }, [])
@@ -586,6 +594,16 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
               <Input disabled />
             </Form.Item>
           )}
+
+          <Form.Item label="Product name">
+            <span>
+              {isProductValid ? (
+                productDetail.current?.productName
+              ) : (
+                <Tag color="red">Invalid product</Tag>
+              )}
+            </span>
+          </Form.Item>
 
           <Form.Item
             label="Plan Name"
@@ -1081,7 +1099,10 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                   showCancel={false}
                   okText="Yes"
                 >
-                  <Button danger disabled={loading || activating}>
+                  <Button
+                    danger
+                    disabled={loading || activating || !isProductValid}
+                  >
                     Delete
                   </Button>
                 </Popconfirm>
@@ -1112,7 +1133,11 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                     onClick={onActivate}
                     loading={activating}
                     disabled={
-                      isNew || plan.status != 1 || activating || loading
+                      isNew ||
+                      plan.status != 1 ||
+                      activating ||
+                      loading ||
+                      !isProductValid
                     }
                   >
                     Activate
