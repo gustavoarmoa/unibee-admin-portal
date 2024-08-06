@@ -295,7 +295,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     productId.current = updatedPlan.productId
     if (isNew) {
       navigate(
-        `${APP_PATH}plan/${updatedPlan.id}&productId=${updatedPlan.productId}`,
+        `${APP_PATH}plan/${updatedPlan.id}?productId=${updatedPlan.productId}`,
         {
           replace: true
         }
@@ -319,7 +319,6 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       return
     }
     message.success('Plan activated')
-    // navigate(`${APP_PATH}plan/list`)
     fetchData()
   }
 
@@ -344,7 +343,9 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       return
     }
     message.success('Plan deleted')
-    navigate(`${APP_PATH}plan/list`)
+    navigate(
+      `${APP_PATH}plan/list?product=${isProductValid ? productId.current : 0}` // no need to do isValid check, only valid can be deleted.
+    )
   }
 
   const fetchData = async () => {
