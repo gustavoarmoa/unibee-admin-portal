@@ -21,6 +21,7 @@ const Index = ({ closeModal, refresh, productId }: Props) => {
       return
     }
     refresh()
+    closeModal()
   }
 
   return (
