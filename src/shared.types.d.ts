@@ -34,6 +34,7 @@ interface IProfile {
   whatsAPP: string
   otherSocialInfo: string
   token: string
+  language: string // en | ru | cn | vi | pt,      English | Russian | Chinese | Vietnamese | Portuguese
 }
 
 // this is admin profile

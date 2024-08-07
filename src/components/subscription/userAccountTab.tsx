@@ -140,7 +140,7 @@ const UserAccountTab = ({
             </Col>
             <Col span={12}>
               <Form.Item label="Account Type" name="type">
-                <Radio.Group disabled>
+                <Radio.Group>
                   <Radio value={1}>Individual</Radio>
                   <Radio value={2}>Business</Radio>
                 </Radio.Group>
@@ -334,6 +334,22 @@ const UserAccountTab = ({
                   />
                 </div>
               </div>
+            </Col>
+          </Row>
+          <Row>
+            <Col span={12}>
+              <Form.Item label="Preferred language" name="language">
+                <Select
+                  style={{ width: '300px' }}
+                  options={[
+                    { value: 'en', label: 'English' },
+                    { value: 'ru', label: 'Russian' },
+                    { value: 'cn', label: 'Chinese' },
+                    { value: 'vi', label: 'Vietnamese' },
+                    { value: 'pt', label: 'Portuguese' }
+                  ]}
+                />
+              </Form.Item>
             </Col>
           </Row>
           <Divider orientation="left" style={{ margin: '16px 0' }}>

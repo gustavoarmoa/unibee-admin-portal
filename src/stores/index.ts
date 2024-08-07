@@ -32,7 +32,8 @@ const INITIAL_PROFILE: IProfile = {
   weChat: '',
   whatsAPP: '',
   otherSocialInfo: '',
-  token: ''
+  token: '',
+  language: 'en'
 }
 
 interface ProfileSlice extends IProfile {
