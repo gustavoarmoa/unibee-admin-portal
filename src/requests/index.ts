@@ -2645,7 +2645,6 @@ export const deleteProductReq = async (productId: number) => {
   }
 }
 
-// https://api.unibee.top/merchant/product/detail
 export const getProductDetailReq = async (productId: number) => {
   try {
     const res = await request.post(

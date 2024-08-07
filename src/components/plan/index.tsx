@@ -21,6 +21,7 @@ import {
 } from '../../requests'
 import '../../shared.css'
 import { IProduct } from '../../shared.types'
+import DeleteProductModal from './deleteProductModal'
 import PlanList from './planList'
 import ProductModal from './productModal'
 
@@ -35,10 +36,12 @@ const Index = () => {
   const [productId, setProductId] = useState(searchParams.get('product') ?? '0') // set default tab
   const [loading, setLoading] = useState(false)
   const [productList, setProductList] = useState<IProduct[]>([])
-  const [productModalOpen, setProductModalOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const [productModalOpen, setProductModalOpen] = useState(false)
   const toggleProductModal = () => setProductModalOpen(!productModalOpen)
-  const [deleteProductModal, setDeleteProductModal] = useState(false)
+  const [deleteProductModalOpen, setDeleteProductModalOpen] = useState(false)
+  const toggleDeleteProductModal = () =>
+    setDeleteProductModalOpen(!deleteProductModalOpen)
 
   const onTabChange = (newActiveKey: string) => {
     setProductId(newActiveKey)
@@ -70,7 +73,6 @@ const Index = () => {
     }
 
     const productList = res.products ?? []
-    // setProductList(productList)
     if (productId == '0') {
       setProductList(productList)
       return
@@ -106,11 +108,15 @@ const Index = () => {
     setIsProductValid(true)
   }
 
+  // no Modal popped up if deleting invalid product
   const deleteProduct = async (productId: string) => {
     // invalid product tab are created locally, just to show user "this is invalid, nothing you can do"
     // to remove invalid product, no backend call is needed.
     console.log('delete.... ', isProductValid)
     if (!isProductValid) {
+      // locally delete it
+      refreshProductList()
+      /*
       const idx = productList.findIndex(
         (p) => p.id.toString() == productId || p.id == Number(productId)
       )
@@ -121,6 +127,7 @@ const Index = () => {
         setSearchParams({ product: '0' })
         setIsProductValid(true)
       }
+        */
       return
     }
 
@@ -128,15 +135,20 @@ const Index = () => {
       message.info('Default product cannot be deleted')
       return
     }
+    toggleDeleteProductModal()
+  }
 
-    setLoading(true)
-    const [res, err] = await deleteProductReq(Number(productId))
-    setLoading(false)
-    if (null != err) {
-      message.error(err.message)
-      return
+  // used after deleting a valid product
+  const refreshProductList = () => {
+    const idx = productList.findIndex(
+      (p) => p.id.toString() == productId || p.id == Number(productId)
+    )
+    if (idx != -1) {
+      setProductList(update(productList, { $splice: [[idx, 1]] }))
+      setProductId('0')
+      setSearchParams({ product: '0' })
+      setIsProductValid(true)
     }
-    // setProductList(res.products ?? [])
   }
 
   const onSaveProduct = (product: IProduct) => {
@@ -164,6 +176,13 @@ const Index = () => {
 
   return (
     <>
+      {deleteProductModalOpen && (
+        <DeleteProductModal
+          productId={Number(productId)}
+          closeModal={toggleDeleteProductModal}
+          refresh={refreshProductList}
+        />
+      )}
       {productModalOpen && (
         <ProductModal
           isNew={isCreating}

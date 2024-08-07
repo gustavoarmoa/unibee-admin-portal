@@ -1,52 +1,55 @@
-import {
-  Button,
-  Col,
-  Divider,
-  Form,
-  Input,
-  message,
-  Modal,
-  Row,
-  Select,
-  Switch
-} from 'antd'
-import TextArea from 'antd/es/input/TextArea'
-import update from 'immutability-helper'
+import { Button, Form, message, Modal } from 'antd'
 import React, { useEffect, useState } from 'react'
-import HiddenIcon from '../../assets/hidden.svg?react'
-import {
-  createSubscriptionReq,
-  getPlanList,
-  TPlanListBody
-} from '../../requests'
-import { IPlan, IProduct, IProfile } from '../../shared.types.d'
+import { deleteProductReq } from '../../requests'
 import { useAppConfigStore } from '../../stores'
-import Plan from '../subscription/plan'
-import PaymentMethodSelector from '../ui/paymentSelector'
 
 interface Props {
-  refresh: (p: IProduct) => void
+  refresh: () => void
   closeModal: () => void
-  isNew: boolean
-  detail: IProduct | undefined // if not passed, we are creating new product. if passed, we are editing this product
+  productId: number
 }
 
-const Index = ({ closeModal, isNew, refresh, detail }: Props) => {
-  const [form] = Form.useForm()
-  const appConfig = useAppConfigStore()
+const Index = ({ closeModal, refresh, productId }: Props) => {
   const [loading, setLoading] = useState(false)
 
-  const fetchProduct = async () => {}
+  const onDelete = async () => {
+    setLoading(true)
+    const [res, err] = await deleteProductReq(productId)
+    setLoading(false)
+    if (null != err) {
+      message.error(err.message)
+      return
+    }
+    refresh()
+  }
 
   return (
     <Modal
-      title="Product detail"
+      title="Product delete confirm"
       open={true}
       width={'720px'}
       footer={null}
       closeIcon={null}
     >
-      <div></div>
+      <p>Are you sure you want to delete this product?</p>
+      <div
+        className="flex items-center justify-end gap-4"
+        style={{
+          marginTop: '24px'
+        }}
+      >
+        <Button onClick={closeModal} disabled={loading}>
+          Cancel
+        </Button>
+        <Button
+          type="primary"
+          onClick={onDelete}
+          loading={loading}
+          disabled={loading}
+        >
+          OK
+        </Button>
+      </div>
     </Modal>
   )
 }
