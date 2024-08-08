@@ -1,24 +1,11 @@
-import {
-  CheckCircleOutlined,
-  CopyOutlined,
-  EditOutlined,
-  LoadingOutlined,
-  MinusOutlined,
-  PlusOutlined,
-  SyncOutlined
-} from '@ant-design/icons'
+import { EditOutlined } from '@ant-design/icons'
 import { Button, Space, Tabs, message } from 'antd'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
 import update from 'immutability-helper'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import {
-  activatePlan,
-  deleteProductReq,
-  getProductDetailReq,
-  getProductListReq
-} from '../../requests'
+import { getProductDetailReq, getProductListReq } from '../../requests'
 import '../../shared.css'
 import { IProduct } from '../../shared.types'
 import DeleteProductModal from './deleteProductModal'
@@ -34,6 +21,7 @@ const Index = () => {
   // const productId = useRef(parseInt(searchParams.get('productId') ?? '0'))
   const [isProductValid, setIsProductValid] = useState(true) // user might manually type the invalid productId in url
   const [productId, setProductId] = useState(searchParams.get('product') ?? '0') // set default tab
+  const deleteProductId = useRef<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [productList, setProductList] = useState<IProduct[]>([])
   const [isCreating, setIsCreating] = useState(false)
@@ -56,6 +44,7 @@ const Index = () => {
       setIsCreating(true)
       toggleProductModal()
     } else if (action == 'remove') {
+      deleteProductId.current = targetKey as string
       deleteProduct(targetKey as string)
     } else {
       return
@@ -110,24 +99,11 @@ const Index = () => {
 
   // no Modal popped up if deleting invalid product
   const deleteProduct = async (productId: string) => {
-    // invalid product tab are created locally, just to show user "this is invalid, nothing you can do"
+    // invalid product tab are created locally, just to show user "product not found", nothing you can do
     // to remove invalid product, no backend call is needed.
-    console.log('delete.... ', isProductValid)
     if (!isProductValid) {
       // locally delete it
       refreshProductList()
-      /*
-      const idx = productList.findIndex(
-        (p) => p.id.toString() == productId || p.id == Number(productId)
-      )
-      console.log('product idx: ', idx, '//', productId, '///', productList)
-      if (idx != -1) {
-        setProductList(update(productList, { $splice: [[idx, 1]] }))
-        setProductId('0')
-        setSearchParams({ product: '0' })
-        setIsProductValid(true)
-      }
-        */
       return
     }
 
@@ -141,13 +117,17 @@ const Index = () => {
   // used after deleting a valid product
   const refreshProductList = () => {
     const idx = productList.findIndex(
-      (p) => p.id.toString() == productId || p.id == Number(productId)
+      (p) => p.id.toString() == deleteProductId.current
     )
     if (idx != -1) {
       setProductList(update(productList, { $splice: [[idx, 1]] }))
-      setProductId('0')
-      setSearchParams({ product: '0' })
       setIsProductValid(true)
+      // I'm on productA, and try to delete productA
+      if (deleteProductId.current == productId) {
+        setProductId('0')
+        setSearchParams({ product: '0' })
+      }
+      // I'm on productA, try to delete productB, then no need to set searchParams or default productId
     }
   }
 
@@ -178,7 +158,9 @@ const Index = () => {
     <>
       {deleteProductModalOpen && (
         <DeleteProductModal
-          productId={Number(productId)}
+          product={productList.find(
+            (p) => p.id == Number(deleteProductId.current)
+          )}
           closeModal={toggleDeleteProductModal}
           refresh={refreshProductList}
         />
