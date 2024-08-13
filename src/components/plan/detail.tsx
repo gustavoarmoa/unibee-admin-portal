@@ -565,6 +565,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
         setIsProductValid(false)
         return
       }
+      setIsProductValid(true)
       productDetail.current = res.product
     }
     getProductDetail()

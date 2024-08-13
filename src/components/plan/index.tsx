@@ -1,5 +1,5 @@
-import { EditOutlined } from '@ant-design/icons'
-import { Button, Space, Tabs, message } from 'antd'
+import { EditOutlined, LoadingOutlined } from '@ant-design/icons'
+import { Button, Space, Spin, Tabs, message } from 'antd'
 // import currency from 'currency.js'
 import Dinero, { Currency } from 'dinero.js'
 import update from 'immutability-helper'
@@ -16,7 +16,6 @@ const APP_PATH = import.meta.env.BASE_URL
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string
 
 const Index = () => {
-  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   // const productId = useRef(parseInt(searchParams.get('productId') ?? '0'))
   const [isProductValid, setIsProductValid] = useState(true) // user might manually type the invalid productId in url
@@ -71,18 +70,7 @@ const Index = () => {
       Number(productId)
     )
     console.log('get product detail res: ', productRes, '//', productErr)
-    if (null != productErr) {
-      // message.error(err.message)
-      productList.push({
-        id: productId,
-        productName: productId,
-        description: ''
-      })
-      setProductList(productList)
-      setIsProductValid(false)
-      return
-    }
-    if (productRes.product == null) {
+    if (null != productErr || productRes.product == null) {
       productList.push({
         id: productId,
         productName: productId,
@@ -173,31 +161,33 @@ const Index = () => {
           refresh={onSaveProduct}
         />
       )}
-      <Tabs
-        type="editable-card"
-        tabBarExtraContent={{
-          left: (
-            <Button
-              // disabled={copyingPlan}
-              style={{ border: 'unset' }}
-              onClick={toggleProductModal}
-              icon={<EditOutlined />}
-            />
-          )
-        }}
-        // renderTabBar={Tabbar}
-        onChange={onTabChange}
-        // onTabClick={(key, evt) => console.log('key/evt: ', key, '//', evt)}
-        activeKey={productId}
-        onEdit={onTabEdit}
-        items={productList.map((p) => ({
-          label: p.productName,
-          key: p.id.toString(),
-          children: (
-            <PlanList productId={p.id} isProductValid={isProductValid} />
-          )
-        }))}
-      />
+      <Spin
+        spinning={loading}
+        indicator={<LoadingOutlined style={{ fontSize: 32 }} spin />}
+      >
+        <Tabs
+          type="editable-card"
+          tabBarExtraContent={{
+            left: (
+              <Button
+                style={{ border: 'unset' }}
+                onClick={toggleProductModal}
+                icon={<EditOutlined />}
+              />
+            )
+          }}
+          onChange={onTabChange}
+          activeKey={productId}
+          onEdit={onTabEdit}
+          items={productList.map((p) => ({
+            label: p.productName,
+            key: p.id.toString(),
+            children: (
+              <PlanList productId={p.id} isProductValid={isProductValid} />
+            )
+          }))}
+        />
+      </Spin>
     </>
   )
 }
