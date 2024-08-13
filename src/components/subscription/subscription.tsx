@@ -39,7 +39,7 @@ import {
   IPlan,
   IPreview,
   ISubscriptionType
-} from '../../shared.types.d'
+} from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
 import { DiscountCodeStatus, SubscriptionStatus } from '../ui/statusTag'
 import CancelPendingSubModal from './modals/cancelPendingSub'
@@ -284,6 +284,8 @@ const Index = ({
 
   // fetch current subscription detail, and all active plans.
   const fetchData = async () => {
+    // activeSub
+
     const pathName = window.location.pathname.split('/')
     const subId = pathName.pop()
     if (subId == null) {

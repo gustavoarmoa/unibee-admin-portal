@@ -1,0 +1,200 @@
+import { LoadingOutlined } from '@ant-design/icons'
+import { Col, Divider, message, Pagination, Popover, Row, Table } from 'antd'
+import { ColumnsType } from 'antd/es/table'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { formatDate, showAmount } from '../../helpers'
+import { usePagination } from '../../hooks'
+import { getSubscriptionHistoryReq } from '../../requests'
+import { ISubHistoryItem } from '../../shared.types'
+import { SubHistoryStatus } from '../ui/statusTag'
+
+const PAGE_SIZE = 10
+const APP_PATH = import.meta.env.BASE_URL
+
+const Index = ({ userId }: { userId: number }) => {
+  const navigate = useNavigate()
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const { page, onPageChangeNoParams } = usePagination()
+  const [total, setTotal] = useState(0)
+  const [subHistory, setSubHistory] = useState<ISubHistoryItem[]>([])
+
+  const getSubHistory = async () => {
+    setHistoryLoading(true)
+    const [res, err] = await getSubscriptionHistoryReq({
+      page,
+      count: PAGE_SIZE,
+      userId
+    })
+    setHistoryLoading(false)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    console.log('sub his res: ', res)
+    const { subscriptionTimeLines, total } = res
+    setSubHistory(subscriptionTimeLines ?? [])
+    setTotal(total)
+  }
+
+  useEffect(() => {
+    getSubHistory()
+  }, [page])
+
+  const columns: ColumnsType<ISubHistoryItem> = [
+    {
+      title: 'Item Name',
+      dataIndex: 'itemName',
+      key: 'itemName',
+      render: (plan, record) =>
+        record.plan == null ? (
+          '―'
+        ) : (
+          <div
+            className=" w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}plan/${record.plan.id}`)}
+          >
+            {record.plan.planName}
+          </div>
+        )
+    },
+    {
+      title: 'Start Time',
+      dataIndex: 'periodStart',
+      key: 'periodStart',
+      render: (d) => (d == 0 || d == null ? '―' : formatDate(d))
+    },
+    {
+      title: 'End Time',
+      dataIndex: 'periodEnd',
+      key: 'periodEnd',
+      render: (d) => (d == 0 || d == null ? '―' : formatDate(d))
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      render: (s) => SubHistoryStatus(s)
+    },
+    {
+      title: 'Created at',
+      dataIndex: 'createTime',
+      key: 'createTime',
+      render: (d, _) => (d === 0 ? 'N/A' : formatDate(d, true))
+    },
+    {
+      title: 'Addons',
+      dataIndex: 'addons',
+      key: 'addons',
+      render: (addons) =>
+        addons == null ? (
+          '―'
+        ) : (
+          <Popover
+            placement="top"
+            title="Addon breakdown"
+            content={
+              <div style={{ width: '280px' }}>
+                {addons.map((a: any) => (
+                  <Row key={a.id}>
+                    <Col span={10} className=" font-bold text-gray-500">
+                      {a.addonPlan.planName}
+                    </Col>
+                    <Col span={14}>
+                      {showAmount(a.addonPlan.amount, a.addonPlan.currency)} ×{' '}
+                      {a.quantity} ={' '}
+                      {showAmount(
+                        a.addonPlan.amount * a.quantity,
+                        a.addonPlan.currency
+                      )}
+                    </Col>
+                  </Row>
+                ))}
+              </div>
+            }
+          >
+            <span style={{ marginLeft: '8px', cursor: 'pointer' }}>
+              {addons.length}
+            </span>
+          </Popover>
+        )
+    },
+    {
+      title: 'Subscription Id',
+      dataIndex: 'subscriptionId',
+      key: 'subscriptionId',
+      width: 140,
+      render: (subId) =>
+        subId == '' || subId == null ? (
+          ''
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}subscription/${subId}`)}
+          >
+            {subId}
+          </div>
+        )
+    },
+    {
+      title: 'Invoice Id',
+      dataIndex: 'invoiceId',
+      key: 'invoiceId',
+      width: 140,
+      render: (invoiceId) =>
+        invoiceId == '' || invoiceId == null ? (
+          ''
+        ) : (
+          <div
+            className=" w-28 overflow-hidden overflow-ellipsis whitespace-nowrap text-blue-500"
+            onClick={() => navigate(`${APP_PATH}invoice/${invoiceId}`)}
+          >
+            {invoiceId}
+          </div>
+        )
+    },
+    { title: 'Payment Id', dataIndex: 'paymentId', key: 'paymentId' }
+  ]
+
+  return (
+    <>
+      <Divider orientation="left" style={{ margin: '16px 0' }}>
+        Subscription and Add-on History
+      </Divider>
+      <Table
+        columns={columns}
+        dataSource={subHistory}
+        rowKey={'uniqueId'}
+        rowClassName="clickable-tbl-row"
+        pagination={false}
+        scroll={{ x: 1280 }}
+        onRow={(record, rowIndex) => {
+          return {
+            onClick: (event) => {}
+          }
+        }}
+        loading={{
+          spinning: historyLoading,
+          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+        }}
+      />
+      <div className="mt-6 flex justify-end">
+        <Pagination
+          style={{ marginTop: '16px' }}
+          current={page + 1} // back-end starts with 0, front-end starts with 1
+          pageSize={PAGE_SIZE}
+          total={total}
+          showTotal={(total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`
+          }
+          size="small"
+          onChange={onPageChangeNoParams}
+          disabled={historyLoading}
+          showSizeChanger={false}
+        />
+      </div>
+    </>
+  )
+}
+
+export default Index

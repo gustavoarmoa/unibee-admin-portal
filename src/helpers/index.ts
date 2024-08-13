@@ -3,7 +3,12 @@ import dayjs from 'dayjs'
 import Dinero from 'dinero.js'
 import passwordValidator from 'password-validator'
 import { CURRENCY } from '../constants'
-import { IPlan, TInvoicePerm, UserInvoice } from '../shared.types'
+import {
+  IPlan,
+  ISubscriptionType,
+  TInvoicePerm,
+  UserInvoice
+} from '../shared.types'
 
 export const passwordSchema = new passwordValidator()
 passwordSchema
@@ -246,3 +251,42 @@ export const formatPlanInterval = (plan: IPlan | undefined) =>
   plan == null
     ? ''
     : `${plan.intervalCount == 1 ? '' : plan.intervalCount}${plan.intervalUnit}`
+
+// subscription data returned from backend need to be re-constructred before front-end use
+// make sure subDetail is the returned subscription data from backend.
+// in general, it's of the structure: {addons, gateway, plan, subscription, user, unfinishedSubscriptionPendingUpdate}
+export const normalizeSub = (subDetail: any): ISubscriptionType | null => {
+  const {
+    user,
+    addons,
+    unfinishedSubscriptionPendingUpdate,
+    subscription,
+    latestInvoice,
+    plan,
+    gateway
+  } = subDetail
+  if (null == subscription) {
+    return null
+  }
+  const s: ISubscriptionType = { ...subscription }
+  s.plan = plan
+  s.latestInvoice = latestInvoice
+  s.addons = addons?.map((a: any) => ({
+    ...a.addonPlan,
+    quantity: a.quantity,
+    addonPlanId: a.addonPlan.id
+  }))
+  s.user = user
+  s.unfinishedSubscriptionPendingUpdate = unfinishedSubscriptionPendingUpdate
+  if (s.unfinishedSubscriptionPendingUpdate != null) {
+    if (s.unfinishedSubscriptionPendingUpdate.updateAddons != null) {
+      s.unfinishedSubscriptionPendingUpdate.updateAddons =
+        s.unfinishedSubscriptionPendingUpdate.updateAddons.map((a: any) => ({
+          ...a.addonPlan,
+          quantity: a.quantity,
+          addonPlanId: a.addonPlan.id
+        }))
+    }
+  }
+  return s
+}

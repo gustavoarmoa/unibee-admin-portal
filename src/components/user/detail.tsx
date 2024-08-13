@@ -7,6 +7,7 @@ import UserInfo from '../shared/userInfo'
 import InvoiceTab from '../subscription/invoicesTab'
 import TransactionTab from '../subscription/paymentTab'
 import AccountInfoTab from './accountTab'
+import ProductList from './productList'
 import SubscriptionTab from './subscriptionTab'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -45,7 +46,7 @@ const Index = () => {
     {
       key: 'subscription',
       label: 'Subscription',
-      children: <SubscriptionTab userId={userId} extraButton={<GoBackBtn />} />
+      children: <ProductList userId={userId} /> //  <SubscriptionTab userId={userId} extraButton={<GoBackBtn />} />
     },
     {
       key: 'invoice',

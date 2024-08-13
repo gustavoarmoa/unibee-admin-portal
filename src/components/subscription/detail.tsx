@@ -9,7 +9,8 @@ import AdminNote from './adminNote'
 import './detail.css'
 import InvoiceTab from './invoicesTab'
 import PaymentTab from './paymentTab'
-import SubscriptionTab from './subscriptionTab'
+import SubscriptionTab from './subscription'
+// import SubscriptionList from './subscriptionList'
 import UserAccount from './userAccountTab'
 
 const APP_PATH = import.meta.env.BASE_URL // import.meta.env.VITE_APP_PATH;
@@ -51,6 +52,7 @@ const Index = () => {
     {
       key: 'subscription',
       label: 'Subscription',
+      // children: <SubscriptionList />
       children: (
         <SubscriptionTab
           setUserId={setUserId}

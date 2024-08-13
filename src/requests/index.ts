@@ -727,6 +727,34 @@ export const getSubDetailWithMore = async (
   return [{ subDetail, planList }, null]
 }
 
+export const getSubDetailInProductReq = async ({
+  userId,
+  productId
+}: {
+  userId: number
+  productId: number
+}) => {
+  try {
+    const res = await request.post(
+      `/merchant/subscription/user_subscription_detail`,
+      {
+        userId,
+        productId
+      }
+    )
+    if (res.data.code == 61 || res.data.code == 62) {
+      session.setSession({ expired: true, refresh: null })
+      throw new ExpiredError(
+        `${res.data.code == 61 ? 'Session expired' : 'Your roles or permissions have been changed, please relogin'}`
+      )
+    }
+    return [res.data.data, null] // backend has no meaningful return value
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
 export const getSubscriptionHistoryReq = async ({
   userId,
   page,
