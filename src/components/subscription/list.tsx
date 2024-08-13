@@ -20,7 +20,6 @@ import {
   Select,
   Space,
   Spin,
-  Steps,
   Table,
   Tooltip,
   message
@@ -31,12 +30,7 @@ import { useNavigate } from 'react-router-dom'
 import { CURRENCY, SUBSCRIPTION_STATUS } from '../../constants'
 import { formatDate, formatPlanInterval, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import {
-  exportDataReq,
-  getPlanList,
-  getProductListReq,
-  getSublist
-} from '../../requests'
+import { exportDataReq, getPlanList, getSublist } from '../../requests'
 import '../../shared.css'
 import { ISubscriptionType, TImportDataType } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
@@ -338,52 +332,6 @@ const Index = () => {
             text: p.plan.planName
           }))
   }
-
-  /*
-  const getProductList = async () => {
-    setLoading(true)
-    const [res, err] = await getProductListReq()
-    setLoading(false)
-    if (null != err) {
-      message.error(err.message)
-      return
-    }
-
-    const productList = res.products ?? []
-
-    setProductList(productList)
-
-
-    const [productRes, productErr] = await getProductDetailReq(
-      Number(productId)
-    )
-    console.log('get product detail res: ', productRes, '//', productErr)
-    if (null != productErr) {
-      // message.error(err.message)
-      productList.push({
-        id: productId,
-        productName: productId,
-        description: ''
-      })
-      setProductList(productList)
-      setIsProductValid(false)
-      return
-    }
-    if (productRes.product == null) {
-      productList.push({
-        id: productId,
-        productName: productId,
-        description: ''
-      })
-      setProductList(productList)
-      setIsProductValid(false)
-      return
-    }
-
-    setProductList(productList)
-    setIsProductValid(true)
-  }
-    */
 
   const onTableChange: TableProps<ISubscriptionType>['onChange'] = (
     pagination,

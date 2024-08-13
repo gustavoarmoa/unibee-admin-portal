@@ -1,14 +1,13 @@
-import { Button, Divider, Empty, Spin, Tabs, TabsProps, message } from 'antd'
-import React, { CSSProperties, useEffect, useState } from 'react'
+import { Button, Divider, Empty, Tabs, TabsProps, message } from 'antd'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { getUserProfile } from '../../requests'
 import { IProfile } from '../../shared.types'
 import UserInfo from '../shared/userInfo'
 import InvoiceTab from '../subscription/invoicesTab'
 import TransactionTab from '../subscription/paymentTab'
-import AccountInfoTab from './accountTab'
+import UserAccountTab from '../subscription/userAccountTab'
 import ProductList from './productList'
-import SubscriptionTab from './subscriptionTab'
 
 const APP_PATH = import.meta.env.BASE_URL
 
@@ -17,6 +16,8 @@ const GoBackBtn = () => {
   const goBack = () => navigate(`${APP_PATH}user/list`)
   return <Button onClick={goBack}>Go back</Button>
 }
+
+const TAB_KEYS = ['account', 'subscription', 'invoice', 'transaction']
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -37,19 +38,44 @@ const Index = () => {
     undefined
   )
 
+  const fetchUserProfile = async () => {
+    const [user, err] = await getUserProfile(userId as number, fetchUserProfile)
+    if (err != null) {
+      message.error(err.message)
+      return
+    }
+    setUserProfile(user)
+  }
+
+  const onTabChange = (key: string) => {
+    setActiveTab(key)
+    setSearchParams({ tab: key })
+  }
+
+  useEffect(() => {
+    fetchUserProfile()
+  }, [])
+
   const tabItems: TabsProps['items'] = [
     {
-      key: 'account',
+      key: TAB_KEYS[0],
       label: 'Account Info',
-      children: <AccountInfoTab userId={userId} extraButton={<GoBackBtn />} />
+      children: (
+        <UserAccountTab
+          user={userProfile}
+          setUserProfile={setUserProfile}
+          refresh={fetchUserProfile}
+          extraButton={<GoBackBtn />}
+        />
+      )
     },
     {
-      key: 'subscription',
+      key: TAB_KEYS[1],
       label: 'Subscription',
-      children: <ProductList userId={userId} /> //  <SubscriptionTab userId={userId} extraButton={<GoBackBtn />} />
+      children: <ProductList userId={userId} userProfile={userProfile} />
     },
     {
-      key: 'invoice',
+      key: TAB_KEYS[2],
       label: 'Invoices',
       children: (
         <InvoiceTab
@@ -58,10 +84,10 @@ const Index = () => {
           extraButton={<GoBackBtn />}
           enableSearch={false}
         />
-      ) // <InvoiceTab user={userProfile} />
+      )
     },
     {
-      key: 'transaction',
+      key: TAB_KEYS[3],
       label: 'Transactions',
       children: (
         <TransactionTab
@@ -72,23 +98,6 @@ const Index = () => {
       )
     }
   ]
-  const onTabChange = (key: string) => {
-    setActiveTab(key)
-    setSearchParams({ tab: key })
-  }
-
-  const fetchUserProfile = async () => {
-    const [user, err] = await getUserProfile(userId as number, fetchUserProfile)
-    if (err != null) {
-      message.error(err.message)
-      return
-    }
-    setUserProfile(user)
-  }
-
-  useEffect(() => {
-    fetchUserProfile()
-  }, [])
 
   return (
     <div>

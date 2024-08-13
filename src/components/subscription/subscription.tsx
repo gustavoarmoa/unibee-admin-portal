@@ -284,8 +284,6 @@ const Index = ({
 
   // fetch current subscription detail, and all active plans.
   const fetchData = async () => {
-    // activeSub
-
     const pathName = window.location.pathname.split('/')
     const subId = pathName.pop()
     if (subId == null) {

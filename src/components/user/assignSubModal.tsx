@@ -14,11 +14,12 @@ import PaymentMethodSelector from '../ui/paymentSelector'
 
 interface Props {
   user: IProfile
+  productId: number
   refresh: () => void
   closeModal: () => void
 }
 
-const Index = ({ user, closeModal, refresh }: Props) => {
+const Index = ({ user, productId, closeModal, refresh }: Props) => {
   const appConfig = useAppConfigStore()
   const [loading, setLoading] = useState(false)
   const [plans, setPlans] = useState<IPlan[]>([])
@@ -127,6 +128,7 @@ const Index = ({ user, closeModal, refresh }: Props) => {
     const body: TPlanListBody = {
       type: [1], // main plan
       status: [2], // active
+      productIds: [productId],
       page: 0,
       count: 150
     }

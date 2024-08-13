@@ -2,6 +2,7 @@ import { Col, Row } from 'antd'
 import { CSSProperties } from 'react'
 import { IProfile } from '../../shared.types.d'
 import { useAppConfigStore } from '../../stores'
+import { UserStatus } from '../ui/statusTag'
 
 const rowStyle: CSSProperties = {
   display: 'flex',
@@ -18,9 +19,15 @@ const Index = ({ user }: { user: IProfile | undefined }) => {
           <span style={{ fontWeight: 'bold' }}>User Id/External Id</span>
         </Col>
         <Col span={6}>
-          {user == undefined
-            ? ''
-            : `${user?.id} / ${user?.externalUserId == '' ? '―' : user?.externalUserId}`}
+          {user == undefined ? (
+            ''
+          ) : (
+            <>
+              {`${user?.id} / ${user?.externalUserId == '' ? '―' : user?.externalUserId}`}
+              &nbsp;&nbsp;
+              {UserStatus(user.status)}
+            </>
+          )}
         </Col>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>First/Last Name</span>

@@ -8,7 +8,7 @@ interface Props {
   user: IProfile
   refresh: null | (() => void)
   closeModal: () => void
-  setRefreshSub: (val: boolean) => void
+  setRefreshSub?: (val: boolean) => void
 }
 
 const Index = ({ user, closeModal, refresh, setRefreshSub }: Props) => {
@@ -25,10 +25,12 @@ const Index = ({ user, closeModal, refresh, setRefreshSub }: Props) => {
       message.error(err.message)
       return
     }
-    setRefreshSub(true) // pass (refreshSub: true) to grandparent, so it can be passed to <subscriptionTab />
+    if (setRefreshSub != null) {
+      setRefreshSub(true)
+    } // pass (refreshSub: true) to grandparent, so it can be passed to <subscriptionTab />
     message.success(`User has been suspended.`)
     if (null != refresh) {
-      refresh() // refresh the parent
+      refresh() // refresh the parent or grandparent
     }
     closeModal()
   }
@@ -52,7 +54,9 @@ const Index = ({ user, closeModal, refresh, setRefreshSub }: Props) => {
           marginTop: '24px'
         }}
       >
-        <Button onClick={closeModal}>Cancel</Button>
+        <Button onClick={closeModal} disabled={loading}>
+          Cancel
+        </Button>
         <Button
           type="primary"
           danger

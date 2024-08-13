@@ -1,13 +1,10 @@
-import { EditOutlined, LoadingOutlined } from '@ant-design/icons'
-import { Button, Space, Spin, Tabs, message } from 'antd'
+import { LoadingOutlined } from '@ant-design/icons'
+import { Spin, Tabs, message } from 'antd'
 // import currency from 'currency.js'
-import Dinero, { Currency } from 'dinero.js'
-import update from 'immutability-helper'
-import React, { useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getProductDetailReq, getProductListReq } from '../../requests'
+import React, { useEffect, useState } from 'react'
+import { getProductListReq } from '../../requests'
 import '../../shared.css'
-import { IProduct } from '../../shared.types'
+import { IProduct, IProfile } from '../../shared.types'
 import OneTimeHistory from './oneTimePurchaseHistory'
 import SubHistory from './subHistory'
 import Subscription from './subscriptionTab'
@@ -15,16 +12,18 @@ import Subscription from './subscriptionTab'
 const APP_PATH = import.meta.env.BASE_URL
 type TargetKey = React.MouseEvent | React.KeyboardEvent | string
 
-const Index = ({ userId }: { userId: number }) => {
-  //const [searchParams, setSearchParams] = useSearchParams()
-  // const productId = useRef(parseInt(searchParams.get('productId') ?? '0'))
-  // const [productId, setProductId] = useState(searchParams.get('product') ?? '0') // set default tab
+const Index = ({
+  userId,
+  userProfile
+}: {
+  userId: number
+  userProfile: IProfile | undefined
+}) => {
   const [productId, setProductId] = useState('0') // set default tab
   const [loading, setLoading] = useState(false)
   const [productList, setProductList] = useState<IProduct[]>([])
   const onTabChange = (newActiveKey: string) => {
     setProductId(newActiveKey)
-    // setSearchParams({ product: newActiveKey })
   }
 
   const getProductList = async () => {
@@ -56,7 +55,13 @@ const Index = ({ userId }: { userId: number }) => {
           items={productList.map((p) => ({
             label: p.productName,
             key: p.id.toString(),
-            children: <Subscription userId={userId} productId={p.id} />
+            children: (
+              <Subscription
+                userId={userId}
+                productId={p.id}
+                userProfile={userProfile}
+              />
+            )
           }))}
         />
         <SubHistory userId={userId} />

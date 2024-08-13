@@ -8,7 +8,7 @@ import dayjs from 'dayjs'
 import React, { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { normalizeSub, showAmount } from '../../helpers'
-import { getSubByUserReq, getSubDetailInProductReq } from '../../requests'
+import { getSubDetailInProductReq } from '../../requests'
 import { IProfile, ISubscriptionType } from '../../shared.types.d'
 import { SubscriptionStatus } from '../ui/statusTag'
 import ModalAssignSub from './assignSubModal'
@@ -23,16 +23,17 @@ const colStyle: CSSProperties = { fontWeight: 'bold' }
 
 const Index = ({
   userId,
+  userProfile,
   productId,
   extraButton
 }: {
   userId: number
+  userProfile: IProfile | undefined
   productId: number
   extraButton?: ReactElement
 }) => {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const [userProfile, setUserProfile] = useState<IProfile | null>(null)
   const [subInfo, setSubInfo] = useState<ISubscriptionType | null>(null) // null: when page is loading, or no active sub.
 
   const [assignSubModalOpen, setAssignSubModalOpen] = useState(false)
@@ -54,22 +55,7 @@ const Index = ({
     }
     const sub = normalizeSub(res)
     setSubInfo(sub)
-
-    /*
-    const { subscriptions, total } = res
-    if (subscriptions == null || subscriptions.length == 0) {
-      setSubInfo(null)
-      return
-    }
-    // I need sub normalize to return a real sub obj
-    const sub = subscriptions[0].subscription
-    sub.plan = subscriptions[0].plan
-    setSubInfo(sub)
-    // setUserProfile(user)
-    */
   }
-
-  // useEffect(() => {}, [])
 
   useEffect(() => {
     getSubInProduct()
@@ -80,6 +66,7 @@ const Index = ({
       {assignSubModalOpen && userProfile != null && (
         <ModalAssignSub
           user={userProfile}
+          productId={productId}
           closeModal={toggleAssignSub}
           refresh={getSubInProduct}
         />
@@ -236,21 +223,18 @@ const Index = ({
         )}
       </Spin>
 
-      {/* <Divider orientation="left" style={{ margin: '16px 0' }}>
-        Current Subscription
-      </Divider> */}
-
       <Button
         onClick={toggleAssignSub}
         disabled={
-          subInfo != null || userProfile == null || userProfile?.status == 2
+          loading ||
+          subInfo != null ||
+          userProfile == null ||
+          userProfile?.status == 2
         } // user has active sub || user not exist || user is suspended
         className=" my-4"
       >
         Assign Subscription
       </Button>
-      {/* <SubHistory userId={userId} />
-      <OneTimeHistory userId={userId} /> */}
       <div className="mt-6 flex items-center justify-center">{extraButton}</div>
     </div>
   )
