@@ -121,7 +121,8 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const productId = useRef(parseInt(searchParams.get('productId') ?? '0'))
   const [isProductValid, setIsProductValid] = useState(true) // user might manually type the invalid productId in url
-  const productDetail = useRef<IProduct | null>(null)
+  // const productDetail = useRef<IProduct | null>(null)
+  const [productDetail, setProductDetail] = useState<IProduct | null>(null)
 
   // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false)
@@ -560,7 +561,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
         return
       }
       setIsProductValid(true)
-      productDetail.current = res.product
+      setProductDetail(res.product)
     }
     getProductDetail()
   }, [])
@@ -593,7 +594,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
           <Form.Item label="Product name">
             <span>
               {isProductValid ? (
-                productDetail.current?.productName
+                productDetail?.productName
               ) : (
                 <Tag color="red">Invalid product</Tag>
               )}
