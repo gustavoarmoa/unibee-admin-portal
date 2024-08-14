@@ -1,29 +1,8 @@
-import {
-  Button,
-  Col,
-  Divider,
-  Form,
-  Input,
-  message,
-  Modal,
-  Row,
-  Select,
-  Switch
-} from 'antd'
+import { Button, Form, Input, message, Modal } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
-import update from 'immutability-helper'
-import React, { useEffect, useState } from 'react'
-import HiddenIcon from '../../assets/hidden.svg?react'
-import {
-  createSubscriptionReq,
-  getPlanList,
-  saveProductReq,
-  TPlanListBody
-} from '../../requests'
-import { IPlan, IProduct, IProfile } from '../../shared.types.d'
-import { useAppConfigStore } from '../../stores'
-import Plan from '../subscription/plan'
-import PaymentMethodSelector from '../ui/paymentSelector'
+import React, { useState } from 'react'
+import { saveProductReq } from '../../requests'
+import { IProduct } from '../../shared.types.d'
 
 interface Props {
   refresh: (p: IProduct) => void
@@ -34,12 +13,7 @@ interface Props {
 
 const Index = ({ closeModal, isNew, refresh, detail }: Props) => {
   const [form] = Form.useForm()
-  const appConfig = useAppConfigStore()
   const [loading, setLoading] = useState(false)
-
-  const fetchProduct = async () => {}
-
-  console.log('product modal isnew: ', isNew)
 
   const onSave = async () => {
     const body = form.getFieldsValue()
@@ -74,7 +48,7 @@ const Index = ({ closeModal, isNew, refresh, detail }: Props) => {
           labelCol={{ flex: '186px' }}
           wrapperCol={{ flex: 1 }}
           colon={false}
-          // disabled={formDisabled}
+          disabled={loading}
           initialValues={isNew ? {} : detail}
         >
           {!isNew && (

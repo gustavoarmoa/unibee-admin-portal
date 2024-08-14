@@ -19,12 +19,7 @@ import {
 } from 'antd'
 import update from 'immutability-helper'
 import React, { useEffect, useRef, useState } from 'react'
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams
-} from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { CURRENCY } from '../../constants'
 import {
   currencyDecimalValidate,
@@ -118,10 +113,9 @@ const unitToSeconds = (value: number, unit: number) => {
 
 const { Option } = Select
 
-// this component has the similar structure with newPlan.tsx, try to refactor them into one.
 const Index = () => {
   const params = useParams()
-  const planId = params.planId
+  const planId = params.planId // http://localhost:5174/plan/270?productId=0, planId is 270
   const isNew = planId == null
 
   const [searchParams, setSearchParams] = useSearchParams()
@@ -349,7 +343,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     }
     message.success('Plan deleted')
     navigate(
-      `${APP_PATH}plan/list?product=${isProductValid ? productId.current : 0}` // no need to do isValid check, only valid can be deleted.
+      `${APP_PATH}plan/list?productId=${isProductValid ? productId.current : 0}` // no need to do isValid check, only valid can be deleted.
     )
   }
 
@@ -1112,7 +1106,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                 <Button
                   onClick={() =>
                     navigate(
-                      `${APP_PATH}plan/list?product=${isProductValid ? productId.current : 0}`
+                      `${APP_PATH}plan/list?productId=${isProductValid ? productId.current : 0}`
                     )
                   }
                   disabled={loading || activating}

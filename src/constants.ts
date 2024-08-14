@@ -1,11 +1,24 @@
 import { Tag } from 'antd'
 import { ReactElement } from 'react'
 
+export enum PlanType {
+  MainPlan = 1,
+  Addon = 2,
+  OnetimePayment = 3
+}
+
+enum PlanStatus {
+  Editing = 1,
+  Active = 2,
+  Inactive = 3,
+  Expired = 4
+}
+
 export const PLAN_STATUS: { [key: number]: string } = {
-  1: 'editing',
-  2: 'active',
-  3: 'inactive',
-  4: 'expired'
+  [PlanStatus.Editing]: 'editing',
+  [PlanStatus.Active]: 'active',
+  [PlanStatus.Inactive]: 'inactive',
+  [PlanStatus.Expired]: 'expired'
 }
 
 export const SUBSCRIPTION_STATUS: { [key: number]: string } = {

@@ -4,7 +4,7 @@ import { Button, Space, Spin, Tabs, message } from 'antd'
 import Dinero, { Currency } from 'dinero.js'
 import update from 'immutability-helper'
 import React, { useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { getProductDetailReq, getProductListReq } from '../../requests'
 import '../../shared.css'
 import { IProduct } from '../../shared.types'
@@ -12,14 +12,12 @@ import DeleteProductModal from './deleteProductModal'
 import PlanList from './planList'
 import ProductModal from './productModal'
 
-const APP_PATH = import.meta.env.BASE_URL
-type TargetKey = React.MouseEvent | React.KeyboardEvent | string
-
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  // const productId = useRef(parseInt(searchParams.get('productId') ?? '0'))
   const [isProductValid, setIsProductValid] = useState(true) // user might manually type the invalid productId in url
-  const [productId, setProductId] = useState(searchParams.get('product') ?? '0') // set default tab
+  const [productId, setProductId] = useState(
+    searchParams.get('productId') ?? '0'
+  ) // set default tab
   const deleteProductId = useRef<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [productList, setProductList] = useState<IProduct[]>([])
@@ -32,7 +30,7 @@ const Index = () => {
 
   const onTabChange = (newActiveKey: string) => {
     setProductId(newActiveKey)
-    setSearchParams({ product: newActiveKey })
+    setSearchParams({ productId: newActiveKey })
   }
 
   const onTabEdit = (
@@ -47,7 +45,6 @@ const Index = () => {
       deleteProduct(targetKey as string)
     } else {
       return
-      // remove(targetKey)
     }
   }
 
@@ -113,7 +110,7 @@ const Index = () => {
       // I'm on productA, and try to delete productA
       if (deleteProductId.current == productId) {
         setProductId('0')
-        setSearchParams({ product: '0' })
+        setSearchParams({ productId: '0' })
       }
       // I'm on productA, try to delete productB, then no need to set searchParams or default productId
     }
@@ -125,7 +122,7 @@ const Index = () => {
       // add new product
       setProductList(update(productList, { $push: [product] }))
       setProductId(product.id.toString())
-      setSearchParams({ product: product.id.toString() })
+      setSearchParams({ productId: product.id.toString() })
     } else {
       // edit existing product
       setProductList(update(productList, { $splice: [[idx, 1, product]] }))
