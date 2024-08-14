@@ -1,12 +1,21 @@
 import { LoadingOutlined } from '@ant-design/icons'
-import { Col, Divider, message, Pagination, Popover, Row, Table } from 'antd'
+import {
+  Col,
+  Divider,
+  message,
+  Pagination,
+  Popover,
+  Row,
+  Spin,
+  Table
+} from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDate, showAmount } from '../../helpers'
 import { usePagination } from '../../hooks'
-import { getSubscriptionHistoryReq } from '../../requests'
-import { ISubHistoryItem } from '../../shared.types'
+import { getProductListReq, getSubscriptionHistoryReq } from '../../requests'
+import { IProduct, ISubHistoryItem } from '../../shared.types'
 import { SubHistoryStatus } from '../ui/statusTag'
 
 const PAGE_SIZE = 10
@@ -18,6 +27,8 @@ const Index = ({ userId }: { userId: number }) => {
   const { page, onPageChangeNoParams } = usePagination()
   const [total, setTotal] = useState(0)
   const [subHistory, setSubHistory] = useState<ISubHistoryItem[]>([])
+  const [productList, setProductList] = useState<IProduct[]>([])
+  const [loadignProducts, setLoadingProducts] = useState(false)
 
   const getSubHistory = async () => {
     setHistoryLoading(true)
@@ -37,11 +48,35 @@ const Index = ({ userId }: { userId: number }) => {
     setTotal(total)
   }
 
+  const getProductList = async () => {
+    setLoadingProducts(true)
+    const [res, err] = await getProductListReq()
+    setLoadingProducts(false)
+    if (null != err) {
+      return
+    }
+    console.log('product list: ', res)
+    setProductList(res.products ?? [])
+  }
+
   useEffect(() => {
     getSubHistory()
   }, [page])
 
-  const columns: ColumnsType<ISubHistoryItem> = [
+  useEffect(() => {
+    getProductList()
+  }, [])
+
+  const getColumns = (): ColumnsType<ISubHistoryItem> => [
+    {
+      title: 'Product',
+      dataIndex: 'product',
+      key: 'product',
+      render: (_, record) => {
+        const product = productList.find((p) => p.id == record.plan.productId)
+        return product != null ? product.productName : ''
+      }
+    },
     {
       title: 'Item Name',
       dataIndex: 'itemName',
@@ -161,23 +196,38 @@ const Index = ({ userId }: { userId: number }) => {
       <Divider orientation="left" style={{ margin: '16px 0' }}>
         Subscription and Add-on History
       </Divider>
-      <Table
-        columns={columns}
-        dataSource={subHistory}
-        rowKey={'uniqueId'}
-        rowClassName="clickable-tbl-row"
-        pagination={false}
-        scroll={{ x: 1280 }}
-        onRow={(record, rowIndex) => {
-          return {
-            onClick: (event) => {}
-          }
-        }}
-        loading={{
-          spinning: historyLoading,
-          indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
-        }}
-      />
+
+      {loadignProducts ? (
+        <Spin
+          indicator={<LoadingOutlined spin />}
+          size="large"
+          style={{
+            width: '100%',
+            height: '320px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        />
+      ) : (
+        <Table
+          columns={getColumns()}
+          dataSource={subHistory}
+          rowKey={'uniqueId'}
+          rowClassName="clickable-tbl-row"
+          pagination={false}
+          scroll={{ x: 1280 }}
+          onRow={(record, rowIndex) => {
+            return {
+              onClick: (event) => {}
+            }
+          }}
+          loading={{
+            spinning: historyLoading,
+            indicator: <LoadingOutlined style={{ fontSize: 32 }} spin />
+          }}
+        />
+      )}
       <div className="mt-6 flex justify-end">
         <Pagination
           style={{ marginTop: '16px' }}
