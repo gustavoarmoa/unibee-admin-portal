@@ -563,7 +563,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
       setIsProductValid(true)
       setProductDetail(res.product)
     }
-    getProductDetail()
+    // getProductDetail()
   }, [])
 
   return (
@@ -591,7 +591,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             </Form.Item>
           )}
 
-          <Form.Item label="Product name">
+          {/* <Form.Item label="Product name">
             <span>
               {isProductValid ? (
                 productDetail?.productName
@@ -599,7 +599,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                 <Tag color="red">Invalid product</Tag>
               )}
             </span>
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item
             label="Plan Name"
