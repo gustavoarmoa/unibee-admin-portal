@@ -25,11 +25,13 @@ const Index = ({
   userId,
   userProfile,
   productId,
+  refreshSub,
   extraButton
 }: {
   userId: number
   userProfile: IProfile | undefined
   productId: number
+  refreshSub: boolean
   extraButton?: ReactElement
 }) => {
   const [loading, setLoading] = useState(false)
@@ -42,7 +44,11 @@ const Index = ({
   const goToSubDetail = (subId: string) => () =>
     navigate(`/subscription/${subId}`)
 
+  // it's better to call setRefresh(false) here, coz I've finished refresh
   const getSubInProduct = async () => {
+    if (loading) {
+      return
+    }
     setLoading(true)
     const [res, err] = await getSubDetailInProductReq({
       userId,
@@ -60,6 +66,12 @@ const Index = ({
   useEffect(() => {
     getSubInProduct()
   }, [productId])
+
+  useEffect(() => {
+    if (refreshSub) {
+      getSubInProduct()
+    }
+  }, [refreshSub])
 
   return (
     <div>

@@ -21,6 +21,7 @@ const TAB_KEYS = ['account', 'subscription', 'invoice', 'transaction']
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [refreshSub, setRefreshSub] = useState(false) // when user account is suspended, all its subscription will also get cancelled, but the sub tab need to be auto refreshed to reflect this.
   const [activeTab, setActiveTab] = useState(
     searchParams.get('tab') ?? 'account'
   )
@@ -64,6 +65,7 @@ const Index = () => {
         <UserAccountTab
           user={userProfile}
           setUserProfile={setUserProfile}
+          setRefreshSub={setRefreshSub}
           refresh={fetchUserProfile}
           extraButton={<GoBackBtn />}
         />
@@ -72,7 +74,13 @@ const Index = () => {
     {
       key: TAB_KEYS[1],
       label: 'Subscription',
-      children: <ProductList userId={userId} userProfile={userProfile} />
+      children: (
+        <ProductList // deep inside this component there is a <Subscription />, which will receive refreshSub props, when it's true in its useEffect cb, it'll re-fetch sub detail info
+          userId={userId} // setRefreshSub fn is triggered by the above <UserAccountTab /> which will pass this fn to <SuspendModal />
+          userProfile={userProfile}
+          refreshSub={refreshSub}
+        />
+      )
     },
     {
       key: TAB_KEYS[2],

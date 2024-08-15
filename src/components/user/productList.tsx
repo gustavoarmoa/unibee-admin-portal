@@ -14,10 +14,12 @@ type TargetKey = React.MouseEvent | React.KeyboardEvent | string
 
 const Index = ({
   userId,
-  userProfile
+  userProfile,
+  refreshSub
 }: {
   userId: number
   userProfile: IProfile | undefined
+  refreshSub: boolean
 }) => {
   const [productId, setProductId] = useState('0') // set default tab
   const [loading, setLoading] = useState(false)
@@ -60,6 +62,7 @@ const Index = ({
                 userId={userId}
                 productId={p.id}
                 userProfile={userProfile}
+                refreshSub={refreshSub}
               />
             )
           }))}

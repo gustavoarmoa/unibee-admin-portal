@@ -69,7 +69,7 @@ const Index = () => {
           user={userProfile}
           setUserProfile={setUserProfile}
           refresh={fetchUserProfile} // this is to refresh the user profle page
-          setRefreshSub={setRefreshSub} // after admin suspended a suer, subscriptin tab also need to refresh, just call setRefreshSub(true)
+          setRefreshSub={setRefreshSub} // after admin suspended a user, subscriptin tab also need to refresh, just call setRefreshSub(true)
         />
       )
     },
