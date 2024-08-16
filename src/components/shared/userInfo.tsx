@@ -18,7 +18,7 @@ const Index = ({ user }: { user: IProfile | undefined }) => {
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>User Id/External Id</span>
         </Col>
-        <Col span={6}>
+        <Col span={20}>
           {user == undefined ? (
             ''
           ) : (
@@ -29,36 +29,36 @@ const Index = ({ user }: { user: IProfile | undefined }) => {
             </>
           )}
         </Col>
+      </Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>First/Last Name</span>
         </Col>
         <Col span={6}>
           {user == undefined ? '' : `${user?.firstName} ${user?.lastName}`}
         </Col>
-      </Row>
-      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>Email</span>
         </Col>
         <Col span={6}>
           <a href={`mailto:${user?.email}`}>{user?.email} </a>
         </Col>
+      </Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>Phone</span>
         </Col>
         <Col span={6}>{user?.phone}</Col>
-      </Row>
-      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>Country</span>
         </Col>
         <Col span={6}>{user?.countryName}</Col>
+      </Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>Billing Address</span>
         </Col>
         <Col span={6}>{user?.address}</Col>
-      </Row>
-      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>Payment Method</span>
         </Col>
@@ -68,6 +68,8 @@ const Index = ({ user }: { user: IProfile | undefined }) => {
               ?.displayName
           }
         </Col>
+      </Row>
+      <Row style={rowStyle}>
         <Col span={4}>
           <span style={{ fontWeight: 'bold' }}>VAT Number</span>
         </Col>
