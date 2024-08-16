@@ -229,7 +229,12 @@ const Index = ({
               <Col span={4} style={colStyle}>
                 Next due date
               </Col>
-              <Col span={10}></Col>
+              <Col span={10}>
+                {subInfo &&
+                  dayjs(new Date(subInfo.currentPeriodEnd * 1000)).format(
+                    'YYYY-MMM-DD'
+                  )}
+              </Col>
             </Row>
           </>
         )}
