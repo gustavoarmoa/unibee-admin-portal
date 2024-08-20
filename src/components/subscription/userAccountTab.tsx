@@ -272,6 +272,13 @@ const UserAccountTab = ({
                 >
                   <Input style={{ width: '300px' }} />
                 </Form.Item>
+
+                <Form.Item
+                  label="Registration number"
+                  name="registrationNumber"
+                >
+                  <Input style={{ width: '300px' }} />
+                </Form.Item>
               </Col>
             </Row>
             <Row>

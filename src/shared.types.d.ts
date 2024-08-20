@@ -30,6 +30,7 @@ interface IProfile {
   telegram: string
   tikTok: string
   vATNumber: string
+  registrationNumber: string
   weChat: string
   whatsAPP: string
   otherSocialInfo: string
