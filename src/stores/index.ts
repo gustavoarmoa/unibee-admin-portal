@@ -29,6 +29,7 @@ const INITIAL_PROFILE: IProfile = {
   telegram: '',
   tikTok: '',
   vATNumber: '',
+  registrationNumber: '',
   weChat: '',
   whatsAPP: '',
   otherSocialInfo: '',
