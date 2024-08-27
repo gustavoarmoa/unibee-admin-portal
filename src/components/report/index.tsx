@@ -21,7 +21,7 @@ import {
 } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
 import update from 'immutability-helper'
-import React, { ReactNode, useEffect, useRef, useState } from 'react'
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
 import {
   exportDataReq,
@@ -32,6 +32,7 @@ import {
 } from '../../requests'
 import { TExportDataType } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
+import { fuzzyMatch } from './helpers'
 import './index.css'
 
 type TExpTmpl = {
@@ -73,6 +74,20 @@ const Index = () => {
   const [exportFormat, setExportFormat] = useState<'xlsx' | 'csv'>('xlsx')
   const [reportTimeStart, setReportTimeStart] = useState<null | Dayjs>(null)
   const [reportTimeEnd, setReportTimeEnd] = useState<null | Dayjs>(null)
+  const [searchContent, setSearchContent] = useState('')
+
+  const filteredFields = useMemo(
+    () =>
+      // Since react-beautiful-dnd only provide index prop as the key for the draggable component
+      // we cannot just filter these draggable items directly, as this would disrupt the order of
+      // the index of these items. Thus the renderer will set display:none to draggable items which
+      // are filtered out.
+      availableFields.map((field) => ({
+        isHide: !fuzzyMatch(field.name, searchContent),
+        field
+      })),
+    [availableFields, searchContent]
+  )
 
   const onExportFormatChange = (e: RadioChangeEvent) => {
     setExportFormat(e.target.value)
@@ -440,46 +455,57 @@ const Index = () => {
 
   return (
     <div>
-      <div className="mb-5 flex justify-end">
-        <div className="mr-6 flex">
-          <Input
-            value={newTmplName}
-            onChange={(evt) => setNewTmplName(evt.target.value)}
-          />
-          <Tooltip title="New preset">
-            <Button
-              disabled={loading || exporting}
-              onClick={createTmpl}
-              icon={<PlusOutlined />}
-              style={{ padding: 0, border: 'none' }}
-            ></Button>
-          </Tooltip>
-        </div>
+      <div className="mb-5 flex justify-between">
         <div>
-          <span>Preset: </span>
-          <Select
-            disabled={loading || exporting}
-            onChange={onSelectTmpl}
-            value={selectedTmpl}
-            style={{ width: '180px' }}
-            options={templates.map((t) => ({
-              value: t.templateId,
-              label: t.name
-            }))}
+          <Input.Search
+            placeholder="Input tag name"
+            onInput={(e) => setSearchContent(e.currentTarget.value)}
+            // Support users in reset search result using the clear button
+            onSearch={(value) => setSearchContent(value)}
+            allowClear
           />
         </div>
-        <Button
-          style={{ padding: 0, border: 'none' }}
-          icon={<SaveOutlined />}
-          onClick={saveTmpl}
-          disabled={loading || exporting}
-        ></Button>
-        <Button
-          onClick={removeTmpl}
-          style={{ padding: 0, border: 'none' }}
-          icon={<DeleteOutlined />}
-          disabled={loading || exporting}
-        ></Button>
+        <div className="flex">
+          <div className="mr-6 flex">
+            <Input
+              value={newTmplName}
+              onChange={(evt) => setNewTmplName(evt.target.value)}
+            />
+            <Tooltip title="New preset">
+              <Button
+                disabled={loading || exporting}
+                onClick={createTmpl}
+                icon={<PlusOutlined />}
+                style={{ padding: 0, border: 'none' }}
+              ></Button>
+            </Tooltip>
+          </div>
+          <div>
+            <span>Preset: </span>
+            <Select
+              disabled={loading || exporting}
+              onChange={onSelectTmpl}
+              value={selectedTmpl}
+              style={{ width: '180px' }}
+              options={templates.map((t) => ({
+                value: t.templateId,
+                label: t.name
+              }))}
+            />
+          </div>
+          <Button
+            style={{ padding: 0, border: 'none' }}
+            icon={<SaveOutlined />}
+            onClick={saveTmpl}
+            disabled={loading || exporting}
+          ></Button>
+          <Button
+            onClick={removeTmpl}
+            style={{ padding: 0, border: 'none' }}
+            icon={<DeleteOutlined />}
+            disabled={loading || exporting}
+          ></Button>
+        </div>
       </div>
       <DragDropContext onDragEnd={onDragEnd}>
         <Spin
@@ -498,26 +524,27 @@ const Index = () => {
                   ref={provided.innerRef}
                   className=" flex flex-wrap gap-2"
                 >
-                  {availableFields.map((f, idx) => (
+                  {filteredFields.map(({ field, isHide }, idx) => (
                     <Draggable
-                      key={f.id}
-                      draggableId={f.id.toString()}
+                      key={field.id}
+                      draggableId={field.id.toString()}
                       index={idx}
                     >
                       {(provided, snapshot) => (
                         <div
+                          className={`${isHide && 'hidden'}`}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           ref={provided.innerRef}
                         >
-                          {f.node == null ? (
-                            <AddCommentTip fieldName={f.name}>
-                              <Tag>{fieldHeaders.current[f.name]}</Tag>
+                          {field.node == null ? (
+                            <AddCommentTip fieldName={field.name}>
+                              <Tag>{fieldHeaders.current[field.name]}</Tag>
                             </AddCommentTip>
                           ) : (
-                            <AddCommentTip fieldName={f.name}>
+                            <AddCommentTip fieldName={field.name}>
                               <Tag color="blue">
-                                {fieldHeaders.current[f.name]}
+                                {fieldHeaders.current[field.name]}
                               </Tag>
                             </AddCommentTip>
                           )}
