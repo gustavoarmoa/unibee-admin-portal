@@ -13,6 +13,7 @@ import {
   useAppConfigStore,
   useMerchantInfoStore,
   usePermissionStore,
+  useProductListStore,
   useProfileStore,
   useSessionStore
 } from '../../stores'
@@ -184,6 +185,7 @@ const OTPForm = ({
 }: IOtpFormProps) => {
   const navigate = useNavigate()
   const appConfigStore = useAppConfigStore()
+  const productsStore = useProductListStore()
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
   const merchantStore = useMerchantInfoStore()
@@ -224,9 +226,10 @@ const OTPForm = ({
       setErrMsg(errInit.message)
       return
     }
-    const { appConfig, gateways, merchantInfo } = initRes
+    const { appConfig, gateways, merchantInfo, products } = initRes
     appConfigStore.setAppConfig(appConfig)
     appConfigStore.setGateway(gateways)
+    productsStore.setProductList({ list: products.products })
     merchantStore.setMerchantInfo(merchantInfo.merchant)
     permStore.setPerm({
       role: merchantInfo.merchantMember.role,

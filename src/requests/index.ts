@@ -22,17 +22,19 @@ export const initializeReq = async () => {
   const [
     [appConfig, errConfig],
     [gateways, errGateway],
-    [merchantInfo, errMerchant]
+    [merchantInfo, errMerchant],
+    [products, errProductList]
   ] = await Promise.all([
     getAppConfigReq(),
     getGatewayListReq(),
-    getMerchantInfoReq()
+    getMerchantInfoReq(),
+    getProductListReq()
   ])
-  const err = errConfig || errGateway || errMerchant
+  const err = errConfig || errGateway || errMerchant || errProductList
   if (null != err) {
     return [null, err]
   }
-  return [{ appConfig, gateways, merchantInfo }, null]
+  return [{ appConfig, gateways, merchantInfo, products }, null]
 }
 
 // ------------

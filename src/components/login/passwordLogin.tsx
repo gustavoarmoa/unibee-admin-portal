@@ -14,6 +14,7 @@ import {
   useAppConfigStore,
   useMerchantInfoStore,
   usePermissionStore,
+  useProductListStore,
   useProfileStore,
   useSessionStore
 } from '../../stores'
@@ -34,6 +35,7 @@ const Index = ({
 }) => {
   const profileStore = useProfileStore()
   const appConfigStore = useAppConfigStore()
+  const productsStore = useProductListStore()
   const sessionStore = useSessionStore()
   const merchantStore = useMerchantInfoStore()
   const permStore = usePermissionStore()
@@ -88,6 +90,7 @@ const Index = ({
     // sessionStore.setSession({ expired: false, refresh: null })
 
     const [initRes, errInit] = await initializeReq()
+    console.log('initRes: ', initRes)
     setSubmitting(false)
     setLogging(false)
     if (null != errInit) {
@@ -95,9 +98,10 @@ const Index = ({
       return
     }
 
-    const { appConfig, gateways, merchantInfo } = initRes
+    const { appConfig, gateways, merchantInfo, products } = initRes
     appConfigStore.setAppConfig(appConfig)
     appConfigStore.setGateway(gateways)
+    productsStore.setProductList({ list: products.products })
     merchantStore.setMerchantInfo(merchantInfo.merchant)
     permStore.setPerm({
       role: merchantInfo.merchantMember.role,

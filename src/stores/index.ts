@@ -1,7 +1,12 @@
 import { StoreApi, UseBoundStore, create } from 'zustand'
 // import { immer } from "zustand/middleware/immer";
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { IAppConfig, IProfile, TMerchantInfo } from '../shared.types.d'
+import {
+  IAppConfig,
+  IProduct,
+  IProfile,
+  TMerchantInfo
+} from '../shared.types.d'
 // import { createStore } from "zustand";
 
 // logged-in user profile
@@ -55,6 +60,20 @@ export const useProfileStore = create<ProfileSlice>()(
     { name: 'profile' }
   )
 )
+
+export type TProductList = { list: IProduct[] }
+const INITIAL_PRODUCT_LIST: TProductList = { list: [] }
+interface ProductListSlice extends TProductList {
+  getProductList: () => TProductList
+  setProductList: (p: TProductList) => void
+  reset: () => void
+}
+export const useProductListStore = create<ProductListSlice>()((set, get) => ({
+  ...INITIAL_PRODUCT_LIST,
+  getProductList: () => get(),
+  setProductList: (p) => set(p),
+  reset: () => set(INITIAL_PRODUCT_LIST)
+}))
 
 // the merchant which the current logged-in user is working for
 const INITIAL_INFO: TMerchantInfo = {

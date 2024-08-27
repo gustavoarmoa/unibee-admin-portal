@@ -32,11 +32,11 @@ import {
   activatePlan,
   deletePlanReq,
   getPlanDetailWithMore,
-  getProductDetailReq,
   savePlan,
   togglePublishReq
 } from '../../requests'
 import { IBillableMetrics, IPlan, IProduct } from '../../shared.types.d'
+import { useProductListStore } from '../../stores'
 import { PlanStatus } from '../ui/statusTag'
 
 const APP_PATH = import.meta.env.BASE_URL
@@ -117,14 +117,15 @@ const Index = () => {
   const params = useParams()
   const planId = params.planId // http://localhost:5174/plan/270?productId=0, planId is 270
   const isNew = planId == null
-
   const [searchParams, setSearchParams] = useSearchParams()
   const productId = useRef(parseInt(searchParams.get('productId') ?? '0'))
-  const [isProductValid, setIsProductValid] = useState(true) // user might manually type the invalid productId in url
-  // const productDetail = useRef<IProduct | null>(null)
-  const [productDetail, setProductDetail] = useState<IProduct | null>(null)
+  const productsStore = useProductListStore()
+  console.log('productsStore: ', productsStore.list)
+  const productDetail = productsStore.list.find(
+    (p) => p.id == productId.current
+  )
+  const isProductValid = productDetail != null
 
-  // const appConfigStore = useAppConfigStore();
   const [loading, setLoading] = useState(false)
   const [activating, setActivating] = useState(false)
   const [publishing, setPublishing] = useState(false) // when toggling publish/unpublish
@@ -362,7 +363,14 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
     }
 
     const { planDetail, addonList, metricsList } = detailRes
-    console.log('res: ', planDetail, '//', addonList, '//', metricsList)
+    console.log(
+      'res of planDetail/addonList/metricsList: ',
+      planDetail,
+      '//',
+      addonList,
+      '//',
+      metricsList
+    )
 
     const addons =
       addonList.plans == null ? [] : addonList.plans.map((p: any) => p.plan)
@@ -547,23 +555,6 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
 
   useEffect(() => {
     fetchData()
-    const getProductDetail = async () => {
-      const [res, err] = await getProductDetailReq(productId.current)
-      console.log('get product detail res: ', res)
-      if (null != err) {
-        message.error('Invalid product')
-        setIsProductValid(false)
-        return
-      }
-      if (res.product == null) {
-        message.error('Invalid product')
-        setIsProductValid(false)
-        return
-      }
-      setIsProductValid(true)
-      setProductDetail(res.product)
-    }
-    // getProductDetail()
   }, [])
 
   return (
@@ -591,7 +582,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
             </Form.Item>
           )}
 
-          {/* <Form.Item label="Product name">
+          <Form.Item label="Product name">
             <span>
               {isProductValid ? (
                 productDetail?.productName
@@ -599,7 +590,7 @@ cancelAtTrialEnd?: 0 | 1 | boolean // backend requires this field to be a number
                 <Tag color="red">Invalid product</Tag>
               )}
             </span>
-          </Form.Item> */}
+          </Form.Item>
 
           <Form.Item
             label="Plan Name"

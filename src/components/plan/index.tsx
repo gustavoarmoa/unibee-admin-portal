@@ -8,11 +8,13 @@ import { useSearchParams } from 'react-router-dom'
 import { getProductDetailReq, getProductListReq } from '../../requests'
 import '../../shared.css'
 import { IProduct } from '../../shared.types'
+import { useProductListStore } from '../../stores'
 import DeleteProductModal from './deleteProductModal'
 import PlanList from './planList'
 import ProductModal from './productModal'
 
 const Index = () => {
+  const productsStore = useProductListStore()
   const [searchParams, setSearchParams] = useSearchParams()
   const [isProductValid, setIsProductValid] = useState(true) // user might manually type the invalid productId in url
   const [productId, setProductId] = useState(
@@ -127,6 +129,16 @@ const Index = () => {
       // edit existing product
       setProductList(update(productList, { $splice: [[idx, 1, product]] }))
     }
+
+    // this is to update the zustand product.store
+    const idx2 = productsStore.list.findIndex((p) => p.id == product.id)
+    let list
+    if (idx2 == -1) {
+      list = update(productsStore.list, { $push: [product] })
+    } else {
+      list = update(productList, { $splice: [[idx2, 1, product]] })
+    }
+    productsStore.setProductList({ list })
   }
 
   useEffect(() => {

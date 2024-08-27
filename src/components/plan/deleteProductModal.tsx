@@ -1,8 +1,9 @@
 import { Button, Col, Form, message, Modal, Row } from 'antd'
+import update from 'immutability-helper'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import { deleteProductReq } from '../../requests'
 import { IProduct } from '../../shared.types'
-import { useAppConfigStore } from '../../stores'
+import { useAppConfigStore, useProductListStore } from '../../stores'
 
 const rowStyle: CSSProperties = {
   display: 'flex',
@@ -18,6 +19,7 @@ interface Props {
 }
 
 const Index = ({ closeModal, refresh, product }: Props) => {
+  const productsStore = useProductListStore()
   const [loading, setLoading] = useState(false)
 
   const onDelete = async () => {
@@ -33,6 +35,11 @@ const Index = ({ closeModal, refresh, product }: Props) => {
     }
     refresh()
     closeModal()
+    const idx = productsStore.list.findIndex((p) => p.id == product.id)
+    if (idx != -1) {
+      const list = update(productsStore.list, { $splice: [[idx, 1]] })
+      productsStore.setProductList({ list })
+    }
   }
 
   return (

@@ -24,6 +24,7 @@ import {
   useAppConfigStore,
   useMerchantInfoStore,
   usePermissionStore,
+  useProductListStore,
   useProfileStore,
   useSessionStore
 } from './stores'
@@ -89,6 +90,7 @@ const App: React.FC = () => {
   const profileStore = useProfileStore()
   const sessionStore = useSessionStore()
   const appConfigStore = useAppConfigStore()
+  const productsStore = useProductListStore()
   const [openLoginModal, setOpenLoginModal] = useState(false)
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
@@ -227,16 +229,17 @@ const App: React.FC = () => {
         navigationEntries.length > 0 &&
         (navigationEntries[0] as PerformanceNavigationTiming).type === 'reload'
       ) {
-        console.log('Page was reloaded, begin initializing....')
         const [initRes, errInit] = await initializeReq()
+        console.log('page reloaded, with initRes: ', initRes)
         if (null != errInit) {
           console.log('init err: ', errInit)
           return
         }
-        const { appConfig, gateways, merchantInfo } = initRes
+        const { appConfig, gateways, merchantInfo, products } = initRes
         appConfigStore.setAppConfig(appConfig)
         appConfigStore.setGateway(gateways)
         merchantInfoStore.setMerchantInfo(merchantInfo.merchant)
+        productsStore.setProductList({ list: products.products })
         permStore.setPerm({
           role: merchantInfo.merchantMember.role,
           permissions: merchantInfo.merchantMember.permissions
