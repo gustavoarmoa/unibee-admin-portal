@@ -42,7 +42,8 @@ const MENU_ITEMS: ItemType<MenuItemType>[] = [
   },
   { label: 'User List', key: 'user', icon: <IdcardOutlined /> },
   { label: 'Admin List', key: 'admin', icon: <TeamOutlined /> },
-  { label: 'Analytics', key: 'analytics', icon: <PieChartOutlined /> },
+  // The backend of Analytics is not completed yet, so it should hide from the menu until backend is ready
+  // { label: 'Analytics', key: 'analytics', icon: <PieChartOutlined /> },
   { label: 'My Account', key: 'my-account', icon: <IdcardOutlined /> },
   { label: 'Report', key: 'report', icon: <BarChartOutlined /> },
   {
