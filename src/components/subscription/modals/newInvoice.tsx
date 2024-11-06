@@ -159,7 +159,7 @@ const Index = ({
         taxPercentage: Number(taxPercentage) * 100,
         currency,
         name: invoiceName,
-        invoiceItems,
+        lines: invoiceItems,
         finish: isFinished
       })
     } else {
@@ -169,7 +169,7 @@ const Index = ({
         taxPercentage: Number(taxPercentage) / 100,
         currency: detail.currency,
         name: invoiceName,
-        invoiceItems
+        lines: invoiceItems
       })
     }
     setLoading(false)
@@ -193,7 +193,6 @@ const Index = ({
     setLoading(true)
     const [_, err] = await publishInvoiceReq({
       invoiceId: detail.invoiceId,
-      payMethod: 1,
       daysUtilDue: 1
     })
     setLoading(false)

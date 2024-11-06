@@ -1,7 +1,12 @@
 import { Button, Col, Input, Modal, Row, message } from 'antd'
 import { useState } from 'react'
+import {
+  UnibeeApiMerchantGatewayEditReq,
+  UnibeeApiMerchantGatewaySetupReq
+} from 'unibee-ts-client'
 import { saveGatewayKeyReq } from '../../../requests'
 import { TGateway } from '../../../shared.types'
+
 const { TextArea } = Input
 
 interface IProps {
@@ -39,7 +44,7 @@ const Index = ({ closeModal, gatewayDetail, refresh }: IProps) => {
       gatewaySecret: privateKey,
       gatewayName: isNew ? gatewayDetail?.gatewayName : undefined,
       gatewayId: isNew ? undefined : gatewayDetail?.gatewayId
-    }
+    } as UnibeeApiMerchantGatewaySetupReq | UnibeeApiMerchantGatewayEditReq
 
     setLoading(true)
     const [_, err] = await saveGatewayKeyReq(body, isNew)

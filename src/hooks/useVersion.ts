@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { request, Response } from '../requests/client'
+import { Response } from '../requests/apiClient'
+import { request } from '../requests/client'
 import { useAxiosFetch } from './useFetch'
 
 export const useVersion = () => useAxiosFetch<string>('/version', request)

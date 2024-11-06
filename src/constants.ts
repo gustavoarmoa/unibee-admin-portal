@@ -1,14 +1,14 @@
 export enum PlanType {
   MainPlan = 1,
-  Addon = 2,
-  OnetimePayment = 3
+  Addon,
+  OnetimePayment
 }
 
 enum PlanStatus {
   Editing = 1,
-  Active = 2,
-  Inactive = 3,
-  Expired = 4
+  Active,
+  Inactive,
+  Expired
 }
 
 export const PLAN_STATUS: { [key: number]: string } = {

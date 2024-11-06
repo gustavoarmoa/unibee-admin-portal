@@ -43,8 +43,8 @@ const PLAN_TYPE_FILTER = [
 ] // main plan or addon
 
 type TFilters = {
-  type: number[] | null // plan type filter
-  status: number[] | null // plan status filter
+  type: number[] | undefined // plan type filter
+  status: number[] | undefined // plan status filter
 }
 
 const Index = ({
@@ -61,8 +61,8 @@ const Index = ({
   const [plan, setPlan] = useState<IPlan[]>([])
   const [copyingPlan, setCopyingPlan] = useState(false)
   const [filters, setFilters] = useState<TFilters>({
-    type: null,
-    status: null
+    type: undefined,
+    status: undefined
   })
 
   const goToDetail = (planId: number) =>

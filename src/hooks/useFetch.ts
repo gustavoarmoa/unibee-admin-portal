@@ -8,16 +8,19 @@ interface DataSetterOptions<T> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateRemoteSourceFunction: (payload: any, data: T) => Promise<T>
   onError: (err: Error) => void
+  // The useFetch hook use the url as the cache key by default
+  // But if you want to use a different cache key or use useClientFetch, you can pass a cacheKey
+  cacheKey: string
 }
 
-export function useFetch<T>(
-  url: string,
-  fetcher: (url: string) => Promise<T>,
+export function useFetch<T, U extends string | undefined>(
+  url: U,
+  fetcher: (url: U) => Promise<T>,
   options?: Partial<DataSetterOptions<T>>
 ) {
   const [error, setError] = useState<Error | undefined>()
   const [loading, setLoading] = useState(true)
-  const [cachedData, setCachedData] = useCache<T>(url)
+  const [cachedData, setCachedData] = useCache<T>(url ?? options?.cacheKey)
 
   const fetchData = useCallback(
     async (fetcher: () => Promise<T>, isOptimistic?: boolean) => {
@@ -57,7 +60,7 @@ export function useFetch<T>(
 
   useEffect(() => {
     fetchData(() => fetcher(url))
-  }, [fetchData])
+  }, [fetchData, url])
 
   return { data: cachedData, error, loading, setData }
 }
@@ -69,7 +72,7 @@ export const useAxiosFetch = <T>(
   fetcher: (url: string) => Promise<T>,
   options?: Partial<DataSetterOptions<T>>
 ) =>
-  useFetch<T>(
+  useFetch<T, string>(
     url,
     async (url) => {
       const { data } = (await fetcher(url)) as AxiosResponse<T>
@@ -78,3 +81,37 @@ export const useAxiosFetch = <T>(
     },
     options
   )
+
+interface useClientFetchOptions {
+  unwrapData?: boolean
+}
+
+// useClientFetch is a wrapper around useFetch that doesn't require a url
+// This hook is useful when you want to fetch data by API client
+// It's worth noting that useClientFetch doesn't cache anything, if you want
+// cache the data, you can pass custom cache key to the options
+export const useClientFetch = <
+  T,
+  O extends Partial<DataSetterOptions<T> & useClientFetchOptions>
+>(
+  fetcher: () => Promise<T>,
+  options?: O
+) => {
+  type Res = O extends { unwrapData?: false }
+    ? T
+    : T extends { data?: infer U }
+      ? U
+      : T
+
+  return useFetch<Res, undefined>(
+    undefined,
+    async () => {
+      const res = await fetcher()
+
+      return (
+        (options?.unwrapData ?? true) ? (res as { data: T }).data : res
+      ) as Res
+    },
+    options as Partial<DataSetterOptions<Res> & useClientFetchOptions>
+  )
+}

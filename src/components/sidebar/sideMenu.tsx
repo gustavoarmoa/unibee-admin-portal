@@ -18,7 +18,7 @@ import { useProfileStore } from '../../stores'
 import { basePathName, trimEnvBasePath } from '../../utils'
 
 const MENU_ITEMS: ItemType<MenuItemType>[] = [
-  { label: 'Product and Plan', key: 'plan', icon: <DesktopOutlined /> },
+  { label: 'Products and Plan', key: 'plan', icon: <DesktopOutlined /> },
   {
     label: 'Billable Metric',
     key: 'billable-metric',

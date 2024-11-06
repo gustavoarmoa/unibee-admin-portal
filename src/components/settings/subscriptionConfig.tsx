@@ -1,7 +1,8 @@
 import { List, message } from 'antd'
 import { PropsWithChildren } from 'react'
-import { useFetch } from '../../hooks'
-import { request } from '../../requests/client'
+import { useClientFetch } from '../../hooks'
+import { merchant } from '../../requests/client'
+import { safeRun } from '../../utils'
 import { Config } from './components'
 
 interface SubscriptionConfig {
@@ -35,36 +36,25 @@ const ConfigItem = ({
 )
 
 export const SubscriptionConfig = () => {
-  const { data, setData, loading } = useFetch<SubscriptionConfig>(
-    '/merchant/subscription/config',
-    async (url) => {
-      const {
-        data: {
-          data: { config }
-        }
-      } = await request.get(url)
-
-      return config
-    },
-    {
-      optimistic: true,
-      updateRemoteSourceFunction: async (
-        payload: Partial<SubscriptionConfig>,
-        data: SubscriptionConfig
-      ) => {
-        await request.post('/merchant/subscription/config/update', payload)
-
-        message.success('The changes has been applied')
-
-        return data
-      },
-      onError: (err) => {
-        message.error(err.message)
-      }
-    }
+  const { data, loading, setData } = useClientFetch(() =>
+    merchant.subscriptionConfigList()
   )
-  const updateData = (updatedData: Partial<SubscriptionConfig>) =>
-    setData({ ...data!, ...updatedData }, updatedData)
+  const updateData = async (updatedDataField: Partial<SubscriptionConfig>) => {
+    const updatedData = { ...data!, ...updatedDataField }
+
+    setData(updatedData, updatedDataField)
+
+    const [_, err] = await safeRun(() =>
+      merchant.subscriptionConfigUpdateCreate(updatedData)
+    )
+
+    if (err) {
+      message.error(err.message)
+      return
+    }
+
+    message.success('This changes has been applied')
+  }
 
   const configs = [
     {
@@ -74,7 +64,7 @@ export const SubscriptionConfig = () => {
       component: (
         <Config.Switch
           loading={loading}
-          value={data?.downgradeEffectImmediately}
+          value={data?.config?.downgradeEffectImmediately}
           update={(checked) => {
             updateData({ downgradeEffectImmediately: checked })
           }}
@@ -88,7 +78,7 @@ export const SubscriptionConfig = () => {
       component: (
         <Config.Switch
           loading={loading}
-          value={data?.upgradeProration}
+          value={data?.config?.upgradeProration}
           update={(checked) => updateData({ upgradeProration: checked })}
         />
       )
@@ -100,7 +90,7 @@ export const SubscriptionConfig = () => {
       component: (
         <Config.InputNumber
           loading={loading}
-          value={data?.incompleteExpireTime}
+          value={data?.config?.incompleteExpireTime}
           suffix="s"
           update={(value) => updateData({ incompleteExpireTime: value })}
         />
@@ -113,7 +103,7 @@ export const SubscriptionConfig = () => {
       component: (
         <Config.Switch
           loading={loading}
-          value={data?.invoiceEmail}
+          value={data?.config?.invoiceEmail}
           update={(checked) => updateData({ invoiceEmail: checked })}
         />
       )
@@ -125,7 +115,7 @@ export const SubscriptionConfig = () => {
       component: (
         <Config.InputNumber
           loading={loading}
-          value={data?.tryAutomaticPaymentBeforePeriodEnd}
+          value={data?.config?.tryAutomaticPaymentBeforePeriodEnd}
           suffix="s"
           update={(value) =>
             updateData({ tryAutomaticPaymentBeforePeriodEnd: value })
@@ -140,7 +130,7 @@ export const SubscriptionConfig = () => {
       component: (
         <Config.Switch
           loading={loading}
-          value={!data?.showZeroInvoice}
+          value={!data?.config?.showZeroInvoice}
           update={(isHideZeroInvoice) =>
             updateData({ showZeroInvoice: !isHideZeroInvoice })
           }

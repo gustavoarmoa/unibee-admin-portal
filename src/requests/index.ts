@@ -1,14 +1,31 @@
 import axios from 'axios'
+import {
+  UnibeeApiMerchantAuthLoginReq,
+  UnibeeApiMerchantAuthRegisterReq,
+  UnibeeApiMerchantDiscountEditReq,
+  UnibeeApiMerchantDiscountNewReq,
+  UnibeeApiMerchantGatewayEditReq,
+  UnibeeApiMerchantGatewaySetupReq,
+  UnibeeApiMerchantGatewayWireTransferEditReq,
+  UnibeeApiMerchantGatewayWireTransferSetupReq,
+  UnibeeApiMerchantInvoiceEditReq,
+  UnibeeApiMerchantInvoiceFinishReq,
+  UnibeeApiMerchantInvoiceListReq,
+  UnibeeApiMerchantInvoiceNewReq,
+  UnibeeApiMerchantMetricEditReq,
+  UnibeeApiMerchantMetricNewReq,
+  UnibeeApiMerchantPlanListReq,
+  UnibeeApiMerchantSubscriptionListReq,
+  UnibeeApiMerchantUserUpdateReq
+} from 'unibee-ts-client'
 import { CURRENCY } from '../constants'
 import {
   AccountType,
-  DiscountCode,
   ExpiredError,
   IProfile,
   ISubscriptionType,
   TExportDataType,
   TImportDataType,
-  TMerchantInfo,
   TRole
 } from '../shared.types'
 import { useMerchantInfoStore, useSessionStore } from '../stores'
@@ -38,14 +55,7 @@ export const initializeReq = async () => {
   return [{ appConfig, gateways, merchantInfo, products }, null]
 }
 
-// ------------
-type TSignupReq = {
-  email: string
-  firstName: string
-  lastName: string
-  password: string
-}
-export const signUpReq = async (body: TSignupReq) => {
+export const signUpReq = async (body: UnibeeApiMerchantAuthRegisterReq) => {
   try {
     await request.post(`/merchant/auth/sso/register`, body)
     return [null, null]
@@ -55,11 +65,9 @@ export const signUpReq = async (body: TSignupReq) => {
   }
 }
 
-type TPassLogin = {
-  email: string
-  password: string
-}
-export const loginWithPasswordReq = async (body: TPassLogin) => {
+export const loginWithPasswordReq = async (
+  body: UnibeeApiMerchantAuthLoginReq
+) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.post('/merchant/auth/sso/login', body)
@@ -216,7 +224,9 @@ export const getMerchantInfoReq = async (refreshCb?: () => void) => {
   }
 }
 
-export const updateMerchantInfoReq = async (body: TMerchantInfo) => {
+export const updateMerchantInfoReq = async (
+  body: UnibeeApiMerchantUserUpdateReq
+) => {
   const session = useSessionStore.getState()
   try {
     const res = await request.post(`/merchant/update`, body)
@@ -272,14 +282,8 @@ export const generateApiKeyReq = async () => {
   }
 }
 
-type TGatewayKeyBody = {
-  gatewayId?: number
-  gatewayName?: string
-  gatewayKey: string
-  gatewaySecret: string
-}
 export const saveGatewayKeyReq = async (
-  body: TGatewayKeyBody,
+  body: UnibeeApiMerchantGatewaySetupReq | UnibeeApiMerchantGatewayEditReq,
   isNew: boolean
 ) => {
   const url = isNew ? '/merchant/gateway/setup' : '/merchant/gateway/edit'
@@ -363,15 +367,15 @@ export const saveSendGridKeyReq = async (vatKey: string) => {
 }
 // ---------------
 export type TPlanListBody = {
-  type?: number[] | null
-  status?: number[] | null
-  productIds?: number[] | null
+  type?: number[]
+  status?: number[]
+  productIds?: number[]
   publishStatus?: number // 1-UnPublished，2-Published
   page: number
   count: number
 }
 export const getPlanList = async (
-  body: TPlanListBody,
+  body: UnibeeApiMerchantPlanListReq,
   refreshCb: (() => void) | null
 ) => {
   const session = useSessionStore.getState()
@@ -560,24 +564,9 @@ export const getMetricsListReq = async (refreshCb: null | (() => void)) => {
   }
 }
 
-// --------
-type TMetricsBody = {
-  // for edit
-  metricId: number
-  metricName: string
-  metricDescription: string
-}
-type TMetricsBodyNew = {
-  // for creation
-  code: string
-  metricName: string
-  metricDescription: string
-  aggregationType: number
-  aggregationProperty: number
-}
 // create a new or save an existing metrics
 export const saveMetricsReq = async (
-  body: TMetricsBody | TMetricsBodyNew,
+  body: UnibeeApiMerchantMetricNewReq | UnibeeApiMerchantMetricEditReq,
   isNew: boolean
 ) => {
   const url = isNew ? `/merchant/metric/new` : `/merchant/metric/edit`
@@ -618,19 +607,10 @@ export const getMetricDetailReq = async (
   }
 }
 
-// ----------
-type TSubListReq = {
-  status: number[]
-  page: number
-  count: number
-  currency?: string
-  amountStart?: number
-  amountEnd?: number
-  planIds?: number[]
-  createTimeStart?: number
-  createTimeEnd?: number
-}
-export const getSublist = async (body: TSubListReq, refreshCb: () => void) => {
+export const getSublist = async (
+  body: UnibeeApiMerchantSubscriptionListReq,
+  refreshCb: () => void
+) => {
   try {
     const res = await request.post(`/merchant/subscription/list`, body)
     if (res.data.code == 61 || res.data.code == 62) {
@@ -1489,7 +1469,9 @@ export const getDiscountCodeDetailWithMore = async (
   }
 }
 
-export const createDiscountCodeReq = async (body: DiscountCode) => {
+export const createDiscountCodeReq = async (
+  body: UnibeeApiMerchantDiscountNewReq
+) => {
   try {
     const res = await request.post(`/merchant/discount/new`, body)
     if (res.data.code == 61 || res.data.code == 62) {
@@ -1505,7 +1487,9 @@ export const createDiscountCodeReq = async (body: DiscountCode) => {
   }
 }
 
-export const updateDiscountCodeReq = async (body: DiscountCode) => {
+export const updateDiscountCodeReq = async (
+  body: UnibeeApiMerchantDiscountEditReq
+) => {
   try {
     const res = await request.post(`/merchant/discount/edit`, body)
     if (res.data.code == 61 || res.data.code == 62) {
@@ -1555,20 +1539,9 @@ export const toggleDiscountCodeActivateReq = async (
     return [null, e]
   }
 }
-// ----------
-type TGetInvoicesReq = {
-  userId?: number
-  page: number
-  count: number
-  firstName?: string
-  lastName?: string
-  currency?: string
-  status?: number[]
-  amountStart?: number
-  amountEnd?: number
-}
+
 export const getInvoiceListReq = async (
-  body: TGetInvoicesReq,
+  body: UnibeeApiMerchantInvoiceListReq,
   refreshCb: (() => void) | null
 ) => {
   try {
@@ -1665,25 +1638,11 @@ export const markRefundAsSucceedReq = async (
   }
 }
 
-// ------------
-type TCreateInvoiceReq = {
-  name: string
-  userId: number
-  currency: string
-  taxPercentage: number
-  invoiceItems: TInvoiceItems[]
-  lines?: TInvoiceItems[]
-  finish: boolean
-}
-type TInvoiceItems = {
-  unitAmountExcludingTax: number
-  description: string
-  quantity: number
-}
 // admin manually create an invoice, still editable until the publishInvoice() is called.
 // before that, customers won't see(or receive) this invoice.
-export const createInvoiceReq = async (body: TCreateInvoiceReq) => {
-  body.lines = body.invoiceItems
+export const createInvoiceReq = async (
+  body: UnibeeApiMerchantInvoiceNewReq
+) => {
   try {
     const res = await request.post(`/merchant/invoice/new`, body)
     if (res.data.code == 61 || res.data.code == 62) {
@@ -1698,19 +1657,8 @@ export const createInvoiceReq = async (body: TCreateInvoiceReq) => {
     return [null, e]
   }
 }
-// -------------
 
-// before publish, admin can still edit and save.
-type TSaveInvoiceReq = {
-  invoiceId: string
-  taxPercentage: number
-  currency: string
-  name: string
-  invoiceItems: TInvoiceItems[]
-  lines?: TInvoiceItems[]
-}
-export const saveInvoiceReq = async (body: TSaveInvoiceReq) => {
-  body.lines = body.invoiceItems
+export const saveInvoiceReq = async (body: UnibeeApiMerchantInvoiceEditReq) => {
   try {
     const res = await request.post(`/merchant/invoice/edit`, body)
     if (res.data.code == 61 || res.data.code == 62) {
@@ -1747,12 +1695,9 @@ export const deleteInvoiceReq = async (invoiceId: string) => {
 
 // after publish, user will receive an email informing him/her to finish the payment.
 // admin cannot edit it anymore, but can cancel it by calling the following revokeInvoice() before user finish the payment
-type TPublishInvoiceReq = {
-  invoiceId: string
-  payMethod: number
-  daysUtilDue: number
-}
-export const publishInvoiceReq = async (body: TPublishInvoiceReq) => {
+export const publishInvoiceReq = async (
+  body: UnibeeApiMerchantInvoiceFinishReq
+) => {
   try {
     const res = await request.post(`/merchant/invoice/finish`, body)
     if (res.data.code == 61 || res.data.code == 62) {
@@ -2062,19 +2007,8 @@ export const getAppKeysWithMore = async (refreshCb: () => void) => {
   return [{ merchantInfo, gateways }, null]
 }
 
-type TWireTransferAccount = {
-  gatewayId?: number // required only for updating
-  currency: string
-  minimumAmount: number
-  bank: {
-    accountHolder: string
-    bic: string
-    iban: string
-    address: string
-  }
-}
 export const createWireTransferAccountReq = async (
-  body: TWireTransferAccount
+  body: UnibeeApiMerchantGatewayWireTransferSetupReq
 ) => {
   try {
     const res = await request.post(
@@ -2095,7 +2029,7 @@ export const createWireTransferAccountReq = async (
 }
 
 export const updateWireTransferAccountReq = async (
-  body: TWireTransferAccount
+  body: UnibeeApiMerchantGatewayWireTransferEditReq
 ) => {
   try {
     const res = await request.post('/merchant/gateway/wire_transfer_edit', body)

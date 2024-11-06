@@ -21,7 +21,8 @@ import {
   TPlanListBody,
   UserData
 } from '../../../requests'
-import { request, Response } from '../../../requests/client'
+import { Response } from '../../../requests/apiClient'
+import { request } from '../../../requests/client'
 import {
   AccountType,
   IPlan,

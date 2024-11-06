@@ -1,9 +1,10 @@
 import { Select, SelectProps } from 'antd'
 import { useMemo } from 'react'
-import { Country, useCountries } from '../hooks'
+import { UnibeeApiBeanVatCountryRate } from 'unibee-ts-client'
+import { useCountries } from '../hooks'
 
 interface CountrySelectorProps extends SelectProps {
-  onCountryChange?: (country: Country) => void
+  onCountryChange?: (country: UnibeeApiBeanVatCountryRate) => void
 }
 
 export const CountrySelector = ({

@@ -11,21 +11,24 @@ export const createCache = () => {
 
 const STORE = createCache()
 
-export const useCache = <T>(key: string, initialValue?: T) => {
+export const useCache = <T>(key?: string, initialValue?: T) => {
   const [value, _setValue] = useState<T | undefined>(
-    STORE.get(key) ?? initialValue
+    (key && STORE.get(key)) || initialValue
   )
 
   const setValue = useCallback(
     (value: T) => {
       _setValue(value)
-      STORE.set(key, value)
+
+      if (key) {
+        STORE.set(key, value)
+      }
     },
     [key]
   )
 
   useEffect(() => {
-    if (!STORE.get(key) && initialValue) {
+    if (key && !STORE.get(key) && initialValue) {
       STORE.set(key, initialValue)
     }
   }, [key, initialValue])
