@@ -35,6 +35,7 @@ import '../../shared.css'
 import { DiscountCode } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
 import { getDiscountCodeStatusTagById } from '../ui/statusTag'
+import { formatQuantity } from './helpers'
 
 const PAGE_SIZE = 10
 
@@ -187,10 +188,20 @@ const Index = () => {
       }
     },
     {
+      title: 'Quantity',
+      dataIndex: 'quantity',
+      key: 'quantity',
+      render: (quantity: number) => formatQuantity(quantity)
+    },
+    {
+      title: 'Remaining Quantity',
+      dataIndex: 'liveQuantity',
+      key: 'liveQuantity'
+    },
+    {
       title: 'Usage count',
       dataIndex: 'quantityUsed',
-      key: 'quantityUsed',
-      render: (count) => count
+      key: 'quantityUsed'
     },
     {
       title: 'Created at',
