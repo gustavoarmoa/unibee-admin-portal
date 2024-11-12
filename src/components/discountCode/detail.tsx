@@ -571,7 +571,10 @@ const Index = () => {
                 })
               ]}
             >
-              <Input style={{ width: 180 }} disabled={watchBillingType == 1} />
+              <Input
+                style={{ width: 180 }}
+                disabled={watchBillingType == 1 || !formEditable}
+              />
               {/* 1: one-time use */}
             </Form.Item>
           </Form.Item>
