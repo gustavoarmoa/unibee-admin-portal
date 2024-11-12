@@ -1,3 +1,5 @@
+import { DiscountCodeUsageStatus } from '../../shared.types'
+
 export const formatNumberByZeroUnLimutedRule = (
   num: number,
   unlimitedText: string | undefined = 'Unlimited'
@@ -19,3 +21,11 @@ const FORMATTED_RECURRING_MAP = {
 
 export const formatRecurringStatus = (recurring: RECURRING_STATUS) =>
   FORMATTED_RECURRING_MAP[recurring] ?? 'Unknown'
+
+const FORMATTED_DISCOUNT_CODE_STATUS_MAP = {
+  [DiscountCodeUsageStatus.FINISHED]: 'Finished',
+  [DiscountCodeUsageStatus.ROLLBACK]: 'Rollback'
+}
+
+export const formatDiscountCodeStatus = (status: DiscountCodeUsageStatus) =>
+  FORMATTED_DISCOUNT_CODE_STATUS_MAP[status] ?? 'Unknown'
