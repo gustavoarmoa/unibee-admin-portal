@@ -1,8 +1,11 @@
-// When quantity is 0, it means the quantity is unlimited.
-const UNLIMITED_QUANTITY = 0
+export const formatNumberByZeroUnLimutedRule = (
+  num: number,
+  unlimitedText: string | undefined = 'Unlimited'
+) => (num === 0 ? unlimitedText : num)
 
+// When quantity is 0, it means the quantity is unlimited.
 export const formatQuantity = (quantity: number) =>
-  quantity === UNLIMITED_QUANTITY ? 'Unlimited' : quantity
+  formatNumberByZeroUnLimutedRule(quantity)
 
 enum RECURRING_STATUS {
   NO,
