@@ -19,6 +19,7 @@ import { usePagination } from '../../hooks'
 import { exportDataReq, getDiscountCodeUsageDetailReq } from '../../requests'
 import { DiscountCodeUsage } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
+import { formatRecurringStatus } from './helpers'
 
 const PAGE_SIZE = 10
 
@@ -82,6 +83,12 @@ const Index = () => {
       dataIndex: 'createTime',
       key: 'createTime',
       render: (usedAt) => formatDate(usedAt, true)
+    },
+    {
+      title: 'Recurring',
+      dataIndex: 'recurring',
+      key: 'recurring',
+      render: (recurring) => formatRecurringStatus(recurring)
     },
     {
       title: 'Subscription Id',
