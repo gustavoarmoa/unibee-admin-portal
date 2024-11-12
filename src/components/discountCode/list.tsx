@@ -35,7 +35,7 @@ import '../../shared.css'
 import { DiscountCode } from '../../shared.types'
 import { useAppConfigStore } from '../../stores'
 import { getDiscountCodeStatusTagById } from '../ui/statusTag'
-import { formatNumberByZeroUnLimutedRule, formatQuantity } from './helpers'
+import { formatNumberByZeroUnLimitedRule, formatQuantity } from './helpers'
 
 const PAGE_SIZE = 10
 
@@ -181,7 +181,7 @@ const Index = () => {
           return '1'
         } else if (code.billingType == 2) {
           // recurring
-          return formatNumberByZeroUnLimutedRule(lim)
+          return formatNumberByZeroUnLimitedRule(lim)
         } else {
           return lim
         }
@@ -197,9 +197,9 @@ const Index = () => {
       title: 'Remaining Quantity',
       dataIndex: 'liveQuantity',
       key: 'liveQuantity',
-      render: (remainningQuantity, code) =>
+      render: (remainingQuantity, code) =>
         // If quantity is 0, the remaining quantity should display unlimited.
-        code.quantity === 0 ? 'Unlimited' : remainningQuantity
+        code.quantity === 0 ? 'Unlimited' : remainingQuantity
     },
     {
       title: 'Usage count',

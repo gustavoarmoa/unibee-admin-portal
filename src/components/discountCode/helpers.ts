@@ -1,13 +1,13 @@
 import { DiscountCodeUsageStatus } from '../../shared.types'
 
-export const formatNumberByZeroUnLimutedRule = (
+export const formatNumberByZeroUnLimitedRule = (
   num: number,
   unlimitedText: string | undefined = 'Unlimited'
 ) => (num === 0 ? unlimitedText : num)
 
 // When quantity is 0, it means the quantity is unlimited.
 export const formatQuantity = (quantity: number) =>
-  formatNumberByZeroUnLimutedRule(quantity)
+  formatNumberByZeroUnLimitedRule(quantity)
 
 enum RECURRING_STATUS {
   NO,
