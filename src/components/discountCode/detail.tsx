@@ -577,7 +577,7 @@ const Index = () => {
           </Form.Item>
 
           <Form.Item
-            label="Valid Date Range"
+            label="Code Apply Date Range"
             name="validityRange"
             rules={[
               {
